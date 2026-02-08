@@ -47,7 +47,6 @@ unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
 $CLAUDE -p \
     --model "$MODEL" \
-    --add-dir "$MAIN_REPO" \
     --permission-mode dontAsk \
     --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash,WebSearch,WebFetch" \
     --no-session-persistence \
