@@ -117,6 +117,8 @@ export interface DiscordInteraction {
 		readonly id: string;
 	};
 	readonly channel_id?: string;
+	readonly token?: string;
+	readonly application_id?: string;
 }
 
 /**
@@ -285,7 +287,7 @@ function createDiscordHandler(config: GatewayConfig, deps: GatewayDeps): RouteHa
 		}
 
 		if (parsed.type === INTERACTION_APPLICATION_COMMAND) {
-			await handleDiscordCommand(res, parsed, deps, requestId);
+			await handleDiscordCommand(res, parsed, config, deps, requestId);
 			return;
 		}
 
@@ -327,6 +329,7 @@ function verifyDiscordSignature(
 async function handleDiscordCommand(
 	res: http.ServerResponse,
 	interaction: DiscordInteraction,
+	config: GatewayConfig,
 	deps: GatewayDeps,
 	requestId: string,
 ): Promise<void> {
@@ -335,14 +338,47 @@ async function handleDiscordCommand(
 		return;
 	}
 
-	const { userId, channelId, content } = extractDiscordInteraction(interaction);
-
-	await deps.handleMessage({
-		userId,
-		channelId,
-		content,
-		timestamp: Date.now(),
-	});
-
+	// Send DEFERRED (type=5) response immediately — Discord expects this within 3s
 	sendJson(res, 200, { type: RESPONSE_DEFERRED });
+
+	const { userId, channelId, content } = extractDiscordInteraction(interaction);
+	const interactionToken = interaction.token;
+	const applicationId = interaction.application_id ?? config.discordApplicationId;
+
+	// Fire-and-forget: process message asynchronously, send follow-up via webhook PATCH
+	void processDiscordCommand(userId, channelId, content, interactionToken, applicationId, deps);
+}
+
+async function processDiscordCommand(
+	userId: string,
+	channelId: string,
+	content: string,
+	interactionToken: string | undefined,
+	applicationId: string | undefined,
+	deps: GatewayDeps,
+): Promise<void> {
+	try {
+		const result = await deps.handleMessage?.({
+			userId,
+			channelId,
+			content,
+			timestamp: Date.now(),
+		});
+
+		if (result && interactionToken && applicationId && deps.discordFollowUp) {
+			await deps.discordFollowUp(applicationId, interactionToken, result.content);
+		}
+	} catch {
+		if (interactionToken && applicationId && deps.discordFollowUp) {
+			await deps
+				.discordFollowUp(
+					applicationId,
+					interactionToken,
+					'처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+				)
+				.catch(() => {
+					// Follow-up delivery failure is non-fatal — the DEFERRED response was already sent
+				});
+		}
+	}
 }

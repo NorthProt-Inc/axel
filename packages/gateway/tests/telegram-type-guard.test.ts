@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-	isTelegramUpdate,
-	extractTelegramMessage,
 	type TelegramUpdate,
+	extractTelegramMessage,
+	isTelegramUpdate,
 } from '../src/webhook-handlers.js';
 
 /**
@@ -159,7 +159,7 @@ describe('HARDEN-003: extractTelegramMessage with typed interface', () => {
 		const result = extractTelegramMessage(update);
 		const after = Date.now();
 		expect(result).not.toBeNull();
-		expect(result!.timestamp).toBeGreaterThanOrEqual(before);
-		expect(result!.timestamp).toBeLessThanOrEqual(after);
+		expect(result?.timestamp).toBeGreaterThanOrEqual(before);
+		expect(result?.timestamp).toBeLessThanOrEqual(after);
 	});
 });

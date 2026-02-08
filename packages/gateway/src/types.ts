@@ -10,6 +10,7 @@ export interface GatewayConfig {
 	readonly rateLimitPerMinute: number;
 	readonly telegramWebhookSecret?: string;
 	readonly discordPublicKey?: string;
+	readonly discordApplicationId?: string;
 	readonly trustedProxies?: readonly string[];
 }
 
@@ -79,9 +80,21 @@ export interface ToolExecuteResult {
 	readonly durationMs: number;
 }
 
+/**
+ * Callback for Discord interaction follow-up messages.
+ * Sends the final response via PATCH to Discord's webhook endpoint:
+ * https://discord.com/api/v10/webhooks/{applicationId}/{interactionToken}/messages/@original
+ */
+export type DiscordFollowUp = (
+	applicationId: string,
+	interactionToken: string,
+	content: string,
+) => Promise<void>;
+
 export interface GatewayDeps {
 	readonly healthCheck: () => Promise<HealthStatus>;
 	readonly handleMessage?: HandleMessage;
+	readonly discordFollowUp?: DiscordFollowUp;
 	readonly searchMemory?: (params: MemorySearchParams) => Promise<MemorySearchResponse>;
 	readonly getMemoryStats?: () => Promise<Record<string, unknown>>;
 	readonly getSession?: (userId: string) => Promise<Record<string, unknown> | null>;
