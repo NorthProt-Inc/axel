@@ -35,23 +35,38 @@ function makeEmbedding(dim: number, seed: number): Float32Array {
 	return arr;
 }
 
-// ── Connection config (testcontainers env → docker-compose defaults) ──
+// ── Connection config (credentials from env vars — no hardcoded secrets) ──
+// Env vars are provided by testcontainers (setup.ts) or must be set manually
+// for docker-compose dev environments. Tests skip if PG credentials are missing.
+
+const MISSING_CREDENTIALS =
+	!process.env.PGDATABASE || !process.env.PGUSER || !process.env.PGPASSWORD;
+
+function requireEnv(name: string): string {
+	const value = process.env[name];
+	if (!value) {
+		throw new Error(
+			`Required environment variable ${name} is not set. Testcontainers setup.ts or docker-compose must provide it.`,
+		);
+	}
+	return value;
+}
 
 function pgAdminConfig(): pg.PoolConfig {
 	return {
-		host: process.env.PGHOST || 'localhost',
-		port: Number(process.env.PGPORT) || 5432,
-		database: process.env.PGDATABASE || 'axel',
-		user: process.env.PGUSER || 'axel',
-		password: process.env.PGPASSWORD || 'axel_dev_password',
+		host: process.env.PGHOST ?? 'localhost',
+		port: Number(process.env.PGPORT ?? '5432'),
+		database: requireEnv('PGDATABASE'),
+		user: requireEnv('PGUSER'),
+		password: requireEnv('PGPASSWORD'),
 		max: 2,
 	};
 }
 
 function redisConfig(): { host: string; port: number } {
 	return {
-		host: process.env.REDIS_HOST || 'localhost',
-		port: Number(process.env.REDIS_PORT) || 6379,
+		host: process.env.REDIS_HOST ?? 'localhost',
+		port: Number(process.env.REDIS_PORT ?? '6379'),
 	};
 }
 
@@ -238,6 +253,8 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
+	if (!pool) return;
+
 	// Clean Redis test keys
 	const keys = await redis.keys('axel:*');
 	if (keys.length > 0) {
@@ -261,7 +278,7 @@ const TEST_DIM = 16;
 // ═══════════════════════════════════════════
 // 1. PgSemanticMemory: store / search / decay
 // ═══════════════════════════════════════════
-describe('PgSemanticMemory (real PG + pgvector)', () => {
+describe.skipIf(MISSING_CREDENTIALS)('PgSemanticMemory (real PG + pgvector)', () => {
 	let semantic: PgSemanticMemory;
 
 	beforeAll(() => {
@@ -404,7 +421,7 @@ describe('PgSemanticMemory (real PG + pgvector)', () => {
 // ═══════════════════════════════════════════
 // 2. RedisWorkingMemory: cache-aside pattern
 // ═══════════════════════════════════════════
-describe('RedisWorkingMemory (real Redis + PG)', () => {
+describe.skipIf(MISSING_CREDENTIALS)('RedisWorkingMemory (real Redis + PG)', () => {
 	let working: RedisWorkingMemory;
 	const userId = 'integ-wm-user';
 
@@ -507,7 +524,7 @@ describe('RedisWorkingMemory (real Redis + PG)', () => {
 // ═══════════════════════════════════════════
 // 3. PgSessionStore: full session lifecycle
 // ═══════════════════════════════════════════
-describe('PgSessionStore (real PG)', () => {
+describe.skipIf(MISSING_CREDENTIALS)('PgSessionStore (real PG)', () => {
 	let sessions: PgSessionStore;
 	const testUserId = 'session-test-user';
 
@@ -567,7 +584,7 @@ describe('PgSessionStore (real PG)', () => {
 // ═══════════════════════════════════════════
 // 4. PgEpisodicMemory: session + message
 // ═══════════════════════════════════════════
-describe('PgEpisodicMemory (real PG)', () => {
+describe.skipIf(MISSING_CREDENTIALS)('PgEpisodicMemory (real PG)', () => {
 	let episodic: PgEpisodicMemory;
 	let sessionId: string;
 	const testUserId = 'episodic-test-user';
@@ -624,7 +641,7 @@ describe('PgEpisodicMemory (real PG)', () => {
 // ═══════════════════════════════════════════
 // 5. PgConceptualMemory: graph traversal
 // ═══════════════════════════════════════════
-describe('PgConceptualMemory (real PG)', () => {
+describe.skipIf(MISSING_CREDENTIALS)('PgConceptualMemory (real PG)', () => {
 	let conceptual: PgConceptualMemory;
 
 	beforeAll(() => {
@@ -698,7 +715,7 @@ describe('PgConceptualMemory (real PG)', () => {
 // ═══════════════════════════════════════════
 // 6. PgMetaMemory: access patterns + MV
 // ═══════════════════════════════════════════
-describe('PgMetaMemory (real PG)', () => {
+describe.skipIf(MISSING_CREDENTIALS)('PgMetaMemory (real PG)', () => {
 	let meta: PgMetaMemory;
 
 	beforeAll(() => {
@@ -753,7 +770,7 @@ describe('PgMetaMemory (real PG)', () => {
 // ═══════════════════════════════════════════
 // 7. Cross-layer: end-to-end memory pipeline
 // ═══════════════════════════════════════════
-describe('Cross-layer E2E: memory pipeline', () => {
+describe.skipIf(MISSING_CREDENTIALS)('Cross-layer E2E: memory pipeline', () => {
 	it('should store → access → record pattern → refresh MV → find in hot memories', async () => {
 		const semantic = new PgSemanticMemory(pool);
 		const meta = new PgMetaMemory(pool);
