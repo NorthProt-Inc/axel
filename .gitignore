@@ -25,6 +25,7 @@ __pycache__/
 
 # Logs (keep structure, ignore contents)
 .axel-ops/logs/*.log
+.axel-ops/logs/*.tar.gz
 
 # Coverage
 coverage/
