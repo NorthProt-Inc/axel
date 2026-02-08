@@ -1,31 +1,32 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08C54 (QA-018 Phase D EDGE-003/004/005 + BOOTSTRAP-001 review)
+> Last Updated: 2026-02-08C61 (QA-019 Phase E integration review)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 637 (main branch: 637/637 pass; worktree: 525/637 — 7 suites blocked by dep resolve) |
-| Passing | 637 (main branch verified by CTO C53) |
-| Failing | 0 (main branch); 112 blocked in worktree (grammy, discord.js, ws, zod dep resolve) |
+| Total Tests | 774 (main branch: 774/774 pass, 62 test files) |
+| Passing | 774 (CTO cycle 60 verified) |
+| Failing | 0 |
 | Coverage (core) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
 | Coverage (infra, reported) | 95%+ stmts (cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42%) |
 | Coverage (channels, reported) | 94.16% stmts / 92.57% branch / 91.66% funcs / 94.16% lines (73 tests) |
-| Coverage (gateway, reported) | 84.34% stmts / 88.46% branch / 94.73% funcs / 84.34% lines (23 tests) |
-| Coverage (apps/axel, reported) | 86.95% stmts / 87.71% branch / 37.93% func / 86.95% lines (33 tests) |
-| Phase | D: Edge Sprint (93% — ALL DEV CODING COMPLETE, assurance tasks remaining) |
+| Coverage (gateway, reported) | 94.53% stmts / 86.33% branch / 96.96% funcs / 94.53% lines (78 tests) |
+| Coverage (apps/axel, reported) | 85.74% stmts (bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48%) |
+| Phase | E: INTEGRATION — ACTIVE (67%, 10/15 tasks done) |
 
 ## Per-Package Status
 
 | Package | Tests | Pass | Fail | Coverage | Target | Gate |
 |---------|-------|------|------|----------|--------|------|
-| `packages/core/` | 354 | 354 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
-| `packages/infra/` | 154 | 154 | 0 | 95%+ stmts (reported) | 80% | **PASS** (FIX-INFRA-001 resolved zod) |
+| `packages/core/` | 366 | 366 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
+| `packages/infra/` | 190 | 190 | 0 | 95%+ stmts (reported) | 80% | **PASS** (+36 integration tests) |
 | `packages/channels/` | 73 | 73 | 0 | 94.16% stmts, 92.57% branch | 75% | **PASS** |
-| `packages/gateway/` | 23 | 23 | 0 | 84.34% stmts, 88.46% branch | 80% | **PASS** |
-| `apps/axel/` | 33 | 33 | 0 | 86.95% stmts, 87.71% branch | — | **PASS** (no coverage target defined) |
+| `packages/gateway/` | 78 | 78 | 0 | 94.53% stmts, 86.33% branch | 80% | **PASS** (+55 tests since Phase D) |
+| `apps/axel/` | 60 | 60 | 0 | 85.74% stmts | — | **PASS** (+27 tests: 16 bootstrap + 8 E2E + 3 existing) |
+| `tools/migrate/` | 7 | 7 | 0 | — | — | **PASS** (testcontainers dep pre-existing) |
 
 ### Infra Package Coverage Breakdown (dev-infra reported C44)
 
@@ -145,6 +146,10 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 60 | CTO (C60) | all | 774 pass, 0 fail | — | Main branch verified. 62 test files. INTEG-007 E2E added. |
+| 58 | dev-infra (INTEG-006) | infra | 190 pass, 0 fail | — | +36 PG+Redis integration tests. Testcontainers PG17+Redis7. |
+| 58 | dev-edge (INTEG-003/004) | gateway | 78 pass, 0 fail | — | +46 tests (12 integration + 26 remaining-routes + 8 rework). 94.53% stmt. |
+| 59 | dev-edge (INTEG-005) | apps/axel | 52 pass, 0 fail | — | +16 bootstrap-channels tests. 98.85% stmt for bootstrap-channels. |
 | 54 | quality (QA-018) | all | 525 pass, 7 suites fail (dep resolve) | 1.26s | div/quality worktree. grammy/discord.js/ws/zod dep resolve failures. Main branch: 637/637 pass (CTO verified). Biome: 0 errors/117 warn. tsc: clean. |
 | 51 | quality (proactive) | all | 512 pass, 17 fail (1 suite) | 1.13s | div/quality worktree. FIX-INFRA-004 verified: 0 relative core imports remain. zod resolve same. |
 | 50 | quality (QA-017) | all | 512 pass, 17 fail (1 suite) | 1.06s | div/quality worktree. zod resolve failure (infra/mcp). EDGE files: 45 tests PASS. Biome: 0 errors on EDGE files. tsc: clean. |
@@ -158,6 +163,63 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | 35 | quality (QA-012) | core | 121 pass, 0 fail | 483ms | Biome: 0 warnings. tsc: clean. |
 | 34 | dev-core (CORE-002+005) | core | 121 pass, 0 fail | — | Reported by dev-core |
 | 33 | dev-core (CORE-001) | core | 55 pass, 0 fail | — | Domain types first pass |
+
+## QA-019 Code Review Findings (Phase E integration: INTEG-003/004/005/006/007)
+
+### Scope
+- **INTEG-003**: Gateway→Orchestrator integration via HandleMessage DI
+- **INTEG-004**: 6 remaining gateway routes (memory, session, tools)
+- **INTEG-005**: Channel bootstrap wiring (createChannels, wireChannels, createHandleMessage)
+- **INTEG-006**: PG+Redis integration test (36 tests, Testcontainers)
+- **INTEG-007**: E2E message roundtrip test (8 tests)
+
+### Issues Found: 0 CRITICAL, 0 HIGH, 8 MEDIUM, 4 LOW
+
+| # | Sev | Perspective | Location | Description | Fix |
+|---|-----|-------------|----------|-------------|-----|
+| 1 | MEDIUM | P4: Reliability | core/orchestrator/inbound-handler.ts:97 | InboundHandler catch discards error without logging (_err). No observability into failures. ERR-073/AUD-081 overlap. FIX-AUDIT-E-002 in progress. | Log error with structured logger before sending fallback. |
+| 2 | MEDIUM | P1: Design | core/orchestrator/inbound-handler.ts:82 | reactLoop receives hardcoded empty tools array. No tool definitions passed to LLM — tool_call events never generated. | Inject tools from container.toolRegistry.listAll() or document as deferred. |
+| 3 | MEDIUM | P1: Design | core/orchestrator/inbound-handler.ts:127-134 | buildMessages creates Message with empty sessionId='', turnId=0/1, emotionalContext=''. Placeholder values may confuse downstream logging. | Use resolved session's sessionId; generate meaningful turnIds. |
+| 4 | MEDIUM | P1: Design | apps/axel/bootstrap-channels.ts:94-96 | createHandleMessage sendCapture only captures last msg.content. Also, sessionRouter.resolveSession called twice (createHandleMessage:99 + inside createInboundHandler). | (1) Accumulate all sent content. (2) Accept double resolution or pass pre-resolved session. |
+| 5 | MEDIUM | P3: Security | gateway/server.ts:253, ws-handler.ts:121 | Hardcoded userId='gateway-user' for all HTTP/WS requests. All web clients share single identity — session/memory/context shared. | Extract userId from auth token or require in request body. Acceptable Phase 0 (single-user). |
+| 6 | MEDIUM | P4: Reliability | gateway/route-handlers.ts:80 | Unsafe cast `(session as Record<string,unknown>).sessionId` — no validation, runtime crash risk if shape changes. | Define SessionInfo type in GatewayDeps or validate before cast. |
+| 7 | MEDIUM | P4: Reliability | gateway/server.ts:23 | rateLimitBuckets Map never pruned for disconnected IPs. ERR-072/AUD-080 overlap. FIX-AUDIT-E-001 in progress. | Add periodic cleanup or TTL-based cache. |
+| 8 | MEDIUM | P5: Changeability | apps/axel/container.ts:162-178 | MemoryContextDataProvider has 3 stub methods (searchSemantic, traverseGraph, getStreamBuffer). Context assembly produces incomplete context. | Track as known gap for Phase F wiring. |
+| 9 | LOW | P7: DRY | apps/axel/bootstrap-channels.ts:12-13 | GATEWAY_ERROR_MESSAGE duplicates ERROR_MESSAGE from inbound-handler.ts (identical Korean string). | Export from core/orchestrator and reuse. |
+| 10 | LOW | P6: Dead Code | apps/axel/main.ts:56 | _handleMessage assigned but never used — not passed to gateway server. | Wire into createGatewayServer when gateway integration completes. |
+| 11 | LOW | P2: Readability | gateway/types.ts:16-17 | MessageEvent indexed signature `[key: string]: unknown` undermines type safety. | Define discriminated union for known event types. |
+| 12 | LOW | P5: Changeability | apps/axel/container.ts:195 | DEFAULT_PG_CONFIG has empty password string. Security smell — could connect without auth in dev. | Set to undefined, require explicit env config. |
+
+### 7-Perspective Summary
+
+| Perspective | Finding |
+|-------------|---------|
+| 1. Design Quality | **Good.** Clean DI wiring: channels → InboundHandler → LLM → send pipeline. createHandleMessage bridges gateway interface elegantly. Gateway extraction (types/http-utils/ws-handler/route-handlers) reduced server.ts from 391→322 lines. Double session resolution in createHandleMessage is a minor design debt. Empty tools array in reactLoop is an integration gap. |
+| 2. Complexity & Readability | **Very Good.** All files well within 400 lines (max 322: server.ts). Route handler factory pattern in route-handlers.ts is clean. E2E test is comprehensive (8 scenarios covering happy path, errors, edge cases). Code is self-documenting with clear function names. |
+| 3. Security | **1 MEDIUM.** Hardcoded userId='gateway-user' — all web clients share identity. Acceptable for Phase 0 single-user but critical to address before multi-user. No new injection vectors. Auth flow (first-message WS, Bearer HTTP) correct. |
+| 4. Bugs & Reliability | **3 MEDIUM.** (1) Silent error discard in InboundHandler (ERR-073 overlap). (2) Unsafe type cast in route-handlers. (3) Rate limit bucket memory leak (ERR-072 overlap). No crash bugs. Error handling patterns are otherwise solid. |
+| 5. Changeability | **Good.** Integration test patterns (INTEG-006 Testcontainers, INTEG-007 mock-based E2E) establish clear testing patterns for future integration work. 3 stub methods in ContextDataProvider are tracked for later wiring. |
+| 6. Dead Code | **1 LOW.** _handleMessage in main.ts unused. |
+| 7. DRY | **1 LOW.** Error message string duplicated between bootstrap-channels.ts and inbound-handler.ts. |
+
+### CONSTITUTION Compliance (QA-019: Phase E Integration)
+
+| Rule | Check | Result |
+|------|-------|--------|
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** — INTEG-003: `0ab35f8` (RED) → `17fe283` (GREEN). INTEG-005: `1d5b5e2` (RED) → `2aff182` (GREEN). INTEG-007: test-only commit `19e51f5`. |
+| Rule 9 (Package Boundary) | Cross-package imports within allowed | **KNOWN ISSUE** — infra→core/orchestrator+memory (12 files). CONST-AMEND-001 pending human approval. channels/gateway→core/types only (PASS). apps/axel→core/*+infra (permitted). |
+| Rule 10 (Test Gate) | All tests pass, coverage targets met, Biome clean, tsc clean | **PASS** — 774 tests all pass. Coverage: core 99.69%>90%, infra 95%+>80%, channels 94%>75%, gateway 94.53%>80%. CTO C60 smoke verified. |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** (max 321 lines: gateway/server.ts. All 71 src files under 400.) |
+
+### TDD Compliance (Phase E new entries)
+
+| Cycle | Task | Division | RED Commit | GREEN Commit | Compliant |
+|-------|------|----------|------------|--------------|-----------|
+| 58 | INTEG-003 | dev-edge | `0ab35f8` (integration.test.ts) | `17fe283` (server.ts wiring) | **YES** |
+| 58 | INTEG-004 | dev-edge | `29c3160` (remaining-routes.test.ts) | `73636a8` (route impl) | **YES** |
+| 59 | INTEG-005 | dev-edge | `1d5b5e2` (bootstrap-channels.test.ts) | `2aff182` (bootstrap-channels.ts) | **YES** |
+| 58 | INTEG-006 | dev-infra | `9cf999b` (pg-redis-integration.test.ts) | N/A (test-only) | **YES** |
+| 60 | INTEG-007 | dev-edge | `19e51f5` (e2e-message-roundtrip.test.ts) | N/A (test-only) | **YES** |
 
 ## QA-018 Code Review Findings (Phase D batch 2: EDGE-003 Discord + EDGE-004 Telegram + EDGE-005 Gateway + BOOTSTRAP-001 DI)
 
@@ -390,3 +452,4 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | **QA-016** | **44** | **Phase C INFRA code review — db, cache, embedding, llm, mcp, common (18 src, 14 test files)** | **2H 7M 4L** | **CONDITIONAL PASS** (zod dep fix needed for full PASS) |
 | **QA-017** | **50** | **Phase D EDGE code review — EDGE-001 (channel types) + EDGE-002 (CLI channel) (2 src, 2 test files)** | **0H 3M 3L** | **PASS** — TDD, §9, §10, §14 all PASS. Excellent design quality. |
 | **QA-018** | **54** | **Phase D code review batch 2 — EDGE-003 (Discord) + EDGE-004 (Telegram) + EDGE-005 (Gateway) + BOOTSTRAP-001 (DI) (7 src, 7 test files)** | **0H 8M 6L** | **CONDITIONAL PASS** — TDD PASS, §9 PASS, §10 CONDITIONAL (worktree dep sync), §14 PASS. 2 security items (timing-safe length leak, WS token in query param). Coverage: channels 94%>75%, gateway 84%>80%. |
+| **QA-019** | **61** | **Phase E integration review — INTEG-003/004/005/006/007 (gateway→orchestrator, bootstrap, PG+Redis, E2E roundtrip)** | **0H 8M 4L** | **PASS** — TDD PASS, §9 KNOWN ISSUE (CONST-AMEND-001), §10 PASS (774 tests), §14 PASS (max 321). Coverage: all targets exceeded. 3 MEDIUM overlap with ERR-071~075 (in progress). Good integration quality. |
