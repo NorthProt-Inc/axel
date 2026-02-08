@@ -2,24 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 33**: Phase B (Core Sprint) ACTIVE. CORE-001 done. CORE-002 + CORE-005 assigned. CORE-003 queued.
+> **Cycle 34**: Phase B (Core Sprint) ACTIVE. CORE-002+CORE-005+DEVOPS-001 done. CORE-003 + QA-012 assigned.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| CORE-003 | P1 | dev-core | Memory Layers: 6-layer architecture M0-M5 interfaces + in-memory stubs (ADR-013). TDD. | CORE-001 ✅ | 0208C31 |
 | CORE-004 | P1 | dev-core | Context Assembly: context window builder, token budget allocation (plan §4.4). TDD. | CORE-001 ✅, CORE-003 | 0208C31 |
-| CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001 ✅, CORE-003, CORE-004, CORE-005 | 0208C31 |
-| QA-012 | P1 | quality | Phase B: Core types + Decay review (after CORE-001 + CORE-002 done) | CORE-001 ✅, CORE-002 | 0208C31 |
-| DEVOPS-001 | P1 | devops | Add @vitest/coverage-v8 to packages/core devDependencies. Enable coverage thresholds. | — | 0208C33 |
+| CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001 ✅, CORE-003, CORE-004, CORE-005 ✅ | 0208C31 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| CORE-002 | dev-core | 0208C33 | C34 |
-| CORE-005 | dev-core | 0208C33 | C34 |
+| CORE-003 | dev-core | 0208C34 | C35 |
+| QA-012 | quality | 0208C34 | C35 |
 
 ## Cancelled
 
@@ -90,3 +87,6 @@
 | SYNC-001 | arch | 0208C33 | PLAN_SYNC.md: Phase A IN_SYNC, Phase B interface contracts with full spec cross-refs |
 | CORE-001 | dev-core | 0208C33 | 10 src + 10 test files, 55 tests pass, Biome+tsc clean. Domain types implemented per plan §3.5. |
 | SCAFFOLD-007 | devops | 0208C33 | .github/workflows/ci.yml — lint → typecheck → test, Node.js 22 + pnpm 9 |
+| CORE-002 | dev-core | 0208C34 | 4 src + 3 test files (decay module). 34 tests, 100% stmt coverage. ADR-015 8-step formula. |
+| CORE-005 | dev-core | 0208C34 | 4 src + 3 test files (persona module). 32 tests, 100% stmt coverage. PersonaEngine interface + buildSystemPrompt. |
+| DEVOPS-001 | coord | 0208C34 | @vitest/coverage-v8 added. Barrel exports excluded from coverage. 93%+ global coverage. |

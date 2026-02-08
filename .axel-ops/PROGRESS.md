@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **B: CORE SPRINT — ACTIVE**
-- **Cycle**: 33
-- **Last Updated**: 2026-02-08C33
-- **STATUS**: **Phase B progressing.** SYNC-001+CORE-001+SCAFFOLD-007 completed (merge reverts resolved, changes reapplied). Smoke test passed (55 tests, typecheck, lint). CORE-002 (decay) + CORE-005 (persona) assigned to dev-core in parallel (no interdependency). DEVOPS-001 (coverage tooling) queued. Critical path: CORE-002 → QA-012, CORE-003 → CORE-004 → CORE-006.
+- **Cycle**: 34
+- **Last Updated**: 2026-02-08C34
+- **STATUS**: **Phase B 60% complete.** CORE-002 (decay) + CORE-005 (persona) merged to main. DEVOPS-001 (coverage tooling) done. Smoke test: 121 tests pass, lint+typecheck clean, coverage 90%+. CORE-003 (memory layers) assigned to dev-core. QA-012 (core types + decay review) assigned to quality. Arch activated for PLAN_SYNC update. Critical path: CORE-003 → CORE-004 → CORE-006.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 5 |
+| Queued | 2 |
 | In Progress | 2 |
-| Done | 47 |
+| Done | 50 |
 | Cancelled | 13 |
 
 ## Open Errors: 0
@@ -45,19 +45,20 @@
 | 31 | 0208 | **PHASE A MILESTONE ACHIEVED.** ENV-001 resolved. ERR-063 resolved. Milestone verified: install+typecheck+test+lint pass. |
 | 32 | 0208 | **PHASE B ACTIVE.** SYNC-001 (arch), CORE-001 (dev-core), SCAFFOLD-007 (devops) assigned. CORE-001/SYNC-001 dep relaxed. |
 | 33 | 0208 | **3 TASKS COMPLETED.** SYNC-001 (PLAN_SYNC.md Phase B contracts), CORE-001 (55 tests, 10 src files), SCAFFOLD-007 (CI pipeline). Merge reverts resolved via checkout. Smoke test PASS. CORE-002 + CORE-005 assigned (parallel, no deps). DEVOPS-001 queued (coverage tooling). |
+| 34 | 0208 | **3 TASKS COMPLETED + MERGE.** CORE-002 (decay, 34 tests), CORE-005 (persona, 32 tests) merged to main. DEVOPS-001 (coverage-v8) done by CTO. Lint fixes applied (Biome). Smoke test: 121 tests, typecheck+lint clean, coverage 93%+. CORE-003 assigned. QA-012 assigned. Arch activated for PLAN_SYNC. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C33 | Cycle 33 | Active |
-| Architecture | 0208C33 | — | Idle (SYNC-001 done) |
-| Dev-Core | 0208C33 | CORE-002, CORE-005 | Active |
+| Coordinator | 0208C34 | Cycle 34 | Active |
+| Architecture | 0208C34 | SYNC-002 | Activated (PLAN_SYNC update for CORE-002/005) |
+| Dev-Core | 0208C34 | CORE-003 | Active (memory layers) |
 | Dev-Infra | — | — | Pending Phase C |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0209T0335 | — | Idle |
-| DevOps | 0208C33 | — | Idle (SCAFFOLD-007 done, DEVOPS-001 queued) |
+| Quality | 0208C34 | QA-012 | Active (core types + decay review) |
+| DevOps | 0208C34 | — | Idle (DEVOPS-001 done) |
 | Audit | 0209T0031 | — | Idle |
 
 ## Human Intervention Needed
