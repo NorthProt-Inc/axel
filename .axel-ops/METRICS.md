@@ -2,14 +2,14 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 40
+## Current Cycle: 41
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
 | coord | — | 39 cycles | 0 | Active |
-| arch | 1 cycle | 4 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002) | 0 | Active (SYNC-003) |
+| arch | 1 cycle | 4 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002) | 1 (SYNC-003, 4 cycles) | Active (SYNC-003, metric-alert) |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | **Idle — all CORE tasks complete** |
 | dev-infra | — | 0 | 0 | Pending Phase C |
 | dev-edge | — | 0 | 0 | Pending Phase D |
@@ -23,7 +23,7 @@
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
 | Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
+| Stalled Tasks (3+ cycles) | 1 (SYNC-003, 4 cycles) | 0 | WARN |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 1 (resolved C33) | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -64,3 +64,4 @@
 | 38 | dev-core, quality, arch | 0 (3 in progress) | 0 | **QA-012 scope reduced** (4 cycles → CORE-001 types only). CORE-002+005 review → QA-013. CORE-004, SYNC-003 in progress. 241 tests pass. |
 | 39 | dev-core, quality, arch | 0 (QA-012 cancelled) | 0 | **QA-012 cancelled** (5 cycles stalled). QA-013 assigned (CORE-002+003+005 review). CORE-004, SYNC-003 in progress. 241 tests pass. |
 | 40 | quality, arch | 2 (CORE-004, CORE-006) | 0 | **ALL CORE TASKS COMPLETE.** CORE-004+006 merged. 330 tests, 99.69% stmt. Phase B 95%. SYNC-003+QA-013 remaining. |
+| 41 | quality, arch | 0 | 0 | No completions. SYNC-003 4 cycles (metric-alert). QA-013 2 cycles. 330 tests pass. |
