@@ -69,6 +69,32 @@ get_prompt() {
     esac
 }
 
+# Division → owned file paths (CONSTITUTION §1)
+# Only these paths are staged for commit. Prevents cross-division state file drift.
+get_owned_paths() {
+    case "$1" in
+        arch)
+            echo "docs/plan/ docs/adr/ .axel-ops/PLAN_SYNC.md .axel-ops/comms/arch.jsonl" ;;
+        dev-core)
+            echo "packages/core/ .axel-ops/comms/dev-core.jsonl" ;;
+        dev-infra)
+            echo "packages/infra/ .axel-ops/comms/dev-infra.jsonl" ;;
+        dev-edge)
+            echo "packages/channels/ packages/gateway/ apps/axel/ .axel-ops/comms/dev-edge.jsonl" ;;
+        ui-ux)
+            echo "packages/ui/ apps/webchat/ .axel-ops/comms/ui-ux.jsonl" ;;
+        quality)
+            echo ".axel-ops/comms/quality.jsonl .axel-ops/TEST_REPORT.md" ;;
+        audit)
+            echo ".axel-ops/comms/audit.jsonl" ;;
+        research)
+            echo "docs/research/ .axel-ops/comms/research.jsonl" ;;
+        devops)
+            echo "docker/ .github/ pnpm-workspace.yaml tsconfig.base.json biome.json .axel-ops/DEPLOY.md tools/migrate/ pnpm-lock.yaml .axel-ops/comms/devops.jsonl" ;;
+        *) echo "" ;;
+    esac
+}
+
 run_division() {
     local div="$1"
     local model
@@ -94,9 +120,11 @@ run_division() {
 
     cd "$worktree"
     # Sync division branch with latest main (local, no network needed)
+    # If rebase fails, hard-reset to main to prevent cumulative drift
     git rebase main --quiet 2>&1 || {
         git rebase --abort 2>/dev/null || true
-        log "$div REBASE onto main FAILED — running with current state"
+        log "$div REBASE FAILED — resetting branch to main (prevent drift)"
+        git reset --hard main 2>/dev/null || true
     }
 
     set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
@@ -113,9 +141,15 @@ run_division() {
         }
 
     # Commit Division output (local only — no push)
+    # IMPORTANT: Only stage owned files to prevent state file drift (CONSTITUTION §1)
     cd "$worktree"
-    if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
-        git add -A
+    local owned_paths
+    owned_paths=$(get_owned_paths "$div")
+    if [ -n "$owned_paths" ]; then
+        # shellcheck disable=SC2086
+        git add --ignore-errors -- $owned_paths 2>/dev/null || true
+    fi
+    if ! git diff --cached --quiet 2>/dev/null; then
         local co_author
         if [ "$model" = "opus" ]; then
             co_author="Claude Opus 4.6"
