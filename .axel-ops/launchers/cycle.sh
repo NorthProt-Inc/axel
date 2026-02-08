@@ -1,7 +1,7 @@
 #!/bin/bash
 # .axel-ops/launchers/cycle.sh
-# Master cycle launcher: Coordinator → Active Divisions (parallel) → Merge + Smoke Test → Push
-# Supports 9 Divisions with conditional activation via broadcast.jsonl
+# Master cycle launcher: CTO → Active Divisions (parallel) → Merge + Smoke Test → Push
+# Only CTO commits and pushes to origin. Divisions commit locally only.
 set -euo pipefail
 
 MAIN_REPO="/home/northprot/projects/axel"
@@ -9,6 +9,9 @@ OPS="$MAIN_REPO/.axel-ops"
 CLAUDE="/home/northprot/.local/bin/claude"
 CYCLE_ID=$(date +"%Y%m%d_%H%M")
 LOCKFILE="/tmp/axel-cycle.lock"
+
+# Ensure pnpm/node are in PATH
+export PATH="/home/northprot/local/node/bin:$PATH"
 
 # Duplicate execution guard
 if [ -f "$LOCKFILE" ]; then
@@ -108,7 +111,7 @@ run_division() {
             log "$div FAILED (exit $?)"
         }
 
-    # Commit Division output
+    # Commit Division output (local only — no push)
     cd "$worktree"
     if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
         git add -A
@@ -124,7 +127,6 @@ docs($div): cycle $CYCLE_ID
 Co-Authored-By: $co_author <noreply@anthropic.com>
 EOF
 )" || true
-        git push origin "$(get_branch "$div")" --quiet || true
     fi
 
     log "=== $div DONE ==="
@@ -136,41 +138,37 @@ get_active_divisions() {
     activation_line=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1)
 
     if [ -z "$activation_line" ]; then
-        # No activation message found — default to all non-coord divisions
         echo "arch dev-core dev-infra dev-edge quality research devops audit"
         return
     fi
 
-    # Extract the "active" array values using grep/sed (no jq dependency)
     echo "$activation_line" | grep -oP '"active":\[([^\]]*)\]' | sed 's/"active":\[//;s/\]//;s/"//g;s/,/ /g'
 }
 
-# ── Phase 1: Coordinator (sequential, main worktree) ──
+# ── Phase 1: CTO (sequential, main worktree) ──
 log "CYCLE $CYCLE_ID START"
 cd "$MAIN_REPO"
-git pull --rebase --quiet 2>/dev/null || true
 set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
 unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
 $CLAUDE -p \
     --model opus \
-    --permission-mode dontAsk \
+    --dangerously-skip-permissions \
     --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash" \
     --no-session-persistence \
     "$(cat "$OPS/prompts/coordinator-session.md")" \
     >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || log "coordinator FAILED"
 
-# Commit Coordinator output
+# Commit CTO output
 cd "$MAIN_REPO"
 if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     git add -A
     git commit -m "$(cat <<EOF
-chore(ops): coordinator cycle $CYCLE_ID
+chore(ops): CTO cycle $CYCLE_ID
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )" || true
-    git push origin main --quiet || true
 fi
 
 # ── Phase 2: Active Divisions (parallel, conditional) ──
@@ -190,8 +188,11 @@ done
 
 # ── Phase 3: Merge + Smoke Test (sequential, main) ──
 cd "$MAIN_REPO"
-MERGED_BRANCHES=()
 
+# Save pre-merge state for clean rollback
+PRE_MERGE_SHA=$(git rev-parse HEAD)
+
+MERGED_BRANCHES=()
 for div in $ACTIVE_DIVS; do
     br=$(get_branch "$div")
     if [ "$br" = "main" ]; then
@@ -206,7 +207,7 @@ for div in $ACTIVE_DIVS; do
     }
 done
 
-# Smoke test after merge (only if we merged something and package.json exists)
+# Smoke test after merge
 if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
     log "SMOKE TEST START"
     SMOKE_PASS=true
@@ -225,37 +226,22 @@ if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
     fi
 
     if [ "$SMOKE_PASS" = true ]; then
-        pnpm test --run 2>>"$OPS/logs/cycle.log" || {
+        pnpm test 2>>"$OPS/logs/cycle.log" || {
             log "SMOKE FAIL: test"
             SMOKE_PASS=false
         }
     fi
 
     if [ "$SMOKE_PASS" = false ]; then
-        log "SMOKE TEST FAILED — reverting last merge(s)"
-        # Revert the most recent merge commits
-        for br in "${MERGED_BRANCHES[@]}"; do
-            # Find the merge commit for this branch and revert it
-            MERGE_COMMIT=$(git log --oneline --merges -1 --grep="$br" | awk '{print $1}')
-            if [ -n "$MERGE_COMMIT" ]; then
-                git revert -m 1 --no-edit "$MERGE_COMMIT" 2>>"$OPS/logs/cycle.log" || {
-                    log "REVERT FAILED for $br ($MERGE_COMMIT)"
-                }
-                log "REVERTED merge $MERGE_COMMIT ($br)"
-            fi
-        done
+        log "SMOKE TEST FAILED — resetting to pre-merge state ($PRE_MERGE_SHA)"
+        git reset --hard "$PRE_MERGE_SHA"
+        log "RESET to $PRE_MERGE_SHA"
     else
         log "SMOKE TEST PASSED"
     fi
 fi
 
-# ── Phase 4: Push ──
-git push origin main --quiet 2>/dev/null || true
-for div in $ACTIVE_DIVS; do
-    br=$(get_branch "$div")
-    if [ "$br" != "main" ]; then
-        git push origin "$br" --quiet 2>/dev/null || true
-    fi
-done
+# ── Phase 4: Push (CTO only) ──
+git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
 
 log "CYCLE $CYCLE_ID COMPLETE"
