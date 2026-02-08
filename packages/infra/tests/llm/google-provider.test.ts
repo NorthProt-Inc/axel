@@ -145,6 +145,96 @@ describe('GoogleLlmProvider', () => {
 		});
 	});
 
+	describe('chat — tool call counter isolation (FIX-INFRA-003)', () => {
+		it('should generate unique callIds per provider instance without global state', async () => {
+			const { GoogleLlmProvider } = await importModule();
+
+			// Create two separate provider instances
+			const model1: MockGoogleModel = { generateContentStream: vi.fn() };
+			const client1 = createMockGoogleClient(model1);
+			const provider1 = new GoogleLlmProvider(client1 as any, { model: 'gemini-2.0-flash' });
+
+			const model2: MockGoogleModel = { generateContentStream: vi.fn() };
+			const client2 = createMockGoogleClient(model2);
+			const provider2 = new GoogleLlmProvider(client2 as any, { model: 'gemini-2.0-flash' });
+
+			model1.generateContentStream.mockResolvedValue(
+				makeToolCallStreamResponse('tool_a', { x: 1 }),
+			);
+			model2.generateContentStream.mockResolvedValue(
+				makeToolCallStreamResponse('tool_b', { y: 2 }),
+			);
+
+			const chunks1: LlmChatChunk[] = [];
+			for await (const chunk of provider1.chat({
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Use tool A',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
+				tools: [
+					{
+						name: 'tool_a',
+						description: 'Tool A',
+						category: 'system',
+						inputSchema: {},
+						requiresApproval: false,
+					},
+				],
+			})) {
+				chunks1.push(chunk);
+			}
+
+			const chunks2: LlmChatChunk[] = [];
+			for await (const chunk of provider2.chat({
+				messages: [
+					{
+						sessionId: 's2',
+						turnId: 1,
+						role: 'user',
+						content: 'Use tool B',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
+				tools: [
+					{
+						name: 'tool_b',
+						description: 'Tool B',
+						category: 'system',
+						inputSchema: {},
+						requiresApproval: false,
+					},
+				],
+			})) {
+				chunks2.push(chunk);
+			}
+
+			const toolCall1 = chunks1.find((c) => c.type === 'tool_call');
+			const toolCall2 = chunks2.find((c) => c.type === 'tool_call');
+
+			// Both instances should start from their own counter, not share global state
+			// If global mutable, provider2's counter would be incremented by provider1's usage
+			expect(toolCall1?.type).toBe('tool_call');
+			expect(toolCall2?.type).toBe('tool_call');
+
+			if (toolCall1?.type === 'tool_call' && toolCall2?.type === 'tool_call') {
+				// Per-instance counters should each start from 1
+				expect(toolCall1.content.callId).toBe('google_call_1');
+				expect(toolCall2.content.callId).toBe('google_call_1');
+			}
+		});
+	});
+
 	describe('chat — error handling', () => {
 		it('should throw ProviderError on API failure', async () => {
 			const { GoogleLlmProvider } = await importModule();

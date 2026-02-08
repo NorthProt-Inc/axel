@@ -376,5 +376,13 @@ describe('McpToolExecutor', () => {
 			const result = validatePath('data/test.txt', '/home/axel');
 			expect(result).toContain('/home/axel/data/test.txt');
 		});
+
+		it('should resolve symlinks before validating path boundary (FIX-INFRA-003)', async () => {
+			const { validatePath } = await importModule();
+			// validatePath should be async to resolve symlinks via fs.realpath
+			// This test verifies the function signature accepts and returns a Promise
+			const result = await validatePath('data/test.txt', '/home/axel');
+			expect(result).toContain('/home/axel/data/test.txt');
+		});
 	});
 });

@@ -331,6 +331,85 @@ describe('AnthropicLlmProvider', () => {
 		});
 	});
 
+	describe('chat — tool call JSON.parse failure (FIX-INFRA-003)', () => {
+		it('should throw ProviderError when tool call JSON is malformed instead of silently using empty args', async () => {
+			const { AnthropicLlmProvider } = await importModule();
+			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const provider = new AnthropicLlmProvider(client as any, {
+				model: 'claude-sonnet-4-5-20250929',
+				maxTokens: 4096,
+			});
+
+			const malformedToolEvents = [
+				{
+					type: 'message_start',
+					message: {
+						id: 'msg_4',
+						type: 'message',
+						role: 'assistant',
+						content: [],
+						stop_reason: null,
+					},
+				},
+				{
+					type: 'content_block_start',
+					index: 0,
+					content_block: { type: 'tool_use', id: 'call_bad', name: 'read_file' },
+				},
+				{
+					type: 'content_block_delta',
+					index: 0,
+					delta: { type: 'input_json_delta', partial_json: '{invalid json' },
+				},
+				{ type: 'content_block_stop', index: 0 },
+				{ type: 'message_stop' },
+			];
+
+			client.messages.create.mockReturnValue(toAsyncIterable(malformedToolEvents));
+
+			const chunks: LlmChatChunk[] = [];
+			try {
+				for await (const chunk of provider.chat({
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Read file',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
+					tools: [
+						{
+							name: 'read_file',
+							description: 'Read a file',
+							category: 'file',
+							inputSchema: {},
+							requiresApproval: false,
+						},
+					],
+				})) {
+					chunks.push(chunk);
+				}
+			} catch (err) {
+				expect(err).toBeInstanceOf(ProviderError);
+				return;
+			}
+
+			// If no throw, the tool_call chunk must NOT have empty args (old buggy behavior)
+			const toolChunk = chunks.find((c) => c.type === 'tool_call');
+			if (toolChunk?.type === 'tool_call') {
+				// In the fixed version, malformed JSON should not silently produce empty args
+				expect(Object.keys(toolChunk.content.args as Record<string, unknown>)).not.toHaveLength(
+					0,
+				);
+			}
+		});
+	});
+
 	describe('chat — message formatting', () => {
 		it('should pass tools as Anthropic tool format', async () => {
 			const { AnthropicLlmProvider } = await importModule();

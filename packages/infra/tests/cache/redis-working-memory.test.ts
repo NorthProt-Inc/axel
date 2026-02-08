@@ -211,6 +211,31 @@ describe('RedisWorkingMemory', () => {
 
 			expect(result).toBeNull();
 		});
+
+		it('should fallback to PG when Redis fails (FIX-INFRA-002)', async () => {
+			const { RedisWorkingMemory } = await importModule();
+			const wm = new RedisWorkingMemory(redis as any, pg as any);
+			redis.get.mockRejectedValue(new Error('Redis connection refused'));
+			pg.query.mockResolvedValue({
+				rows: [{ summary: 'PG summary text' }],
+			});
+
+			const result = await wm.getSummary('user-1');
+
+			expect(result).toBe('PG summary text');
+			expect(pg.query).toHaveBeenCalled();
+		});
+
+		it('should return null when both Redis and PG have no summary', async () => {
+			const { RedisWorkingMemory } = await importModule();
+			const wm = new RedisWorkingMemory(redis as any, pg as any);
+			redis.get.mockRejectedValue(new Error('Redis timeout'));
+			pg.query.mockResolvedValue({ rows: [] });
+
+			const result = await wm.getSummary('user-1');
+
+			expect(result).toBeNull();
+		});
 	});
 
 	describe('compress', () => {
@@ -227,6 +252,34 @@ describe('RedisWorkingMemory', () => {
 			expect(redis.set).toHaveBeenCalledWith(
 				'axel:working:user-1:summary',
 				expect.any(String),
+				'EX',
+				3600,
+			);
+		});
+
+		it('should fallback to PG when Redis lrange fails (FIX-INFRA-002)', async () => {
+			const { RedisWorkingMemory } = await importModule();
+			const wm = new RedisWorkingMemory(redis as any, pg as any);
+			redis.lrange.mockRejectedValue(new Error('Redis connection refused'));
+			pg.query.mockResolvedValue({
+				rows: [
+					{
+						turn_id: 1,
+						role: 'user',
+						content: 'PG turn',
+						channel_id: 'cli',
+						created_at: new Date('2026-02-08T10:00:00Z'),
+						token_count: 3,
+					},
+				],
+			});
+
+			await wm.compress('user-1');
+
+			expect(pg.query).toHaveBeenCalled();
+			expect(redis.set).toHaveBeenCalledWith(
+				'axel:working:user-1:summary',
+				expect.stringContaining('PG turn'),
 				'EX',
 				3600,
 			);
@@ -256,6 +309,34 @@ describe('RedisWorkingMemory', () => {
 
 			expect(redis.del).toHaveBeenCalledWith('axel:working:user-1:turns');
 			expect(redis.del).toHaveBeenCalledWith('axel:working:user-1:summary');
+		});
+	});
+
+	describe('error specificity (FIX-INFRA-002)', () => {
+		it('should catch errors with specific Error type in pushTurn', async () => {
+			const { RedisWorkingMemory } = await importModule();
+			const wm = new RedisWorkingMemory(redis as any, pg as any);
+			// Non-Error throw should still be handled gracefully
+			redis.rpush.mockRejectedValue('string error');
+
+			await expect(wm.pushTurn('user-1', makeTurn())).resolves.toBeUndefined();
+			expect(pg.query).toHaveBeenCalledOnce();
+		});
+
+		it('should catch errors with specific Error type in clear', async () => {
+			const { RedisWorkingMemory } = await importModule();
+			const wm = new RedisWorkingMemory(redis as any, pg as any);
+			redis.del.mockRejectedValue(new TypeError('Connection closed'));
+
+			await expect(wm.clear('user-1')).resolves.toBeUndefined();
+		});
+
+		it('should catch errors with specific Error type in flush', async () => {
+			const { RedisWorkingMemory } = await importModule();
+			const wm = new RedisWorkingMemory(redis as any, pg as any);
+			redis.lrange.mockRejectedValue(new Error('Redis unavailable'));
+
+			await expect(wm.flush('user-1')).resolves.toBeUndefined();
 		});
 	});
 
