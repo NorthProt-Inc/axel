@@ -100,23 +100,21 @@ Source: plan Layer 3 §3.1 (lines 933-1008), ADR-013
 
 | Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| §3.1 M0 Stream | `packages/core/src/memory/stream-buffer.ts` | `StreamBuffer`, `StreamEvent` | NOT_STARTED | — | ADR-013. Redis Streams. TTL: session. Max 1,000 entries. Speculative Prefetch trigger. |
-| §3.1 M1 Working | `packages/core/src/memory/working-memory.ts` | `WorkingMemory`, `Turn` | NOT_STARTED | — | ADR-013, ADR-003. Redis Hash+List. TTL: 1h inactive. 20-turn window. Cross-channel unified. |
-| §3.1 M2 Episodic | `packages/core/src/memory/episodic-memory.ts` | `EpisodicMemory` | NOT_STARTED | — | ADR-013. PostgreSQL. TTL: 30d. Session summaries + emotion tags. |
-| §3.1 M3 Semantic | `packages/core/src/memory/semantic-memory.ts` | `SemanticMemory` | NOT_STARTED | — | ADR-013, ADR-016. pgvector 3072d. HNSW(m=16, ef=64). Hybrid search (vector+trigram+metadata). |
-| §3.1 M4 Conceptual | `packages/core/src/memory/conceptual-memory.ts` | `ConceptualMemory`, `Entity`, `Relation` | NOT_STARTED | — | ADR-013. PostgreSQL tables. SQL-based graph traversal (replaces Python BFS). |
-| §3.1 M5 Meta | `packages/core/src/memory/meta-memory.ts` | `MetaMemory`, `PrefetchedMemory` | NOT_STARTED | — | ADR-013. PostgreSQL MV `hot_memories`. Refresh every 6h. Speculative Prefetch source. |
+| §3.1 M0 Stream | `packages/core/src/memory/stream-buffer.ts` | `StreamBuffer`, `StreamEvent`, `StreamEventType` | IN_SYNC | C37 | ADR-013. `InMemoryStreamBuffer` stub. push/consume/trim/healthCheck. 4 event types. 241 tests (memory module total). |
+| §3.1 M1 Working | `packages/core/src/memory/working-memory.ts` | `WorkingMemory`, `Turn` | IN_SYNC | C37 | ADR-013, ADR-003. `InMemoryWorkingMemory` stub. MAX_TURNS=20 (plan:960). pushTurn/getTurns/getSummary/compress/flush/clear/healthCheck. |
+| §3.1 M2 Episodic | `packages/core/src/memory/episodic-memory.ts` | `EpisodicMemory`, `CreateSessionParams`, `MessageRecord` | IN_SYNC | C37 | ADR-013. `InMemoryEpisodicMemory` stub. createSession/endSession/addMessage/getRecentSessions/searchByTopic/searchByContent/healthCheck. |
+| §3.1 M3 Semantic | `packages/core/src/memory/semantic-memory.ts` | `SemanticMemory`, `NewMemory`, `SemanticQuery`, `ScoredMemory`, `DecayResult`, `DecayRunConfig` | IN_SYNC | C37 | ADR-013, ADR-016. `InMemorySemanticMemory` stub. Hybrid scoring 0.7v+0.3t (plan:167). `decay(DecayRunConfig)` — simplified from plan's `DecayConfig`; full decay calc in core/decay/calculator.ts. |
+| §3.1 M4 Conceptual | `packages/core/src/memory/conceptual-memory.ts` | `ConceptualMemory`, `NewEntity`, `Entity`, `NewRelation`, `Relation`, `GraphNode` | IN_SYNC | C37 | ADR-013. `InMemoryConceptualMemory` stub. BFS traversal (in-memory). addEntity/addRelation/traverse/findEntity/getRelated/incrementMentions/healthCheck. |
+| §3.1 M5 Meta | `packages/core/src/memory/meta-memory.ts` | `MetaMemory`, `AccessPattern`, `HotMemory` | IN_SYNC | C37 | ADR-013. `InMemoryMetaMemory` stub. recordAccess/getHotMemories/getPrefetchCandidates/refreshView/pruneOldPatterns/healthCheck. MV refresh is no-op in stub. |
+| §3.1 Types | `packages/core/src/memory/types.ts` | `MemoryLayerName` + all 22 type exports | IN_SYNC | C37 | Central type definitions. `MemoryLayerName` union: 6 literal values. All interfaces define `readonly layerName` + `healthCheck()`. |
+| §3.1 Index | `packages/core/src/memory/index.ts` | (barrel export) | IN_SYNC | C37 | Re-exports 22 types + 6 InMemory* classes. Single import: `@axel/core/memory`. |
 
-**Cross-Layer Interface Contract** — all 6 memory layer interfaces MUST implement:
-```typescript
-interface MemoryLayer<T> {
-  readonly layerName: string;            // "M0:stream" | "M1:working" | ... | "M5:meta"
-  store(data: T): Promise<void>;
-  retrieve(query: unknown): Promise<readonly T[]>;
-  healthCheck(): Promise<ComponentHealth>;
-}
-```
-Note: This is a guideline pattern from ADR-013. Concrete implementations will differ per layer (e.g., M0 uses Redis Streams, M3 uses pgvector). Dev-Core should define the concrete interfaces based on this pattern and plan §3.1 specs.
+**Cross-Layer Interface Contract** — Dev-Core implemented concrete per-layer interfaces instead of generic `MemoryLayer<T>`:
+- All 6 layers implement `readonly layerName: 'M0:stream' | ... | 'M5:meta'` (literal type)
+- All 6 layers implement `healthCheck(): Promise<ComponentHealth>`
+- Per-layer methods match plan §3.1 / ADR-013 TypeScript interfaces exactly
+- No generic `store()/retrieve()` — each layer has domain-specific method names (e.g., M0: push/consume/trim, M3: store/search/decay)
+- This is a reasonable design choice: concrete interfaces over generic abstract. No plan amendment needed.
 
 ### B.4 Context Assembly (CORE-004)
 
@@ -124,10 +122,11 @@ Source: plan §3.3 (lines 1092-1153), ADR-012
 
 | Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| §3.3 ContextBudget | `packages/core/src/context/types.ts` | `ContextBudget` | NOT_STARTED | — | 8 budget slots, total 76K tokens (plan:1101-1111). 200K model → ~124K generation. |
-| §3.3 AssembledContext | `packages/core/src/context/types.ts` | `AssembledContext`, `ContextSection` | NOT_STARTED | — | `sections[]` with per-section token count + source layer annotation (plan:1114-1126). |
-| §3.3 ContextDataProvider | `packages/core/src/context/types.ts` | `ContextDataProvider` | NOT_STARTED | — | DI contract (ADR-006). 7 data methods: working, semantic, graph, session, stream, meta, tools (plan:1130-1138). No I/O in assembler itself. |
-| §3.3 assembler | `packages/core/src/context/assembler.ts` | `ContextAssembler` | NOT_STARTED | — | Constructor injection of `ContextDataProvider`. Priority-ordered assembly (plan:1143-1153). Truncation on budget overflow. |
+| §3.3 ContextBudget | `packages/core/src/context/types.ts` | `ContextBudget` (Zod), `DEFAULT_CONTEXT_BUDGET` | IN_SYNC | C41 | 8 budget slots, total 76K tokens (plan:1101-1111). Zod schema `ContextBudgetSchema` validates positive integers. DEFAULT values match plan exactly: system 8K, stream 2K, working 40K, semantic 12K, graph 4K, session 4K, meta 2K, tools 4K. 289 tests pass. |
+| §3.3 AssembledContext | `packages/core/src/context/types.ts` | `AssembledContext`, `ContextSection` | IN_SYNC | C41 | `sections[]` with per-section token count + source layer annotation (plan:1114-1126). All fields `readonly`. `budgetUtilization: Readonly<Record<string, number>>`. |
+| §3.3 ContextDataProvider | `packages/core/src/context/types.ts` | `ContextDataProvider`, `TokenCounter` | IN_SYNC | C41 | DI contract (ADR-006). 7 data methods match plan:1130-1138. `getMetaMemory` returns `HotMemory[]` (aligned with M5 type). **Added**: `TokenCounter` interface (count: async accurate, estimate: sync ~len/4) per ADR-018. |
+| §3.3 assembler | `packages/core/src/context/assembler.ts` | `ContextAssembler`, `AssembleParams` | IN_SYNC | C41 | Constructor injection of `ContextDataProvider` + `TokenCounter`. Priority-ordered 8-stage assembly matches plan:1143-1153 exactly. Binary-search truncation (front-preserve, back-cut per plan:1153). **Added**: `AssembleParams` (userId, query, optional entityId). 7 pure formatters. 242 lines. |
+| §3.3 index | `packages/core/src/context/index.ts` | (barrel export) | IN_SYNC | C41 | **Added by dev-core**: barrel export for context module. Single import: `@axel/core/context`. |
 
 ### B.5 Persona Engine (CORE-005)
 
@@ -142,13 +141,14 @@ Source: plan Layer 4 (lines 1155-1227), ADR-006
 
 ### B.6 Orchestrator (CORE-006)
 
-Source: plan Layer 7 (lines 1378-1483), ADR-014
+Source: plan Layer 7 (lines 1378-1483), ADR-014, ADR-020, ADR-021
 
 | Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| L7 ReActConfig | `packages/core/src/orchestrator/types.ts` | `ReActConfig` | NOT_STARTED | — | maxIterations:15, toolTimeout:30s, totalTimeout:300s, streaming flag (plan:1396-1401). |
-| L7 reactLoop | `packages/core/src/orchestrator/react-loop.ts` | `reactLoop()` | NOT_STARTED | — | AsyncGenerator<ReActEvent>. 4 error recovery paths (plan:1439-1444). Uses `LlmProvider` + `ToolDefinition[]`. |
-| L7 SessionRouter | `packages/core/src/orchestrator/session-router.ts` | `SessionRouter`, `UnifiedSession` | NOT_STARTED | — | ADR-014. resolveSession, switchChannel, endSession (plan:1452-1470). Cross-channel session unification. |
+| L7 ReActConfig | `packages/core/src/orchestrator/types.ts` | `ReActConfig` (Zod), `DEFAULT_REACT_CONFIG`, `LlmProvider`, `ToolExecutor`, `SessionStore` | IN_SYNC | C41 | Zod schema `ReActConfigSchema`. Defaults match plan:1396-1401 exactly: maxIterations=15, toolTimeoutMs=30000, totalTimeoutMs=300000, streamingEnabled=true. **Added**: `LlmChatChunk` discriminated union (text/thinking/tool_call), `LlmChatParams`, `ResolvedSession`, `ChannelContext`, `SessionStats` DI contracts. 111 lines. |
+| L7 reactLoop | `packages/core/src/orchestrator/react-loop.ts` | `reactLoop()`, `ReActLoopParams` | IN_SYNC | C41 | AsyncGenerator<ReActEvent>. 4 error recovery paths match plan:1439-1444: (1) retryable ProviderError → exponential backoff 100×2^n cap 5s, (2) ToolError → append to messages for LLM recovery, (3) channel send failure deferred to infra, (4) total timeout → yield partial + "시간 초과". ADR-020 error taxonomy fully applied. 269 lines. 330 tests (orchestrator module total). |
+| L7 SessionRouter | `packages/core/src/orchestrator/session-router.ts` | `SessionRouter`, `UnifiedSession` | IN_SYNC | C41 | ADR-014. resolveSession (replaces plan's switchChannel — same semantics, detects channel switch via `ResolvedSession.channelSwitched`), endSession, getChannelContext (sync helper for LLM context), updateActivity, getActiveSession, getSessionStats. Delegation pattern to `SessionStore` DI contract. 78 lines. |
+| L7 index | `packages/core/src/orchestrator/index.ts` | (barrel export) | IN_SYNC | C41 | **Added by dev-core**: barrel export for orchestrator module. 10 type exports + reactLoop + SessionRouter. |
 
 ### B.7 Cross-Package Interface Summary
 
@@ -166,10 +166,12 @@ These interfaces in `packages/core/src/types/` are consumed by other packages (C
 | `TokenUsage` | core/types/common.ts | infra (LLM adapter), core (context budgeting) | Token accounting |
 | `AxelError`, `AxelErrorInfo` | core/types/errors.ts | all packages (error handling) | Error classes for ReAct event serialization (ADR-020) |
 | `DecayInput`, `DecayConfig` | core/decay/types.ts | infra (batch scheduler) | Decay calculation inputs (Zod schema validated) |
-| `ContextBudget`, `AssembledContext`, `ContextDataProvider` | core/context/types.ts | infra (data providers impl) | Context assembly DI contract |
+| `ContextBudget`, `AssembledContext`, `ContextDataProvider`, `TokenCounter` | core/context/types.ts | infra (data providers impl, token counter impl) | Context assembly DI contract (ADR-012, ADR-018) |
 | `Persona`, `PersonaEngine` | core/persona/*.ts | infra (file I/O impl), core (orchestrator) | Persona system contract |
 | `ReActConfig`, `SessionRouter`, `UnifiedSession` | core/orchestrator/types.ts | infra (Redis session store), channels (message routing) | Orchestration contract |
-| `LlmProvider`, `ChatParams`, `ChatChunk` | plan L5 (lines 1247-1270) | infra/src/llm/ only | NOT in core/types — defined in infra. Infra-internal interface. |
+| `LlmProvider`, `LlmChatParams`, `LlmChatChunk` | core/orchestrator/types.ts | infra/src/llm/ (implements), core (reactLoop consumer) | **Moved to core** (plan originally had L5 infra-internal). DI contract in core enables package boundary compliance (CONSTITUTION §9). |
+| `ToolExecutor` | core/orchestrator/types.ts | infra (tool runtime impl) | Tool dispatch DI contract for reactLoop |
+| `SessionStore`, `ResolvedSession`, `ChannelContext`, `SessionStats` | core/orchestrator/types.ts | infra (Redis/PG session impl) | ADR-014. Session persistence DI contracts. |
 
 ## Phase C: Infra Sprint
 
@@ -203,3 +205,8 @@ These interfaces in `packages/core/src/types/` are consumed by other packages (C
 | 35 | B.1 Core Domain Types | NOT_STARTED→IN_SYNC | 10 src + 10 test files. 55 tests pass. All plan §3.5 interfaces implemented. errors.ts added (reasonable extension). CORE-001 done C33. | SYNC-002 |
 | 35 | B.2 Adaptive Decay | NOT_STARTED→IN_SYNC | 4 src + 3 test files. 34 tests, 100% stmt coverage. ADR-015 8-step formula verified. CORE-002 done C34. | SYNC-002 |
 | 35 | B.5 Persona Engine | NOT_STARTED→IN_SYNC | 4 src + 3 test files. 32 tests, 100% stmt coverage. PersonaEngine interface + buildSystemPrompt pure fn. CORE-005 done C34. | SYNC-002 |
+| 37 | B.3 Memory Layers M0-M5 | NOT_STARTED→IN_SYNC | 8 src + 7 test files. 241 tests, 100% stmt, 95% branch. All 6 layer interfaces match plan §3.1/ADR-013. 22 types + 6 InMemory* stubs. No drift. CORE-003 done C36. | SYNC-003 |
+| 40 | QA-011 3 MEDIUM remnants | verified resolved | ADR-013:144,171-174 HNSW confirmed. migration-strategy:372,377-393 HNSW confirmed. plan:843-857 LEFT JOIN confirmed. All 3 issues resolved by FIX-PRE-IMPL (C20). QA-011 flagged them but checked pre-FIX-PRE-IMPL state. No remaining drift. | arch (C40 verification) |
+| 41 | B.4 Context Assembly | NOT_STARTED→IN_SYNC | 3 src + 2 test files. 289 tests, 100% coverage. ContextBudget 8 slots 76K, 8-stage assembly order, binary-search truncation all match plan §3.3. TokenCounter added per ADR-018. CORE-004 done C37/merged C40. | SYNC-003 |
+| 41 | B.6 Orchestrator | NOT_STARTED→IN_SYNC | 4 src + 3 test files. 330 tests, 99.69% stmt. ReActConfig defaults match plan:1396-1401. 4 error recovery paths per ADR-020. SessionRouter delegation per ADR-014. LlmProvider moved to core (plan had infra-internal). CORE-006 done C38/merged C40. | SYNC-003 |
+| 41 | B.7 Interface Summary | updated | LlmProvider, ToolExecutor, SessionStore, ChannelContext, SessionStats added to cross-package summary. LlmProvider moved from "infra-internal" to core DI contract. | SYNC-003 |
