@@ -12,3 +12,10 @@ export {
 	renderToolResult,
 	renderThinking,
 } from './output.js';
+export {
+	createStreamSession,
+	feedChunk,
+	completeStream,
+	getStreamOutput,
+	type StreamSession,
+} from './streaming.js';
