@@ -194,10 +194,11 @@ $CLAUDE -p \
     "$(cat "$OPS/prompts/coordinator-session.md")" \
     >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || log "coordinator FAILED"
 
-# Commit CTO output
+# Commit CTO output (CONSTITUTION §1 — only CTO-owned files)
 cd "$MAIN_REPO"
-if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
-    git add -A
+CTO_OWNED=".axel-ops/PROGRESS.md .axel-ops/BACKLOG.md .axel-ops/ERRORS.md .axel-ops/METRICS.md .axel-ops/comms/broadcast.jsonl"
+git add --ignore-errors -- $CTO_OWNED 2>/dev/null || true
+if ! git diff --cached --quiet 2>/dev/null; then
     git commit -m "$(cat <<EOF
 chore(ops): CTO cycle $CYCLE_ID
 

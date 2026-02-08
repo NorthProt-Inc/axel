@@ -2,21 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 80 (CTO update)**: UI/UX 4 tasks done (UI-001/003/004/007). QA-021 CONDITIONAL PASS. 933 tests (+53). Dependencies unblocked → UI-002/005/006 assigned. FIX-UI-001 (devops) created for marked-terminal types.
+> **Cycle 82 (CTO update)**: UI-002/005/006 done → UI/UX Sprint **88% (7/8)**. 975 tests (+42). Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1) created. FIX-UI-001 + QA-022 queued.
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
+| FIX-PUNYCODE-001 | P0 | devops | punycode DeprecationWarning (DEP0040) 해결 — Node.js 내장 punycode 사용처 추적 후 userland alternative 전환 | — |
+| README-001 | P1 | devops | 프로젝트 전반 README 업데이트 — 기존 README 참고하지 말고 새롭게 분석 후 관례적 작성 (root + packages/* + apps/* + tools/*) | — |
 | FIX-UI-001 | P2 | devops | marked-terminal 타입 선언 추가 — .d.ts 작성 또는 @types/marked-terminal 설치 (TS7016 해결) | — |
+| QA-022 | P1 | quality | UI/UX Sprint 최종 리뷰 — UI-002/005/006 코드 검증, §8 TDD, §9 경계, §14 파일 크기, 커버리지 확인 | UI-002, UI-005, UI-006 |
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| UI-002 | P1 | ui-ux | CLI 스트리밍 출력 개선 — 토큰별 렌더링, spinner 통합, markdown 실시간 렌더링 | 0208C80 |
-| UI-005 | P2 | ui-ux | WebChat markdown 렌더링 — shiki 코드 하이라이트, marked 통합, XSS 방지 sanitize (DOMPurify) | 0208C80 |
-| UI-006 | P2 | ui-ux | WebChat 세션 관리 — gateway API 연동 (session/end, 이력 로드), 사이드바 기능 구현 | 0208C80 |
+| (none) | — | — | — | — |
 
 ## Cancelled
 
@@ -163,3 +164,6 @@
 | UI-004 | ui-ux | 0208C80 | WS first-message auth per ADR-019: createAuthMessage, parseAuthResponse, isAuthOk. 9 tests. TDD RED→GREEN. |
 | UI-007 | ui-ux | 0208C80 | Design tokens→Tailwind: buildTailwindColors, buildTailwindFontFamily. 7 tests. TDD RED→GREEN. |
 | QA-021 | quality | 0208C80 | UI/UX scaffold review: CONDITIONAL PASS. 0C 0H 7M 4L (post UI-001/003/004/007 resolution). §9 PASS. §14 PASS. Coverage ui 94.96% stmt. |
+| UI-002 | ui-ux | 0208C82 | CLI streaming session: createStreamSession, feedChunk, completeStream, getStreamOutput. Immutable state, token accumulation, markdown render on completion. 12 tests, 100% stmt. TDD RED→GREEN→REFACTOR. |
+| UI-005 | ui-ux | 0208C82 | WebChat markdown enhanced: renderMarkdownWithHighlight (async marked + shiki github-dark, 8 langs), sanitizeHtml (allowlist-based XSS prevention). 17 tests. TDD RED→GREEN→REFACTOR. |
+| UI-006 | ui-ux | 0208C82 | WebChat session API client: buildSessionUrl, buildSessionEndUrl, parseSessionResponse, parseSessionEndResponse, addSessionToList. Gateway integration. 13 tests. TDD RED→GREEN→REFACTOR. |
