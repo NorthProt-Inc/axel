@@ -2,14 +2,14 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 34
+## Current Cycle: 35
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 34 cycles | 0 | Active |
-| arch | 1 cycle | 3 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001) | 0 | Activated (PLAN_SYNC update) |
+| coord | — | 35 cycles | 0 | Active |
+| arch | 1 cycle | 3 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001) | 0 | Active (SYNC-002) |
 | dev-core | 1 cycle | 3 (CORE-001, CORE-002, CORE-005) | 0 | Active (CORE-003) |
 | dev-infra | — | 0 | 0 | Pending Phase C |
 | dev-edge | — | 0 | 0 | Pending Phase D |
@@ -59,3 +59,4 @@
 | 32 | arch, dev-core, devops | 0 (3 in progress) | 0 | **PHASE B ACTIVE.** SYNC-001, CORE-001, SCAFFOLD-007 assigned. |
 | 33 | coord | 3 (SYNC-001, CORE-001, SCAFFOLD-007) | 0 | **3 TASKS DONE.** Merge reverts resolved. 55 tests pass. CORE-002+CORE-005 assigned. |
 | 34 | coord, dev-core, quality, arch | 3 (CORE-002, CORE-005, DEVOPS-001) | 0 | **3 TASKS DONE + MERGE.** 121 tests. Coverage 93%+. CORE-003+QA-012 assigned. |
+| 35 | dev-core, quality, arch | 0 (3 in progress) | 0 | In progress. CORE-003, QA-012, SYNC-002 ongoing. 121 tests pass. |

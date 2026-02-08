@@ -5,9 +5,9 @@
 ## Status
 
 - **Phase**: **B: CORE SPRINT — ACTIVE**
-- **Cycle**: 34
-- **Last Updated**: 2026-02-08C34
-- **STATUS**: **Phase B 60% complete.** CORE-002 (decay) + CORE-005 (persona) merged to main. DEVOPS-001 (coverage tooling) done. Smoke test: 121 tests pass, lint+typecheck clean, coverage 90%+. CORE-003 (memory layers) assigned to dev-core. QA-012 (core types + decay review) assigned to quality. Arch activated for PLAN_SYNC update. Critical path: CORE-003 → CORE-004 → CORE-006.
+- **Cycle**: 35
+- **Last Updated**: 2026-02-08C35
+- **STATUS**: **Phase B 60% complete.** No new completions. CORE-003 (memory layers, dev-core) + QA-012 (core review, quality) in progress. SYNC-002 (arch, PLAN_SYNC update) in progress. Smoke test: 121 tests pass, lint+typecheck clean. Critical path: CORE-003 → CORE-004 → CORE-006. 0 errors, no drift.
 
 ## Task Counts
 
@@ -46,19 +46,20 @@
 | 32 | 0208 | **PHASE B ACTIVE.** SYNC-001 (arch), CORE-001 (dev-core), SCAFFOLD-007 (devops) assigned. CORE-001/SYNC-001 dep relaxed. |
 | 33 | 0208 | **3 TASKS COMPLETED.** SYNC-001 (PLAN_SYNC.md Phase B contracts), CORE-001 (55 tests, 10 src files), SCAFFOLD-007 (CI pipeline). Merge reverts resolved via checkout. Smoke test PASS. CORE-002 + CORE-005 assigned (parallel, no deps). DEVOPS-001 queued (coverage tooling). |
 | 34 | 0208 | **3 TASKS COMPLETED + MERGE.** CORE-002 (decay, 34 tests), CORE-005 (persona, 32 tests) merged to main. DEVOPS-001 (coverage-v8) done by CTO. Lint fixes applied (Biome). Smoke test: 121 tests, typecheck+lint clean, coverage 93%+. CORE-003 assigned. QA-012 assigned. Arch activated for PLAN_SYNC. |
+| 35 | 0208 | **In progress.** CORE-003 (dev-core), QA-012 (quality), SYNC-002 (arch) all in progress — no new completions. Smoke test: 121 tests pass. 0 errors, no drift. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C34 | Cycle 34 | Active |
-| Architecture | 0208C34 | SYNC-002 | Activated (PLAN_SYNC update for CORE-002/005) |
-| Dev-Core | 0208C34 | CORE-003 | Active (memory layers) |
+| Coordinator | 0208C35 | Cycle 35 | Active |
+| Architecture | 0208C35 | SYNC-002 | Active (PLAN_SYNC update for CORE-002/005) |
+| Dev-Core | 0208C35 | CORE-003 | Active (memory layers M0-M5) |
 | Dev-Infra | — | — | Pending Phase C |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C34 | QA-012 | Active (core types + decay review) |
-| DevOps | 0208C34 | — | Idle (DEVOPS-001 done) |
+| Quality | 0208C35 | QA-012 | Active (core types + decay review) |
+| DevOps | 0208C34 | — | Idle |
 | Audit | 0209T0031 | — | Idle |
 
 ## Human Intervention Needed
