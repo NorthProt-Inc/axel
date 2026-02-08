@@ -2,18 +2,26 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 40**: Phase B (Core Sprint) — **ALL CORE TASKS COMPLETE**. CORE-004+006 merged to main (330 tests). SYNC-003 (arch) + QA-013 (quality) remaining for Phase B closure.
+> **Cycle 42**: **PHASE B COMPLETE → PHASE C (Infra Sprint) ACTIVE.** Phase B: 56 tasks done, 330 tests, 99.69% stmt coverage. Phase C: 9 tasks created (5 INFRA + 2 SYNC/QA + 2 DEVOPS).
 
 ## Queued
 
-(none)
+| ID | Priority | Division | Task | Depends On |
+|----|----------|----------|------|------------|
+| INFRA-002 | P1 | dev-infra | L2 Redis cache layer: WorkingMemory + StreamBuffer impls, circuit breaker, PG fallback. ADR-003, ADR-021. `packages/infra/src/cache/` | INFRA-001 |
+| INFRA-003 | P1 | dev-infra | L5 LLM adapters: Anthropic + Google providers, circuit breaker, retry, streaming. ADR-020, ADR-021. `packages/infra/src/llm/` | — |
+| INFRA-005 | P1 | dev-infra | L6 MCP tool registry: defineTool(), ToolExecutor impl, command allowlist, path validation. ADR-010. `packages/infra/src/mcp/` | INFRA-001, INFRA-004 |
+| QA-016 | P1 | quality | Phase C code review — all INFRA modules. TDD, §9 boundary, coverage 80%+. | INFRA-001~005 |
+| SYNC-004 | P1 | arch | PLAN_SYNC.md Phase C update — all 5 INFRA modules NOT_STARTED→IN_SYNC. | INFRA-001~005 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| SYNC-003 | arch | 0208C37 | C41 |
-| QA-013 | quality | 0208C39 | C41 |
+| INFRA-001 | dev-infra | 0208C42 | C44 |
+| INFRA-004 | dev-infra | 0208C42 | C44 |
+| DEVOPS-002 | devops | 0208C42 | C43 |
+| DEVOPS-003 | devops | 0208C42 | C43 |
 
 ## Cancelled
 
@@ -92,3 +100,5 @@
 | SYNC-002 | arch | 0208C36 | PLAN_SYNC.md: B.1/B.2/B.5 IN_SYNC, A.3 IN_SYNC. No drift detected. |
 | CORE-004 | dev-core | 0208C40 | 3 src + 2 test files (context assembly). 289 tests, 100% stmt+branch+func+lines. Plan §3.3 ContextBudget+Assembler. |
 | CORE-006 | dev-core | 0208C40 | 4 src + 3 test files (orchestrator). 330 tests, 99.69% stmt. ReAct loop+SessionRouter+tool dispatch. ADR-014/020/021. |
+| SYNC-003 | arch | 0208C41 | PLAN_SYNC.md: B.3+B.4+B.6 IN_SYNC. Phase B plan-code sync 100%. |
+| QA-013 | quality | 0208C41 | Phase B final verification: 330 tests smoke test, ALL CONSTITUTION gates PASS. 0 CRITICAL, 0 HIGH. READY FOR PHASE B CLOSURE. |

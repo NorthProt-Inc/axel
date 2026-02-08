@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **B: CORE SPRINT — CLOSURE PENDING**
-- **Cycle**: 41
-- **Last Updated**: 2026-02-08C41
-- **STATUS**: **Phase B 95% complete.** ALL 6 core modules done (CORE-001~006). 330 tests pass, typecheck+lint clean. SYNC-003 (arch, 4 cycles — metric-alert issued) + QA-013 (quality, 2 cycles) remaining for Phase B closure. 0 errors, no drift. If SYNC-003 stalls 1 more cycle, CTO will execute directly.
+- **Phase**: **C: INFRA SPRINT — ACTIVE**
+- **Cycle**: 42
+- **Last Updated**: 2026-02-08C42
+- **STATUS**: **Phase B COMPLETE (100%).** SYNC-003 + QA-013 both done C41. ALL 6 core modules (CORE-001~006), 330 tests, 99.69% stmt coverage, ALL CONSTITUTION gates PASS. **Phase C kickoff.** INFRA-001 (persistence, P0) + INFRA-004 (embedding, P1) assigned to dev-infra (parallel, no deps). DEVOPS-002 (npm deps) + DEVOPS-003 (testcontainers) assigned to devops. 5 tasks queued (INFRA-002/003/005, QA-016, SYNC-004).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 0 |
-| In Progress | 2 |
-| Done | 54 |
+| Queued | 5 |
+| In Progress | 4 |
+| Done | 56 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -53,19 +53,20 @@
 | 39 | 0208 | **QA-012 cancelled (5 cycles stalled).** CORE-001 types already verified by SYNC-002. Scope absorbed into QA-013 (CORE-002+003+005 review). QA-013 assigned to quality. CORE-004 (dev-core), SYNC-003 (arch) in progress. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
 | 40 | 0208 | **ALL CORE TASKS COMPLETE.** CORE-004 (context assembly, 289 tests, 100% coverage) + CORE-006 (orchestrator, 330 tests, 99.69% stmt) merged to main. Smoke test: 330 tests pass, typecheck+lint clean. Phase B 95%. SYNC-003 scope expanded (B.3+B.4+B.6). QA-013 scope expanded (CORE-001~006 full review). 0 errors, no drift. |
 | 41 | 0208 | **No new completions.** SYNC-003 (arch, 4 cycles — metric-alert) + QA-013 (quality, 2 cycles) in progress. Smoke test: 330 tests pass, typecheck+lint clean. 0 errors, no drift. SYNC-003 will be escalated (CTO direct execution) if no completion by C42. |
+| 42 | 0208 | **PHASE B COMPLETE → PHASE C KICKOFF.** SYNC-003 done (B.3+B.4+B.6 IN_SYNC, 100% plan-code sync) + QA-013 done (330 tests smoke test, ALL gates PASS). Phase B: 56 tasks, 330 tests, 99.69% stmt. **Phase C (Infra Sprint) started.** 9 tasks created: INFRA-001~005, DEVOPS-002/003, QA-016, SYNC-004. INFRA-001 (persistence, P0) + INFRA-004 (embedding, P1) assigned parallel. DEVOPS-002/003 (deps+testcontainers) assigned. 0 errors, no drift. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C41 | Cycle 41 | Active |
-| Architecture | 0208C37 | SYNC-003 | Active (PLAN_SYNC B.3+B.4+B.6 update, **4 cycles — metric-alert**) |
+| Coordinator | 0208C42 | Cycle 42 | Active |
+| Architecture | 0208C41 | — | Idle (SYNC-003 complete, awaiting SYNC-004 when INFRA tasks done) |
 | Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
-| Dev-Infra | — | — | Pending Phase C |
+| Dev-Infra | 0208C42 | INFRA-001, INFRA-004 | **Active** (L2 Persistence + L5 Embedding, parallel) |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C39 | QA-013 | Active (Phase B full review: CORE-001~006, 2 cycles) |
-| DevOps | 0208C34 | — | Idle |
+| Quality | 0208C41 | — | Idle (QA-013 complete, awaiting QA-016 when INFRA tasks done) |
+| DevOps | 0208C42 | DEVOPS-002, DEVOPS-003 | **Active** (npm deps + testcontainers setup) |
 | Audit | 0209T0031 | — | Idle |
 
 ## Human Intervention Needed
