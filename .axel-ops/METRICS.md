@@ -2,18 +2,18 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 38
+## Current Cycle: 39
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 37 cycles | 0 | Active |
+| coord | — | 38 cycles | 0 | Active |
 | arch | 1 cycle | 4 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002) | 0 | Active (SYNC-003) |
 | dev-core | 1 cycle | 4 (CORE-001, CORE-002, CORE-005, CORE-003) | 0 | Active (CORE-004) |
 | dev-infra | — | 0 | 0 | Pending Phase C |
 | dev-edge | — | 0 | 0 | Pending Phase D |
-| quality | 4 cycles | 1 (QA-011) | 1 (QA-012, scope reduced C38) | Active (QA-012, 4 cycles — scope reduced) |
+| quality | — | 1 (QA-011) | 1 (QA-012, cancelled C39) | Active (QA-013 assigned) |
 | research | — | 0 | 0 | Idle |
 | devops | 2 cycles | 8 (SCAFFOLD-001~007 + FIX) | 0 | Idle |
 | audit | 1 cycle | 1 (AUDIT-002) | 0 | Idle |
@@ -23,7 +23,7 @@
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
 | Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 1 (QA-012 — scope reduced C38, CORE-001 types only) | 0 | REMEDIATED |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 1 (resolved C33) | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -43,7 +43,7 @@
 |-------|--------|-------------|-----------|------------|
 | Plan Closure | **DONE** | 17 | 21 | 100% |
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
-| B: Core Sprint | **ACTIVE** | 32 | — | 80% (CORE-001~003+005+SYNC-001~002+SCAFFOLD-007+DEVOPS-001 done. CORE-004/006+QA-012/013+SYNC-003 remaining.) |
+| B: Core Sprint | **ACTIVE** | 32 | — | 80% (CORE-001~003+005+SYNC-001~002+SCAFFOLD-007+DEVOPS-001 done. CORE-004/006+QA-013+SYNC-003 remaining.) |
 | C: Infra Sprint | QUEUED | — | — | — |
 | D: Edge Sprint | QUEUED | — | — | — |
 | E: Integration | QUEUED | — | — | — |
@@ -63,3 +63,4 @@
 | 36 | dev-core, quality, arch | 2 (CORE-003, SYNC-002) | 0 | **2 TASKS DONE.** 241 tests. Memory layers M0-M5 merged. CORE-004 assigned. Phase B 80%. |
 | 37 | dev-core, quality, arch | 0 (3 in progress) | 0 | No completions. CORE-004, QA-012, SYNC-003 in progress. QA-012 at 3 cycles — metric-alert. 241 tests pass. |
 | 38 | dev-core, quality, arch | 0 (3 in progress) | 0 | **QA-012 scope reduced** (4 cycles → CORE-001 types only). CORE-002+005 review → QA-013. CORE-004, SYNC-003 in progress. 241 tests pass. |
+| 39 | dev-core, quality, arch | 0 (QA-012 cancelled) | 0 | **QA-012 cancelled** (5 cycles stalled). QA-013 assigned (CORE-002+003+005 review). CORE-004, SYNC-003 in progress. 241 tests pass. |
