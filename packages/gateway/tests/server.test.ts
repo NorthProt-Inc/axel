@@ -243,6 +243,139 @@ describe('Gateway Server', () => {
 		});
 	});
 
+	describe('rate limiting (AUD-066)', () => {
+		it('returns 429 when rate limit is exceeded', async () => {
+			await server.stop();
+
+			const config = createTestConfig({ rateLimitPerMinute: 3 });
+			const deps = createMockDeps();
+			server = createGatewayServer(config, deps);
+			httpServer = await server.start();
+
+			const authHeaders = {
+				authorization: 'Bearer test-auth-token-12345',
+				'content-type': 'application/json',
+			};
+			const body = JSON.stringify({ content: 'hello', channelId: 'webchat' });
+
+			// Make 3 requests (at limit)
+			for (let i = 0; i < 3; i++) {
+				const res = await makeRequest(httpServer, {
+					method: 'POST',
+					path: '/api/v1/chat',
+					headers: authHeaders,
+					body,
+				});
+				expect(res.status).toBe(200);
+			}
+
+			// 4th request should be rate limited
+			const res = await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: authHeaders,
+				body,
+			});
+			expect(res.status).toBe(429);
+		});
+
+		it('includes Retry-After header in 429 response', async () => {
+			await server.stop();
+
+			const config = createTestConfig({ rateLimitPerMinute: 1 });
+			const deps = createMockDeps();
+			server = createGatewayServer(config, deps);
+			httpServer = await server.start();
+
+			const authHeaders = {
+				authorization: 'Bearer test-auth-token-12345',
+				'content-type': 'application/json',
+			};
+			const body = JSON.stringify({ content: 'hello', channelId: 'webchat' });
+
+			// Exhaust rate limit
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: authHeaders,
+				body,
+			});
+
+			// Should get 429 with Retry-After
+			const res = await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: authHeaders,
+				body,
+			});
+			expect(res.status).toBe(429);
+			expect(res.headers['retry-after']).toBeDefined();
+		});
+
+		it('does not rate limit unauthenticated /health endpoint', async () => {
+			await server.stop();
+
+			const config = createTestConfig({ rateLimitPerMinute: 2 });
+			const deps = createMockDeps();
+			server = createGatewayServer(config, deps);
+			httpServer = await server.start();
+
+			// Make many health requests — should never be rate limited
+			for (let i = 0; i < 5; i++) {
+				const res = await makeRequest(httpServer, { path: '/health' });
+				expect(res.status).toBe(200);
+			}
+		});
+	});
+
+	describe('body size limit (AUD-067)', () => {
+		it('rejects request body larger than 32KB with 413', async () => {
+			const largeContent = 'a'.repeat(33_000);
+			const res = await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: largeContent, channelId: 'webchat' }),
+			});
+
+			expect(res.status).toBe(413);
+		});
+
+		it('accepts request body under 32KB', async () => {
+			const normalContent = 'a'.repeat(1000);
+			const res = await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: normalContent, channelId: 'webchat' }),
+			});
+
+			expect(res.status).toBe(200);
+		});
+
+		it('rejects based on streaming body size even without Content-Length', async () => {
+			const largeContent = 'a'.repeat(33_000);
+			const res = await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+					'transfer-encoding': 'chunked',
+				},
+				body: JSON.stringify({ content: largeContent, channelId: 'webchat' }),
+			});
+
+			expect(res.status).toBe(413);
+		});
+	});
+
 	describe('graceful shutdown', () => {
 		it('stops accepting new connections after stop()', async () => {
 			await server.stop();
