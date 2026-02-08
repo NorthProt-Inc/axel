@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 79
+## Current Cycle: 80
 
 ## Division Performance (Last 10 Cycles)
 
@@ -13,10 +13,10 @@
 | dev-core | 1 cycle | 8 | 0 | Idle |
 | dev-infra | 1 cycle | 11 (+1: FIX-HARDEN-001) | 0 | Idle |
 | dev-edge | 1 cycle | 21 (+5: HARDEN-003/004/005/006/007) | 0 | Idle (all done) |
-| quality | 1 cycle | 7 (+1: QA-020) | 1 (QA-012, cancelled C39) | Idle |
+| quality | 1 cycle | 8 (+1: QA-021) | 1 (QA-012, cancelled C39) | Idle (QA-021 done) |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
 | devops | 1 cycle | 17 (+1: FIX-MIGRATION-001) | 0 | Idle |
-| **ui-ux** | — | 0 (new Division) | 0 | **Activated (C79)** |
+| **ui-ux** | 1 cycle | 4 (UI-001/003/004/007) | 0 | **Active (UI-002/005/006)** |
 | audit | 1 cycle | 4 | 0 | Idle |
 
 ## Bottleneck Indicators
@@ -38,8 +38,8 @@
 | `packages/channels/` | 75% | CLI 95.95%, Discord 90.27%, Telegram 93.18% | +15% over target |
 | `packages/gateway/` | 80% | 95.65% stmt, 88.07% branch (post HARDEN-006/007) | +15% over target |
 | `apps/axel/` | — | bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48% | — |
-| `packages/ui/` | 80% | 35 tests (6 test files: tokens, cli-theme, cli-banner, cli-renderer, cli-format, cli-spinner) | Scaffold only — awaiting coverage report |
-| `apps/webchat/` | — | 0 tests (scaffold, no test files yet) | — |
+| `packages/ui/` | 80% | 95.58% stmt (cli), 100% (tokens). 50 tests, 7 test files. | +15% over target |
+| `apps/webchat/` | — | 38 tests (markdown 8 + chat-logic 14 + ws-auth 9 + tokens-integration 7). Pure logic tests. | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 
 ## Sprint Progress
@@ -53,23 +53,12 @@
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
 | E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
-| UI/UX Sprint | **ACTIVE** | 79 | — | 0% (0/8 tasks). Scaffold complete. 880 tests (+35 from ui package). |
+| UI/UX Sprint | **ACTIVE** | 79 | — | 50% (4/8 tasks done, 3 in progress). 933 tests, 82 files. |
 
 ## Cycle History (Last 10)
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 60 | dev-edge, dev-core, quality, arch | 1 (INTEG-007) | 0 | **1 TASK DONE.** E2E roundtrip. 774 tests. Phase E **67%**. |
-| 61 | dev-edge, dev-core, quality | 3 (FIX-AUDIT-E-001/002, QA-019) | 0 (4 resolved) | **3 TASKS DONE.** 801 tests. ERR-071~074 resolved. Phase E **73%**. |
-| 62 | coord | 2 (FIX-SCHEMA-001, SYNC-007) | 0 (1 resolved) | **2 TASKS DONE (CTO override).** ERR-070 resolved. Phase E **88%**. |
-| 63 | devops | 1 (FIX-AUDIT-E-003) | 0 (1 resolved: ERR-075) | **PHASE E EFFECTIVELY COMPLETE.** 806 tests, 64 files. 16/17 done. ERR-075 resolved. Open errors 2→1. |
-| 64 | dev-edge, coord | 0 | 0 | **HARDENING CYCLE.** INTEG-008 + FIX-AUDIT-E-004 assigned. |
-| 65 | dev-edge, quality, dev-infra | 2 (INTEG-008, FIX-AUDIT-E-004) | 0 | **2 TASKS DONE.** 816 tests, 66 files. Gateway 95.28% stmt. |
-| 66 | quality, dev-infra, dev-edge | 3 (QA-020, FIX-HARDEN-001, FIX-HARDEN-002) | 0 | **PHASE E COMPLETE.** QA-020 PASS. 834 tests (798 pass, 36 skip), 66 files. |
-| 67 | dev-edge | 0 | 0 | **POST-RELEASE HARDENING.** 5 hardening tasks created. HARDEN-003/004/005 assigned. |
-| 68 | dev-edge | 3 (HARDEN-003/004/005) | 0 | **3 HARDENING TASKS DONE.** 835 tests, 69 files. Gateway 95.47% stmt. HARDEN-006/007 assigned. |
-| 69 | dev-edge | 0 | 0 | **No completions.** HARDEN-006/007 in progress (1 cycle). 0 open errors. |
-| 70 | dev-edge | 2 (HARDEN-006/007) | 0 | **ALL HARDENING COMPLETE.** HARDEN-006 (Discord DEFERRED, 6 tests), HARDEN-007 (SSE headers, 4 tests). Gateway 95.65% stmt. **PROJECT COMPLETE.** |
 | 71 | (none) | 0 | 0 | **STEADY STATE.** Roadmap exhausted. 0 drift, 0 errors, 118 tasks done. Awaiting next direction. |
 | 72 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
 | 73 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
@@ -79,3 +68,4 @@
 | 77 | coord | 1 (FIX-MIGRATION-002) | 0 (1 resolved) | **1 TASK DONE (CTO override).** migration-strategy.md updated. ERR-085 resolved. 0 errors. STEADY STATE restored. |
 | 78 | (none) | 0 | 0 | **STEADY STATE.** Drift CLEAN. 0 errors, 0 queued. Roadmap exhausted. Awaiting next direction. |
 | 79 | ui-ux, quality | 0 | 0 | **UI/UX SPRINT KICKOFF.** Human directive P0. 8 tasks created. 880 tests (+35). packages/ui/ + apps/webchat/ scaffold confirmed. |
+| 80 | ui-ux, quality | 5 (UI-001/003/004/007, QA-021) | 0 | **5 TASKS DONE.** 933 tests (+53), 82 files. UI/UX Sprint **50%**. UI-002/005/006 assigned. FIX-UI-001 created. |

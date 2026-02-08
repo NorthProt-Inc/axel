@@ -2,24 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 79 (CTO update)**: Human directive P0 — UI/UX Division activated. packages/ui/ + apps/webchat/ scaffold confirmed (880 tests, +35 new). 8 UI/UX tasks created.
+> **Cycle 80 (CTO update)**: UI/UX 4 tasks done (UI-001/003/004/007). QA-021 CONDITIONAL PASS. 933 tests (+53). Dependencies unblocked → UI-002/005/006 assigned. FIX-UI-001 (devops) created for marked-terminal types.
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| UI-001 | P1 | ui-ux | CLI 렌더러에 CliChannel 통합 — @axel/ui/cli 렌더링을 packages/channels/src/cli/ CliChannel에 연결 | — |
-| UI-002 | P1 | ui-ux | CLI 스트리밍 출력 개선 — 토큰별 렌더링, spinner 통합, markdown 실시간 렌더링 | UI-001 |
-| UI-003 | P1 | ui-ux | WebChat 컴포넌트 테스트 — MessageList, MessageInput, ChatSidebar, StreamingIndicator 단위 테스트 | — |
-| UI-004 | P1 | ui-ux | WebChat WS 인증 — ADR-019 first-message auth 패턴 적용 (connectWebSocket에 auth token 전송) | — |
-| UI-005 | P2 | ui-ux | WebChat markdown 렌더링 — shiki 코드 하이라이트, marked 통합, XSS 방지 sanitize | UI-003 |
-| UI-006 | P2 | ui-ux | WebChat 세션 관리 — gateway API 연동 (session/end, 이력 로드), 사이드바 기능 구현 | UI-004 |
-| UI-007 | P2 | ui-ux | Design tokens webchat 적용 — colors/typography/spacing tokens를 Tailwind CSS config에 연동 | — |
-| QA-021 | P1 | quality | UI/UX scaffold 코드 리뷰 — packages/ui/ + apps/webchat/ CONSTITUTION §9/§14/§15 검증 | — |
+| FIX-UI-001 | P2 | devops | marked-terminal 타입 선언 추가 — .d.ts 작성 또는 @types/marked-terminal 설치 (TS7016 해결) | — |
 
 ## In Progress
 
-(none)
+| ID | Priority | Division | Task | Started |
+|----|----------|----------|------|---------|
+| UI-002 | P1 | ui-ux | CLI 스트리밍 출력 개선 — 토큰별 렌더링, spinner 통합, markdown 실시간 렌더링 | 0208C80 |
+| UI-005 | P2 | ui-ux | WebChat markdown 렌더링 — shiki 코드 하이라이트, marked 통합, XSS 방지 sanitize (DOMPurify) | 0208C80 |
+| UI-006 | P2 | ui-ux | WebChat 세션 관리 — gateway API 연동 (session/end, 이력 로드), 사이드바 기능 구현 | 0208C80 |
 
 ## Cancelled
 
@@ -161,3 +158,8 @@
 | HARDEN-007 | dev-edge | 0208C70 | QA-020-L3 + AUD-094: SSE security headers (X-Content-Type-Options, X-Frame-Options) + startedAt moved to start() listen callback. 4 tests. TDD RED→GREEN. |
 | FIX-MIGRATION-001 | devops | 0208C75 | Migration fixes: (1) 002 messages created_at+token_count, (2) 007 ALTER COLUMN conditional DO block, (3) 008 session_summaries table. 845 tests, 15 migrate tests. ERR-082/083/084 resolved. |
 | FIX-MIGRATION-002 | coord (CTO) | 0208C77 | migration-strategy.md 업데이트: (1) 디렉토리 구조 007/008 추가, (2) messages 테이블 created_at+token_count 반영, (3) 007/008 migration 문서화, (4) Execution Order 001-008. CTO override (arch 3 cycles stalled). ERR-085 resolved. |
+| UI-001 | ui-ux | 0208C80 | CLI output rendering: renderAssistantMessage, renderStreamStart/Chunk/End, renderToolCall/Result, renderThinking. 15 tests, 100% stmt. TDD RED→GREEN→REFACTOR. |
+| UI-003 | ui-ux | 0208C80 | WebChat logic tests: 8 markdown + 14 chat-logic (parseWsMessage, applyChunk, applyDone, createUserMessage). Pure functions extracted. TDD RED→GREEN→REFACTOR. |
+| UI-004 | ui-ux | 0208C80 | WS first-message auth per ADR-019: createAuthMessage, parseAuthResponse, isAuthOk. 9 tests. TDD RED→GREEN. |
+| UI-007 | ui-ux | 0208C80 | Design tokens→Tailwind: buildTailwindColors, buildTailwindFontFamily. 7 tests. TDD RED→GREEN. |
+| QA-021 | quality | 0208C80 | UI/UX scaffold review: CONDITIONAL PASS. 0C 0H 7M 4L (post UI-001/003/004/007 resolution). §9 PASS. §14 PASS. Coverage ui 94.96% stmt. |
