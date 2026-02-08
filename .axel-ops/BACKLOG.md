@@ -2,24 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 10**: WP-1~3, WP-5~7, ADR-017/018 completed. 8 tasks moved to Done.
-> WP-4 and FIX-MED dependencies resolved, moved to Queued-assignable.
-> QA-008 created for quality gate re-verification.
+> **Cycle 11**: WP-4 completed, QA-008 completed. FIX-MED unblocked and assigned to Arch.
+> QA-008 found 3 new issues (ERR-047~049), absorbed into FIX-MED scope.
+> ERR-QG1 → CONDITIONAL. QA-009 created for final sign-off after FIX-MED.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| WP-4 | P0 | arch | Redis role clarification: redefine Redis as ephemeral cache with PG shadow writes. Update ADR-003, create ADR-016 (Redis Role Redefinition). Add degradation paths for Redis unavailability. Absorbs ERR-010, ERR-038. | — | 0208 |
-| FIX-MED | P1 | arch | MEDIUM/LOW issues batch (17 items): Zod v4 compat (ERR-015), countTokens async (ERR-016), TTFT target revision (ERR-017), Docker cold start qualifier (ERR-018), tsdown attribution (ERR-019), EmbeddingService signature (ERR-022), layer numbering (ERR-023), channel reconnection (ERR-042), streaming error handling (ERR-044), persona hot-reload (ERR-045), meta memory feedback (ERR-046), DI container completeness (ERR-034), credential redaction (ERR-032), default allowlist (ERR-031), security test cases (ERR-033), naming collision (ERR-004), dual embedding (ERR-005), context assembler I/O (ERR-006), mentions ambiguity (ERR-007), claude_reports gaps (ERR-008), InboundHandler (ERR-009). | WP-4 | 0208 |
-| QA-008 | P0 | quality | Quality gate re-verification: review all WP-1~7 outputs (ADR-001~021, plan Section 3.5, factual corrections). Re-assess 5 CONSTITUTION quality gates. Determine if ERR-QG1 can be fully resolved. | — | 0208 |
+| QA-009 | P1 | quality | Final quality gate sign-off: verify FIX-MED resolved all remaining MEDIUM/LOW issues. Confirm all 5 CONSTITUTION quality gates PASS. Approve plan finalization. | FIX-MED | 0208 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| WP-4 | arch | 0208T0830 | 0208T0930 |
-| QA-008 | quality | 0208T0830 | 0208T0930 |
+| FIX-MED | arch | 0208T1000 | 0208T1200 |
 
 ## Cancelled
 
@@ -69,3 +66,5 @@
 | WP-7 | arch | 0208T0830 | docs/adr/019-auth-strategy.md |
 | ADR-017 | arch | 0208T0830 | docs/adr/017-webchat-spa-framework.md |
 | ADR-018 | arch | 0208T0830 | docs/adr/018-token-counting-strategy.md |
+| WP-4 | arch | 0208T0930 | docs/adr/003-redis-working-memory.md, docs/plan/axel-project-plan.md (Redis PG-first, error handling) |
+| QA-008 | quality | 0208T0955 | Quality gate re-verification: 3 PASS, 2 CONDITIONAL PASS. 23 errors confirmed resolved. 3 new issues found. |

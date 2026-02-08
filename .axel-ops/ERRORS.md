@@ -2,22 +2,22 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 10**: WP-1~7 + ADR-017/018 completed (commit 15351d8). 23 errors resolved.
-> ERR-QG1 downgraded to PENDING — requires QA-008 re-verification of quality gates.
-> Open: 24 (2 HIGH, 12 MEDIUM, 5 LOW, 1 PENDING). Resolved: 23.
+> **Cycle 11**: WP-4 completed (commit 6466f1d). QA-008 completed. ERR-010 partially resolved, ERR-038 resolved.
+> QA-008 found 3 new issues (ERR-047~049). ERR-QG1 → CONDITIONAL (3 PASS, 2 CONDITIONAL PASS).
+> Open: 22 (1 HIGH, 13 MEDIUM, 5 LOW, 1 CONDITIONAL). Resolved: 25.
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
-| ERR-QG1 | **PENDING** | quality | 0208 | QUALITY GATE re-assessment needed. WP-1~7 resolved all 21 HIGH issues cited in original finding. Quality must re-verify all 5 gates via QA-008. Downgraded from CRITICAL. | QA-008 |
+| ERR-QG1 | **CONDITIONAL** | quality | 0208 | QUALITY GATE: 3 PASS (Completeness, Traceability, Sources), 2 CONDITIONAL PASS (Consistency — React→Svelte refs + ToolDefinition dup; Feasibility — TTFT/Docker qualifiers). Full PASS requires FIX-MED completion. | FIX-MED |
 | ERR-004 | MEDIUM | quality | 0207 | Memory layer naming collision with Turtle Stack layers | FIX-MED |
 | ERR-005 | MEDIUM | quality | 0207 | Dual embedding interface (LlmProvider.embed() vs EmbeddingService) | FIX-MED |
 | ERR-006 | MEDIUM | quality | 0207 | Context Assembler I/O injection pattern undocumented | FIX-MED |
 | ERR-007 | MEDIUM | quality | 0207 | channelMentions field ambiguity (distinct count vs sum) | FIX-MED |
 | ERR-008 | MEDIUM | quality | 0207 | claude_reports #08, #13, #21 missing Axel mappings | FIX-MED |
 | ERR-009 | LOW | quality | 0207 | InboundHandler type not defined in plan | FIX-MED |
-| ERR-010 | **HIGH** | quality | 0208 | Redis usage violates PG single DB principle (MISSION #2). | WP-4 |
+| ERR-010 | MEDIUM | quality | 0208 | Redis plan body (Section 4 Layer 2) not updated with ADR-003 shadow write/degradation details. ADR-003 updated by WP-4 but plan body incomplete. Downgraded from HIGH — conceptual issue resolved in ADR-003. | FIX-MED |
 | ERR-015 | MEDIUM | quality | 0208 | Zod v4 breaking API changes from v3. | FIX-MED |
 | ERR-016 | MEDIUM | quality | 0208 | countTokens() conflates sync and async. | FIX-MED |
 | ERR-017 | MEDIUM | quality | 0208 | TTFT '500ms 이내' not achievable as guarantee. | FIX-MED |
@@ -29,16 +29,19 @@
 | ERR-032 | LOW | quality | 0208 | No credential redaction spec for error logs. | FIX-MED |
 | ERR-033 | LOW | quality | 0208 | Security test cases missing. | FIX-MED |
 | ERR-034 | **HIGH** | quality | 0208 | DI container covers only 2 of ~15 injectable services. | FIX-MED |
-| ERR-038 | **HIGH** | quality | 0208 | Redis 5 critical functions with zero error handling. | WP-4 |
 | ERR-042 | MEDIUM | quality | 0208 | AxelChannel lacks reconnection lifecycle. | FIX-MED |
 | ERR-044 | MEDIUM | quality | 0208 | Streaming pipeline no error handling. | FIX-MED |
 | ERR-045 | MEDIUM | quality | 0208 | PersonaEngine hot-reload unspecified. | FIX-MED |
 | ERR-046 | LOW | quality | 0208 | Meta Memory feedback loop no mechanism. | FIX-MED |
+| ERR-047 | MEDIUM | quality | 0208 | Plan body references 'Vite + React' in 3 locations despite ADR-017 Svelte 5 decision. | FIX-MED |
+| ERR-048 | MEDIUM | quality | 0208 | ToolDefinition interface defined twice (Section 3.5 + Section 4 Layer 6) with signature differences. | FIX-MED |
+| ERR-049 | LOW | quality | 0208 | Gemini Flash ~300-500ms latency claim lacks research citation. | FIX-MED |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-038 | Redis 5 critical functions now have explicit error handling with circuit breaker + typed fallbacks. | WP-4 (arch) | 0208 |
 | ERR-QG2 | ADR-001~012 created. 12 confirmed ADRs now have formal files. | WP-1 (arch) | 0208 |
 | ERR-001 | IVFFlat→HNSW index strategy updated in plan. | WP-3 (arch) | 0208 |
 | ERR-002 | Zod MemoryConfigSchema decay parameters added. | WP-3 (arch) | 0208 |
