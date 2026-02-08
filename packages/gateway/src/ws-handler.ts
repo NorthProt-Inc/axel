@@ -4,6 +4,7 @@ import { generateRequestId, timingSafeEqual } from './http-utils.js';
 import type { GatewayConfig, GatewayDeps } from './types.js';
 
 const WS_AUTH_TIMEOUT_MS = 5_000;
+const MAX_WS_MESSAGE_BYTES = 65_536; // 64KB
 
 export interface AuthenticatedWebSocket extends WebSocket {
 	authenticated?: boolean;
@@ -21,6 +22,17 @@ export function setupWsAuth(
 	}, WS_AUTH_TIMEOUT_MS);
 
 	ws.on('message', (data: WebSocket.RawData) => {
+		const messageBytes = Buffer.isBuffer(data)
+			? data.length
+			: Array.isArray(data)
+				? data.reduce((sum, buf) => sum + buf.length, 0)
+				: data.byteLength;
+
+		if (messageBytes > MAX_WS_MESSAGE_BYTES) {
+			ws.close(1009, 'Message too big');
+			return;
+		}
+
 		ws.authenticated
 			? handleWsMessage(ws, data, config, deps)
 			: handleWsAuthMessage(ws, data, config);
@@ -118,11 +130,14 @@ function handleWsChatMessage(
 	}
 
 	deps
-		.handleMessage({ userId: 'gateway-user', channelId, content }, (event) => {
-			if (ws.readyState === ws.OPEN) {
-				ws.send(JSON.stringify(event));
-			}
-		})
+		.handleMessage(
+			{ userId: 'gateway-user', channelId, content, timestamp: Date.now() },
+			(event) => {
+				if (ws.readyState === ws.OPEN) {
+					ws.send(JSON.stringify(event));
+				}
+			},
+		)
 		.then((result) => {
 			if (ws.readyState === ws.OPEN) {
 				ws.send(

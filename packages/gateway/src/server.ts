@@ -154,10 +154,23 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 	}
 
+	function evictStaleBuckets(now: number, excludeIp: string): void {
+		const staleThreshold = now - RATE_LIMIT_WINDOW_MS * 2;
+		for (const [ip, ts] of rateLimitBuckets) {
+			if (ip === excludeIp) continue;
+			const latest = ts[ts.length - 1];
+			if (latest === undefined || latest < staleThreshold) {
+				rateLimitBuckets.delete(ip);
+			}
+		}
+	}
+
 	function checkRateLimit(req: http.IncomingMessage): boolean {
 		const clientIp = req.socket.remoteAddress ?? 'unknown';
 		const now = Date.now();
 		const windowStart = now - RATE_LIMIT_WINDOW_MS;
+
+		evictStaleBuckets(now, clientIp);
 
 		let timestamps = rateLimitBuckets.get(clientIp);
 		if (!timestamps) {
@@ -172,6 +185,10 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		if (timestamps.length >= config.rateLimitPerMinute) return false;
 		timestamps.push(now);
 		return true;
+	}
+
+	function getRateLimitBucketCount(): number {
+		return rateLimitBuckets.size;
 	}
 
 	function handleCors(req: http.IncomingMessage, res: http.ServerResponse): boolean {
@@ -253,6 +270,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			userId: 'gateway-user',
 			channelId: chatInput.channelId,
 			content: chatInput.content,
+			timestamp: Date.now(),
 		});
 
 		sendJson(res, 200, {
@@ -293,6 +311,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 					userId: 'gateway-user',
 					channelId: chatInput.channelId,
 					content: chatInput.content,
+					timestamp: Date.now(),
 				},
 				(event) => {
 					res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
@@ -317,5 +336,5 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		res.end();
 	}
 
-	return { start, stop };
+	return { start, stop, getRateLimitBucketCount };
 }

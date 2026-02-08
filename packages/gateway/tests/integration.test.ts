@@ -388,7 +388,8 @@ describe('INTEG-003: Gateway → Orchestrator Integration', () => {
 
 			// Verify handleMessage was called with timestamp
 			expect(handleMessage).toHaveBeenCalled();
-			const callArg = handleMessage.mock.calls[handleMessage.mock.calls.length - 1]![0] as Record<string, unknown>;
+			const lastCall = handleMessage.mock.calls[handleMessage.mock.calls.length - 1];
+			const callArg = lastCall?.[0] as Record<string, unknown>;
 			expect(callArg.timestamp).toBeDefined();
 			expect(typeof callArg.timestamp).toBe('number');
 			expect(callArg.timestamp as number).toBeGreaterThanOrEqual(before);

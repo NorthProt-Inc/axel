@@ -474,7 +474,7 @@ describe('Gateway Server', () => {
 			const after = Date.now();
 
 			expect(handleMessage).toHaveBeenCalledTimes(1);
-			const callArg = handleMessage.mock.calls[0]![0] as Record<string, unknown>;
+			const callArg = handleMessage.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(callArg.timestamp).toBeDefined();
 			expect(typeof callArg.timestamp).toBe('number');
 			expect(callArg.timestamp as number).toBeGreaterThanOrEqual(before);
@@ -502,7 +502,7 @@ describe('Gateway Server', () => {
 			const after = Date.now();
 
 			expect(handleMessage).toHaveBeenCalledTimes(1);
-			const callArg = handleMessage.mock.calls[0]![0] as Record<string, unknown>;
+			const callArg = handleMessage.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(callArg.timestamp).toBeDefined();
 			expect(typeof callArg.timestamp).toBe('number');
 			expect(callArg.timestamp as number).toBeGreaterThanOrEqual(before);

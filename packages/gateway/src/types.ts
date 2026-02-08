@@ -37,7 +37,12 @@ export interface MessageResult {
  * is forwarded to the caller for SSE/WS streaming.
  */
 export type HandleMessage = (
-	message: { readonly userId: string; readonly channelId: string; readonly content: string },
+	message: {
+		readonly userId: string;
+		readonly channelId: string;
+		readonly content: string;
+		readonly timestamp: number;
+	},
 	onEvent?: (event: MessageEvent) => void,
 ) => Promise<MessageResult>;
 
