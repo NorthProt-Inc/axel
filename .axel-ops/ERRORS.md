@@ -2,12 +2,15 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 48**: 0 open errors. FIX-INFRA-002/003 resolved QA-016 HIGH issues (bare catches, mutable state, symlink). Biome format error fixed by CTO (minor). All 508 tests pass.
+> **Cycle 54**: 3 open errors (all HIGH from AUDIT-004). FIX-GATEWAY-001 created to resolve.
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
+| ERR-066 | HIGH | AUD-065: Gateway WS auth uses query parameter token instead of ADR-019 first-message pattern. Token exposed in URL/server logs. | AUDIT-004 | 0208C54 |
+| ERR-067 | HIGH | AUD-066: rateLimitPerMinute config declared but NO rate limiting implemented in gateway. Plan spec requires rate limiting. | AUDIT-004 | 0208C54 |
+| ERR-068 | HIGH | AUD-067: No request body size limit in gateway. DoS vector. OpenAPI specifies maxLength 32000 for chat input. | AUDIT-004 | 0208C54 |
 
 ## Resolved
 

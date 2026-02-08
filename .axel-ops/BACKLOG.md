@@ -2,21 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 53**: Phase D Edge Sprint **93%** (14/15 done). EDGE-004 (Telegram, 23 tests) + EDGE-005 (Gateway, 23 tests) completed. **637 tests, 50 files** pass. QA-018 expanded + SYNC-006 expanded + AUDIT-004 created.
+> **Cycle 54**: Phase D Edge Sprint **95%** (16/18 done). QA-018 (CONDITIONAL PASS) + AUDIT-004 (3H 6M 5L) completed. FIX-GATEWAY-001 created for 3 HIGH. SYNC-006 in progress. **637 tests, 50 files** pass.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| QA-018 | P1 | quality | Phase D code review batch 2: EDGE-003 (Discord) + EDGE-004 (Telegram) + EDGE-005 (Gateway) + BOOTSTRAP-001 (DI). Verify TDD, §9, §10, §14, coverage targets (channels 75%+, gateway 80%+), ADR compliance (009/011/021). 637 tests. | EDGE-003, EDGE-004, EDGE-005, BOOTSTRAP-001 |
-| SYNC-006 | P1 | arch | PLAN_SYNC.md Phase D update: D.4 Telegram NOT_STARTED→IN_SYNC, D.5 Gateway NOT_STARTED→IN_SYNC, D.6 Bootstrap NOT_STARTED→IN_SYNC (map all to plan sections). | EDGE-004, EDGE-005, BOOTSTRAP-001 |
-| AUDIT-004 | P1 | audit | Phase D code audit: EDGE-003/004/005 + BOOTSTRAP-001. TDD, §9, §14, security (gateway auth, CORS, error redaction), package boundary. 637 tests. | EDGE-004, EDGE-005 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
+| SYNC-006 | arch | 0208C53 | C55 |
+| FIX-GATEWAY-001 | dev-edge | 0208C54 | C55 |
 
 ## Cancelled
 
@@ -124,3 +123,5 @@
 | BOOTSTRAP-001 | dev-edge | 0208C52 | DI container + lifecycle in apps/axel/src/. config.ts (Zod AxelConfigSchema), container.ts (~20 services), lifecycle.ts (4-phase shutdown), main.ts. 33 tests, 591 total. |
 | EDGE-004 | dev-edge | 0208C53 | Telegram Channel AxelChannel impl. grammy Bot API, polling, 4096 char splitting, typing indicator, streaming editMessageText. 23 tests, 97.66% stmt. 637 tests total. |
 | EDGE-005 | dev-edge | 0208C53 | Gateway HTTP+WS server. Node.js http + ws. /health, /api/v1/chat, /api/v1/chat/stream (SSE), /ws. Security: timing-safe Bearer, CORS, error redaction. 23 tests, 84.34% stmt. 637 tests total. |
+| QA-018 | quality | 0208C54 | Phase D code review batch 2: CONDITIONAL PASS. 0H 8M 6L. TDD PASS, §9 PASS, §14 PASS. Coverage: channels 94%>75%, gateway 84%>80%. |
+| AUDIT-004 | audit | 0208C54 | Phase D code audit: 3H 6M 5L. TDD PASS. §9 PASS. §14 PASS. HIGH: AUD-065 WS auth pattern, AUD-066 rate limiting, AUD-067 body size limit. |

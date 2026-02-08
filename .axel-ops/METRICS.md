@@ -2,27 +2,27 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 53
+## Current Cycle: 54
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 53 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 2 (SYNC-004 C46, PLAN-AMEND-001 C51 — both CTO override) | **Activate next** (SYNC-006) |
+| coord | — | 54 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 2 (SYNC-004 C46, PLAN-AMEND-001 C51 — both CTO override) | **In Progress** (SYNC-006, 1 cycle) |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | Idle — all CORE tasks complete |
 | dev-infra | 1 cycle | 9 (INFRA-001~005, COMMON-CB, FIX-INFRA-002/003/004) | 0 | Idle — all infra tasks complete |
-| dev-edge | 1.2 cycles | 6 (EDGE-001~005, BOOTSTRAP-001) | 0 | Idle — **ALL EDGE CODING COMPLETE** |
-| quality | 2 cycles | 4 (QA-011, QA-013, QA-016, QA-017) | 1 (QA-012, cancelled C39) | **Activate next** (QA-018) |
+| dev-edge | 1.2 cycles | 6 (EDGE-001~005, BOOTSTRAP-001) | 0 | **Activate next** (FIX-GATEWAY-001) |
+| quality | 1 cycle | 5 (QA-011, QA-013, QA-016, QA-017, QA-018) | 1 (QA-012, cancelled C39) | Idle — QA-018 done |
 | research | — | 0 | 0 | Idle |
 | devops | 1 cycle | 14 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004 + FIX-INFRA-001 + DEVOPS-005/006) | 0 | Idle — all devops tasks complete |
-| audit | 1 cycle | 2 (AUDIT-002, AUDIT-003) | 0 | **Activate next** (AUDIT-004: Phase D audit) |
+| audit | 1 cycle | 3 (AUDIT-002, AUDIT-003, AUDIT-004) | 0 | Idle — AUDIT-004 done |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 0 | 5 | OK |
+| Open Errors | 3 | 5 | OK (under threshold, FIX-GATEWAY-001 assigned) |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
@@ -46,7 +46,7 @@
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests. FIX-INFRA tasks carry to Phase D) |
-| D: Edge Sprint | **ACTIVE** | 47 | — | 93% (14/15 done: EDGE-001~005, BOOTSTRAP-001, FIX-INFRA-002/003/004, DEVOPS-005/006, QA-017, PLAN-AMEND-001, SYNC-005. Remaining: QA-018+SYNC-006+AUDIT-004) |
+| D: Edge Sprint | **ACTIVE** | 47 | — | 95% (16/18 done. QA-018+AUDIT-004 done C54. Remaining: SYNC-006 + FIX-GATEWAY-001) |
 | E: Integration | QUEUED | — | — | — |
 
 ## Cycle History (Last 10)
@@ -63,3 +63,4 @@
 | 51 | dev-edge, quality, coord | 4 (EDGE-003, QA-017, PLAN-AMEND-001, SYNC-005) | 0 | **4 TASKS DONE.** 558 tests. CTO override on PLAN-AMEND-001/SYNC-005 (arch 3 cycles stalled). Phase D **73%**. |
 | 52 | dev-edge, coord | 1 (BOOTSTRAP-001) | 0 | **BOOTSTRAP-001 DONE.** 591 tests. EDGE-004+EDGE-005 assigned parallel. Phase D **80%**. |
 | 53 | dev-edge, coord | 2 (EDGE-004, EDGE-005) | 0 | **ALL DEV CODING COMPLETE.** 637 tests, 50 files. Telegram 97.66%, Gateway 84.34%. QA-018+SYNC-006+AUDIT-004 queued. Phase D **93%**. |
+| 54 | quality, audit, coord | 2 (QA-018, AUDIT-004) | 3 (ERR-066/067/068 HIGH) | QA-018 CONDITIONAL PASS (0H 8M 6L). AUDIT-004: 3H 6M 5L (gateway security). FIX-GATEWAY-001 created. SYNC-006 in progress. Phase D **95%**. |
