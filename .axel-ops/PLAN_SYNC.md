@@ -12,14 +12,53 @@
 
 ## Phase A: Foundation
 
+### A.1 Root Scaffolding (SCAFFOLD-001~003, 006)
+
 | Plan Section | Layer | Code Location | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| — | — | `pnpm-workspace.yaml` | NOT_STARTED | — | DevOps scaffolding |
-| — | — | `tsconfig.base.json` | NOT_STARTED | — | DevOps scaffolding |
-| — | — | `biome.json` | NOT_STARTED | — | DevOps scaffolding |
-| — | — | `vitest.config.ts` | NOT_STARTED | — | DevOps scaffolding |
-| — | — | `docker/docker-compose.dev.yml` | NOT_STARTED | — | DevOps scaffolding |
-| — | — | `.github/workflows/ci.yml` | NOT_STARTED | — | DevOps scaffolding |
+| 3.3 Monorepo | TL0 | `pnpm-workspace.yaml` | NOT_STARTED | — | ADR-004. Workspace packages: `packages/*`, `apps/*`, `tools/*` (plan:202-276) |
+| 3.3 Monorepo | TL0 | `package.json` (root) | NOT_STARTED | — | ADR-004. Workspace scripts: `typecheck`, `test`, `lint`, `build` |
+| 3.3/TL0 tsconfig | TL0 | `tsconfig.base.json` | NOT_STARTED | — | ADR-001. strict:true, noUncheckedIndexedAccess, exactOptionalPropertyTypes, target ES2023, module NodeNext (plan:546-557) |
+| TL0 Biome | TL0 | `biome.json` | NOT_STARTED | — | ADR-007. Replaces ESLint+Prettier. Lint + format config (plan:541) |
+| 6.3 Test Infra | TL0 | `vitest.config.ts` (root) | NOT_STARTED | — | ADR-008. pool:"forks" for process isolation (plan:1790-1815) |
+| TL0 Docker | TL0 | `docker/docker-compose.dev.yml` | NOT_STARTED | — | ADR-002, ADR-003. PostgreSQL 17 + pgvector + Redis 7 (plan:268-271) |
+
+### A.2 Per-Package Config (SCAFFOLD-004~005)
+
+| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| 3.3 Monorepo | TL0 | `packages/core/package.json` | NOT_STARTED | — | No external I/O deps. Exports `types/`. (plan:210-219) |
+| 3.3 Monorepo | TL0 | `packages/core/tsconfig.json` | NOT_STARTED | — | extends tsconfig.base.json |
+| 3.3 Monorepo | TL0 | `packages/infra/package.json` | NOT_STARTED | — | May import `@axel/core/types` only (CONSTITUTION §9) |
+| 3.3 Monorepo | TL0 | `packages/infra/tsconfig.json` | NOT_STARTED | — | extends tsconfig.base.json |
+| 3.3 Monorepo | TL0 | `packages/channels/package.json` | NOT_STARTED | — | May import `@axel/core/types` only (CONSTITUTION §9) |
+| 3.3 Monorepo | TL0 | `packages/channels/tsconfig.json` | NOT_STARTED | — | extends tsconfig.base.json |
+| 3.3 Monorepo | TL0 | `packages/gateway/package.json` | NOT_STARTED | — | May import `@axel/core/types` only (CONSTITUTION §9) |
+| 3.3 Monorepo | TL0 | `packages/gateway/tsconfig.json` | NOT_STARTED | — | extends tsconfig.base.json |
+| 3.3 Monorepo | TL0 | `apps/axel/package.json` | NOT_STARTED | — | May import any `@axel/*` (CONSTITUTION §9) |
+| 3.3 Monorepo | TL0 | `apps/axel/tsconfig.json` | NOT_STARTED | — | extends tsconfig.base.json |
+| 6.3 Test Infra | TL0 | `packages/*/vitest.config.ts` | NOT_STARTED | — | ADR-008. Per-package test config |
+
+### A.3 CI Pipeline (SCAFFOLD-007)
+
+| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| 7/Phase 0 CI | TL0 | `.github/workflows/ci.yml` | NOT_STARTED | — | RES-005. Pipeline: lint → typecheck → test (plan:1860, CONSTITUTION §13) |
+
+### A.4 Plan-Spec Cross-References for DevOps
+
+Phase A scaffolding에서 DevOps Division이 참조해야 할 plan spec 상세:
+
+| Spec | Plan Location | Key Values |
+|---|---|---|
+| Workspace packages | plan:202-276 | `packages/{core,infra,channels,gateway}`, `apps/{axel,webchat}`, `tools/{migrate,seed,bench}` |
+| tsconfig strict options | plan:546-557 | strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes, ES2023, NodeNext |
+| Biome config | plan:541, ADR-007 | Single tool replacing ESLint+Prettier |
+| vitest pool | plan:1790-1815, ADR-008 | `pool: "forks"` for process isolation |
+| Docker dev services | plan:268-271, ADR-002, ADR-003 | PostgreSQL 17 + pgvector extension, Redis 7 |
+| Package boundary | CONSTITUTION §9 | core: no imports; infra/channels/gateway: `@axel/core/types` only; apps: any |
+| CI smoke tests | CONSTITUTION §13 | `pnpm install --frozen-lockfile && pnpm typecheck && pnpm test --run` |
+| Coverage targets | CONSTITUTION §8 | core 90%, infra 80%, channels 75%, gateway 80% |
 
 ## Phase B: Core Sprint
 
