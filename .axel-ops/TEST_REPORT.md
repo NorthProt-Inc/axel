@@ -1,28 +1,31 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08C50 (QA-017 Phase D EDGE-001/002 review)
+> Last Updated: 2026-02-08C54 (QA-018 Phase D EDGE-003/004/005 + BOOTSTRAP-001 review)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 529 (512 runnable, 17 blocked: 16 zod + 1 suite fail) |
-| Passing | 512 |
-| Failing | 17 (1 suite: tool-registry.test.ts — zod dependency resolve failure, worktree sync issue) |
+| Total Tests | 637 (main branch: 637/637 pass; worktree: 525/637 — 7 suites blocked by dep resolve) |
+| Passing | 637 (main branch verified by CTO C53) |
+| Failing | 0 (main branch); 112 blocked in worktree (grammy, discord.js, ws, zod dep resolve) |
 | Coverage (core) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
 | Coverage (infra, reported) | 95%+ stmts (cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42%) |
-| Coverage (channels, reported) | 95.95% stmts / 100% branch / 90.9% funcs / 95.95% lines |
-| Phase | D: Edge Sprint (47% — EDGE-001/002 done, QA-017 DONE, EDGE-003 in progress) |
+| Coverage (channels, reported) | 94.16% stmts / 92.57% branch / 91.66% funcs / 94.16% lines (73 tests) |
+| Coverage (gateway, reported) | 84.34% stmts / 88.46% branch / 94.73% funcs / 84.34% lines (23 tests) |
+| Coverage (apps/axel, reported) | 86.95% stmts / 87.71% branch / 37.93% func / 86.95% lines (33 tests) |
+| Phase | D: Edge Sprint (93% — ALL DEV CODING COMPLETE, assurance tasks remaining) |
 
 ## Per-Package Status
 
 | Package | Tests | Pass | Fail | Coverage | Target | Gate |
 |---------|-------|------|------|----------|--------|------|
 | `packages/core/` | 354 | 354 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
-| `packages/infra/` | 154 | 137 | 17 | 95%+ stmts (reported) | 80% | **CONDITIONAL PASS** (zod worktree sync) |
-| `packages/channels/` | 21 | 21 | 0 | 95.95% stmts, 100% branch, 90.9% func | 75% | **PASS** |
-| `packages/gateway/` | 0 | 0 | 0 | — | 80% | Pending Phase D |
+| `packages/infra/` | 154 | 154 | 0 | 95%+ stmts (reported) | 80% | **PASS** (FIX-INFRA-001 resolved zod) |
+| `packages/channels/` | 73 | 73 | 0 | 94.16% stmts, 92.57% branch | 75% | **PASS** |
+| `packages/gateway/` | 23 | 23 | 0 | 84.34% stmts, 88.46% branch | 80% | **PASS** |
+| `apps/axel/` | 33 | 33 | 0 | 86.95% stmts, 87.71% branch | — | **PASS** (no coverage target defined) |
 
 ### Infra Package Coverage Breakdown (dev-infra reported C44)
 
@@ -95,8 +98,21 @@ All INFRA tasks follow TDD protocol: test commits (RED) precede source commits (
 |-------|------|----------|------------|--------------|-------|-----------|
 | 48 | EDGE-001 | dev-edge | `01afaad` (07:18:37) | `08feb6a` (07:18:47) | +10s | **YES** |
 | 49 | EDGE-002 | dev-edge | `0ac817f` (07:30:31) | `32d2ba0` (07:31:07) | +36s | **YES** |
+| 51 | EDGE-003 | dev-edge | `e2b7f00` (08:24:xx) | `ee1bb57` (08:24:xx) | RED→GREEN | **YES** |
+| 52 | BOOTSTRAP-001 | dev-edge | `8b93e58` (08:36:xx) | `16b0131` (08:36:xx) | RED→GREEN | **YES** |
+| 53 | EDGE-004 | dev-edge | `95efb00` (08:53:xx) | `149a144` (08:53:xx) | RED→GREEN | **YES** |
+| 53 | EDGE-005 | dev-edge | `78240ed` (08:53:xx) | `d168703` (08:53:xx) | RED→GREEN | **YES** |
 
-All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN). EDGE-002 has additional REFACTOR commits (f398d9a, 3aa50a6, 62a34ab) after GREEN — correct TDD cycle.
+All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN). EDGE-002 has additional REFACTOR commits (f398d9a, 3aa50a6, 62a34ab) after GREEN — correct TDD cycle. EDGE-003 has REFACTOR commits (48909bf). BOOTSTRAP-001 has REFACTOR commit (451e41b).
+
+## CONSTITUTION Compliance (QA-018: Phase D EDGE-003/004/005 + BOOTSTRAP-001)
+
+| Rule | Check | Result |
+|------|-------|--------|
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** (all 4 tasks: RED commit precedes GREEN commit in git log) |
+| Rule 9 (Package Boundary) | channels→core/types only; gateway→core/types only; apps/axel→core/*+infra (allowed) | **PASS** — channels imports only `@axel/core/types`. gateway imports only `@axel/core/types`. apps/axel imports `@axel/core/{types,context,memory,orchestrator}` + `@axel/infra` (permitted per §9 for apps/*). |
+| Rule 10 (Test Gate) | All tests pass, coverage targets met, Biome clean, tsc clean | **CONDITIONAL PASS** — 637 tests pass on main (CTO verified). Worktree has dep resolve issues (grammy/discord.js/ws/zod). Biome: 0 errors, 117 warnings (all `any` in test mocks). tsc: clean (0 errors). Coverage: channels 94%>75%, gateway 84%>80%. |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** (max: server.ts 364 lines, discord-channel.ts 302 lines. All under 400.) |
 
 ## CONSTITUTION Compliance (QA-017: Phase D EDGE-001/002)
 
@@ -129,6 +145,7 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 54 | quality (QA-018) | all | 525 pass, 7 suites fail (dep resolve) | 1.26s | div/quality worktree. grammy/discord.js/ws/zod dep resolve failures. Main branch: 637/637 pass (CTO verified). Biome: 0 errors/117 warn. tsc: clean. |
 | 51 | quality (proactive) | all | 512 pass, 17 fail (1 suite) | 1.13s | div/quality worktree. FIX-INFRA-004 verified: 0 relative core imports remain. zod resolve same. |
 | 50 | quality (QA-017) | all | 512 pass, 17 fail (1 suite) | 1.06s | div/quality worktree. zod resolve failure (infra/mcp). EDGE files: 45 tests PASS. Biome: 0 errors on EDGE files. tsc: clean. |
 | 46 | quality (QA-016 verify) | core+infra | 459 pass, 16 fail (1 suite) | 1.03s | Independent re-verification on div/quality. Same result as C44. tsc: clean. Biome: 0 errors/114 warn. |
@@ -141,6 +158,48 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | 35 | quality (QA-012) | core | 121 pass, 0 fail | 483ms | Biome: 0 warnings. tsc: clean. |
 | 34 | dev-core (CORE-002+005) | core | 121 pass, 0 fail | — | Reported by dev-core |
 | 33 | dev-core (CORE-001) | core | 55 pass, 0 fail | — | Domain types first pass |
+
+## QA-018 Code Review Findings (Phase D batch 2: EDGE-003 Discord + EDGE-004 Telegram + EDGE-005 Gateway + BOOTSTRAP-001 DI)
+
+### Issues Found: 0 CRITICAL, 0 HIGH, 8 MEDIUM, 6 LOW
+
+| # | Sev | Perspective | Location | Description | Fix |
+|---|-----|-------------|----------|-------------|-----|
+| 1 | MEDIUM | P7: DRY | channels/src/discord+telegram | splitMessage() duplicated identically in discord-channel.ts:290 and telegram-channel.ts:216. StreamingState types also near-identical. | Extract to channels/src/common/utils.ts |
+| 2 | MEDIUM | P3: Security | gateway/src/server.ts:359-363 | timingSafeEqual() short-circuits on length mismatch — reveals token length via timing. | Hash both inputs (SHA-256) before comparison, or pad shorter string. |
+| 3 | MEDIUM | P3: Security | gateway/src/server.ts:186 | WS auth token in query param (/ws?token=XXX) — logged in access logs, proxy logs. | Document as Phase 0 limitation per ADR-019. Phase 2: first-message auth or Sec-WebSocket-Protocol header. |
+| 4 | MEDIUM | P4: Reliability | gateway/src/server.ts:104-106 | HTTP body collection has no size limit — OOM risk from malicious unbounded POST. | Add MAX_BODY_SIZE (e.g., 1MB), abort with 413 if exceeded. |
+| 5 | MEDIUM | P1: Design | gateway/src/server.ts:12 | rateLimitPerMinute defined in config but never implemented. No rate limiting logic exists. | Implement per-IP sliding window rate limiter, or remove field and document as Phase 2. |
+| 6 | MEDIUM | P1: Design | apps/axel/src/container.ts:109-117 | EstimateTokenCounter ceil(text.length/4) underestimates non-ASCII (Korean/CJK) tokens by ~2.6x. | Add locale-aware heuristic or document English-only limitation. |
+| 7 | MEDIUM | P1: Design | apps/axel/src/container.ts:126-164 | MemoryContextDataProvider has 4 stub methods returning empty arrays. Context assembly produces incomplete context (4/8 slots empty). | Document stubs; create follow-up task for full adapter logic. Already noted in code comment — acceptable for Phase D. |
+| 8 | MEDIUM | P1: Design | apps/axel/src/lifecycle.ts:23 | Module-level startTime captures time at import, not at server start. Uptime inflated in test scenarios. | Accept startTime as parameter to aggregateHealth(). |
+| 9 | LOW | P6: Dead Code | channels/src/discord/discord-channel.ts:207-215 | addReaction() is a stub that voids its params. | Add @todo TSDoc annotation. |
+| 10 | LOW | P1: Design | channels/src/discord/discord-channel.ts:69 | Default onError is silent no-op (same pattern as CLI, QA-017 #3). Consistent DI design — caller provides handler. | Document in AxelChannel interface contract. |
+| 11 | LOW | P4: Reliability | channels/src/telegram/telegram-channel.ts:150 | userId defaults to '' when ctx.from is undefined. Empty userId may cause downstream issues (session router). | Guard: if ctx.from undefined, skip message. |
+| 12 | LOW | P1: Design | apps/axel/src/container.ts:217 | Unsafe cast 'as Parameters<typeof ...>' for Anthropic client. Type mismatch between ContainerDeps and actual SDK. | Define minimal AnthropicClient interface in ContainerDeps. |
+| 13 | LOW | P1: Design | apps/axel/src/main.ts:48 | gracefulShutdown() receives channels: [] — no channels stopped during shutdown. | Pass active channels once channel start() is wired in bootstrap(). |
+| 14 | LOW | P7: DRY | apps/axel/src/container.ts:31+lifecycle.ts:4 | HealthCheckTarget interface duplicated identically in both files. | Define in lifecycle.ts and import from container.ts. |
+
+### 7-Perspective Summary
+
+| Perspective | Finding |
+|-------------|---------|
+| 1. Design Quality | **Very Good.** Discord/Telegram channels follow clean AxelChannel pattern — DI-friendly constructors, streaming via message edit, reconnection tracking (Discord). Gateway uses functional factory pattern (createGatewayServer) with closure — clean separation of config/deps/routes. DI container correctly wires ~20 services with no DI framework. 2 design debt items: EstimateTokenCounter locale-awareness and stub ContextDataProvider methods. |
+| 2. Complexity & Readability | **Very Good.** All files well within 400-line limit (max: server.ts 364 lines). Streaming logic extracted into helper functions (handleOverflow, throttledEdit, finalizeStream). Gateway routes table is clean and declarative. Config schema (Zod) is well-structured with clear defaults. No deep nesting (max 3 levels). |
+| 3. Security | **2 MEDIUM issues found.** (1) timingSafeEqual length leak — low practical risk for static Bearer tokens but should be fixed. (2) WS query param token exposure — acceptable Phase 0 per ADR-019 but must be upgraded in Phase 2. CORS properly validated. Error redaction correctly ENV-aware (dev vs production). |
+| 4. Bugs & Reliability | **1 MEDIUM + 1 LOW.** (1) No HTTP body size limit — real OOM risk. (2) Telegram userId empty string on undefined ctx.from. No crash bugs. Graceful shutdown correctly follows 4-phase ADR-021 pattern with error recovery at each phase. |
+| 5. Changeability | **Very Good.** Adding new channels follows established pattern. Adding new gateway routes requires only adding to routes table. DI container is extensible — add new service, add health check target. Config schema is additive (new fields with defaults). |
+| 6. Dead Code | **1 LOW.** addReaction() stub in Discord channel. All other exports used. No commented-out code. |
+| 7. DRY | **2 issues.** (1) splitMessage() duplicated across Discord+Telegram. (2) HealthCheckTarget duplicated in container.ts+lifecycle.ts. Both easily fixable. |
+
+### ADR Compliance
+
+| ADR | Check | Result |
+|-----|-------|--------|
+| ADR-009 (Channel Architecture) | AxelChannel interface compliance for Discord/Telegram | **PASS** — both implement full interface with capabilities, lifecycle, streaming. |
+| ADR-011 (Error Handling) | Error redaction in gateway responses | **PASS** — sendError() uses generic message in production, detail in development. |
+| ADR-019 (Auth Strategy) | Static Bearer token Phase 0 | **PASS** — timing-safe comparison, WS query param auth (Phase 0 documented limitation). |
+| ADR-021 (Resilience) | Graceful shutdown, reconnection | **PASS** — 4-phase shutdown in lifecycle.ts, Discord reconnection tracking with degraded health state. |
 
 ## QA-017 Code Review Findings (Phase D: EDGE-001 channel types + EDGE-002 CLI channel)
 
@@ -330,3 +389,4 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | **QA-013 FINAL** | **41** | **Phase B complete — 330 tests smoke test on merged main** | **11M 10L total** | **ALL CONSTITUTION gates PASS, READY FOR PHASE B CLOSURE** |
 | **QA-016** | **44** | **Phase C INFRA code review — db, cache, embedding, llm, mcp, common (18 src, 14 test files)** | **2H 7M 4L** | **CONDITIONAL PASS** (zod dep fix needed for full PASS) |
 | **QA-017** | **50** | **Phase D EDGE code review — EDGE-001 (channel types) + EDGE-002 (CLI channel) (2 src, 2 test files)** | **0H 3M 3L** | **PASS** — TDD, §9, §10, §14 all PASS. Excellent design quality. |
+| **QA-018** | **54** | **Phase D code review batch 2 — EDGE-003 (Discord) + EDGE-004 (Telegram) + EDGE-005 (Gateway) + BOOTSTRAP-001 (DI) (7 src, 7 test files)** | **0H 8M 6L** | **CONDITIONAL PASS** — TDD PASS, §9 PASS, §10 CONDITIONAL (worktree dep sync), §14 PASS. 2 security items (timing-safe length leak, WS token in query param). Coverage: channels 94%>75%, gateway 84%>80%. |
