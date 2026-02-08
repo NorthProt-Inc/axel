@@ -2,20 +2,20 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 31
+## Current Cycle: 32
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 31 cycles | 0 | Active |
-| arch | 1 cycle | 2 (FIX-AUDIT, FIX-PRE-IMPL) | 0 | Idle |
-| dev-core | — | 0 | 0 | Pending Phase B |
+| coord | — | 32 cycles | 0 | Active |
+| arch | 1 cycle | 2 (FIX-AUDIT, FIX-PRE-IMPL) | 0 | Active (SYNC-001) |
+| dev-core | — | 0 | 0 | Active (CORE-001) |
 | dev-infra | — | 0 | 0 | Pending Phase C |
 | dev-edge | — | 0 | 0 | Pending Phase D |
 | quality | 1 cycle | 1 (QA-011) | 0 | Idle |
 | research | — | 0 | 0 | Idle |
-| devops | 3 cycles | 7 (SCAFFOLD-001~006 + FIX) | 0 | Idle |
+| devops | 3 cycles | 7 (SCAFFOLD-001~006 + FIX) | 0 | Active (SCAFFOLD-007) |
 | audit | 1 cycle | 1 (AUDIT-002) | 0 | Idle |
 
 ## Bottleneck Indicators
@@ -43,7 +43,7 @@
 |-------|--------|-------------|-----------|------------|
 | Plan Closure | **DONE** | 17 | 21 | 100% |
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
-| B: Core Sprint | **ACTIVE** | 31 | — | 0% (BACKLOG created: CORE-001~006, QA-012) |
+| B: Core Sprint | **ACTIVE** | 32 | — | 0% (SYNC-001+CORE-001+SCAFFOLD-007 in progress) |
 | C: Infra Sprint | QUEUED | 43 | 57 | — |
 | D: Edge Sprint | QUEUED | 58 | 77 | — |
 | E: Integration | QUEUED | 78 | 92 | — |
@@ -52,10 +52,7 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 19 | quality | 0 (QA-011 in progress) | 0 new | QA-011 awaiting results. No new Division output. |
-| 20 | quality | 1 (QA-011) | 3 new (ERR-060~062) | PLAN CLOSURE APPROVED. 3 MEDIUM consistency items. FIX-PRE-IMPL assigned to Arch. |
-| 21 | arch | 1 (FIX-PRE-IMPL) | 0 new, 3 resolved | PLAN CLOSURE 100%. All queues empty. 0 open errors. Awaiting Phase A kickoff. |
-| 22 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
+| 23 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
 | 23 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
 | 24 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
 | 25 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
@@ -64,4 +61,5 @@
 | 28 | devops, arch | 0 (in progress) | 0 | **PHASE A KICKOFF.** Autonomous phase transition. SCAFFOLD-001/002/003 assigned to DevOps. SYNC-001 queued for Arch. |
 | 29 | devops, arch | 0 (in progress) | 0 | Phase A in progress. SCAFFOLD-006 additionally assigned. No Division reports. No drift. |
 | 30 | devops | 6 (unmerged) | 2 new (ENV-001 P0, ERR-063 MED) | SCAFFOLD-001~006 complete on div/devops. Merge reverted by human. ENV-001: Node.js 18→22, pnpm missing. ERR-063: ownership violation. |
-| 31 | coord | 7 (SCAFFOLD-001~006 + FIX) | 0 new, 2 resolved | **PHASE A COMPLETE.** ENV-001 resolved (Node.js 22.13.1, pnpm 9.15.4). ERR-063 resolved. Milestone verified: install+typecheck+test+lint all pass. |
+| 31 | coord | 7 (SCAFFOLD-001~006 + FIX) | 0 new, 2 resolved | **PHASE A COMPLETE.** ENV-001 resolved. ERR-063 resolved. Milestone verified. |
+| 32 | arch, dev-core, devops | 0 (3 in progress) | 0 | **PHASE B ACTIVE.** SYNC-001, CORE-001, SCAFFOLD-007 assigned. CORE-001 SYNC-001 dep relaxed. |

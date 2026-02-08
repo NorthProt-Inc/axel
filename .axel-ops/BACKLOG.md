@@ -2,15 +2,12 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 31**: Phase A COMPLETE. Phase B (Core Sprint) BACKLOG created. Dev-Core activated.
+> **Cycle 32**: Phase B (Core Sprint) ACTIVE. SYNC-001 + CORE-001 + SCAFFOLD-007 in progress.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| SCAFFOLD-007 | P2 | devops | Create .github/workflows/ci.yml (lint → typecheck → test) | — | 0208C28 |
-| SYNC-001 | P1 | arch | Update PLAN_SYNC.md with Phase B interface mappings + contracts | — | 0208C28 |
-| CORE-001 | P0 | dev-core | Core domain types: AxelMessage, Conversation, Session, Memory, Tool types (plan §3.5). TDD: tests first. | SYNC-001 | 0208C31 |
 | CORE-002 | P0 | dev-core | Adaptive Decay engine: exponential decay, access boost, consolidation threshold (ADR-015). TDD. | CORE-001 | 0208C31 |
 | CORE-003 | P1 | dev-core | Memory Layers: 6-layer architecture M0-M5 interfaces + in-memory stubs (ADR-013). TDD. | CORE-001 | 0208C31 |
 | CORE-004 | P1 | dev-core | Context Assembly: context window builder, token budget allocation (plan §4.4). TDD. | CORE-001, CORE-003 | 0208C31 |
@@ -22,6 +19,9 @@
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
+| SYNC-001 | arch | 0208C32 | C32 |
+| CORE-001 | dev-core | 0208C32 | C33 |
+| SCAFFOLD-007 | devops | 0208C32 | C33 |
 
 ## Cancelled
 
