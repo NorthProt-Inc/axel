@@ -277,6 +277,8 @@ if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
 fi
 
 # ── Phase 4: Push (CTO only) ──
-git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
+# DISABLED: GitHub account suspended. Re-enable when Mark confirms recovery.
+# git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
+log "PUSH SKIPPED — GitHub suspended (human directive)"
 
 log "CYCLE $CYCLE_ID COMPLETE"
