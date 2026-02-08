@@ -26,6 +26,17 @@ export type { MemoryEngine, MemoryStats } from './engine.js';
 // Common types
 export type { TokenUsage } from './common.js';
 
+// Channel types
+export type {
+	AxelChannel,
+	ChannelCapabilities,
+	InboundHandler,
+	InboundMessage,
+	MediaAttachment,
+	OutboundMessage,
+	PresenceStatus,
+} from './channel.js';
+
 // Error classes (runtime values — must use `export` not `export type`)
 export {
 	AxelError,
