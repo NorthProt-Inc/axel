@@ -65,6 +65,8 @@ File: `.github/workflows/ci.yml`
 | `@axel/infra` | @anthropic-ai/sdk@^0.74.0 | ✅ ADDED (C42) |
 | `@axel/infra` | @google/generative-ai@^0.24.1 | ✅ ADDED (C42) |
 | `@axel/infra` | @types/pg@^8.16.0, testcontainers@^11.11.0 | ✅ ADDED (C42, devDeps) |
+| `@axel/infra` | @testcontainers/postgresql@^11.11.0 | ✅ ADDED (C47, FIX-INFRA-001) |
+| `@axel/infra` | zod@^4.3.6 | ✅ RESOLVED (C47 — symlink regenerated via pnpm install) |
 
 ## Subpath Exports (@axel/core)
 
@@ -77,7 +79,13 @@ File: `.github/workflows/ci.yml`
 | `@axel/core/persona` | `./src/persona/index.ts` | ✅ CONFIGURED (C44) |
 | `@axel/core/orchestrator` | `./src/orchestrator/index.ts` | ✅ CONFIGURED (C44) |
 
-**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 419 tests pass, typecheck+lint clean.
+**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 475 tests pass, typecheck+lint clean.
+
+## Known Issues (Resolved)
+
+| Issue | Cycle | Resolution |
+|-------|-------|-----------|
+| ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
 
 ## Release History
 

@@ -7,7 +7,7 @@
  * Environment variables are set for each container to allow test code to connect.
  */
 
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from 'testcontainers';
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 import { afterAll, beforeAll } from 'vitest';
 
