@@ -10,6 +10,7 @@ import {
 } from './http-utils.js';
 import { createResourceHandlers } from './route-handlers.js';
 import type { GatewayConfig, GatewayDeps, Route } from './types.js';
+import { createWebhookHandlers } from './webhook-handlers.js';
 import { type AuthenticatedWebSocket, setupWsAuth } from './ws-handler.js';
 
 const MAX_BODY_BYTES = 32_768; // 32KB
@@ -23,6 +24,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	const rateLimitBuckets = new Map<string, number[]>();
 
 	const rh = createResourceHandlers(deps);
+	const wh = createWebhookHandlers(config, deps);
 
 	const routes: Route[] = [
 		{ method: 'GET', path: '/health', requiresAuth: false, handler: handleHealth },
@@ -54,6 +56,18 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			path: '/api/v1/tools/execute',
 			requiresAuth: true,
 			handler: rh.handleToolExecute,
+		},
+		{
+			method: 'POST',
+			path: '/webhooks/telegram',
+			requiresAuth: false,
+			handler: wh.handleTelegramWebhook,
+		},
+		{
+			method: 'POST',
+			path: '/webhooks/discord',
+			requiresAuth: false,
+			handler: wh.handleDiscordWebhook,
 		},
 	];
 

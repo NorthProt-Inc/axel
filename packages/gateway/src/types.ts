@@ -8,6 +8,8 @@ export interface GatewayConfig {
 	readonly env: 'development' | 'production' | 'test';
 	readonly corsOrigins: readonly string[];
 	readonly rateLimitPerMinute: number;
+	readonly telegramWebhookSecret?: string;
+	readonly discordPublicKey?: string;
 }
 
 /** Event emitted during streaming message processing */
