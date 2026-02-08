@@ -20,8 +20,6 @@ export interface ShutdownableContainer {
 	readonly pgPool: { end(): Promise<void> };
 }
 
-const startTime = Date.now();
-
 /**
  * Aggregate health checks from all components.
  *
@@ -29,9 +27,13 @@ const startTime = Date.now();
  * - All healthy → system healthy
  * - Any unhealthy → system unhealthy
  * - Any degraded (none unhealthy) → system degraded
+ *
+ * @param targets - Components to check
+ * @param startTime - Application start timestamp (ms). Defaults to now.
  */
 export async function aggregateHealth(
 	targets: readonly HealthCheckTarget[],
+	startTime: number = Date.now(),
 ): Promise<HealthStatus> {
 	const checks: Record<string, ComponentHealth> = {};
 	let worstState: HealthState = 'healthy';

@@ -8,6 +8,7 @@ import type {
 } from '@axel/core/types';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 import type { Message } from 'discord.js';
+import { splitMessage } from '../utils/split-message.js';
 
 /** Sendable channel subset — excludes PartialGroupDMChannel (no send method) */
 interface SendableChannel {
@@ -285,18 +286,4 @@ interface StreamingState {
 
 function createStreamingState(): StreamingState {
 	return { accumulated: '', sentMessage: null, lastEditTime: 0 };
-}
-
-function splitMessage(content: string, maxLength: number): string[] {
-	if (content.length <= maxLength) {
-		return [content];
-	}
-
-	const chunks: string[] = [];
-	let remaining = content;
-	while (remaining.length > 0) {
-		chunks.push(remaining.slice(0, maxLength));
-		remaining = remaining.slice(maxLength);
-	}
-	return chunks;
 }

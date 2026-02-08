@@ -10,7 +10,6 @@ import type {
 } from '@axel/core/memory';
 import type { LlmProvider, SessionStore, ToolExecutor } from '@axel/core/orchestrator';
 import { SessionRouter } from '@axel/core/orchestrator';
-import type { ComponentHealth } from '@axel/core/types';
 import {
 	AnthropicLlmProvider,
 	AxelPgPool,
@@ -26,12 +25,9 @@ import {
 	RedisWorkingMemory,
 	ToolRegistry,
 } from '@axel/infra';
+import type { HealthCheckTarget } from './lifecycle.js';
 
-/** Health check target for startup/runtime monitoring */
-export interface HealthCheckTarget {
-	readonly name: string;
-	readonly check: () => Promise<ComponentHealth>;
-}
+export type { HealthCheckTarget };
 
 /** External dependencies injected into the container builder */
 export interface ContainerDeps {
@@ -69,10 +65,38 @@ export interface ContainerDeps {
 		quit(): Promise<string>;
 	};
 	readonly anthropicClient: {
-		messages: { create: (...args: unknown[]) => unknown };
+		messages: {
+			create(params: Record<string, unknown>): AsyncIterable<{
+				readonly type: string;
+				readonly index?: number;
+				readonly delta?: {
+					readonly type: string;
+					readonly text?: string;
+					readonly thinking?: string;
+					readonly partial_json?: string;
+				};
+				readonly content_block?: {
+					readonly type: string;
+					readonly id?: string;
+					readonly name?: string;
+				};
+			}>;
+		};
 	};
 	readonly googleClient: {
-		generateContentStream: (...args: unknown[]) => unknown;
+		getGenerativeModel(config: { model: string }): {
+			generateContentStream(params: Record<string, unknown>): Promise<{
+				stream: AsyncIterable<{
+					readonly candidates?: readonly {
+						readonly content: {
+							readonly parts: readonly Record<string, unknown>[];
+							readonly role: string;
+						};
+						readonly finishReason?: string;
+					}[];
+				}>;
+			}>;
+		};
 	};
 	readonly embeddingClient: {
 		embedContent(params: { content: { parts: { text: string }[] }; taskType: string }): Promise<{
@@ -214,13 +238,10 @@ export function createContainer(deps: ContainerDeps): Container {
 
 	// LLM providers (ADR-020)
 	const anthropicProvider = new AnthropicLlmProvider(
-		deps.anthropicClient as Parameters<typeof AnthropicLlmProvider.prototype.constructor>[0],
+		deps.anthropicClient,
 		DEFAULT_ANTHROPIC_CONFIG,
 	);
-	const googleProvider = new GoogleLlmProvider(
-		deps.googleClient as Parameters<typeof GoogleLlmProvider.prototype.constructor>[0],
-		DEFAULT_GOOGLE_CONFIG,
-	);
+	const googleProvider = new GoogleLlmProvider(deps.googleClient, DEFAULT_GOOGLE_CONFIG);
 
 	// Embedding service (ADR-016)
 	const embeddingService = new GeminiEmbeddingService(
