@@ -1,7 +1,7 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08 Cycle 39 (QA-015-PROACTIVE)
+> Last Updated: 2026-02-08 Cycle 39 (QA-015-PROACTIVE, smoke test verified)
 
 ## Summary
 
@@ -74,7 +74,8 @@ All 6 completed CORE tasks follow TDD protocol: test commits (RED) precede sourc
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
-| 39 | quality (QA-015-PROACTIVE) | core | 330 pass, 0 fail | — | CORE-006 proactive review |
+| 39 | quality (smoke test) | core | 241 pass, 0 fail | 624ms | main branch smoke: typecheck+lint+test PASS |
+| 39 | quality (QA-015-PROACTIVE) | core | 330 pass, 0 fail | — | CORE-006 proactive review (div/dev-core) |
 | 38 | quality (QA-014-PROACTIVE) | core | 289 pass, 0 fail | — | CORE-004 proactive review |
 | 36 | quality (QA-013) | core | 241 pass, 0 fail | 583ms | Biome: 0 warnings. tsc: clean. |
 | 35 | quality (QA-012) | core | 121 pass, 0 fail | 483ms | Biome: 0 warnings. tsc: clean. |
