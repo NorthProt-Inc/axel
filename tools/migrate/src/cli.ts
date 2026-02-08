@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-import { Client } from "pg";
-import { Migrator } from "./migrator.js";
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Client } from 'pg';
+import { Migrator } from './migrator.js';
 
 async function main() {
 	const command = process.argv[2];
 	const arg = process.argv[3];
 
 	const connectionString =
-		process.env["DATABASE_URL"] ?? "postgresql://postgres:postgres@localhost:5432/axel_dev";
+		process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/axel_dev';
 
 	const client = new Client({ connectionString });
 	await client.connect();
@@ -17,14 +17,14 @@ async function main() {
 	// Resolve migrations directory relative to this file
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = dirname(__filename);
-	const migrationsDir = join(__dirname, "../migrations");
+	const migrationsDir = join(__dirname, '../migrations');
 
 	const migrator = new Migrator(client, migrationsDir);
 	await migrator.initialize();
 
 	try {
 		switch (command) {
-			case "up":
+			case 'up':
 				if (arg) {
 					const version = Number.parseInt(arg, 10);
 					await migrator.up(version);
@@ -33,17 +33,17 @@ async function main() {
 				}
 				break;
 
-			case "down":
+			case 'down':
 				if (arg) {
 					const version = Number.parseInt(arg, 10);
 					await migrator.down(version);
 				} else {
-					console.error("Please specify a migration version to rollback");
+					console.error('Please specify a migration version to rollback');
 					process.exit(1);
 				}
 				break;
 
-			case "status": {
+			case 'status': {
 				const applied = await migrator.getAppliedMigrations();
 				const pending = await migrator.getPendingMigrations();
 
@@ -60,10 +60,10 @@ async function main() {
 			}
 
 			default:
-				console.log("Usage:");
-				console.log("  axel-migrate up [version]      - Apply migrations");
-				console.log("  axel-migrate down <version>    - Rollback migration");
-				console.log("  axel-migrate status            - Show migration status");
+				console.log('Usage:');
+				console.log('  axel-migrate up [version]      - Apply migrations');
+				console.log('  axel-migrate down <version>    - Rollback migration');
+				console.log('  axel-migrate status            - Show migration status');
 				process.exit(1);
 		}
 	} finally {
@@ -72,6 +72,6 @@ async function main() {
 }
 
 main().catch((error) => {
-	console.error("Migration error:", error);
+	console.error('Migration error:', error);
 	process.exit(1);
 });

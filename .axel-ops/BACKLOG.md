@@ -2,33 +2,32 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 56**: **PHASE E: INTEGRATION KICKOFF.** Phase D complete (646 tests, 0 errors). 12 Phase E tasks created. Goal: wire all packages into working end-to-end system.
+> **Cycle 57**: **PHASE E: IN PROGRESS.** 3 tasks done (INTEG-001, INTEG-002, FIX-MEDIUM-001). 686 tests, 58 files. ERR-069 CRITICAL: pgvector 2000d limit. RES-006 assigned for research.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| ~~INTEG-001~~ | ~~P0~~ | ~~devops~~ | ~~DB migration runner~~ | ~~—~~ |
-| ~~INTEG-002~~ | ~~P0~~ | ~~dev-core~~ | ~~InboundHandler impl~~ | ~~—~~ |
-| INTEG-003 | P0 | dev-edge | Gateway route integration: replace stub chat responses with real orchestrator calls. Wire /api/v1/chat + /api/v1/chat/stream + /ws to InboundHandler. | INTEG-002 |
-| INTEG-004 | P1 | dev-edge | Remaining gateway routes: /api/v1/memory/search, /api/v1/memory/stats, /api/v1/session/end, /api/v1/tools, /api/v1/tools/execute (AUD-072). | INTEG-001 |
-| INTEG-005 | P1 | dev-edge | Channel bootstrap wiring: update main.ts to create+start channels, pass to gracefulShutdown (AUD-074). Wire InboundHandler to each channel. | INTEG-002, INTEG-003 |
-| INTEG-006 | P1 | dev-infra | Integration test: PG + Redis real containers. Verify full memory pipeline: store → search → decay → consolidate. Testcontainers (DEVOPS-003). | INTEG-001 |
-| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-002, INTEG-005 |
-| ~~FIX-MEDIUM-001~~ | ~~P2~~ | ~~dev-edge~~ | ~~Fix 8 MEDIUM issues~~ | ~~—~~ |
+| ~~INTEG-003~~ | ~~P0~~ | ~~dev-edge~~ | ~~Gateway route integration~~ | ~~INTEG-002~~ |
+| ~~INTEG-004~~ | ~~P1~~ | ~~dev-edge~~ | ~~Remaining gateway routes~~ | ~~INTEG-001~~ |
+| INTEG-005 | P1 | dev-edge | Channel bootstrap wiring: update main.ts to create+start channels, pass to gracefulShutdown (AUD-074). Wire InboundHandler to each channel. | INTEG-002 ✓, INTEG-003 |
+| ~~INTEG-006~~ | ~~P1~~ | ~~dev-infra~~ | ~~Integration test: PG + Redis~~ | ~~INTEG-001~~ |
+| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-002 ✓, INTEG-005 |
 | INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 |
-| SYNC-007 | P1 | arch | PLAN_SYNC.md Phase E update: map integration code to plan sections. | INTEG-002, INTEG-003 |
+| SYNC-007 | P1 | arch | PLAN_SYNC.md Phase E update: map integration code to plan sections. | INTEG-002 ✓, INTEG-003 |
 | QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. | INTEG-006, INTEG-007 |
 | AUDIT-005 | P1 | audit | Phase E audit: integration security (SQL injection in migration, auth flow E2E, error propagation). | INTEG-003, INTEG-006 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
+| RES-006 | P0 | research | Research pgvector dimension limits: (1) pgvector 0.8.x 2000d hard limit confirmation, (2) pgvector 0.9+ roadmap/release timeline, (3) alternative: quantized embeddings ≤2000d with minimal quality loss (Matryoshka, binary quantization), (4) alternative: separate vector index (pg_embedding, Qdrant sidecar) with PG as source of truth. Source URLs required. | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| INTEG-001 | devops | 0208C56 | C57 |
-| INTEG-002 | dev-core | 0208C56 | C57 |
-| FIX-MEDIUM-001 | dev-edge | 0208C56 | C57 |
+| INTEG-003 | dev-edge | 0208C57 | C58 |
+| INTEG-004 | dev-edge | 0208C57 | C58 |
+| INTEG-006 | dev-infra | 0208C57 | C58 |
+| RES-006 | research | 0208C57 | C58 |
 
 ## Cancelled
 
@@ -140,3 +139,6 @@
 | AUDIT-004 | audit | 0208C54 | Phase D code audit: 3H 6M 5L. TDD PASS. §9 PASS. §14 PASS. HIGH: AUD-065 WS auth pattern, AUD-066 rate limiting, AUD-067 body size limit. |
 | FIX-GATEWAY-001 | dev-edge | 0208C55 | 3 HIGH gateway security fixes: (1) WS first-message auth per ADR-019, (2) sliding window rate limiting, (3) 32KB body size limit. 32 tests (+9), 87.01% stmt, 646 total. TDD RED→GREEN→REFACTOR. |
 | SYNC-006 | coord (CTO) | 0208C55 | PLAN_SYNC.md Phase D: D.4 Telegram IN_SYNC (23 tests, 97.66% stmt), D.5 Gateway IN_SYNC (32 tests, 87.01% stmt, 4/12 routes + FIX-GATEWAY-001), D.6 Bootstrap IN_SYNC (33 tests, 86.95% stmt). CTO override (arch 2 cycles). |
+| INTEG-001 | devops | 0208C57 | tools/migrate/ — DB migration runner, 6 SQL migrations, 10 tests. pgvector extension enabled. ERR-069 discovered (2000d limit). |
+| INTEG-002 | dev-core | 0208C57 | packages/core/src/orchestrator/inbound-handler.ts — InboundHandler factory, resolveSession→assemble→reactLoop→send pipeline. 12 tests, 366 total. |
+| FIX-MEDIUM-001 | dev-edge | 0208C57 | 8 MEDIUM fixes: splitMessage DRY, classifyError ADR-011, lifecycle startTime, HealthCheckTarget DRY, Telegram guards, container types, CORS Vary. 18 new tests, 664→686 total. |

@@ -5,20 +5,20 @@
 ## Status
 
 - **Phase**: **E: INTEGRATION — ACTIVE**
-- **Cycle**: 56
-- **Last Updated**: 2026-02-08C56
-- **STATUS**: **PHASE E KICKOFF.** 12 integration tasks created. Goal: wire core/infra/channels/gateway into end-to-end working system. DB migration, InboundHandler, gateway route integration, E2E tests, remaining routes, MEDIUM fixes. **646 tests, 50 files** pass. **0 errors.** First assignments: INTEG-001 (devops, P0), INTEG-002 (dev-core, P0), FIX-MEDIUM-001 (dev-edge, P2).
+- **Cycle**: 57
+- **Last Updated**: 2026-02-08C57
+- **STATUS**: **3 TASKS COMPLETED.** INTEG-001 (DB migration runner, 10 tests), INTEG-002 (InboundHandler, 12 tests), FIX-MEDIUM-001 (8 MEDIUM fixes, 18 tests). **686 tests, 58 files** pass. Biome lint fix applied (tools/migrate). **ERR-069 CRITICAL**: pgvector 2000d hard limit vs plan 3072d — RES-006 assigned, **human decision needed**. Next wave: INTEG-003 (P0, gateway→orchestrator), INTEG-004 (P1, remaining routes), INTEG-006 (P1, PG+Redis integration test).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 10 |
-| In Progress | 3 |
-| Done | 88 |
+| Queued | 8 |
+| In Progress | 4 |
+| Done | 91 |
 | Cancelled | 14 |
 
-## Open Errors: 0
+## Open Errors: 1 (ERR-069 CRITICAL)
 
 ## Cycle History
 
@@ -46,21 +46,23 @@
 | 54 | 0208 | **2 ASSURANCE TASKS COMPLETED.** QA-018 (CONDITIONAL PASS: 0H 8M 6L — lifecycle startTime, DRY HealthCheckTarget, Telegram userId, container cast, shutdown channels, splitMessage dup) + AUDIT-004 (3H 6M 5L — WS auth pattern AUD-065, rate limiting AUD-066, body size AUD-067). FIX-GATEWAY-001 (P1) created for 3 HIGH gateway security gaps. SYNC-006 in progress (arch, 1 cycle). Phase D **95%** (16/18). 3 errors. |
 | 55 | 0208 | **PHASE D COMPLETE.** FIX-GATEWAY-001 (3 HIGH security fixes: WS first-message auth, rate limiting, 32KB body limit — 32 tests, 87.01% stmt) + SYNC-006 (CTO override — PLAN_SYNC D.4/D.5/D.6 IN_SYNC). **646 tests, 50 files** pass. 0 errors. Phase D **100%** (18/18). **PHASE E: INTEGRATION** next. |
 | 56 | 0208 | **PHASE E KICKOFF.** 12 integration tasks created. INTEG-001 (DB migration, devops, P0), INTEG-002 (InboundHandler, dev-core, P0), FIX-MEDIUM-001 (8 MEDIUM fixes, dev-edge, P2) assigned. 10 queued (INTEG-003~008, SYNC-007, QA-019, AUDIT-005, CONST-AMEND-001). Phase E **0%** (0/12). 0 errors. |
+| 57 | 0208 | **3 TASKS COMPLETED.** INTEG-001 (DB migration, 10 tests, ERR-069 pgvector 2000d CRITICAL discovered), INTEG-002 (InboundHandler, 12 tests, 366 core total), FIX-MEDIUM-001 (8 MEDIUM fixes, 18 tests, 664→686 total). Biome lint fix (CTO, tools/migrate). Smoke: **686 tests, 58 files**, typecheck+lint clean. INTEG-003 (P0) + INTEG-004 (P1) → dev-edge, INTEG-006 (P1) → dev-infra, RES-006 (P0, pgvector research) → research. Phase E **25%** (3/12+1). 1 CRITICAL error. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C56 | Cycle 56 | Active |
-| Architecture | 0208C55 | — | Idle — activated next cycle for SYNC-007 |
-| Dev-Core | 0208C56 | INTEG-002 | **Active** — InboundHandler (P0) |
-| Dev-Infra | 0208C49 | — | Idle — INTEG-006 queued (depends INTEG-001) |
-| Dev-Edge | 0208C56 | FIX-MEDIUM-001 | **Active** — 8 MEDIUM fixes (P2) |
-| Research | 0208T0030 | — | Idle |
-| Quality | 0208C54 | — | Idle — QA-019 queued (depends INTEG-006/007) |
-| DevOps | 0208C56 | INTEG-001 | **Active** — DB migration runner (P0) |
-| Audit | 0208C54 | — | Idle — AUDIT-005 queued (depends INTEG-003/006) |
+| Coordinator | 0208C57 | Cycle 57 | Active |
+| Architecture | 0208C55 | — | Idle — SYNC-007 blocked (needs INTEG-003) |
+| Dev-Core | 0208C57 | — | Idle — INTEG-002 done, no dev-core tasks queued |
+| Dev-Infra | 0208C57 | INTEG-006 | **Active** — PG+Redis integration test (P1) |
+| Dev-Edge | 0208C57 | INTEG-003, INTEG-004 | **Active** — Gateway route integration (P0) + remaining routes (P1) |
+| Research | 0208C57 | RES-006 | **Active** — pgvector dimension limit research (P0, ERR-069) |
+| Quality | 0208C54 | — | Idle — QA-019 blocked (needs INTEG-006/007) |
+| DevOps | 0208C57 | — | Idle — INTEG-001 done |
+| Audit | 0208C54 | — | Idle — AUDIT-005 blocked (needs INTEG-003/006) |
 
 ## Human Intervention Needed
 
 - **CONST-AMEND-001**: CONSTITUTION §9 amendment needed — expand infra allowed imports to include `@axel/core/{types,memory,orchestrator}`. §9 currently says `core/src/types/ only` but PLAN_SYNC B.7 + DEVOPS-004 intentionally export broader subpaths. **Requires human (Mark) approval** per CONSTITUTION immutability rule.
+- **ERR-069 CRITICAL**: pgvector 0.8.1 has **2000 dimension hard limit** for ALL index types. Plan specifies 3072d embeddings (ADR-016). Production deployment blocked. RES-006 assigned for alternatives research. **Requires human (Mark) decision** on embedding dimension strategy: (1) reduce to ≤2000d, (2) wait for pgvector 0.9+, (3) alternative vector index alongside PG, (4) other approach.

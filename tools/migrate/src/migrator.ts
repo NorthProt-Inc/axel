@@ -1,6 +1,6 @@
-import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
-import type { Client } from "pg";
+import { readFile, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import type { Client } from 'pg';
 
 export interface Migration {
 	version: number;
@@ -65,17 +65,17 @@ export class Migrator {
 			return;
 		}
 
-		await this.client.query("BEGIN");
+		await this.client.query('BEGIN');
 		try {
 			await this.client.query(migration.upSql);
-			await this.client.query(
-				"INSERT INTO schema_migrations (version, name) VALUES ($1, $2)",
-				[migration.version, migration.name],
-			);
-			await this.client.query("COMMIT");
+			await this.client.query('INSERT INTO schema_migrations (version, name) VALUES ($1, $2)', [
+				migration.version,
+				migration.name,
+			]);
+			await this.client.query('COMMIT');
 			console.log(`✓ Applied migration ${version}: ${migration.name}`);
 		} catch (error) {
-			await this.client.query("ROLLBACK");
+			await this.client.query('ROLLBACK');
 			throw error;
 		}
 	}
@@ -104,23 +104,21 @@ export class Migrator {
 			return;
 		}
 
-		await this.client.query("BEGIN");
+		await this.client.query('BEGIN');
 		try {
 			await this.client.query(migration.downSql);
-			await this.client.query("DELETE FROM schema_migrations WHERE version = $1", [
-				version,
-			]);
-			await this.client.query("COMMIT");
+			await this.client.query('DELETE FROM schema_migrations WHERE version = $1', [version]);
+			await this.client.query('COMMIT');
 			console.log(`✓ Rolled back migration ${version}: ${migration.name}`);
 		} catch (error) {
-			await this.client.query("ROLLBACK");
+			await this.client.query('ROLLBACK');
 			throw error;
 		}
 	}
 
 	private async loadMigrations(): Promise<Migration[]> {
 		const files = await readdir(this.migrationsDir);
-		const upFiles = files.filter((f) => f.endsWith(".sql") && !f.endsWith(".down.sql"));
+		const upFiles = files.filter((f) => f.endsWith('.sql') && !f.endsWith('.down.sql'));
 
 		const migrations: Migration[] = [];
 
@@ -130,15 +128,15 @@ export class Migrator {
 				continue;
 			}
 
-			const version = Number.parseInt(match[1] ?? "0", 10);
-			const name = match[2] ?? "";
+			const version = Number.parseInt(match[1] ?? '0', 10);
+			const name = match[2] ?? '';
 			const downFile = `${match[1]}_${name}.down.sql`;
 
 			const upPath = join(this.migrationsDir, upFile);
 			const downPath = join(this.migrationsDir, downFile);
 
-			const upSql = await readFile(upPath, "utf-8");
-			const downSql = await readFile(downPath, "utf-8");
+			const upSql = await readFile(upPath, 'utf-8');
+			const downSql = await readFile(downPath, 'utf-8');
 
 			migrations.push({ version, name, upSql, downSql });
 		}

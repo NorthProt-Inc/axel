@@ -2,7 +2,7 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 56**: **1 CRITICAL OPEN.** Phase E kickoff. ERR-069: pgvector 2000d hard limit vs plan 3072d.
+> **Cycle 57**: **1 CRITICAL OPEN.** ERR-069 pgvector 2000d limit. RES-006 assigned for research. Human decision pending.
 
 ## Open
 

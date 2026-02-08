@@ -1,19 +1,19 @@
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
-import { Client } from "pg";
-import { Migrator } from "../src/migrator.js";
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import { Client } from 'pg';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { Migrator } from '../src/migrator.js';
 
-describe("Migrator", () => {
+describe('Migrator', () => {
 	let container: StartedPostgreSqlContainer;
 	let client: Client;
 	let migrator: Migrator;
 
 	beforeAll(async () => {
 		// Start PostgreSQL 17 + pgvector container
-		container = await new PostgreSqlContainer("pgvector/pgvector:pg17")
-			.withDatabase("test_db")
-			.withUsername("test_user")
-			.withPassword("test_password")
+		container = await new PostgreSqlContainer('pgvector/pgvector:pg17')
+			.withDatabase('test_db')
+			.withUsername('test_user')
+			.withPassword('test_password')
 			.start();
 
 		const connectionString = container.getConnectionUri();
@@ -21,9 +21,9 @@ describe("Migrator", () => {
 		await client.connect();
 
 		// Use absolute path from project root
-		const migrationsDir = process.cwd().includes("tools/migrate")
-			? "./migrations"
-			: "./tools/migrate/migrations";
+		const migrationsDir = process.cwd().includes('tools/migrate')
+			? './migrations'
+			: './tools/migrate/migrations';
 		migrator = new Migrator(client, migrationsDir);
 	});
 
@@ -32,7 +32,7 @@ describe("Migrator", () => {
 		await container.stop();
 	});
 
-	test("should create schema_migrations table", async () => {
+	test('should create schema_migrations table', async () => {
 		await migrator.initialize();
 
 		const result = await client.query(`
@@ -45,26 +45,26 @@ describe("Migrator", () => {
 		expect(result.rows[0]?.exists).toBe(true);
 	});
 
-	test("should return empty list when no migrations applied", async () => {
+	test('should return empty list when no migrations applied', async () => {
 		await migrator.initialize();
 		const applied = await migrator.getAppliedMigrations();
 		expect(applied).toEqual([]);
 	});
 
-	test("should detect pending migrations", async () => {
+	test('should detect pending migrations', async () => {
 		await migrator.initialize();
 		const pending = await migrator.getPendingMigrations();
 		expect(pending.length).toBeGreaterThan(0);
 		expect(pending[0]?.version).toBe(1);
 	});
 
-	test("should apply single migration", async () => {
+	test('should apply single migration', async () => {
 		await migrator.initialize();
 		const pending = await migrator.getPendingMigrations();
 		const firstMigration = pending[0];
 
 		if (!firstMigration) {
-			throw new Error("No pending migrations found");
+			throw new Error('No pending migrations found');
 		}
 
 		await migrator.up(firstMigration.version);
@@ -74,7 +74,7 @@ describe("Migrator", () => {
 		expect(applied[0]?.version).toBe(1);
 	});
 
-	test("should verify pgvector extension is enabled", async () => {
+	test('should verify pgvector extension is enabled', async () => {
 		await migrator.initialize();
 		await migrator.up(1); // Apply extensions migration
 
@@ -87,7 +87,7 @@ describe("Migrator", () => {
 		expect(result.rows[0]?.exists).toBe(true);
 	});
 
-	test("should apply all pending migrations", async () => {
+	test('should apply all pending migrations', async () => {
 		await migrator.initialize();
 		await migrator.upAll();
 
@@ -95,21 +95,33 @@ describe("Migrator", () => {
 		expect(applied.length).toBeGreaterThan(0);
 
 		// Verify all expected tables exist
-		const tables = ["schema_migrations", "sessions", "messages", "memories", "entities", "relations", "memory_access_patterns", "interaction_logs"];
+		const tables = [
+			'schema_migrations',
+			'sessions',
+			'messages',
+			'memories',
+			'entities',
+			'relations',
+			'memory_access_patterns',
+			'interaction_logs',
+		];
 
 		for (const table of tables) {
-			const result = await client.query(`
+			const result = await client.query(
+				`
 				SELECT EXISTS (
 					SELECT 1 FROM information_schema.tables
 					WHERE table_name = $1
 				) AS exists
-			`, [table]);
+			`,
+				[table],
+			);
 
 			expect(result.rows[0]?.exists).toBe(true);
 		}
 	});
 
-	test("should verify memories table has vector column", async () => {
+	test('should verify memories table has vector column', async () => {
 		await migrator.initialize();
 		await migrator.upAll();
 
@@ -120,10 +132,10 @@ describe("Migrator", () => {
 		`);
 
 		expect(result.rows).toHaveLength(1);
-		expect(result.rows[0]?.udt_name).toBe("vector");
+		expect(result.rows[0]?.udt_name).toBe('vector');
 	});
 
-	test("should verify hot_memories materialized view exists", async () => {
+	test('should verify hot_memories materialized view exists', async () => {
 		await migrator.initialize();
 		await migrator.upAll();
 
@@ -136,7 +148,7 @@ describe("Migrator", () => {
 		expect(result.rows[0]?.exists).toBe(true);
 	});
 
-	test("should rollback single migration", async () => {
+	test('should rollback single migration', async () => {
 		await migrator.initialize();
 		await migrator.upAll();
 
@@ -144,7 +156,7 @@ describe("Migrator", () => {
 		const lastVersion = appliedBefore[appliedBefore.length - 1]?.version;
 
 		if (!lastVersion) {
-			throw new Error("No applied migrations found");
+			throw new Error('No applied migrations found');
 		}
 
 		await migrator.down(lastVersion);
@@ -153,7 +165,7 @@ describe("Migrator", () => {
 		expect(appliedAfter.length).toBe(appliedBefore.length - 1);
 	});
 
-	test("should handle idempotent migrations", async () => {
+	test('should handle idempotent migrations', async () => {
 		await migrator.initialize();
 		await migrator.upAll();
 
