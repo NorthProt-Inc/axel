@@ -53,9 +53,18 @@ File: `.github/workflows/ci.yml`
 | Package | Provider | Thresholds | Status |
 |---------|----------|------------|--------|
 | `@axel/core` | v8 | 90% (lines/functions/branches/statements) | ✅ CONFIGURED |
-| `@axel/infra` | — | 80% | ⏳ PENDING |
+| `@axel/infra` | v8 | 80% (lines/functions/branches/statements) | ✅ CONFIGURED (testcontainers: PG17+pgvector, Redis7) |
 | `@axel/channels` | — | 75% | ⏳ PENDING |
 | `@axel/gateway` | — | 80% | ⏳ PENDING |
+
+## Phase C Dependencies (Infra Sprint)
+
+| Package | Dependencies | Status |
+|---------|-------------|--------|
+| `@axel/infra` | pg@^8.18.0, ioredis@^5.9.2 | ✅ ADDED (C42) |
+| `@axel/infra` | @anthropic-ai/sdk@^0.74.0 | ✅ ADDED (C42) |
+| `@axel/infra` | @google/generative-ai@^0.24.1 | ✅ ADDED (C42) |
+| `@axel/infra` | @types/pg@^8.16.0, testcontainers@^11.11.0 | ✅ ADDED (C42, devDeps) |
 
 ## Release History
 
