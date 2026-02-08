@@ -2,13 +2,13 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 25
+## Current Cycle: 27
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 25 cycles | 0 | Active |
+| coord | — | 27 cycles | 0 | Active |
 | arch | 1 cycle | 2 (FIX-AUDIT, FIX-PRE-IMPL) | 0 | Idle |
 | dev-core | — | 0 | 0 | Inactive |
 | dev-infra | — | 0 | 0 | Inactive |
@@ -59,3 +59,5 @@
 | 23 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
 | 24 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
 | 25 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
+| 26 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
+| 27 | (none) | 0 | 0 | STEADY STATE. All Divisions idle. Awaiting Phase A kickoff. |
