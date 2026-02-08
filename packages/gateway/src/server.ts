@@ -3,6 +3,10 @@ import * as http from 'node:http';
 import type { HealthStatus } from '@axel/core/types';
 import { type WebSocket, WebSocketServer } from 'ws';
 
+const MAX_BODY_BYTES = 32_768; // 32KB
+const WS_AUTH_TIMEOUT_MS = 5_000;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
 export interface GatewayConfig {
 	readonly port: number;
 	readonly host: string;
@@ -29,11 +33,17 @@ interface Route {
 	readonly handler: RouteHandler;
 }
 
+interface AuthenticatedWebSocket extends WebSocket {
+	authenticated?: boolean;
+	authTimer?: ReturnType<typeof setTimeout>;
+}
+
 export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	let httpServer: http.Server | null = null;
 	let wss: WebSocketServer | null = null;
 	const startedAt = Date.now();
-	const connections = new Set<WebSocket>();
+	const connections = new Set<AuthenticatedWebSocket>();
+	const rateLimitBuckets = new Map<string, number[]>();
 
 	const routes: Route[] = [
 		{ method: 'GET', path: '/health', requiresAuth: false, handler: handleHealth },
@@ -53,10 +63,13 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			handleUpgrade(req, socket as import('node:net').Socket, head);
 		});
 
-		wss.on('connection', (ws: WebSocket) => {
+		wss.on('connection', (ws: AuthenticatedWebSocket) => {
 			connections.add(ws);
-			ws.on('close', () => connections.delete(ws));
-			setupWsHandler(ws);
+			ws.on('close', () => {
+				if (ws.authTimer) clearTimeout(ws.authTimer);
+				connections.delete(ws);
+			});
+			setupWsAuth(ws);
 		});
 
 		return new Promise<http.Server>((resolve) => {
@@ -67,8 +80,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	}
 
 	async function stop(): Promise<void> {
-		// Close all WebSocket connections
 		for (const ws of connections) {
+			if (ws.authTimer) clearTimeout(ws.authTimer);
 			ws.close(1001, 'Server shutting down');
 		}
 		connections.clear();
@@ -92,20 +105,33 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 	}
 
+	// ─── HTTP Request Handling ───
+
 	function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
 		const requestId = generateRequestId();
 
-		// CORS
 		if (handleCors(req, res)) {
 			return;
 		}
 
-		// Collect body
 		let body = '';
+		let bodyBytes = 0;
+		let aborted = false;
+
 		req.on('data', (chunk: Buffer) => {
+			if (aborted) return;
+			bodyBytes += chunk.length;
+			if (bodyBytes > MAX_BODY_BYTES) {
+				aborted = true;
+				sendError(res, 413, 'Request body too large', requestId);
+				req.destroy();
+				return;
+			}
 			body += chunk.toString();
 		});
+
 		req.on('end', () => {
+			if (aborted) return;
 			processRequest(req, res, body, requestId);
 		});
 	}
@@ -131,6 +157,13 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			return;
 		}
 
+		if (route.requiresAuth && !checkRateLimit(req)) {
+			const retryAfter = Math.ceil(RATE_LIMIT_WINDOW_MS / 1000);
+			res.setHeader('Retry-After', String(retryAfter));
+			sendError(res, 429, 'Rate limit exceeded', requestId);
+			return;
+		}
+
 		route.handler(req, res, body).catch((err: unknown) => {
 			const message = err instanceof Error ? err.message : 'Internal Server Error';
 			sendError(
@@ -141,6 +174,34 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			);
 		});
 	}
+
+	// ─── Rate Limiting (AUD-066) ───
+
+	function checkRateLimit(req: http.IncomingMessage): boolean {
+		const clientIp = req.socket.remoteAddress ?? 'unknown';
+		const now = Date.now();
+		const windowStart = now - RATE_LIMIT_WINDOW_MS;
+
+		let timestamps = rateLimitBuckets.get(clientIp);
+		if (!timestamps) {
+			timestamps = [];
+			rateLimitBuckets.set(clientIp, timestamps);
+		}
+
+		// Remove expired entries
+		while (timestamps.length > 0 && (timestamps[0] ?? 0) < windowStart) {
+			timestamps.shift();
+		}
+
+		if (timestamps.length >= config.rateLimitPerMinute) {
+			return false;
+		}
+
+		timestamps.push(now);
+		return true;
+	}
+
+	// ─── CORS ───
 
 	function handleCors(req: http.IncomingMessage, res: http.ServerResponse): boolean {
 		const origin = req.headers.origin;
@@ -161,6 +222,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		return false;
 	}
 
+	// ─── Auth ───
+
 	function verifyAuth(req: http.IncomingMessage): boolean {
 		const authHeader = req.headers.authorization;
 		if (!authHeader?.startsWith('Bearer ')) {
@@ -169,6 +232,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		const token = authHeader.slice(7);
 		return timingSafeEqual(token, config.authToken);
 	}
+
+	// ─── WebSocket (AUD-065: first-message auth per ADR-019) ───
 
 	function handleUpgrade(
 		req: http.IncomingMessage,
@@ -183,22 +248,56 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			return;
 		}
 
-		const token = url.searchParams.get('token');
-		if (!token || !timingSafeEqual(token, config.authToken)) {
-			socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-			socket.destroy();
-			return;
-		}
-
+		// Accept all WS connections; auth happens via first message
 		wss?.handleUpgrade(req, socket, head, (ws) => {
 			wss?.emit('connection', ws, req);
 		});
 	}
 
-	function setupWsHandler(ws: WebSocket): void {
+	function setupWsAuth(ws: AuthenticatedWebSocket): void {
+		ws.authenticated = false;
+
+		// 5-second auth timeout per ADR-019
+		ws.authTimer = setTimeout(() => {
+			if (!ws.authenticated) {
+				ws.close(4001, 'Auth timeout');
+			}
+		}, WS_AUTH_TIMEOUT_MS);
+
 		ws.on('message', (data: WebSocket.RawData) => {
+			if (!ws.authenticated) {
+				handleWsAuthMessage(ws, data);
+				return;
+			}
 			handleWsMessage(ws, data);
 		});
+	}
+
+	function handleWsAuthMessage(ws: AuthenticatedWebSocket, data: WebSocket.RawData): void {
+		let parsed: Record<string, unknown>;
+		try {
+			parsed = JSON.parse(data.toString()) as Record<string, unknown>;
+		} catch {
+			ws.close(4001, 'Unauthorized');
+			return;
+		}
+
+		if (parsed.type !== 'auth' || typeof parsed.token !== 'string') {
+			ws.close(4001, 'Unauthorized');
+			return;
+		}
+
+		if (!timingSafeEqual(parsed.token, config.authToken)) {
+			ws.close(4001, 'Unauthorized');
+			return;
+		}
+
+		ws.authenticated = true;
+		if (ws.authTimer) {
+			clearTimeout(ws.authTimer);
+			ws.authTimer = undefined;
+		}
+		ws.send(JSON.stringify({ type: 'auth_ok' }));
 	}
 
 	function handleWsMessage(ws: WebSocket, data: WebSocket.RawData): void {
