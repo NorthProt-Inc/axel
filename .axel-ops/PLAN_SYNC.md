@@ -12,180 +12,45 @@
 
 ## Phase A: Foundation
 
-### A.1 Root Scaffolding (SCAFFOLD-001~003, 006)
-
 | Plan Section | Layer | Code Location | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| 3.3 Monorepo | TL0 | `pnpm-workspace.yaml` | IN_SYNC | C32 | ADR-004. Workspace packages: `packages/*`, `apps/*`, `tools/*` (plan:202-276) |
-| 3.3 Monorepo | TL0 | `package.json` (root) | IN_SYNC | C32 | ADR-004. Workspace scripts: `typecheck`, `test`, `lint`, `build` |
-| 3.3/TL0 tsconfig | TL0 | `tsconfig.base.json` | IN_SYNC | C32 | ADR-001. strict:true, noUncheckedIndexedAccess, exactOptionalPropertyTypes, target ES2023, module NodeNext (plan:546-557) |
-| TL0 Biome | TL0 | `biome.json` | IN_SYNC | C32 | ADR-007. Replaces ESLint+Prettier. Lint + format config (plan:541) |
-| 6.3 Test Infra | TL0 | `vitest.config.ts` (root) | IN_SYNC | C32 | ADR-008. pool:"forks" for process isolation (plan:1790-1815) |
-| TL0 Docker | TL0 | `docker/docker-compose.dev.yml` | IN_SYNC | C32 | ADR-002, ADR-003. PostgreSQL 17 + pgvector + Redis 7 (plan:268-271) |
-
-### A.2 Per-Package Config (SCAFFOLD-004~005)
-
-| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| 3.3 Monorepo | TL0 | `packages/core/package.json` | IN_SYNC | C32 | No external I/O deps. Exports `types/`. (plan:210-219) |
-| 3.3 Monorepo | TL0 | `packages/core/tsconfig.json` | IN_SYNC | C32 | extends tsconfig.base.json |
-| 3.3 Monorepo | TL0 | `packages/infra/package.json` | IN_SYNC | C32 | May import `@axel/core/types` only (CONSTITUTION §9) |
-| 3.3 Monorepo | TL0 | `packages/infra/tsconfig.json` | IN_SYNC | C32 | extends tsconfig.base.json |
-| 3.3 Monorepo | TL0 | `packages/channels/package.json` | IN_SYNC | C32 | May import `@axel/core/types` only (CONSTITUTION §9) |
-| 3.3 Monorepo | TL0 | `packages/channels/tsconfig.json` | IN_SYNC | C32 | extends tsconfig.base.json |
-| 3.3 Monorepo | TL0 | `packages/gateway/package.json` | IN_SYNC | C32 | May import `@axel/core/types` only (CONSTITUTION §9) |
-| 3.3 Monorepo | TL0 | `packages/gateway/tsconfig.json` | IN_SYNC | C32 | extends tsconfig.base.json |
-| 3.3 Monorepo | TL0 | `apps/axel/package.json` | IN_SYNC | C32 | May import any `@axel/*` (CONSTITUTION §9) |
-| 3.3 Monorepo | TL0 | `apps/axel/tsconfig.json` | IN_SYNC | C32 | extends tsconfig.base.json |
-| 6.3 Test Infra | TL0 | `packages/core/vitest.config.ts` | IN_SYNC | C32 | ADR-008. Per-package test config |
-| 6.3 Test Infra | TL0 | `packages/infra/vitest.config.ts` | IN_SYNC | C32 | ADR-008. Per-package test config |
-| 6.3 Test Infra | TL0 | `packages/channels/vitest.config.ts` | IN_SYNC | C32 | ADR-008. Per-package test config |
-| 6.3 Test Infra | TL0 | `packages/gateway/vitest.config.ts` | IN_SYNC | C32 | ADR-008. Per-package test config |
-
-### A.3 CI Pipeline (SCAFFOLD-007)
-
-| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| 7/Phase 0 CI | TL0 | `.github/workflows/ci.yml` | NOT_STARTED | — | RES-005. SCAFFOLD-007 in progress (devops). Pipeline: lint → typecheck → test (plan:1860, CONSTITUTION §13) |
-
-### A.4 Plan-Spec Cross-References for DevOps
-
-Phase A scaffolding에서 DevOps Division이 참조해야 할 plan spec 상세:
-
-| Spec | Plan Location | Key Values |
-|---|---|---|
-| Workspace packages | plan:202-276 | `packages/{core,infra,channels,gateway}`, `apps/{axel,webchat}`, `tools/{migrate,seed,bench}` |
-| tsconfig strict options | plan:546-557 | strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes, ES2023, NodeNext |
-| Biome config | plan:541, ADR-007 | Single tool replacing ESLint+Prettier |
-| vitest pool | plan:1790-1815, ADR-008 | `pool: "forks"` for process isolation |
-| Docker dev services | plan:268-271, ADR-002, ADR-003 | PostgreSQL 17 + pgvector extension, Redis 7 |
-| Package boundary | CONSTITUTION §9 | core: no imports; infra/channels/gateway: `@axel/core/types` only; apps: any |
-| CI smoke tests | CONSTITUTION §13 | `pnpm install --frozen-lockfile && pnpm typecheck && pnpm test --run` |
-| Coverage targets | CONSTITUTION §8 | core 90%, infra 80%, channels 75%, gateway 80% |
+| — | — | `pnpm-workspace.yaml` | NOT_STARTED | — | DevOps scaffolding |
+| — | — | `tsconfig.base.json` | NOT_STARTED | — | DevOps scaffolding |
+| — | — | `biome.json` | NOT_STARTED | — | DevOps scaffolding |
+| — | — | `vitest.config.ts` | NOT_STARTED | — | DevOps scaffolding |
+| — | — | `docker/docker-compose.dev.yml` | NOT_STARTED | — | DevOps scaffolding |
+| — | — | `.github/workflows/ci.yml` | NOT_STARTED | — | DevOps scaffolding |
 
 ## Phase B: Core Sprint
 
-### B.1 Core Domain Types (CORE-001)
-
-Source: plan §3.5 (lines 347-511)
-
-| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| §3.5 memory.ts | `packages/core/src/types/memory.ts` | `MemoryType`, `Memory`, `MemorySearchResult` | NOT_STARTED | — | `Memory.embedding`: `Float32Array` (3072d, ADR-016). `channelMentions`: `Record<string, number>` for cross-channel tracking. |
-| §3.5 message.ts | `packages/core/src/types/message.ts` | `MessageRole`, `Message` | NOT_STARTED | — | `emotionalContext`: string field for persona adaptation. `metadata`: `Record<string, unknown>` for extensibility. |
-| §3.5 session.ts | `packages/core/src/types/session.ts` | `SessionState`, `SessionSummary` | NOT_STARTED | — | 7-state FSM: initializing→active→thinking→tool_executing→summarizing→ending→ended (ERR-041). |
-| §3.5 react.ts | `packages/core/src/types/react.ts` | `ReActEvent`, `ToolCallRequest` | NOT_STARTED | — | Discriminated union (6 variants). Streaming output type for AsyncGenerator. |
-| §3.5 tool.ts | `packages/core/src/types/tool.ts` | `ToolResult`, `ToolDefinition` | NOT_STARTED | — | `inputSchema`: `z.ZodSchema` (ADR-005). `handler` returns `Promise<ToolResult>`. |
-| §3.5 health.ts | `packages/core/src/types/health.ts` | `HealthState`, `HealthStatus`, `ComponentHealth` | NOT_STARTED | — | 3-state: healthy/degraded/unhealthy. |
-| §3.5 engine.ts | `packages/core/src/types/engine.ts` | `MemoryEngine`, `MemoryStats` | NOT_STARTED | — | DI contract for memory subsystem. `search()` returns `readonly MemorySearchResult[]`. |
-| §3.5 common.ts | `packages/core/src/types/common.ts` | `TokenUsage` | NOT_STARTED | — | Anthropic SDK token accounting (input, output, cache read, cache creation). |
-| §3.5 index.ts | `packages/core/src/types/index.ts` | (barrel export) | NOT_STARTED | — | Re-exports all type modules. Single import point for `@axel/core/types`. |
-
-### B.2 Adaptive Decay (CORE-002)
-
-Source: plan §3.5 Layer 3 / §3.2 (lines 1010-1085), ADR-015
-
-| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| §3.2 DecayInput | `packages/core/src/decay/types.ts` | `DecayInput` | NOT_STARTED | — | 8 fields. `channelMentions`: distinct channel count (plan:1036). All `number` types. |
-| §3.2 DecayConfig | `packages/core/src/decay/types.ts` | `DecayConfig` | NOT_STARTED | — | 10 config fields + `typeMultipliers` map. Defaults in ADR-015:37-47. |
-| §3.2 calculator | `packages/core/src/decay/calculator.ts` | `calculateDecayedImportance()` | NOT_STARTED | — | Pure function, no I/O. 8-step formula (plan:1054-1084). Returns `number`. |
-| §3.2 batch | `packages/core/src/decay/batch.ts` | `decayBatch()` | NOT_STARTED | — | Batch processing for periodic decay sweep. Calls calculator per-item. |
-
-### B.3 Memory Layers (CORE-003)
-
-Source: plan Layer 3 §3.1 (lines 933-1008), ADR-013
-
-| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| §3.1 M0 Stream | `packages/core/src/memory/stream-buffer.ts` | `StreamBuffer`, `StreamEvent` | NOT_STARTED | — | ADR-013. Redis Streams. TTL: session. Max 1,000 entries. Speculative Prefetch trigger. |
-| §3.1 M1 Working | `packages/core/src/memory/working-memory.ts` | `WorkingMemory`, `Turn` | NOT_STARTED | — | ADR-013, ADR-003. Redis Hash+List. TTL: 1h inactive. 20-turn window. Cross-channel unified. |
-| §3.1 M2 Episodic | `packages/core/src/memory/episodic-memory.ts` | `EpisodicMemory` | NOT_STARTED | — | ADR-013. PostgreSQL. TTL: 30d. Session summaries + emotion tags. |
-| §3.1 M3 Semantic | `packages/core/src/memory/semantic-memory.ts` | `SemanticMemory` | NOT_STARTED | — | ADR-013, ADR-016. pgvector 3072d. HNSW(m=16, ef=64). Hybrid search (vector+trigram+metadata). |
-| §3.1 M4 Conceptual | `packages/core/src/memory/conceptual-memory.ts` | `ConceptualMemory`, `Entity`, `Relation` | NOT_STARTED | — | ADR-013. PostgreSQL tables. SQL-based graph traversal (replaces Python BFS). |
-| §3.1 M5 Meta | `packages/core/src/memory/meta-memory.ts` | `MetaMemory`, `PrefetchedMemory` | NOT_STARTED | — | ADR-013. PostgreSQL MV `hot_memories`. Refresh every 6h. Speculative Prefetch source. |
-
-**Cross-Layer Interface Contract** — all 6 memory layer interfaces MUST implement:
-```typescript
-interface MemoryLayer<T> {
-  readonly layerName: string;            // "M0:stream" | "M1:working" | ... | "M5:meta"
-  store(data: T): Promise<void>;
-  retrieve(query: unknown): Promise<readonly T[]>;
-  healthCheck(): Promise<ComponentHealth>;
-}
-```
-Note: This is a guideline pattern from ADR-013. Concrete implementations will differ per layer (e.g., M0 uses Redis Streams, M3 uses pgvector). Dev-Core should define the concrete interfaces based on this pattern and plan §3.1 specs.
-
-### B.4 Context Assembly (CORE-004)
-
-Source: plan §3.3 (lines 1092-1153), ADR-012
-
-| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| §3.3 ContextBudget | `packages/core/src/context/types.ts` | `ContextBudget` | NOT_STARTED | — | 8 budget slots, total 76K tokens (plan:1101-1111). 200K model → ~124K generation. |
-| §3.3 AssembledContext | `packages/core/src/context/types.ts` | `AssembledContext`, `ContextSection` | NOT_STARTED | — | `sections[]` with per-section token count + source layer annotation (plan:1114-1126). |
-| §3.3 ContextDataProvider | `packages/core/src/context/types.ts` | `ContextDataProvider` | NOT_STARTED | — | DI contract (ADR-006). 7 data methods: working, semantic, graph, session, stream, meta, tools (plan:1130-1138). No I/O in assembler itself. |
-| §3.3 assembler | `packages/core/src/context/assembler.ts` | `ContextAssembler` | NOT_STARTED | — | Constructor injection of `ContextDataProvider`. Priority-ordered assembly (plan:1143-1153). Truncation on budget overflow. |
-
-### B.5 Persona Engine (CORE-005)
-
-Source: plan Layer 4 (lines 1155-1227), ADR-006
-
-| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| L4 PersonaSchema | `packages/core/src/persona/schema.ts` | `PersonaSchema` (Zod), `Persona` (inferred type) | NOT_STARTED | — | Zod schema defines persona file structure (plan:1174-1195). `learned_behaviors[]` with confidence. |
-| L4 PersonaEngine | `packages/core/src/persona/engine.ts` | `PersonaEngine` | NOT_STARTED | — | 5 methods: load, reload, getSystemPrompt, evolve, updatePreference (plan:1197-1203). Hot-reload via fs.watch + debounce 500ms (plan:1205-1211). |
-| L4 ChannelAdaptations | `packages/core/src/persona/channel-adaptations.ts` | `ChannelAdaptation` | NOT_STARTED | — | Per-channel formality/verbosity (plan:1214-1221). 6 channels: discord, telegram, slack, cli, email, webchat. |
-
-### B.6 Orchestrator (CORE-006)
-
-Source: plan Layer 7 (lines 1378-1483), ADR-014
-
-| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
-|---|---|---|---|---|---|
-| L7 ReActConfig | `packages/core/src/orchestrator/types.ts` | `ReActConfig` | NOT_STARTED | — | maxIterations:15, toolTimeout:30s, totalTimeout:300s, streaming flag (plan:1396-1401). |
-| L7 reactLoop | `packages/core/src/orchestrator/react-loop.ts` | `reactLoop()` | NOT_STARTED | — | AsyncGenerator<ReActEvent>. 4 error recovery paths (plan:1439-1444). Uses `LlmProvider` + `ToolDefinition[]`. |
-| L7 SessionRouter | `packages/core/src/orchestrator/session-router.ts` | `SessionRouter`, `UnifiedSession` | NOT_STARTED | — | ADR-014. resolveSession, switchChannel, endSession (plan:1452-1470). Cross-channel session unification. |
-
-### B.7 Cross-Package Interface Summary
-
-These interfaces in `packages/core/src/types/` are consumed by other packages (CONSTITUTION §9):
-
-| Interface | Defined In | Consumed By | Notes |
-|---|---|---|---|
-| `Memory`, `MemoryType`, `MemorySearchResult` | core/types/memory.ts | infra (persistence), core (decay, context) | Canonical memory domain type |
-| `Message`, `MessageRole` | core/types/message.ts | infra (persistence), channels (adapters), gateway | Canonical message type |
-| `SessionState`, `SessionSummary` | core/types/session.ts | infra (persistence), core (orchestrator) | Session FSM states |
-| `ReActEvent`, `ToolCallRequest` | core/types/react.ts | gateway (WS streaming), channels (response routing) | Streaming event protocol |
-| `ToolResult`, `ToolDefinition` | core/types/tool.ts | infra (MCP registry), core (orchestrator) | Tool system contract |
-| `HealthState`, `HealthStatus`, `ComponentHealth` | core/types/health.ts | infra (all services), gateway (health endpoint) | System health protocol |
-| `MemoryEngine`, `MemoryStats` | core/types/engine.ts | infra (memory impl), core (context assembly) | DI contract for memory |
-| `TokenUsage` | core/types/common.ts | infra (LLM adapter), core (context budgeting) | Token accounting |
-| `DecayInput`, `DecayConfig` | core/decay/types.ts | infra (batch scheduler) | Decay calculation inputs |
-| `ContextBudget`, `AssembledContext`, `ContextDataProvider` | core/context/types.ts | infra (data providers impl) | Context assembly DI contract |
-| `Persona`, `PersonaEngine` | core/persona/*.ts | infra (file I/O impl), core (orchestrator) | Persona system contract |
-| `ReActConfig`, `SessionRouter`, `UnifiedSession` | core/orchestrator/types.ts | infra (Redis session store), channels (message routing) | Orchestration contract |
-| `LlmProvider`, `ChatParams`, `ChatChunk` | plan L5 (lines 1247-1270) | infra/src/llm/ only | NOT in core/types — defined in infra. Infra-internal interface. |
+| 3.5 Core Types | TL3 | `packages/core/src/types/` | NOT_STARTED | — | |
+| 4.3 Adaptive Decay | TL3 | `packages/core/src/decay/` | NOT_STARTED | — | ADR-015 |
+| 4.2 Memory Layers | TL3 | `packages/core/src/memory/` | NOT_STARTED | — | ADR-013 |
+| 4.4 Context Assembly | TL3 | `packages/core/src/context/` | NOT_STARTED | — | |
+| 4.5 Persona Engine | TL3 | `packages/core/src/persona/` | NOT_STARTED | — | |
+| 4.6 Orchestrator | TL3 | `packages/core/src/orchestrator/` | NOT_STARTED | — | |
 
 ## Phase C: Infra Sprint
 
 | Plan Section | Layer | Code Location | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| L2 Persistence | TL2 | `packages/infra/src/db/` | NOT_STARTED | — | ADR-002. PostgreSQL 17 + pgvector. Connection pool + prepared statements. |
-| L2 Cache | TL2 | `packages/infra/src/cache/` | NOT_STARTED | — | ADR-003. Redis 7. Working memory + stream buffer + prefetch cache. |
-| L5 LLM Adapter | TL2 | `packages/infra/src/llm/` | NOT_STARTED | — | Provider adapters (Anthropic, Google, Ollama). Circuit breaker + retry. `LlmProvider` interface. |
-| L5 Embedding | TL2 | `packages/infra/src/embedding/` | NOT_STARTED | — | ADR-016. gemini-embedding-001. 3072d. batchEmbedContents. |
-| L6 MCP Registry | TL2 | `packages/infra/src/mcp/` | NOT_STARTED | — | `defineTool()` pattern. Auto-registration. Command allowlist (ADR-010). |
+| 4.1 Persistence | TL2 | `packages/infra/src/db/` | NOT_STARTED | — | ADR-002 |
+| 4.1 Cache | TL2 | `packages/infra/src/cache/` | NOT_STARTED | — | ADR-003 |
+| 4.7 LLM Adapter | TL2 | `packages/infra/src/llm/` | NOT_STARTED | — | |
+| 4.8 Embedding | TL2 | `packages/infra/src/embedding/` | NOT_STARTED | — | ADR-016 |
+| 4.9 MCP Registry | TL2 | `packages/infra/src/mcp/` | NOT_STARTED | — | |
 
 ## Phase D: Edge Sprint
 
 | Plan Section | Layer | Code Location | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| L8 CLI Channel | TL1 | `packages/channels/src/cli/` | NOT_STARTED | — | ADR-009. readline-based. |
-| L8 Discord | TL1 | `packages/channels/src/discord/` | NOT_STARTED | — | ADR-009. discord.js. |
-| L8 Telegram | TL1 | `packages/channels/src/telegram/` | NOT_STARTED | — | ADR-009. Grammy. |
-| L9 Gateway | TL1 | `packages/gateway/src/` | NOT_STARTED | — | HTTP/WS. OpenAPI spec (PLAN-002). |
-| Bootstrap | TL0 | `apps/axel/src/` | NOT_STARTED | — | DI container assembly. Lifecycle management (ADR-021). |
+| 5.1 CLI Channel | TL1 | `packages/channels/src/cli/` | NOT_STARTED | — | |
+| 5.3 App Bootstrap | TL0 | `apps/axel/src/` | NOT_STARTED | — | |
+| 5.2 Gateway | TL1 | `packages/gateway/src/` | NOT_STARTED | — | |
+| 5.4 Discord | TL1 | `packages/channels/src/discord/` | NOT_STARTED | — | |
+| 5.5 Telegram | TL1 | `packages/channels/src/telegram/` | NOT_STARTED | — | |
 
 ## Drift Log
 
@@ -194,4 +59,3 @@ These interfaces in `packages/core/src/types/` are consumed by other packages (C
 | 20 | ADR-013:144,171-174 | plan→plan | IVFFlat→HNSW aligned with plan body, ADR-002, migration-strategy | FIX-PRE-IMPL |
 | 20 | migration-strategy:372,377-393 | plan→plan | IVFFlat text/SQL→HNSW, note rewritten for HNSW characteristics | FIX-PRE-IMPL |
 | 20 | plan:843-853 | plan→plan | hot_memories MV SQL: INNER JOIN→LEFT JOIN, aligned with migration-strategy:285-302 | FIX-PRE-IMPL |
-| 32 | Phase A scaffold files | NOT_STARTED→IN_SYNC | 20/21 scaffold files verified present on div/arch worktree. SCAFFOLD-001~006+FIX complete. | SYNC-001 |
