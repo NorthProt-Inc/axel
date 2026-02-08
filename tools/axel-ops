@@ -1,95 +1,60 @@
 #!/bin/bash
-# tools/axel-ops — Human→Coordinator directive CLI helper
-# Usage:
-#   axel-ops directive "UI/UX Division 만들어라"        # P1 directive
-#   axel-ops directive -p0 "빌드 깨졌다, 즉시 수정"      # P0 urgent
-#   axel-ops feedback "CLI 색상 마음에 안든다"           # feedback
-#   axel-ops status                                    # PROGRESS.md summary
-#   axel-ops backlog                                   # BACKLOG.md output
-#   axel-ops errors                                    # ERRORS.md output
-#   axel-ops halt TASK-ID                              # halt directive
-#   axel-ops approve TASK-ID                           # approve
+# tools/axel-ops — Human→Coordinator CLI
+# 지시:  ax "빌드 고쳐"          (P1 기본)
+#        ax -0 "긴급 수정"       (P0)
+#        ax -2 "나중에 해"       (P2)
+#        ax -f "색상 별로"       (feedback)
+# 관리:  ax halt UI-002 / ax approve UI-002
+# 조회:  ax s / ax b / ax e / ax log
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OPS="$REPO_ROOT/.axel-ops"
-COMMS_FILE="$OPS/comms/human.md"
+SCRIPT="$(readlink -f "$0")"
+OPS="$(cd "$(dirname "$SCRIPT")/.." && pwd)/.axel-ops"
+HD="$OPS/comms/human.md"
 
-append_directive() {
-	local priority="$1"
-	local type="$2"
-	local msg="$3"
-	local line="- [ ] **[$priority $type]** $msg"
-	echo "$line" >> "$COMMS_FILE"
-	echo "Added: $line"
+say() {
+	local line="- [ ] **[$1]** $2"
+	echo "$line" >> "$HD"
+	echo "  $line"
 }
 
-case "${1:-help}" in
-	directive)
-		shift
-		priority="P1"
-		if [ "${1:-}" = "-p0" ]; then
-			priority="P0"
-			shift
-		elif [ "${1:-}" = "-p2" ]; then
-			priority="P2"
-			shift
-		elif [ "${1:-}" = "-p3" ]; then
-			priority="P3"
-			shift
-		fi
-		msg="${1:?Usage: axel-ops directive [-p0|-p2|-p3] \"message\"}"
-		append_directive "$priority" "directive" "$msg"
-		;;
-	feedback)
-		shift
-		msg="${1:?Usage: axel-ops feedback \"message\"}"
-		append_directive "P2" "feedback" "$msg"
-		;;
+# No args = help
+[ $# -eq 0 ] && set -- help
+
+case "$1" in
+	-0)  shift; say "P0 directive" "${*:?메시지를 입력하세요}" ;;
+	-2)  shift; say "P2 directive" "${*:?메시지를 입력하세요}" ;;
+	-3)  shift; say "P3 directive" "${*:?메시지를 입력하세요}" ;;
+	-f)  shift; say "P2 feedback" "${*:?메시지를 입력하세요}" ;;
 	halt)
-		shift
-		task_id="${1:?Usage: axel-ops halt TASK-ID}"
-		append_directive "P0" "halt" "Halt task $task_id"
-		;;
+		shift; say "P0 halt" "Halt task ${1:?TASK-ID 필요}" ;;
 	approve)
-		shift
-		task_id="${1:?Usage: axel-ops approve TASK-ID}"
-		append_directive "P1" "approve" "Approve $task_id"
+		shift; say "P1 approve" "Approve ${1:?TASK-ID 필요}" ;;
+	s|status)   [ -f "$OPS/PROGRESS.md" ] && cat "$OPS/PROGRESS.md" || echo "없음" ;;
+	b|backlog)  [ -f "$OPS/BACKLOG.md" ] && cat "$OPS/BACKLOG.md" || echo "없음" ;;
+	e|errors)   [ -f "$OPS/ERRORS.md" ] && cat "$OPS/ERRORS.md" || echo "없음" ;;
+	log)        [ -f "$OPS/logs/cycle.log" ] && tail -20 "$OPS/logs/cycle.log" || echo "없음" ;;
+	pending)    grep -n '^\- \[ \]' "$HD" 2>/dev/null || echo "대기 중인 지시 없음" ;;
+	clear)      sed -i '/^\- \[x\]/d' "$HD" && echo "처리 완료된 항목 삭제" ;;
+	help|-h)
+		cat <<'HELP'
+ax — Axel 지시 CLI
+
+  ax "메시지"              P1 지시 (기본)
+  ax -0 "메시지"           P0 긴급 지시
+  ax -2 "메시지"           P2 지시
+  ax -f "메시지"           피드백
+
+  ax halt TASK-ID          작업 중단
+  ax approve TASK-ID       승인
+
+  ax s                     상태 (PROGRESS)
+  ax b                     백로그 (BACKLOG)
+  ax e                     에러 (ERRORS)
+  ax log                   최근 사이클 로그
+  ax pending               미처리 지시 목록
+  ax clear                 처리완료([x]) 항목 삭제
+HELP
 		;;
-	status)
-		if [ -f "$OPS/PROGRESS.md" ]; then
-			cat "$OPS/PROGRESS.md"
-		else
-			echo "PROGRESS.md not found"
-		fi
-		;;
-	backlog)
-		if [ -f "$OPS/BACKLOG.md" ]; then
-			cat "$OPS/BACKLOG.md"
-		else
-			echo "BACKLOG.md not found"
-		fi
-		;;
-	errors)
-		if [ -f "$OPS/ERRORS.md" ]; then
-			cat "$OPS/ERRORS.md"
-		else
-			echo "ERRORS.md not found"
-		fi
-		;;
-	help|*)
-		echo "axel-ops — Human→Coordinator directive CLI"
-		echo ""
-		echo "Commands:"
-		echo "  directive [-p0|-p2|-p3] \"msg\"   Send directive (default P1)"
-		echo "  feedback \"msg\"                   Send feedback"
-		echo "  halt TASK-ID                      Halt a task"
-		echo "  approve TASK-ID                   Approve escalated item"
-		echo "  status                            Show PROGRESS.md"
-		echo "  backlog                           Show BACKLOG.md"
-		echo "  errors                            Show ERRORS.md"
-		echo ""
-		echo "Or just edit .axel-ops/comms/human.md directly:"
-		echo "  - [ ] **[P0 directive]** 긴급 지시 내용"
-		;;
+	*)   say "P1 directive" "$*" ;;
 esac
