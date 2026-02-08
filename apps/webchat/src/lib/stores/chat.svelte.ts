@@ -5,6 +5,7 @@
  */
 
 import { parseWsMessage, applyChunk, applyDone, createUserMessage } from './chat-logic.js';
+import { createAuthMessage, parseAuthResponse, isAuthOk } from './ws-auth.js';
 
 export interface ChatMessage {
 	readonly id: string;
@@ -25,6 +26,7 @@ let sessionList = $state<Session[]>([]);
 let currentSessionId = $state<string | null>(null);
 let isStreaming = $state(false);
 let wsConnection = $state<WebSocket | null>(null);
+let wsAuthenticated = $state(false);
 
 export const messages = {
 	get value() { return messageList; },
@@ -42,7 +44,7 @@ export function sendMessage(content: string): void {
 	const userMsg = createUserMessage(content);
 	messageList = [...messageList, userMsg];
 
-	if (wsConnection?.readyState === WebSocket.OPEN) {
+	if (wsConnection?.readyState === WebSocket.OPEN && wsAuthenticated) {
 		wsConnection.send(JSON.stringify({
 			type: 'message',
 			content,
@@ -52,11 +54,27 @@ export function sendMessage(content: string): void {
 	}
 }
 
-export function connectWebSocket(url: string): void {
+export function connectWebSocket(url: string, token: string): void {
 	const ws = new WebSocket(url);
+	let authenticated = false;
+
+	ws.addEventListener('open', () => {
+		ws.send(JSON.stringify(createAuthMessage(token)));
+	});
 
 	ws.addEventListener('message', (event) => {
-		const parsed = parseWsMessage(event.data as string);
+		const raw = event.data as string;
+
+		if (!authenticated) {
+			const authResp = parseAuthResponse(raw);
+			if (authResp && isAuthOk(authResp)) {
+				authenticated = true;
+				wsAuthenticated = true;
+			}
+			return;
+		}
+
+		const parsed = parseWsMessage(raw);
 		if (!parsed) return;
 
 		if (parsed.type === 'chunk') {
@@ -69,6 +87,7 @@ export function connectWebSocket(url: string): void {
 
 	ws.addEventListener('close', () => {
 		wsConnection = null;
+		wsAuthenticated = false;
 		isStreaming = false;
 	});
 
