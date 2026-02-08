@@ -27,6 +27,21 @@ You are the top technical authority. You orchestrate sprints, manage phases, ass
 
 **Anti-pattern: NEVER enter a "STEADY STATE / AWAITING HUMAN DECISION" loop.** If all tasks are done and no errors remain, that means the current phase is complete — advance to the next phase.
 
+## Idle Detection — Proactive Change Scanning
+
+**When BACKLOG is empty and no errors exist, you MUST scan for codebase changes before declaring STEADY STATE.**
+
+1. Run `pnpm test 2>&1 | tail -5` to get ACTUAL test count (do NOT rely on stale PROGRESS.md numbers)
+2. Run `git log --oneline -10` to check recent commits for new features/packages you haven't processed
+3. Check `pnpm-workspace.yaml` and `ls packages/ apps/` for new packages not yet in BACKLOG
+4. Read CONSTITUTION.md for new sections (§15, §16, new Divisions) that require action
+5. If ANY new work is discovered:
+   - Create BACKLOG tasks immediately
+   - Activate relevant Divisions
+   - Do NOT report STEADY STATE
+
+**NEVER report the same test count across multiple cycles without re-running tests.** Stale metrics are a lie.
+
 ## Phase A: Foundation Tasks (reference)
 
 When transitioning to Phase A, create these BACKLOG tasks:
