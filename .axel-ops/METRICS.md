@@ -2,20 +2,20 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 64
+## Current Cycle: 65
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 63 cycles | 0 | Active |
+| coord | — | 64 cycles | 0 | Active |
 | arch | 2.5 cycles | 5 | 4 (all CTO override) | Idle |
 | dev-core | 1 cycle | 8 | 0 | Idle |
-| dev-infra | 1 cycle | 10 | 0 | Idle |
-| dev-edge | 1 cycle | 13 | 0 | Idle |
-| quality | 1 cycle | 6 | 1 (QA-012, cancelled C39) | Idle |
+| dev-infra | 1 cycle | 10 | 0 | Assigned (FIX-HARDEN-001) |
+| dev-edge | 1 cycle | 15 (+2: INTEG-008, FIX-AUDIT-E-004) | 0 | Assigned (FIX-HARDEN-002) |
+| quality | 1 cycle | 6 | 1 (QA-012, cancelled C39) | Assigned (QA-020) |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 16 | 0 | Idle (FIX-AUDIT-E-003 done C63) |
+| devops | 1 cycle | 16 | 0 | Idle |
 | audit | 1 cycle | 4 | 0 | Idle |
 
 ## Bottleneck Indicators
@@ -35,7 +35,7 @@
 | `packages/core/` | 90% | 95.2% (branches), 99.69% (stmts), 100% (funcs/lines) | +5% over target |
 | `packages/infra/` | 80% | cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42% | +15% over target |
 | `packages/channels/` | 75% | CLI 95.95%, Discord 90.27%, Telegram 93.18% | +15% over target |
-| `packages/gateway/` | 80% | 94.79% stmt (post FIX-AUDIT-E-001) | +14% over target |
+| `packages/gateway/` | 80% | 95.28% stmt (post INTEG-008 + FIX-AUDIT-E-004) | +15% over target |
 | `apps/axel/` | — | bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48% | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 
@@ -48,7 +48,7 @@
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
-| E: Integration | **HARDENING** | 56 | — | 94% done + 2 hardening tasks in progress (INTEG-008, FIX-AUDIT-E-004). 806 tests, 64 files. 1 error (human-blocked). |
+| E: Integration | **FINAL QA** | 56 | — | 100% executable (18/18 tasks). 816 tests, 66 files. INTEG-008+FIX-AUDIT-E-004 done. Final QA + hardening in progress. 1 error (human-blocked). |
 
 ## Cycle History (Last 10)
 
@@ -65,3 +65,4 @@
 | 62 | coord | 2 (FIX-SCHEMA-001, SYNC-007) | 0 (1 resolved) | **2 TASKS DONE (CTO override).** ERR-070 resolved. Phase E **88%**. |
 | 63 | devops | 1 (FIX-AUDIT-E-003) | 0 (1 resolved: ERR-075) | **PHASE E EFFECTIVELY COMPLETE.** 806 tests, 64 files. 16/17 done. ERR-075 resolved. Open errors 2→1. All Divisions idle. Awaiting human decisions. |
 | 64 | dev-edge, coord | 0 | 0 | **HARDENING CYCLE.** No idle waiting. INTEG-008 (webhook routes) + FIX-AUDIT-E-004 (AUD-086/090) assigned to dev-edge. Phase E active hardening. |
+| 65 | dev-edge, quality, dev-infra | 2 (INTEG-008, FIX-AUDIT-E-004) | 0 | **2 TASKS DONE.** INTEG-008 (webhook routes, 17 tests), FIX-AUDIT-E-004 (headers+cast). **816 tests, 66 files.** Gateway 95.28% stmt. Phase E executable work done. QA-020 + 2 hardening tasks assigned. |

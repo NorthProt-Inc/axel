@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 64**: **PHASE E: HARDENING.** 16 tasks done + 2 assigned. 806 tests, 64 files. INTEG-008 + FIX-AUDIT-E-004 in progress. 2 human-blocked tasks remain. Open errors 1 (ERR-069 CRITICAL human decision).
+> **Cycle 65**: **PHASE E: COMPLETE (executable).** 18 Phase E tasks done. 816 tests, 66 files. All executable work finished. 2 human-blocked tasks remain. Open errors 1 (ERR-069 CRITICAL human decision). Final QA + hardening assigned.
 
 ## Queued (Human-Blocked)
 
@@ -15,8 +15,9 @@
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | 0208C64 |
-| FIX-AUDIT-E-004 | P2 | dev-edge | Fix AUD-086 (security headers: X-Content-Type-Options, X-Frame-Options) + AUD-090 (unsafe cast in handleSessionEnd). TDD mandatory. | 0208C64 |
+| QA-020 | P1 | quality | Final Phase E review: verify INTEG-008 webhook routes + FIX-AUDIT-E-004 security fixes. 816 tests, 66 files. Check TDD, §9, §14, coverage. | 0208C65 |
+| FIX-HARDEN-001 | P2 | dev-infra | Fix AUD-088: remove hardcoded fallback credentials from pg-redis-integration.test.ts. Require env vars from testcontainers setup. TDD mandatory. | 0208C65 |
+| FIX-HARDEN-002 | P2 | dev-edge | Fix AUD-093: wire ToolRegistry tool definitions into InboundHandler (tools:[] → actual tools). Add ToolDefinition[] to InboundHandlerDeps. TDD mandatory. | 0208C65 |
 
 ## Cancelled
 
@@ -144,3 +145,5 @@
 | FIX-SCHEMA-001 | coord (CTO) | 0208C62 | Sessions table schema drift fixed: channel_history JSONB→TEXT[], last_activity_at TIMESTAMPTZ added, idx_sessions_user updated. migration-strategy.md + 002_episodic_memory.sql aligned with PgSessionStore. ERR-070 resolved. |
 | SYNC-007 | coord (CTO) | 0208C62 | PLAN_SYNC Phase E: 7 subsections (E.1~E.7) mapped. Migration runner, InboundHandler, gateway integration, PG+Redis integration, channel bootstrap, E2E roundtrip, schema amendment all IN_SYNC. |
 | FIX-AUDIT-E-003 | devops | 0208C63 | AUD-083 hardcoded DB credentials removed from migrate CLI. Env vars enforced (DATABASE_URL or PG*). 5 new tests. 806 tests pass. ERR-075 resolved. |
+| FIX-AUDIT-E-004 | dev-edge | 0208C65 | AUD-086 security headers (X-Content-Type-Options, X-Frame-Options) + AUD-090 unsafe cast fix. 111 gateway tests. TDD RED→GREEN. |
+| INTEG-008 | dev-edge | 0208C65 | Webhook routes: POST /webhooks/telegram (secret_token verification) + POST /webhooks/discord (Ed25519 signature verification, PING→PONG). 17 webhook tests. 816 total tests, 66 files. |

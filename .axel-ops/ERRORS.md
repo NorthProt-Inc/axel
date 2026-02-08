@@ -2,7 +2,7 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 63**: **1 CRITICAL (ERR-069, human decision pending).** ERR-075 resolved by FIX-AUDIT-E-003 (devops). Open errors 2→1.
+> **Cycle 65**: **1 CRITICAL (ERR-069, human decision pending).** No new errors. AUD-086/AUD-090 resolved by FIX-AUDIT-E-004. Open errors unchanged at 1.
 
 ## Open
 

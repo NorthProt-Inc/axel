@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **E: INTEGRATION — HARDENING**
-- **Cycle**: 64
-- **Last Updated**: 2026-02-08C64
-- **STATUS**: **No idle cycles.** INTEG-008 (webhook routes) + FIX-AUDIT-E-004 (gateway security headers + route-handlers unsafe cast) assigned. Phase E **94% → active hardening.** 806 tests, 64 files. Open errors 1 (ERR-069 CRITICAL human-blocked). 2 human-blocked tasks unchanged. Activating dev-edge + dev-edge for executable work.
+- **Phase**: **E: INTEGRATION — FINAL QA**
+- **Cycle**: 65
+- **Last Updated**: 2026-02-08C65
+- **STATUS**: **2 TASKS COMPLETED.** INTEG-008 (webhook routes, 17 tests) + FIX-AUDIT-E-004 (security headers + unsafe cast). **816 tests, 66 files.** Phase E all executable work done. Final QA (QA-020) + 2 hardening tasks assigned. Open errors 1 (ERR-069 CRITICAL human-blocked). 2 human-blocked tasks unchanged.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 2 (2 human-blocked) |
-| In Progress | 2 (INTEG-008, FIX-AUDIT-E-004) |
-| Done | 106 |
+| In Progress | 3 (QA-020, FIX-HARDEN-001, FIX-HARDEN-002) |
+| Done | 108 |
 | Cancelled | 14 |
 
 ## Open Errors: 1 (ERR-069 CRITICAL human-decision only)
@@ -54,18 +54,19 @@
 | 62 | 0208 | **2 TASKS COMPLETED (CTO override).** FIX-SCHEMA-001 (sessions schema: JSONB→TEXT[], last_activity_at, ERR-070 resolved), SYNC-007 (PLAN_SYNC Phase E: 7 subsections E.1~E.7 mapped). Smoke: **801 tests, 63 files**, typecheck clean. FIX-AUDIT-E-003 in progress (devops). Phase E **88%** (15/17). Open errors 3→2. |
 | 63 | 0208 | **1 TASK COMPLETED.** FIX-AUDIT-E-003 (devops: AUD-083 hardcoded DB creds removed, 806 tests, ERR-075 resolved). **PHASE E EFFECTIVELY COMPLETE** — 16/17 tasks done, 0 in progress, all executable work finished. Remaining: 2 human-blocked (FIX-DIMENSION-001 P0, CONST-AMEND-001 P2) + 1 optional P2 (INTEG-008). Open errors 2→1. **All Divisions idle. Awaiting human decisions.** |
 | 64 | 0208 | **HARDENING CYCLE.** No idle waiting — assigned INTEG-008 (webhook routes, dev-edge) + FIX-AUDIT-E-004 (gateway security: AUD-086 headers + AUD-090 unsafe cast, dev-edge). 2 tasks in progress. Phase E active hardening. Open errors 1 (ERR-069 CRITICAL human-blocked). |
+| 65 | 0208 | **2 TASKS COMPLETED.** INTEG-008 (webhook routes: Telegram + Discord, 17 tests, Ed25519 + secret_token verification), FIX-AUDIT-E-004 (AUD-086 security headers + AUD-090 unsafe cast fix). **816 tests, 66 files.** Gateway 95.28% stmt. Phase E **all executable work done.** Final QA (QA-020) + 2 hardening tasks (FIX-HARDEN-001 test creds, FIX-HARDEN-002 empty tools) assigned. Open errors 1 (ERR-069 CRITICAL human-blocked). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C64 | Cycle 64 | Active |
+| Coordinator | 0208C65 | Cycle 65 | Active |
 | Architecture | 0208C58 | — | Idle |
 | Dev-Core | 0208C61 | — | Idle |
-| Dev-Infra | 0208C58 | — | Idle |
-| Dev-Edge | 0208C64 | INTEG-008, FIX-AUDIT-E-004 | Assigned |
+| Dev-Infra | 0208C65 | FIX-HARDEN-001 | Assigned |
+| Dev-Edge | 0208C65 | FIX-HARDEN-002 | Assigned |
 | Research | 0208C58 | — | Idle |
-| Quality | 0208C61 | — | Idle |
+| Quality | 0208C65 | QA-020 | Assigned |
 | DevOps | 0208C63 | — | Idle |
 | Audit | 0208C59 | — | Idle |
 
