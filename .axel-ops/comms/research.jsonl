@@ -17,3 +17,9 @@
 {"ts":"0208T0617","from":"research","type":"claim","task":"RES-001","note":"Starting pgvector index comparison research"}
 {"ts":"0208T0619","from":"research","type":"done","task":"RES-001","out":"docs/research/RES-001-pgvector-index-comparison.md","note":"HNSW recommended for Layer 6 (read-heavy), IVFFlat for Layers 2-5 (write-heavy). Hybrid approach balances query performance (15.5x) vs build time (32x) and memory (2.8x)."}
 {"ts":"0208T0619","from":"research","type":"ack","task":"RES-002,RES-003,RES-004,RES-005","note":"All P1 research tasks completed. Research outputs available in docs/research/ for Architecture Division use."}
+{"ts":"0208T0629","from":"research","type":"claim","task":"RES-001","note":"Starting pgvector index comparison research"}
+{"ts":"0208T0631","from":"research","type":"done","task":"RES-001","out":"docs/research/RES-001-pgvector-index-comparison.md","note":"HNSW recommended for Axel (7.4x faster queries, better recall), hybrid approach detailed with layer-specific config"}
+{"ts":"0207T2214","from":"research","type":"done","task":"RES-002","out":"docs/research/RES-002-typescript-token-counting.md","note":"Anthropic SDK countTokens() recommended over tiktoken (billing-grade accuracy, multimodal support)"}
+{"ts":"0207T2214","from":"research","type":"done","task":"RES-003","out":"docs/research/RES-003-gemini-embedding-comparison.md","note":"gemini-embedding-001 comparison complete"}
+{"ts":"0207T2214","from":"research","type":"done","task":"RES-004","out":"docs/research/RES-004-webchat-spa-framework.md","note":"React vs Svelte vs Solid framework comparison complete"}
+{"ts":"0207T2214","from":"research","type":"done","task":"RES-005","out":"docs/research/RES-005-github-actions-ci-cd.md","note":"GitHub Actions CI/CD best practices for TS monorepo documented"}
