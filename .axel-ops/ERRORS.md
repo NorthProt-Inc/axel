@@ -2,13 +2,14 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 21**: FIX-PRE-IMPL completed (f553f8f). ERR-060~062 all resolved.
-> **PLAN CLOSURE 100% COMPLETE.** All consistency items fixed. Open: 0. Resolved: 61.
+> **Cycle 30**: 2 new issues. ENV-001 (P0 blocker: Node.js/pnpm). ERR-063 (MEDIUM: ownership violation).
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
+| ENV-001 | P0 | devops | 0208C30 | Node.js 18.19.1 detected, need 22 LTS. pnpm not installed. Phase A milestone blocked. | **HUMAN** |
+| ERR-063 | MEDIUM | coord | 0208C30 | DevOps created packages/core/src/types/index.ts — dev-core ownership (Constitution Rule 1). Must remove from div/devops before remerge. | SCAFFOLD-FIX (devops) |
 
 ## Resolved
 

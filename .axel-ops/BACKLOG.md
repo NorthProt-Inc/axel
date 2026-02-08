@@ -2,25 +2,33 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 29**: Phase A (Foundation) in progress. DevOps: SCAFFOLD-001~003 in progress + SCAFFOLD-006 assigned. Arch: SYNC-001 queued.
+> **Cycle 30**: Phase A (Foundation). SCAFFOLD-001~006 code complete on div/devops but **reverted from main** (0afbf38). 2 blockers: Node.js upgrade + remerge. SCAFFOLD-007 + SYNC-001 queued.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| SCAFFOLD-004 | P1 | devops | Create per-package package.json + tsconfig.json (core, infra, channels, gateway, apps/axel) | SCAFFOLD-001, SCAFFOLD-002 | 0208C28 |
-| SCAFFOLD-005 | P1 | devops | Create vitest.config.ts (root + per-package) | SCAFFOLD-003, SCAFFOLD-004 | 0208C28 |
-| SCAFFOLD-007 | P2 | devops | Create .github/workflows/ci.yml (lint → typecheck → test) | SCAFFOLD-005 | 0208C28 |
+| SCAFFOLD-FIX | P0 | devops | Fix ownership violation (remove packages/core/src/types/index.ts from div/devops), rebase div/devops on main | — | 0208C30 |
+| SCAFFOLD-007 | P2 | devops | Create .github/workflows/ci.yml (lint → typecheck → test) | SCAFFOLD-005, ENV-001 resolved | 0208C28 |
 | SYNC-001 | P1 | arch | Create initial PLAN_SYNC.md interface mappings for Phase A | — | 0208C28 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| SCAFFOLD-001 | devops | 0208C28 | C29 |
-| SCAFFOLD-002 | devops | 0208C28 | C29 |
-| SCAFFOLD-003 | devops | 0208C28 | C29 |
-| SCAFFOLD-006 | devops | 0208C29 | C30 |
+
+## Done (Pending Merge)
+
+> These tasks are code-complete on div/devops but reverted from main (commit 0afbf38). Require SCAFFOLD-FIX + ENV-001 resolution before remerge.
+
+| ID | Division | Completed | Output | Branch |
+|----|----------|-----------|--------|--------|
+| SCAFFOLD-001 | devops | 0208C30 | pnpm-workspace.yaml, package.json | div/devops |
+| SCAFFOLD-002 | devops | 0208C30 | tsconfig.base.json | div/devops |
+| SCAFFOLD-003 | devops | 0208C30 | biome.json | div/devops |
+| SCAFFOLD-004 | devops | 0208C30 | packages/*/package.json + tsconfig.json | div/devops |
+| SCAFFOLD-005 | devops | 0208C30 | vitest.config.ts (root + per-package) | div/devops |
+| SCAFFOLD-006 | devops | 0208C30 | docker/docker-compose.dev.yml | div/devops |
 
 ## Cancelled
 
