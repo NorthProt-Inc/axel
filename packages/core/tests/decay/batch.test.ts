@@ -59,7 +59,7 @@ describe('decayBatch', () => {
 		expect(results[1]).toBeLessThan(0.5);
 	});
 
-	it('should produce same results as individual calculations', () => {
+	it('should produce same results as individual calculations', async () => {
 		const { calculateDecayedImportance } = await import('../../src/decay/calculator.js');
 		const inputs = [
 			makeInput({ importance: 0.9, memoryType: 'fact', hoursElapsed: 720, channelMentions: 2 }),
