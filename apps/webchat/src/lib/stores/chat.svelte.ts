@@ -1,7 +1,11 @@
 /**
  * Chat state store using Svelte 5 runes.
  * Manages messages, WebSocket connection, and session state.
+ * Pure logic delegated to chat-logic.ts for testability.
  */
+
+import { parseWsMessage, applyChunk, applyDone, createUserMessage } from './chat-logic.js';
+import { createAuthMessage, parseAuthResponse, isAuthOk } from './ws-auth.js';
 
 export interface ChatMessage {
 	readonly id: string;
@@ -22,6 +26,7 @@ let sessionList = $state<Session[]>([]);
 let currentSessionId = $state<string | null>(null);
 let isStreaming = $state(false);
 let wsConnection = $state<WebSocket | null>(null);
+let wsAuthenticated = $state(false);
 
 export const messages = {
 	get value() { return messageList; },
@@ -36,15 +41,10 @@ export const streaming = {
 };
 
 export function sendMessage(content: string): void {
-	const userMsg: ChatMessage = {
-		id: crypto.randomUUID(),
-		role: 'user',
-		content,
-		timestamp: new Date(),
-	};
+	const userMsg = createUserMessage(content);
 	messageList = [...messageList, userMsg];
 
-	if (wsConnection?.readyState === WebSocket.OPEN) {
+	if (wsConnection?.readyState === WebSocket.OPEN && wsAuthenticated) {
 		wsConnection.send(JSON.stringify({
 			type: 'message',
 			content,
@@ -54,41 +54,40 @@ export function sendMessage(content: string): void {
 	}
 }
 
-export function connectWebSocket(url: string): void {
+export function connectWebSocket(url: string, token: string): void {
 	const ws = new WebSocket(url);
+	let authenticated = false;
+
+	ws.addEventListener('open', () => {
+		ws.send(JSON.stringify(createAuthMessage(token)));
+	});
 
 	ws.addEventListener('message', (event) => {
-		const data = JSON.parse(event.data as string) as { type: string; content?: string; sessionId?: string };
-		if (data.type === 'chunk' && data.content) {
-			const last = messageList[messageList.length - 1];
-			if (last?.role === 'assistant' && last.streaming) {
-				messageList = [
-					...messageList.slice(0, -1),
-					{ ...last, content: last.content + data.content },
-				];
-			} else {
-				messageList = [...messageList, {
-					id: crypto.randomUUID(),
-					role: 'assistant',
-					content: data.content,
-					timestamp: new Date(),
-					streaming: true,
-				}];
+		const raw = event.data as string;
+
+		if (!authenticated) {
+			const authResp = parseAuthResponse(raw);
+			if (authResp && isAuthOk(authResp)) {
+				authenticated = true;
+				wsAuthenticated = true;
 			}
-		} else if (data.type === 'done') {
-			const last = messageList[messageList.length - 1];
-			if (last?.role === 'assistant' && last.streaming) {
-				messageList = [
-					...messageList.slice(0, -1),
-					{ ...last, streaming: false },
-				];
-			}
+			return;
+		}
+
+		const parsed = parseWsMessage(raw);
+		if (!parsed) return;
+
+		if (parsed.type === 'chunk') {
+			messageList = applyChunk(messageList, parsed.content, crypto.randomUUID());
+		} else if (parsed.type === 'done') {
+			messageList = applyDone(messageList);
 			isStreaming = false;
 		}
 	});
 
 	ws.addEventListener('close', () => {
 		wsConnection = null;
+		wsAuthenticated = false;
 		isStreaming = false;
 	});
 
