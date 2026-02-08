@@ -105,13 +105,15 @@ run_division "research" "sonnet" "/home/northprot/projects/axel-wt-research" &
 PID_RES=$!
 run_division "quality"  "opus"   "/home/northprot/projects/axel-wt-quality"  &
 PID_QA=$!
+run_division "audit"    "opus"   "/home/northprot/projects/axel-wt-audit"    &
+PID_AUDIT=$!
 
-# Wait for all 3 to complete
-wait $PID_ARCH $PID_RES $PID_QA
+# Wait for all 4 to complete
+wait $PID_ARCH $PID_RES $PID_QA $PID_AUDIT
 
 # ── Phase 3: Merge Division results into main ──
 cd "$MAIN_REPO"
-for br in div/arch div/research div/quality; do
+for br in div/arch div/research div/quality div/audit; do
     git merge "$br" --no-ff --no-edit --quiet 2>>"$OPS/logs/cycle.log" || {
         log "MERGE CONFLICT on $br — skipping, will retry next cycle"
         git merge --abort 2>/dev/null || true
@@ -120,7 +122,7 @@ done
 
 # Push all branches to origin
 git push origin main --quiet 2>/dev/null || true
-for br in div/arch div/research div/quality; do
+for br in div/arch div/research div/quality div/audit; do
     git push origin "$br" --quiet 2>/dev/null || true
 done
 

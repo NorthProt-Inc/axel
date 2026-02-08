@@ -13,6 +13,7 @@
 | **Architecture** | `docs/plan/`, `docs/adr/` | opus |
 | **Research** | `docs/research/` | sonnet |
 | **Quality** | `.axel-ops/comms/quality.jsonl` (write), all `docs/` (read-only for review) | opus |
+| **Audit** | `.axel-ops/comms/audit.jsonl` (write), all files (read-only for verification) | opus |
 
 **Rule**: A Division may ONLY create/modify files in its owned directories. Reading any file is allowed.
 
@@ -37,6 +38,7 @@ Each Division writes to its own comms file. Coordinator reads all.
 | `block` | Blocker encountered | any |
 | `escalate` | Human intervention needed | coord only |
 | `broadcast` | Global announcement | coord only |
+| `finding` | Factual discrepancy found | audit only |
 | `ack` | Acknowledgment | any |
 
 ### 2.3 Comms Files
@@ -46,6 +48,7 @@ Each Division writes to its own comms file. Coordinator reads all.
 | `comms/arch.jsonl` | Architecture | Coordinator, Quality |
 | `comms/research.jsonl` | Research | Coordinator, Architecture |
 | `comms/quality.jsonl` | Quality | Coordinator, Architecture |
+| `comms/audit.jsonl` | Audit | Coordinator, Architecture, Quality |
 | `comms/broadcast.jsonl` | Coordinator | All |
 
 ## 3. Quality Gates

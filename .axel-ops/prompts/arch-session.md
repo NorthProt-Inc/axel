@@ -22,6 +22,7 @@ Read the following files in order:
 5. `.axel-ops/comms/research.jsonl` — Research results you may need (tail 10)
 6. `.axel-ops/comms/quality.jsonl` — QA feedback on your work (tail 10)
 7. `docs/plan/axel-project-plan.md` — Current v2.0 plan
+8. `.axel-ops/comms/audit.jsonl` — Audit findings to address (tail 20)
 
 ### Step 2: Identify Your Tasks
 
@@ -87,6 +88,12 @@ If blocked, write a `block` message instead:
 ```jsonl
 {"ts":"[timestamp]","from":"arch","type":"block","task":"[TASK-ID]","need":"[what you need]","note":"[description]"}
 ```
+
+**Audit Response** (from audit.jsonl findings):
+- Read HIGH/MEDIUM findings from `.axel-ops/comms/audit.jsonl`
+- For each finding: verify, then fix in `docs/plan/` or `docs/adr/`
+- **VERSION BUMP** applies after audit fixes
+- Write `ack` messages to `.axel-ops/comms/arch.jsonl` referencing each finding
 
 ### Step 5: QA Feedback Response
 

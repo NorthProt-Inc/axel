@@ -9,7 +9,7 @@
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| (empty) | | | | | |
+| AUDIT-001 | P0 | audit | Plan factual accuracy audit. Key items: (1) Embedding dimension — Mark confirms 3072d (full), not 768d (truncated). Verify all 11 plan references + ADR-016. (2) Cross-check all ADR decisions against plan body. (3) Verify model names, versions, numerical claims against official docs. | — | 0208 |
 
 ## In Progress
 
