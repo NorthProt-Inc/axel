@@ -1,10 +1,9 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { z } from 'zod';
-import type { ToolExecutor } from '../../../core/src/orchestrator/types.js';
-import { ToolError } from '../../../core/src/types/errors.js';
-import type { ToolCallRequest } from '../../../core/src/types/react.js';
-import type { ToolCategory, ToolDefinition, ToolResult } from '../../../core/src/types/tool.js';
+import type { ToolExecutor } from '@axel/core/orchestrator';
+import { ToolError } from '@axel/core/types';
+import type { ToolCallRequest, ToolCategory, ToolDefinition, ToolResult } from '@axel/core/types';
 
 /** Handler function type for tool execution */
 type ToolHandler = (args: Record<string, unknown>) => Promise<ToolResult>;

@@ -1,5 +1,5 @@
-import type { Turn, WorkingMemory } from '../../../core/src/memory/types.js';
-import type { ComponentHealth } from '../../../core/src/types/health.js';
+import type { Turn, WorkingMemory } from '@axel/core/memory';
+import type { ComponentHealth } from '@axel/core/types';
 
 /** Minimal Redis client interface (subset used by this adapter) */
 interface RedisClient {

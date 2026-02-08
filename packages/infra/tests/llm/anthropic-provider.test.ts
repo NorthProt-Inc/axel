@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { LlmChatChunk, LlmChatParams } from '../../../core/src/orchestrator/types.js';
-import type { ToolDefinition } from '../../../core/src/types/tool.js';
+import type { LlmChatChunk, LlmChatParams } from '@axel/core/orchestrator';
+import type { ToolDefinition } from '@axel/core/types';
 
 // ─── Mock Anthropic SDK Client ───
 
@@ -256,7 +256,7 @@ describe('AnthropicLlmProvider', () => {
 
 		it('should mark rate limit errors as retryable', async () => {
 			const { AnthropicLlmProvider } = await importModule();
-			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const { ProviderError } = await import('@axel/core/types');
 			const provider = new AnthropicLlmProvider(client as any, {
 				model: 'claude-sonnet-4-5-20250929',
 				maxTokens: 4096,
@@ -294,7 +294,7 @@ describe('AnthropicLlmProvider', () => {
 
 		it('should mark 400 errors as non-retryable', async () => {
 			const { AnthropicLlmProvider } = await importModule();
-			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const { ProviderError } = await import('@axel/core/types');
 			const provider = new AnthropicLlmProvider(client as any, {
 				model: 'claude-sonnet-4-5-20250929',
 				maxTokens: 4096,
@@ -334,7 +334,7 @@ describe('AnthropicLlmProvider', () => {
 	describe('chat — tool call JSON.parse failure (FIX-INFRA-003)', () => {
 		it('should throw ProviderError when tool call JSON is malformed instead of silently using empty args', async () => {
 			const { AnthropicLlmProvider } = await importModule();
-			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const { ProviderError } = await import('@axel/core/types');
 			const provider = new AnthropicLlmProvider(client as any, {
 				model: 'claude-sonnet-4-5-20250929',
 				maxTokens: 4096,

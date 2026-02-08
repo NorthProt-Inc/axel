@@ -5,8 +5,8 @@ import type {
 	ScoredMemory,
 	SemanticMemory,
 	SemanticQuery,
-} from '../../../core/src/memory/types.js';
-import type { Memory, MemoryType } from '../../../core/src/types/memory.js';
+} from '@axel/core/memory';
+import type { Memory, MemoryType } from '@axel/core/types';
 
 // ─── Mock PG Pool ───
 

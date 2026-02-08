@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { StreamEventType } from '../../../core/src/memory/types.js';
+import type { StreamEventType } from '@axel/core/memory';
 
 // ─── Mock Types ───
 

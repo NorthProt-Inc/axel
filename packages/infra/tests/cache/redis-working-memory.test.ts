@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Turn } from '../../../core/src/memory/types.js';
+import type { Turn } from '@axel/core/memory';
 
 // ─── Mock Types ───
 

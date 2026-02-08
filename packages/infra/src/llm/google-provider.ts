@@ -2,9 +2,9 @@ import type {
 	LlmChatChunk,
 	LlmChatParams,
 	LlmProvider,
-} from '../../../core/src/orchestrator/types.js';
-import { ProviderError } from '../../../core/src/types/errors.js';
-import type { ToolCallRequest } from '../../../core/src/types/react.js';
+} from '@axel/core/orchestrator';
+import { ProviderError } from '@axel/core/types';
+import type { ToolCallRequest } from '@axel/core/types';
 
 /** Google Generative AI stream response chunk */
 interface GoogleStreamChunk {
