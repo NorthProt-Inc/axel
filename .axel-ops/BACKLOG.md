@@ -2,21 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 51**: Phase D Edge Sprint **73%**. 4 tasks completed (EDGE-003, QA-017, PLAN-AMEND-001, SYNC-005). BOOTSTRAP-001 assigned to dev-edge. EDGE-004/005 queued.
+> **Cycle 52**: Phase D Edge Sprint **80%**. BOOTSTRAP-001 completed (dev-edge, 33 tests, 591 total). EDGE-004 + EDGE-005 assigned parallel. QA-018 + SYNC-006 queued.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| EDGE-004 | P1 | dev-edge | Implement Telegram Channel in packages/channels/src/telegram/. grammy. AxelChannel impl. Polling mode (Phase D). 4096 char limit. typingIndicator via sendChatAction. Per plan L8 + ADR-009. TDD mandatory. | EDGE-001, DEVOPS-005 |
-| EDGE-005 | P1 | dev-edge | Implement Gateway HTTP + WebSocket in packages/gateway/src/. Routes per openapi-v1.yaml: /health, /api/v1/chat, /api/v1/memory/search, /api/v1/session, /ws. WebSocket protocol per websocket-protocol.md. Security middleware: CORS, JWT auth, rate limiting, input validation (Zod), error redaction (ADR-011). Per plan L9 (lines 1564-1629). TDD mandatory. | EDGE-001, BOOTSTRAP-001 |
+| QA-018 | P1 | quality | Phase D code review batch 2: EDGE-003 (Discord) + BOOTSTRAP-001 (DI container + lifecycle). Verify TDD, §9, §10, §14, coverage targets (channels 75%+), ADR compliance (009/011/021). 591 tests. | EDGE-003, BOOTSTRAP-001 |
+| SYNC-006 | P1 | arch | PLAN_SYNC.md Phase D update: D.6 Bootstrap NOT_STARTED→IN_SYNC (map apps/axel/src/ config/container/lifecycle/main to plan lines 308-338, 579-680). | BOOTSTRAP-001 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| BOOTSTRAP-001 | dev-edge | 0208C51 | C52–C53 |
+| EDGE-004 | dev-edge | 0208C52 | C53–C54 |
+| EDGE-005 | dev-edge | 0208C52 | C54–C55 |
 
 ## Cancelled
 
@@ -121,3 +122,4 @@
 | QA-017 | quality | 0208C51 | Phase D code review (EDGE-001/002): PASS. 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW. TDD PASS. §9 PASS. ADR-009 PASS. |
 | PLAN-AMEND-001 | coord (CTO) | 0208C51 | ADR-002 PG 16→17, migration-strategy PG 16→17 + sessions user_id + channel_history + idx. AUD-050/058 resolved. CTO override (arch 3 cycles stalled). |
 | SYNC-005 | coord (CTO) | 0208C51 | PLAN_SYNC.md Phase D: D.1-D.3 NOT_STARTED→IN_SYNC, D.4-D.6 NOT_STARTED, D.7 AMENDED. CTO override. |
+| BOOTSTRAP-001 | dev-edge | 0208C52 | DI container + lifecycle in apps/axel/src/. config.ts (Zod AxelConfigSchema), container.ts (~20 services), lifecycle.ts (4-phase shutdown), main.ts. 33 tests, 591 total. |
