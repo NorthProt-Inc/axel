@@ -1,31 +1,48 @@
 # BACKLOG
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
+>
+> **Cycle 7 Restructure**: FIX-001~009 absorbed into 7 Work Packages per QA-007 root cause analysis.
+> Dependency chains simplified. FIX-001/FIX-002 cancelled (6 cycles stalled, superseded).
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| FIX-003 | P0 | arch | QA-003 HIGH issues: Redis/PG role clarification, embedding model update, tiktoken removal, IVFFlat formula fix, Gemini Flash latency + QA-004 HIGH: ToolDefinition type ownership, migration direction reversal | FIX-001 | 0208 |
-| ADR-016 | P0 | arch | Redis role redefinition ADR — resolve ADR-002/003 tension, PG as authoritative source, Redis as ephemeral cache | FIX-003 | 0208 |
-| FIX-004 | P1 | arch | QA-003+004 MEDIUM/LOW issues: Zod v4 compat, countTokens async, TTFT target revision, Docker cold start qualifier, tsdown attribution, EmbeddingService signature, Layer numbering cleanup | FIX-003 | 0208 |
-| FIX-005 | P1 | arch | QA-004 standalone fixes not requiring FIX-003: ToolDefinition → core/types extraction, migration direction text fix | — | 0208 |
+| WP-1 | P0 | arch | Batch-create ADR-001~012 files in docs/adr/. Each needs: title, status(confirmed), context, decision, consequences, alternatives. ADR-003 (Redis) needs clarification per ERR-010. Absorbs FIX-002, ERR-003. | — | 0208 |
+| WP-2 | P0 | arch | Define core domain types in plan Section 3: Memory, Message, MemoryEngine, ToolResult, ReActEvent, SessionSummary, HealthStatus, SessionState. Absorbs ERR-035 part of FIX-008. | WP-1 | 0208 |
+| WP-3 | P0 | arch | Factual corrections: (1) text-embedding-004→gemini-embedding-001 in 3 locations (ERR-011,021), (2) tiktoken→Anthropic SDK countTokens (ERR-012), (3) Gemini Flash latency '<50ms'→realistic target (ERR-014), (4) IVFFlat formula removal (ERR-013), (5) ToolDefinition type ownership (ERR-020), (6) migration direction text fix (ERR-021). Absorbs FIX-003 HIGH + FIX-005. | — | 0208 |
+| WP-4 | P0 | arch | Redis role clarification: redefine Redis as ephemeral cache with PG shadow writes. Update ADR-003, create ADR-016 (Redis Role Redefinition). Add degradation paths for Redis unavailability. Absorbs ERR-010, ERR-038, ADR-016. | WP-1 | 0208 |
+| WP-5 | P0 | arch | Error handling specification: (1) ADR-020 Error Taxonomy (AxelError base, TransientError, PermanentError, ValidationError, AuthError, ProviderError, ToolError), (2) ReAct loop try/catch + timeout enforcement (ERR-036), (3) error type hierarchy definition (ERR-037). Absorbs FIX-008 error items, ADR-020. | WP-2 | 0208 |
+| WP-6 | P0 | arch | Lifecycle specification: (1) Session state machine with SessionState enum (ERR-041), (2) graceful shutdown sequence with SIGTERM handling (ERR-040), (3) memory consolidation L2→L3 algorithm (ERR-039), (4) ADR-021 Resilience Patterns (circuit breaker, reconnection, degradation). Absorbs FIX-008 lifecycle items, ADR-021. | WP-2 | 0208 |
+| WP-7 | P0 | arch | Security specification: (1) ADR-019 Auth Strategy (JWT vs static bearer, token transport, WS auth), (2) WebSocket authentication (ERR-025), (3) command args + cwd validation (ERR-026), (4) webhook signature verification (ERR-028), (5) prompt injection defense beyond regex (ERR-029), (6) migration subprocess TS-only (ERR-030). Absorbs FIX-006, ADR-019. | — | 0208 |
+| FIX-MED | P1 | arch | MEDIUM/LOW issues batch: Zod v4 compat (ERR-015), countTokens async (ERR-016), TTFT target revision (ERR-017), Docker cold start qualifier (ERR-018), tsdown attribution (ERR-019), EmbeddingService signature (ERR-022), layer numbering (ERR-023), SecurityConfigSchema (ERR-027), channel reconnection (ERR-042), circuit breaker state machine (ERR-043), streaming error handling (ERR-044), persona hot-reload (ERR-045), meta memory feedback (ERR-046), DI container completeness (ERR-034), credential redaction (ERR-032), default allowlist (ERR-031), security test cases (ERR-033). | WP-3,WP-5,WP-6,WP-7 | 0208 |
 | ADR-017 | P1 | arch | Svelte 5 WebChat SPA decision ADR (based on RES-004) | — | 0208 |
 | ADR-018 | P1 | arch | Token counting strategy ADR: Anthropic SDK countTokens + per-model strategy (based on RES-002) | — | 0208 |
-| FIX-006 | P0 | arch | QA-005 security HIGH issues: auth strategy ADR needed (JWT vs static bearer), WS auth, command args validation, webhook signatures, prompt injection defense, migration subprocess TS-only | FIX-001 | 0208 |
-| ADR-019 | P0 | arch | Authentication strategy ADR — JWT vs static bearer for single-user MVP, token transport, WS auth | FIX-006 | 0208 |
-| FIX-007 | P2 | arch | QA-005 security LOW issues: docker/node in default allowlist, credential redaction in logs, missing security test cases | FIX-006 | 0208 |
-| FIX-008 | P0 | arch | QA-006 HIGH issues: complete DI container spec, define core types (Memory, Message, MemoryEngine), ReAct loop error handling, error type hierarchy, Redis failure modes, memory consolidation algorithm, graceful shutdown, session state machine | FIX-001 | 0208 |
-| ADR-020 | P0 | arch | Error Taxonomy ADR — base AxelError class, subclasses (TransientError, PermanentError, ValidationError, AuthError, ProviderError, ToolError), category enum, classifyError() mapping | FIX-008 | 0208 |
-| ADR-021 | P0 | arch | Resilience Patterns ADR — Redis degradation paths, circuit breaker state machine, graceful shutdown sequence, reconnection strategy | FIX-008 | 0208 |
-| FIX-009 | P1 | arch | QA-006 MEDIUM/LOW issues: channel reconnection lifecycle, circuit breaker state machine, streaming error handling, persona hot-reload, meta memory feedback loop | FIX-008 | 0208 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-001 | arch | 0207T2200 | — |
-| FIX-002 | arch | 0207T2200 | — |
+| (none) | — | — | — |
+
+## Cancelled
+
+| ID | Reason | Superseded By |
+|----|--------|---------------|
+| FIX-001 | 6 cycles stalled, absorbed into WP-1~7 | WP-1, WP-2, WP-3, WP-4, WP-5, WP-6, WP-7 |
+| FIX-002 | 6 cycles stalled, absorbed into WP-1 | WP-1 |
+| FIX-003 | Absorbed into WP-3, WP-4 | WP-3, WP-4 |
+| FIX-004 | Absorbed into FIX-MED | FIX-MED |
+| FIX-005 | Absorbed into WP-3 | WP-3 |
+| FIX-006 | Absorbed into WP-7 | WP-7 |
+| FIX-007 | Absorbed into FIX-MED | FIX-MED |
+| FIX-008 | Absorbed into WP-2, WP-5, WP-6 | WP-2, WP-5, WP-6 |
+| FIX-009 | Absorbed into FIX-MED | FIX-MED |
+| ADR-016 | Absorbed into WP-4 | WP-4 |
+| ADR-019 | Absorbed into WP-7 | WP-7 |
+| ADR-020 | Absorbed into WP-5 | WP-5 |
+| ADR-021 | Absorbed into WP-6 | WP-6 |
 
 ## Done
 
@@ -48,3 +65,4 @@
 | QA-004 | quality | 0208T0106 | 2 HIGH, 2 MEDIUM, 1 LOW issues found (cross-reference integrity) |
 | QA-005 | quality | 0208T0212 | 3 HIGH, 4 MEDIUM, 3 LOW issues found (security design review) |
 | QA-006 | quality | 0208T0313 | 8 HIGH, 4 MEDIUM, 1 LOW issues found (implementability review) |
+| QA-007 | quality | 0208T0413 | Comprehensive review summary: 45 issues synthesized, 4 root causes, 7 work packages defined |
