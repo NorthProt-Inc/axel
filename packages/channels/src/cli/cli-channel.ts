@@ -2,11 +2,11 @@ import * as readline from 'node:readline';
 import type {
 	AxelChannel,
 	ChannelCapabilities,
+	HealthStatus,
 	InboundHandler,
 	InboundMessage,
 	OutboundMessage,
 } from '@axel/core/types';
-import type { HealthStatus } from '@axel/core/types';
 
 const CLI_USER_ID = 'cli-user';
 const CLI_CHANNEL_ID = 'cli';
@@ -61,7 +61,7 @@ export class CliChannel implements AxelChannel {
 		this.startedAt = new Date();
 
 		this.rl.on('line', (line: string) => {
-			const trimmed = (line as string).trim();
+			const trimmed = line.trim();
 			if (trimmed.length === 0) {
 				return;
 			}
