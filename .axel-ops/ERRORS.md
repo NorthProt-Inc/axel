@@ -2,14 +2,20 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 13**: QA-009 completed — ALL 5 quality gates PASS. ERR-QG1 RESOLVED.
-> Open: 0. Resolved: 48. PLANNING PHASE COMPLETE.
+> **Cycle 17**: AUDIT-001 completed (34 findings). EMBED-3072 resolved bulk of HIGH findings.
+> Residual findings → FIX-AUDIT. Open: 7. Resolved: 48.
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
-| (none) | | | | | |
+| ERR-050 | MEDIUM | audit | 0208 | AUD-027: v2-open-items PLAN-001 still says React, ADR-017 superseded to Svelte 5 | FIX-AUDIT |
+| ERR-051 | MEDIUM | audit | 0208 | AUD-028: ADR-016 max input tokens 8192→2048 per RES-003 | FIX-AUDIT |
+| ERR-052 | MEDIUM | audit | 0208 | AUD-029: plan 1721-1722 migration logic invalidated by 3072d | FIX-AUDIT |
+| ERR-053 | MEDIUM | audit | 0208 | AUD-030: migration-strategy IVFFlat/HNSW params need 3072d recalculation | FIX-AUDIT |
+| ERR-054 | LOW | audit | 0208 | AUD-031: ADR-016:123 axnmihn index reuse claim invalid at 3072d | FIX-AUDIT |
+| ERR-055 | LOW | audit | 0208 | AUD-033: ADR-016 rateLimitRpm=1500 may be paid tier, free tier 5-15 RPM | FIX-AUDIT |
+| ERR-056 | MEDIUM | quality | 0208 | QA-010: v2-open-items needs top note about 768d→3072d override | FIX-AUDIT |
 
 ## Resolved
 

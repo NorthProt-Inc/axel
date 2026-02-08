@@ -2,19 +2,19 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 16**: AUDIT-001 assigned to Audit Division. Embedding 768d→3072d factual audit.
+> **Cycle 17**: AUDIT-001 done. EMBED-3072 done. QA-010 done. Residual audit findings → FIX-AUDIT assigned to Arch.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| (empty) | | | | | |
+| QA-011 | P1 | quality | Verify FIX-AUDIT corrections against AUDIT-001 + QA-010 findings | FIX-AUDIT | 0208 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| AUDIT-001 | audit | 0208T1900 | 1 cycle |
+| FIX-AUDIT | arch | 0208T2200 | 1 cycle |
 
 ## Cancelled
 
@@ -66,5 +66,8 @@
 | ADR-018 | arch | 0208T0830 | docs/adr/018-token-counting-strategy.md |
 | WP-4 | arch | 0208T0930 | docs/adr/003-redis-working-memory.md, docs/plan/axel-project-plan.md (Redis PG-first, error handling) |
 | QA-008 | quality | 0208T0955 | Quality gate re-verification: 3 PASS, 2 CONDITIONAL PASS. 23 errors confirmed resolved. 3 new issues found. |
-| FIX-MED | arch | 0208T1130 | docs/plan/axel-project-plan.md — 22 MEDIUM/LOW issues resolved (React→Svelte, ToolDefinition dedup, DI container, TTFT/Docker qualifiers, etc.) |
-| QA-009 | quality | 0208T1335 | ALL 5 CONSTITUTION §3 quality gates PASS. PLAN FINALIZATION APPROVED. 48→0 open errors. |
+| FIX-MED | arch | 0208T1130 | docs/plan/axel-project-plan.md — 22 MEDIUM/LOW issues resolved |
+| QA-009 | quality | 0208T1335 | ALL 5 CONSTITUTION §3 quality gates PASS. PLAN FINALIZATION APPROVED. |
+| AUDIT-001 | audit | 0208T2100 | 34 findings (22 HIGH, 8 MEDIUM, 4 LOW). Embedding 768d→3072d + factual accuracy audit. |
+| EMBED-3072 | arch | 0208T2100 | 6 files updated: ADR-016, plan body, v2-open-items, migration-strategy, ADR-013, ADR-002. 768d→3072d applied. |
+| QA-010 | quality | 0208T2115 | Proactive 768d→3072d impact analysis. 2 HIGH + 3 MEDIUM issues. Drift check PASS. |
