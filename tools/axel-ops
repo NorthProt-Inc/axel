@@ -13,28 +13,15 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OPS="$REPO_ROOT/.axel-ops"
-COMMS_FILE="$OPS/comms/human.jsonl"
+COMMS_FILE="$OPS/comms/human.md"
 
-ts() { date +"%m%dT%H%M"; }
-
-append_msg() {
-	local type="$1"
-	local priority="$2"
+append_directive() {
+	local priority="$1"
+	local type="$2"
 	local msg="$3"
-	local extra="$4"
-
-	local json="{\"ts\":\"$(ts)\",\"from\":\"human\",\"type\":\"$type\""
-	if [ -n "$priority" ]; then
-		json="$json,\"priority\":\"$priority\""
-	fi
-	json="$json,\"msg\":\"$msg\""
-	if [ -n "$extra" ]; then
-		json="$json,$extra"
-	fi
-	json="$json}"
-
-	echo "$json" >> "$COMMS_FILE"
-	echo "Recorded: $json"
+	local line="- [ ] **[$priority $type]** $msg"
+	echo "$line" >> "$COMMS_FILE"
+	echo "Added: $line"
 }
 
 case "${1:-help}" in
@@ -52,22 +39,22 @@ case "${1:-help}" in
 			shift
 		fi
 		msg="${1:?Usage: axel-ops directive [-p0|-p2|-p3] \"message\"}"
-		append_msg "directive" "$priority" "$msg" ""
+		append_directive "$priority" "directive" "$msg"
 		;;
 	feedback)
 		shift
 		msg="${1:?Usage: axel-ops feedback \"message\"}"
-		append_msg "feedback" "" "$msg" ""
+		append_directive "P2" "feedback" "$msg"
 		;;
 	halt)
 		shift
 		task_id="${1:?Usage: axel-ops halt TASK-ID}"
-		append_msg "halt" "P0" "Halt task $task_id" "\"task\":\"$task_id\""
+		append_directive "P0" "halt" "Halt task $task_id"
 		;;
 	approve)
 		shift
 		task_id="${1:?Usage: axel-ops approve TASK-ID}"
-		append_msg "approve" "" "Approve $task_id" "\"task\":\"$task_id\""
+		append_directive "P1" "approve" "Approve $task_id"
 		;;
 	status)
 		if [ -f "$OPS/PROGRESS.md" ]; then
@@ -101,5 +88,8 @@ case "${1:-help}" in
 		echo "  status                            Show PROGRESS.md"
 		echo "  backlog                           Show BACKLOG.md"
 		echo "  errors                            Show ERRORS.md"
+		echo ""
+		echo "Or just edit .axel-ops/comms/human.md directly:"
+		echo "  - [ ] **[P0 directive]** 긴급 지시 내용"
 		;;
 esac

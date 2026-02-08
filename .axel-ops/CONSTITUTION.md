@@ -84,7 +84,7 @@ Each Division writes to its own comms file. Coordinator reads all.
 | `comms/devops.jsonl` | DevOps | Coordinator, All |
 | `comms/audit.jsonl` | Audit | Coordinator, Architect, Quality |
 | `comms/ui-ux.jsonl` | UI/UX | Coordinator, Quality, Architect, Dev-Edge |
-| `comms/human.jsonl` | Human (Mark) | Coordinator (read-first every cycle) |
+| `comms/human.md` | Human (Mark) | Coordinator (read-first every cycle) |
 
 ## 3. Quality Gates
 
@@ -231,7 +231,7 @@ When a Dev Division completes work that affects shared resources:
 
 ## 16. Human Directive Priority
 
-Coordinator MUST read `comms/human.jsonl` at the START of every cycle, BEFORE reading other comms.
+Coordinator MUST read `comms/human.md` at the START of every cycle, BEFORE reading other comms.
 - `directive` messages → immediately create BACKLOG task (inherit priority)
 - `feedback` messages → route to relevant Division as `assign` with corrections
 - `halt` messages → immediately move task to "Blocked (human-halted)"

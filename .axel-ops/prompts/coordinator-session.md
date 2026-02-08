@@ -64,7 +64,7 @@ Milestone: `pnpm install && pnpm typecheck && pnpm test` succeeds (0 tests, 0 er
 ### Step 1: Context Load
 
 Read the following files in order:
-1. **`.axel-ops/comms/human.jsonl`** — **HUMAN DIRECTIVES (read FIRST, CONSTITUTION §16)**
+1. **`.axel-ops/comms/human.md`** — **HUMAN DIRECTIVES (read FIRST, CONSTITUTION §16)**
 2. `.axel-ops/MISSION.md` — Immutable mission
 3. `.axel-ops/CONSTITUTION.md` — Agent behavior rules
 4. `.axel-ops/PROGRESS.md` — Global state
@@ -84,12 +84,15 @@ Read the following files in order:
 18. `.axel-ops/comms/audit.jsonl` — Audit Division log (tail 10)
 
 **Human Directive Processing (CONSTITUTION §16)**:
-If `comms/human.jsonl` contains new (unprocessed) messages:
-- `directive` → immediately create BACKLOG task with inherited priority, BEFORE all other work
-- `feedback` → route to relevant Division as `assign` with corrections
-- `halt` → immediately move referenced task to "Blocked (human-halted)"
-- `approve` → unblock escalated items
-- Write acknowledgement to `comms/broadcast.jsonl`: `{"type":"ack","ref":"human-directive","msg":"..."}`
+Read `comms/human.md`. Unchecked items (`- [ ]`) are unprocessed directives.
+For each unchecked item:
+- `**[P0 directive]**` → immediately create BACKLOG task, BEFORE all other work
+- `**[P1 directive]**` / `**[P2 directive]**` → create BACKLOG task with matching priority
+- `**[P2 feedback]**` → route to relevant Division as `assign` with corrections
+- `**[P0 halt]**` → immediately move referenced task to "Blocked (human-halted)"
+- `**[P1 approve]**` → unblock escalated items
+After processing, change `- [ ]` to `- [x]` in `comms/human.md`.
+Write acknowledgement to `comms/broadcast.jsonl`.
 
 ### Step 2: Drift Detection
 
