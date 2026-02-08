@@ -23,6 +23,7 @@ export { SessionRouter } from './session-router.js';
 // Inbound handler
 export {
 	createInboundHandler,
+	type ErrorInfo,
 	type InboundHandlerDeps,
 	type SendCallback,
 } from './inbound-handler.js';
