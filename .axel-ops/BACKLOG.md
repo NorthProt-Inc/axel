@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 66**: **PHASE E: COMPLETE.** All 20 executable tasks done. 834 tests (798 pass, 36 skip), 66 files. QA-020 final review PASS (0C 0H 3M 4L). FIX-HARDEN-001 + FIX-HARDEN-002 done. 2 human-blocked tasks remain. Open errors 1 (ERR-069 CRITICAL human decision).
+> **Cycle 67**: **ALL PHASES COMPLETE → POST-RELEASE HARDENING.** 5 hardening tasks created from QA-020 MEDIUM findings + AUD-087. 3 assigned to dev-edge (HARDEN-003/004/005). 2 queued P3 (HARDEN-006/007). 2 human-blocked tasks unchanged. Open errors 1 (ERR-069 CRITICAL human decision).
 
 ## Queued (Human-Blocked)
 
@@ -11,9 +11,20 @@
 | FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). | RES-006 ✓ | **Human decision needed** |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — | **Human approval needed** |
 
+## Queued (Hardening)
+
+| ID | Priority | Division | Task | Depends On |
+|----|----------|----------|------|------------|
+| HARDEN-006 | P3 | dev-edge | QA-020-M3: handleDiscordCommand sends DEFERRED response after awaiting handleMessage. Discord expects DEFERRED immediately, then follow-up via webhook PATCH. Refactor to fire-and-forget pattern with interaction callback URL. | — |
+| HARDEN-007 | P3 | dev-edge | QA-020-L3 + AUD-094: SSE stream writeHead (server.ts:316-320) missing X-Content-Type-Options + X-Frame-Options headers. Add security headers for consistency with AUD-086 fix. Also fix startedAt timing (set in start() not factory). | — |
+
 ## In Progress
 
-*None — all executable work complete.*
+| ID | Priority | Division | Task | Started |
+|----|----------|----------|------|---------|
+| HARDEN-003 | P2 | dev-edge | QA-020-M1: Replace nested type assertions in extractTelegramMessage (webhook-handlers.ts:89-115) with lightweight TelegramUpdate interface + type guard. Eliminate 4-level Record<string,unknown> casting chain. TDD mandatory. | 0208C67 |
+| HARDEN-004 | P2 | dev-edge | QA-020-M2: Replace nested type assertions in extractDiscordInteraction (webhook-handlers.ts:222-261) with Discord interaction interface + type guard. Same pattern as HARDEN-003. TDD mandatory. | 0208C67 |
+| HARDEN-005 | P2 | dev-edge | AUD-087: Rate limiting proxy-unaware. Add optional trustedProxies config to GatewayConfig. When set, parse X-Forwarded-For for client IP instead of req.socket.remoteAddress. TDD mandatory. | 0208C67 |
 
 ## Cancelled
 
