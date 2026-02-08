@@ -290,6 +290,34 @@ describe('CliChannel', () => {
 		});
 	});
 
+	describe('default options', () => {
+		it('uses default write function (process.stdout)', async () => {
+			const { rl } = createMockReadline();
+			const writeSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+			channel = new CliChannel({ createReadline: () => rl as never });
+
+			await channel.start();
+			await channel.send('cli-user', { content: 'test output' });
+
+			expect(writeSpy).toHaveBeenCalled();
+			writeSpy.mockRestore();
+		});
+
+		it('default onError is a no-op', async () => {
+			const { rl, emit } = createMockReadline();
+			channel = new CliChannel({ createReadline: () => rl as never });
+
+			channel.onMessage(async () => {
+				throw new Error('silent error');
+			});
+
+			await channel.start();
+			// Should not throw — default onError silently ignores
+			emit('line', 'trigger');
+			await new Promise((r) => setTimeout(r, 10));
+		});
+	});
+
 	describe('error handling', () => {
 		it('catches handler errors without crashing', async () => {
 			const { rl, emit } = createMockReadline();
