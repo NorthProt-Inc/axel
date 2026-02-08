@@ -19,3 +19,10 @@ export { reactLoop, type ReActLoopParams } from './react-loop.js';
 
 // Session router
 export { SessionRouter } from './session-router.js';
+
+// Inbound handler
+export {
+	createInboundHandler,
+	type InboundHandlerDeps,
+	type SendCallback,
+} from './inbound-handler.js';
