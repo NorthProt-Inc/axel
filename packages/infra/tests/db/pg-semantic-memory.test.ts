@@ -57,7 +57,7 @@ describe('PgSemanticMemory', () => {
 				content: 'User prefers TypeScript',
 				memoryType: 'preference',
 				importance: 0.8,
-				embedding: makeFakeEmbedding(3072),
+				embedding: makeFakeEmbedding(1536),
 				sourceChannel: 'discord',
 				sourceSession: 'sess-1',
 			};
@@ -132,7 +132,7 @@ describe('PgSemanticMemory', () => {
 
 			const query: SemanticQuery = {
 				text: 'TypeScript preference',
-				embedding: makeFakeEmbedding(3072),
+				embedding: makeFakeEmbedding(1536),
 				limit: 10,
 			};
 
@@ -152,7 +152,7 @@ describe('PgSemanticMemory', () => {
 
 			const query: SemanticQuery = {
 				text: 'test',
-				embedding: makeFakeEmbedding(3072),
+				embedding: makeFakeEmbedding(1536),
 				limit: 10,
 				minImportance: 0.5,
 			};
@@ -171,7 +171,7 @@ describe('PgSemanticMemory', () => {
 
 			const query: SemanticQuery = {
 				text: 'test',
-				embedding: makeFakeEmbedding(3072),
+				embedding: makeFakeEmbedding(1536),
 				limit: 10,
 				memoryTypes: ['fact', 'preference'] as readonly MemoryType[],
 			};
@@ -190,7 +190,7 @@ describe('PgSemanticMemory', () => {
 
 			const query: SemanticQuery = {
 				text: 'test',
-				embedding: makeFakeEmbedding(3072),
+				embedding: makeFakeEmbedding(1536),
 				limit: 5,
 				channelFilter: 'discord',
 			};
@@ -232,7 +232,7 @@ describe('PgSemanticMemory', () => {
 
 			const results = await mem.search({
 				text: 'test',
-				embedding: makeFakeEmbedding(3072),
+				embedding: makeFakeEmbedding(1536),
 				limit: 10,
 				hybridSearch: true,
 			});

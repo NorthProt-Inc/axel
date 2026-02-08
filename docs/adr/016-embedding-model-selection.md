@@ -1,7 +1,8 @@
 # ADR-016: Embedding Model Selection
 
-> Status: PROPOSED
+> Status: AMENDED
 > Date: 2026-02-07
+> Amended: 2026-02-08 (ERR-069: 3072d → 1536d Matryoshka truncation)
 > Author: Architecture Division
 
 ## Context
@@ -17,7 +18,9 @@ axnmihn은 `text-embedding-004` (768d)를 사용했으나, **2026-01-14에 depre
 
 ## Decision
 
-**gemini-embedding-001** (3072d, full dimension) 사용.
+**gemini-embedding-001** (1536d, Matryoshka truncation) 사용.
+
+> **Amendment (2026-02-08, ERR-069)**: pgvector 0.8.1의 HNSW/IVFFlat 인덱스가 최대 2000d만 지원하여 3072d 벡터에 인덱스 생성 불가 (sequential scan만 가능). RES-006 조사 결과, Google 공식 Matryoshka 학습으로 1536d 절단 시 정밀도 손실 미미, 저장 50% 절감, pgvector 인덱스 생성 가능. Mark 승인 완료.
 
 ### Model Specifications
 
@@ -26,33 +29,35 @@ axnmihn은 `text-embedding-004` (768d)를 사용했으나, **2026-01-14에 depre
 | Model ID | `gemini-embedding-001` |
 | Provider | Google (Gemini API) |
 | Max input tokens | 2,048 |
-| Output dimensions | 128–3,072 (유연). 추천값: 768 / 1,536 / 3,072. Axel: 3,072 (full) |
+| Output dimensions | 128–3,072 (유연). 추천값: 768 / 1,536 / 3,072. Axel: **1,536** (Matryoshka truncation, ERR-069) |
 | Dimension method | Matryoshka Representation Learning |
-| MTEB score | 68.16 (GA model 3072d). 실험 모델(gemini-embedding-exp-03-07): 68.32 |
+| MTEB score | 68.16 (GA model 3072d). 1536d truncated: >95% recall parity (RES-006) |
 | Language support | 100+ languages (한국어 포함) |
 | Pricing | $0.15 / 1M tokens |
 | Batch API | `batchEmbedContents` endpoint — 최대 250 texts/request (Vertex AI) |
 | Task types | `RETRIEVAL_DOCUMENT`, `RETRIEVAL_QUERY`, `SEMANTIC_SIMILARITY`, `CLASSIFICATION`, `CLUSTERING`, `CODE_RETRIEVAL_QUERY`, `QUESTION_ANSWERING`, `FACT_VERIFICATION` (8개) |
 
-### Dimension Choice: 3072d (Full Dimension)
+### Dimension Choice: 1536d (Matryoshka Truncation)
 
 | Dimension | Pros | Cons |
 |-----------|------|------|
-| **3,072** | 최고 정밀도, MTEB #1 모델의 full capacity 활용 | 저장 공간 4x (768d 대비), 인덱스 빌드 시간 증가 |
-| 768 | axnmihn 호환 차원, 저장 효율적 | full dimension 대비 품질 감소 |
-| 256 | 최소 저장, 빠른 검색 | 정밀도 부족 (특히 유사한 기억 간 구별력) |
+| 3,072 | 최고 정밀도 | **pgvector 2000d 제한으로 인덱스 불가 (ERR-069)** |
+| **1,536** | pgvector HNSW 인덱스 가능, >95% recall parity, 50% 저장 절감 | full dimension 대비 미세 품질 감소 |
+| 768 | axnmihn 호환 차원, 저장 효율적 | 1536d 대비 품질 감소 |
+| 256 | 최소 저장, 빠른 검색 | 정밀도 부족 |
 
-3072d 선택 근거 (Mark override — 2026-02-08):
-1. MTEB #1 모델의 full capacity를 활용하여 최고 검색 품질 확보
-2. Axel 규모 (1,000~10,000 벡터)에서 4x 저장 공간 증가는 수용 가능 (100K vectors 기준 1.17GB)
-3. 단일 사용자 에이전트이므로 쿼리 성능 차이가 체감 수준 이하
-4. 향후 Matryoshka truncation으로 768d/256d로 축소 가능 (역방향 유연성 확보)
+1536d 선택 근거 (Mark 승인 — 2026-02-08, ERR-069 해결):
+1. pgvector 0.8.1 HNSW/IVFFlat 최대 2000d 제한 → 3072d 인덱스 불가
+2. Matryoshka learning으로 vector[:1536] 절단 시 >95% recall parity (RES-006, 25 sources)
+3. HNSW 인덱스 생성 가능 → production-ready vector search
+4. 저장 공간 50% 절감 (3072d 대비): (1536 × 4) = 6,144 bytes/vector
 
 ### Matryoshka Representation Learning
 
 gemini-embedding-001은 Matryoshka 학습을 적용하여 벡터의 앞부분(prefix)이 낮은 차원에서도 유효하다:
-- 3,072d full dimension은 모델의 최대 표현력을 활용
-- `vector[:768]`는 768d 독립 모델과 유사한 품질 (필요 시 축소 가능)
+- 3,072d full dimension은 모델의 최대 표현력을 활용 (단, pgvector 2000d 제한으로 인덱스 불가)
+- **`vector[:1536]`는 >95% recall parity 유지하면서 pgvector HNSW 인덱스 지원** (Axel 선택)
+- `vector[:768]`는 768d 독립 모델과 유사한 품질 (필요 시 추가 축소 가능)
 - `vector[:256]`는 빠른 1차 필터에 사용 가능
 
 이 특성으로 인해 dimension 축소가 re-train 없이 가능하다 (역방향 유연성).
@@ -64,7 +69,7 @@ gemini-embedding-001은 Matryoshka 학습을 적용하여 벡터의 앞부분(pr
 
 interface EmbeddingConfig {
   readonly model: "gemini-embedding-001";
-  readonly dimension: 3072;
+  readonly dimension: 1536;  // Matryoshka truncation (ERR-069)
   readonly taskType: "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY";
   readonly batchSize: 100;      // conservative default. batchEmbedContents supports up to 250 (Vertex AI)
   readonly rateLimitRpm: 1500;  // Gemini paid tier. Free tier: ~5-15 RPM (RES-003)
@@ -77,7 +82,7 @@ interface EmbeddingConfig {
 
 ### Migration Impact
 
-axnmihn의 `text-embedding-004` 벡터는 **gemini-embedding-001과 호환되지 않는다**. embedding space가 다르기 때문에 cosine similarity 결과가 의미 없다. 또한 axnmihn은 768d, Axel은 3072d로 차원도 다르다.
+axnmihn의 `text-embedding-004` 벡터는 **gemini-embedding-001과 호환되지 않는다**. embedding space가 다르기 때문에 cosine similarity 결과가 의미 없다. 또한 axnmihn은 768d, Axel은 1536d로 차원도 다르다.
 
 **결론: 기존 1,000+ 기억을 gemini-embedding-001로 re-embed 필수.**
 
@@ -119,15 +124,16 @@ Re-embedding 상세 계획은 PLAN-003 (Migration Strategy)에서 정의:
 
 ### Positive
 
-- MTEB #1 모델의 full 3072d capacity를 활용하여 최고 품질의 벡터 검색 가능
-- Matryoshka 지원으로 필요 시 768d/256d로 축소 가능 (역방향 유연성)
+- MTEB #1 모델의 1536d Matryoshka truncation으로 >95% recall parity 유지
+- pgvector HNSW 인덱스 생성 가능 (production-ready vector search)
+- Matryoshka 지원으로 필요 시 768d/256d로 추가 축소 가능 (역방향 유연성)
 - Gemini API는 이미 Intent Classifier (Flash)와 Session Summary에 사용 — 추가 API key 불필요
 - 3072d로 유사한 기억 간 구별력 극대화 (장기적으로 10,000+ 벡터 성장 시 중요)
 
 ### Negative
 
 - axnmihn 벡터 Direct Copy 불가 — re-embed 필수 (비용/시간은 무시할 수준)
-- 3072d는 768d 대비 저장 공간 4x (100K vectors 기준 1.17GB vs 293MB — Axel 규모에서 수용 가능)
+- 1536d는 768d 대비 저장 공간 2x (100K vectors 기준 586MB vs 293MB — Axel 규모에서 수용 가능)
 - Google API 단일 의존 (embedding + flash 모두 Google)
   - Mitigation: Ollama fallback을 Phase 2에서 구현 가능
 - text-embedding-004 대비 소폭 비용 상승 ($0.10 → $0.15/1M tokens, 월 $0.50 이하)
@@ -140,7 +146,7 @@ google: z.object({
   apiKey: z.string().min(1),
   flashModel: z.string().default("gemini-3-flash-preview"),
   embeddingModel: z.string().default("gemini-embedding-001"),
-  embeddingDimension: z.number().int().default(3072),
+  embeddingDimension: z.number().int().default(1536),  // Matryoshka truncation (ERR-069)
 })
 ```
 

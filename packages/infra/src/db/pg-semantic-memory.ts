@@ -13,7 +13,7 @@ import type { PgPoolDriver } from './pg-pool.js';
  * PostgreSQL + pgvector backed Semantic Memory (M3, ADR-013, ADR-016).
  *
  * Maps to `memories` table per migration-strategy 003.
- * Uses HNSW index with vector(3072) for cosine similarity search.
+ * Uses HNSW index with vector(1536) for cosine similarity search.
  * Hybrid scoring: 0.7 * vector_score + 0.3 * text_score (plan §3.1).
  */
 class PgSemanticMemory implements SemanticMemory {

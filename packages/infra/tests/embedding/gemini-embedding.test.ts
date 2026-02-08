@@ -72,7 +72,7 @@ function makeFakeEmbedding(dim: number): number[] {
 describe('GeminiEmbeddingService', () => {
 	const DEFAULT_CONFIG: EmbeddingConfig = {
 		model: 'gemini-embedding-001',
-		dimension: 3072,
+		dimension: 1536,
 		batchSize: 100,
 		maxRetries: 3,
 		retryBaseMs: 100,
@@ -87,7 +87,7 @@ describe('GeminiEmbeddingService', () => {
 
 	describe('embed() — single text', () => {
 		it('should return a Float32Array of the correct dimension', async () => {
-			const fakeValues = makeFakeEmbedding(3072);
+			const fakeValues = makeFakeEmbedding(1536);
 			mockClient.embedContent.mockResolvedValue({
 				embedding: { values: fakeValues },
 			});
@@ -98,11 +98,11 @@ describe('GeminiEmbeddingService', () => {
 			const result = await service.embed('hello world', 'RETRIEVAL_DOCUMENT');
 
 			expect(result).toBeInstanceOf(Float32Array);
-			expect(result.length).toBe(3072);
+			expect(result.length).toBe(1536);
 		});
 
 		it('should pass the correct task type to the API', async () => {
-			const fakeValues = makeFakeEmbedding(3072);
+			const fakeValues = makeFakeEmbedding(1536);
 			mockClient.embedContent.mockResolvedValue({
 				embedding: { values: fakeValues },
 			});
@@ -127,7 +127,7 @@ describe('GeminiEmbeddingService', () => {
 		});
 
 		it('should retry on transient API errors', async () => {
-			const fakeValues = makeFakeEmbedding(3072);
+			const fakeValues = makeFakeEmbedding(1536);
 			mockClient.embedContent
 				.mockRejectedValueOnce(new Error('503 Service Unavailable'))
 				.mockResolvedValueOnce({ embedding: { values: fakeValues } });
@@ -174,7 +174,7 @@ describe('GeminiEmbeddingService', () => {
 	describe('embedBatch() — multiple texts', () => {
 		it('should embed multiple texts in a single batch call', async () => {
 			const texts = ['text one', 'text two', 'text three'];
-			const fakeEmbeddings = texts.map(() => makeFakeEmbedding(3072));
+			const fakeEmbeddings = texts.map(() => makeFakeEmbedding(1536));
 			mockClient.batchEmbedContents.mockResolvedValue({
 				embeddings: fakeEmbeddings.map((v) => ({ values: v })),
 			});
@@ -187,7 +187,7 @@ describe('GeminiEmbeddingService', () => {
 			expect(results).toHaveLength(3);
 			for (const r of results) {
 				expect(r).toBeInstanceOf(Float32Array);
-				expect(r.length).toBe(3072);
+				expect(r.length).toBe(1536);
 			}
 			expect(mockClient.batchEmbedContents).toHaveBeenCalledTimes(1);
 		});
@@ -195,7 +195,7 @@ describe('GeminiEmbeddingService', () => {
 		it('should split large batches into chunks of batchSize', async () => {
 			const batchSize = 2;
 			const texts = ['a', 'b', 'c', 'd', 'e'];
-			const fakeEmbedding = makeFakeEmbedding(3072);
+			const fakeEmbedding = makeFakeEmbedding(1536);
 
 			mockClient.batchEmbedContents.mockImplementation(async (params) => {
 				return {
@@ -235,7 +235,7 @@ describe('GeminiEmbeddingService', () => {
 		});
 
 		it('should retry failed batch chunks', async () => {
-			const fakeEmbedding = makeFakeEmbedding(3072);
+			const fakeEmbedding = makeFakeEmbedding(1536);
 			mockClient.batchEmbedContents
 				.mockRejectedValueOnce(new Error('503 Service Unavailable'))
 				.mockResolvedValueOnce({
@@ -318,7 +318,7 @@ describe('GeminiEmbeddingService', () => {
 			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			const result = await service.embed('hello', 'RETRIEVAL_DOCUMENT');
-			expect(result.length).toBe(3072);
+			expect(result.length).toBe(1536);
 		});
 
 		it('should throw if API returns fewer dimensions than configured', async () => {

@@ -7,7 +7,7 @@ describe('InMemorySemanticMemory', () => {
 	let semantic: InMemorySemanticMemory;
 
 	const makeEmbedding = (val: number): Float32Array => {
-		const arr = new Float32Array(3072);
+		const arr = new Float32Array(1536);
 		arr[0] = val;
 		return arr;
 	};
@@ -210,7 +210,7 @@ describe('InMemorySemanticMemory', () => {
 		it('should compute cosine similarity with zero-norm embedding', async () => {
 			await semantic.store(makeNewMemory({ content: 'Test' }));
 
-			const zeroEmbed = new Float32Array(3072);
+			const zeroEmbed = new Float32Array(1536);
 			const query: SemanticQuery = {
 				text: 'test',
 				embedding: zeroEmbed,

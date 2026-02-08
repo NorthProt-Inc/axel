@@ -138,18 +138,18 @@ describe('Memory Layer Types', () => {
 		it('should have all required fields', () => {
 			const query: SemanticQuery = {
 				text: 'user preferences for music',
-				embedding: new Float32Array(3072),
+				embedding: new Float32Array(1536),
 				limit: 10,
 			};
 			expect(query.text).toBe('user preferences for music');
-			expect(query.embedding).toHaveLength(3072);
+			expect(query.embedding).toHaveLength(1536);
 			expect(query.limit).toBe(10);
 		});
 
 		it('should support optional filter fields', () => {
 			const query: SemanticQuery = {
 				text: 'test',
-				embedding: new Float32Array(3072),
+				embedding: new Float32Array(1536),
 				limit: 5,
 				minImportance: 0.3,
 				memoryTypes: ['fact', 'preference'],
@@ -170,7 +170,7 @@ describe('Memory Layer Types', () => {
 				content: 'User likes jazz',
 				memoryType: 'preference',
 				importance: 0.8,
-				embedding: new Float32Array(3072),
+				embedding: new Float32Array(1536),
 				createdAt: new Date(),
 				lastAccessed: new Date(),
 				accessCount: 5,
@@ -321,7 +321,7 @@ describe('Memory Layer Types', () => {
 				content: 'User prefers dark mode',
 				memoryType: 'preference',
 				importance: 0.7,
-				embedding: new Float32Array(3072),
+				embedding: new Float32Array(1536),
 				sourceChannel: 'cli',
 			};
 			expect(newMem.content).toBe('User prefers dark mode');
@@ -335,7 +335,7 @@ describe('Memory Layer Types', () => {
 				content: 'Test',
 				memoryType: 'fact',
 				importance: 0.5,
-				embedding: new Float32Array(3072),
+				embedding: new Float32Array(1536),
 				sourceChannel: null,
 				sourceSession: 'sess-001',
 			};

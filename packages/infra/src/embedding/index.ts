@@ -43,7 +43,7 @@ function isRetryableError(error: unknown): boolean {
 /**
  * Gemini Embedding Service (ADR-016).
  *
- * Uses gemini-embedding-001 with 3072d full dimension.
+ * Uses gemini-embedding-001 with 1536d Matryoshka truncation (ERR-069 resolution).
  * Supports single and batch embedding with retry and circuit breaker.
  */
 class GeminiEmbeddingService {

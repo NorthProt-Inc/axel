@@ -41,7 +41,7 @@ function makeMemorySearchResult(content: string): MemorySearchResult {
 			content,
 			memoryType: 'fact',
 			importance: 0.8,
-			embedding: new Float32Array(3072),
+			embedding: new Float32Array(1536),
 			createdAt: new Date(),
 			lastAccessed: new Date(),
 			accessCount: 5,

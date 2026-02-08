@@ -150,7 +150,7 @@ Coverage targets:
 | Package | May Import From |
 |---------|----------------|
 | `packages/core/` | No other `packages/` — only Node.js stdlib and external npm |
-| `packages/infra/` | `packages/core/src/types/` only |
+| `packages/infra/` | `@axel/core/{types,memory,orchestrator}` |
 | `packages/channels/` | `packages/core/src/types/` only |
 | `packages/gateway/` | `packages/core/src/types/` only |
 | `apps/axel/` | Any `packages/*` |

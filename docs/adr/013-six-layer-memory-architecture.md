@@ -140,7 +140,7 @@ interface EpisodicMemory {
 | Aspect | axnmihn | Axel |
 |--------|---------|------|
 | Storage | ChromaDB (별도 프로세스) | pgvector (같은 DB) |
-| Embedding model | Gemini embedding-001 (768d) | **gemini-embedding-001 (3072d)** (ADR-016) |
+| Embedding model | Gemini embedding-001 (768d) | **gemini-embedding-001 (1536d, Matryoshka)** (ADR-016) |
 | Index | ChromaDB default | HNSW (m=16, ef_construction=64) — RES-001, ADR-002 |
 | Search | Vector only | **Hybrid** — vector + trigram + metadata |
 | Decay | Python batch (C++ SIMD) | TypeScript 순수 함수 (ADR-015) |
@@ -170,7 +170,7 @@ LIMIT 20;
 
 **인덱스 결정: HNSW (확정)**
 - RES-001 결과: HNSW가 7.4x 빠른 쿼리, 더 높은 recall 제공
-- 3072d 벡터 기준 메모리: (3072 × 4) + (16 × 2 × 4) = 12,416 bytes/vector. 1K vectors ≈ 12MB
+- 1536d 벡터 기준 메모리: (1536 × 4) + (16 × 2 × 4) = 6,272 bytes/vector. 1K vectors ≈ 6MB
 - Phase 0 VPS (8GB RAM)에서 충분히 수용 가능
 - Plan body, ADR-002, migration-strategy 모두 HNSW(m=16, ef_construction=64)로 통일됨
 

@@ -52,7 +52,7 @@ const LlmConfigSchema = z.object({
 		apiKey: z.string().min(1),
 		flashModel: z.string().default('gemini-3-flash-preview'),
 		embeddingModel: z.string().default('gemini-embedding-001'),
-		embeddingDimension: z.number().int().default(3072),
+		embeddingDimension: z.number().int().default(1536),
 	}),
 	fallbackChain: z
 		.array(z.enum(['anthropic', 'google', 'ollama']))
