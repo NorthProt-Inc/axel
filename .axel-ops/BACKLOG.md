@@ -2,19 +2,33 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 55**: **PHASE D COMPLETE.** 18/18 done. FIX-GATEWAY-001 (3 HIGH gateway security fixes) + SYNC-006 (CTO override — PLAN_SYNC D.4/D.5/D.6) completed. **646 tests, 50 files** pass. All 3 errors resolved. **PHASE E: INTEGRATION** next.
+> **Cycle 56**: **PHASE E: INTEGRATION KICKOFF.** Phase D complete (646 tests, 0 errors). 12 Phase E tasks created. Goal: wire all packages into working end-to-end system.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
+| ~~INTEG-001~~ | ~~P0~~ | ~~devops~~ | ~~DB migration runner~~ | ~~—~~ |
+| ~~INTEG-002~~ | ~~P0~~ | ~~dev-core~~ | ~~InboundHandler impl~~ | ~~—~~ |
+| INTEG-003 | P0 | dev-edge | Gateway route integration: replace stub chat responses with real orchestrator calls. Wire /api/v1/chat + /api/v1/chat/stream + /ws to InboundHandler. | INTEG-002 |
+| INTEG-004 | P1 | dev-edge | Remaining gateway routes: /api/v1/memory/search, /api/v1/memory/stats, /api/v1/session/end, /api/v1/tools, /api/v1/tools/execute (AUD-072). | INTEG-001 |
+| INTEG-005 | P1 | dev-edge | Channel bootstrap wiring: update main.ts to create+start channels, pass to gracefulShutdown (AUD-074). Wire InboundHandler to each channel. | INTEG-002, INTEG-003 |
+| INTEG-006 | P1 | dev-infra | Integration test: PG + Redis real containers. Verify full memory pipeline: store → search → decay → consolidate. Testcontainers (DEVOPS-003). | INTEG-001 |
+| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-002, INTEG-005 |
+| ~~FIX-MEDIUM-001~~ | ~~P2~~ | ~~dev-edge~~ | ~~Fix 8 MEDIUM issues~~ | ~~—~~ |
+| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 |
+| SYNC-007 | P1 | arch | PLAN_SYNC.md Phase E update: map integration code to plan sections. | INTEG-002, INTEG-003 |
+| QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. | INTEG-006, INTEG-007 |
+| AUDIT-005 | P1 | audit | Phase E audit: integration security (SQL injection in migration, auth flow E2E, error propagation). | INTEG-003, INTEG-006 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| *(empty — Phase D complete, Phase E tasks to be created)* | | | |
+| INTEG-001 | devops | 0208C56 | C57 |
+| INTEG-002 | dev-core | 0208C56 | C57 |
+| FIX-MEDIUM-001 | dev-edge | 0208C56 | C57 |
 
 ## Cancelled
 
