@@ -20,7 +20,9 @@ axnmihn은 3개의 분리된 스토리지를 사용했다:
 
 ## Decision
 
-**PostgreSQL 16 + pgvector 0.8을 단일 데이터베이스로 사용한다.**
+**PostgreSQL 17 + pgvector 0.8을 단일 데이터베이스로 사용한다.**
+
+> **Amendment (C51, CTO override)**: PG 16 → PG 17. docker-compose.dev.yml (pgvector/pgvector:pg17) 및 testcontainers (pgvector/pgvector:pg17)와 일치시킴. AUD-058 해결.
 
 | 기능 | axnmihn | Axel |
 |------|---------|------|

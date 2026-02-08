@@ -2,20 +2,20 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 50
+## Current Cycle: 51
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 49 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-004, overridden C46 by CTO) | **Active** — PLAN-AMEND-001 (1 cycle), SYNC-005 queued |
+| coord | — | 51 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 2 (SYNC-004 C46, PLAN-AMEND-001 C51 — both CTO override) | Idle |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | Idle — all CORE tasks complete |
-| dev-infra | 1 cycle | 9 (INFRA-001~005, COMMON-CB, FIX-INFRA-002/003/004) | 0 | **Idle** — all infra tasks complete |
-| dev-edge | 1 cycle | 2 (EDGE-001, EDGE-002) | 0 | **Active** — EDGE-003 (Discord) assigned |
-| quality | 2 cycles | 3 (QA-011, QA-013, QA-016) | 1 (QA-012, cancelled C39) | **Active** — QA-017 assigned (Phase D review) |
+| dev-infra | 1 cycle | 9 (INFRA-001~005, COMMON-CB, FIX-INFRA-002/003/004) | 0 | Idle — all infra tasks complete |
+| dev-edge | 1.3 cycles | 3 (EDGE-001, EDGE-002, EDGE-003) | 0 | **Active** — BOOTSTRAP-001 |
+| quality | 2 cycles | 4 (QA-011, QA-013, QA-016, QA-017) | 1 (QA-012, cancelled C39) | Idle (next review pending) |
 | research | — | 0 | 0 | Idle |
-| devops | 1 cycle | 14 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004 + FIX-INFRA-001 + DEVOPS-005/006) | 0 | **Idle** — all devops tasks complete |
+| devops | 1 cycle | 14 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004 + FIX-INFRA-001 + DEVOPS-005/006) | 0 | Idle — all devops tasks complete |
 | audit | 1 cycle | 2 (AUDIT-002, AUDIT-003) | 0 | Idle — next at Phase D milestone |
 
 ## Bottleneck Indicators
@@ -34,7 +34,7 @@
 |---------|--------|---------|-------|
 | `packages/core/` | 90% | 95.2% (branches), 99.69% (stmts), 100% (funcs/lines) | +5% over target |
 | `packages/infra/` | 80% | cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42% | +15% over target |
-| `packages/channels/` | 75% | 95.95% stmt (CLI only) | +20% over target (early) |
+| `packages/channels/` | 75% | 92.33% stmt (CLI 95.95% + Discord 92.33%), 94.59% branch, 90.32% func | +17% over target |
 | `packages/gateway/` | 80% | — | — |
 
 ## Sprint Progress
@@ -45,7 +45,7 @@
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests. FIX-INFRA tasks carry to Phase D) |
-| D: Edge Sprint | **ACTIVE** | 47 | — | 47% (7/15 done: EDGE-001/002, FIX-INFRA-002/003/004, DEVOPS-005/006) |
+| D: Edge Sprint | **ACTIVE** | 47 | — | 73% (11/15 done: EDGE-001/002/003, FIX-INFRA-002/003/004, DEVOPS-005/006, QA-017, PLAN-AMEND-001, SYNC-005) |
 | E: Integration | QUEUED | — | — | — |
 
 ## Cycle History (Last 10)
@@ -64,3 +64,4 @@
 | 48 | dev-edge, dev-infra, devops, arch | 4 (EDGE-001, FIX-INFRA-002, FIX-INFRA-003, DEVOPS-005) | 0 | **4 TASKS DONE.** 508 tests, 42 files. EDGE-002 (P0) assigned. Phase D 27%. |
 | 49 | dev-edge, dev-infra, devops, arch | 3 (EDGE-002, FIX-INFRA-004, DEVOPS-006) | 0 | **3 TASKS DONE.** 529 tests, 43 files. QA-017+EDGE-003 assigned. Phase D **47%**. |
 | 50 | dev-edge, quality, arch | 0 | 0 | No completions. PLAN-AMEND-001 at 3 cycles (watch). 529 tests pass. Phase D 47%. |
+| 51 | dev-edge, quality, coord | 4 (EDGE-003, QA-017, PLAN-AMEND-001, SYNC-005) | 0 | **4 TASKS DONE.** 558 tests. CTO override on PLAN-AMEND-001/SYNC-005 (arch 3 cycles stalled). Phase D **73%**. |

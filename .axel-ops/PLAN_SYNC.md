@@ -262,13 +262,56 @@ Source: ADR-021
 
 ## Phase D: Edge Sprint
 
-| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
+### D.1 Channel Types (EDGE-001)
+
+Source: plan L8 (lines 1485-1562), ADR-009
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| L8 CLI Channel | TL1 | `packages/channels/src/cli/` | NOT_STARTED | — | ADR-009. readline-based. |
-| L8 Discord | TL1 | `packages/channels/src/discord/` | NOT_STARTED | — | ADR-009. discord.js. |
-| L8 Telegram | TL1 | `packages/channels/src/telegram/` | NOT_STARTED | — | ADR-009. Grammy. |
-| L9 Gateway | TL1 | `packages/gateway/src/` | NOT_STARTED | — | HTTP/WS. OpenAPI spec (PLAN-002). |
-| Bootstrap | TL0 | `apps/axel/src/` | NOT_STARTED | — | DI container assembly. Lifecycle management (ADR-021). |
+| L8 AxelChannel | `packages/core/src/types/channel.ts` | `AxelChannel`, `ChannelCapabilities`, `InboundMessage`, `OutboundMessage`, `InboundHandler`, `MediaAttachment`, `PresenceStatus` | IN_SYNC | C51 | 7 exports. Lifecycle (start/stop/healthCheck), reconnection (ERR-042), optional streaming/presence/reactions. 24 tests. |
+| L8 Channel Index | `packages/core/src/types/index.ts` | (barrel re-export) | IN_SYNC | C51 | Channel types added to existing barrel. |
+
+### D.2 CLI Channel (EDGE-002)
+
+Source: plan L8, ADR-009
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L8 CLI | `packages/channels/src/cli/cli-channel.ts` | `CliChannel` | IN_SYNC | C51 | AxelChannel impl. readline, fixed userId 'cli-user', streaming output, DI-friendly constructor. 133 lines. 21 tests, 95.95% stmt. |
+
+### D.3 Discord Channel (EDGE-003)
+
+Source: plan L8, ADR-009
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L8 Discord | `packages/channels/src/discord/discord-channel.ts` | `DiscordChannel` | IN_SYNC | C51 | AxelChannel impl. discord.js Client, bot/empty message filtering, 2000 char splitting, streaming via message.edit() (1s throttle), reconnection tracking, degraded health. 29 tests, 92.33% stmt. |
+
+### D.4 Telegram Channel (EDGE-004)
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| L8 Telegram | `packages/channels/src/telegram/` | NOT_STARTED | — | ADR-009. Grammy. Queued (dep: EDGE-001, DEVOPS-005 — met). |
+
+### D.5 Gateway (EDGE-005)
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| L9 Gateway | `packages/gateway/src/` | NOT_STARTED | — | HTTP/WS. OpenAPI spec (PLAN-002). Dep: EDGE-001, BOOTSTRAP-001. |
+
+### D.6 Bootstrap (BOOTSTRAP-001)
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| Bootstrap | `apps/axel/src/` | NOT_STARTED | — | DI container assembly. Lifecycle management (ADR-021). Dep: EDGE-001, EDGE-002. |
+
+### D.7 Plan Amendment (PLAN-AMEND-001)
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| ADR-002:23 | `docs/adr/002-postgresql-single-db.md` | AMENDED | C51 | PG 16→17. AUD-058 resolved. CTO override (arch 3 cycles stalled). |
+| migration-strategy:9,70,502 | `docs/plan/migration-strategy.md` | AMENDED | C51 | PG 16→17. CI image pg16→pg17. |
+| migration-strategy:103-117 | `docs/plan/migration-strategy.md` | AMENDED | C51 | sessions table: user_id TEXT NOT NULL + channel_history JSONB added. idx_sessions_user added. Aligns with PgSessionStore implementation (AUD-050). |
 
 ## Drift Log
 
@@ -295,3 +338,8 @@ Source: ADR-021
 | 46 | C.6 Common CB | NOT_STARTED→IN_SYNC | COMMON-CB (11 tests, 100% stmt). CircuitBreaker state machine per ADR-021. | coord (CTO override) |
 | 46 | C.7 Interface Summary | created | 9 core→infra interface implementations mapped. All core memory/orchestrator DI contracts have concrete infra implementations. | coord (CTO override) |
 | 46 | C.8 Known Issues | created | 7 HIGH + 8 MEDIUM + 5 LOW from QA-016 + AUDIT-003. 1 Phase D blocker (zod dep resolve). | coord (CTO override) |
+| 51 | D.1 Channel Types | NOT_STARTED→IN_SYNC | EDGE-001 (7 channel interfaces, 24 tests). AxelChannel + 6 supporting types. | coord (CTO override, SYNC-005) |
+| 51 | D.2 CLI Channel | NOT_STARTED→IN_SYNC | EDGE-002 (CliChannel, 21 tests, 95.95% stmt). readline AxelChannel impl. | coord (CTO override, SYNC-005) |
+| 51 | D.3 Discord Channel | NOT_STARTED→IN_SYNC | EDGE-003 (DiscordChannel, 29 tests, 92.33% stmt). discord.js AxelChannel impl. | coord (CTO override, SYNC-005) |
+| 51 | D.7 ADR-002 PG 16→17 | plan→plan | AMENDED. ADR-002:23, migration-strategy:9/70/502 updated. AUD-058 resolved. | coord (CTO override, PLAN-AMEND-001) |
+| 51 | D.7 sessions user_id | code→plan | AMENDED. migration-strategy sessions table: user_id + channel_history added. AUD-050 resolved. | coord (CTO override, PLAN-AMEND-001) |

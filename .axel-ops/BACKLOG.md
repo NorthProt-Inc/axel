@@ -2,13 +2,12 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 50**: Phase D Edge Sprint 47%. No new completions. 4 in progress (EDGE-003, QA-017, PLAN-AMEND-001, SYNC-005). PLAN-AMEND-001 at 3 cycles. BOOTSTRAP-001/EDGE-004 deps met, queued for dev-edge bandwidth.
+> **Cycle 51**: Phase D Edge Sprint **73%**. 4 tasks completed (EDGE-003, QA-017, PLAN-AMEND-001, SYNC-005). BOOTSTRAP-001 assigned to dev-edge. EDGE-004/005 queued.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| BOOTSTRAP-001 | P1 | dev-edge | Implement bootstrap + DI container in apps/axel/src/. main.ts (container assembly), config.ts (Zod AxelConfigSchema + .env loading), lifecycle.ts (startup/shutdown per ADR-021). ~20 injectable services. Per plan lines 308-338, 579-680. TDD mandatory. | EDGE-001, EDGE-002 |
 | EDGE-004 | P1 | dev-edge | Implement Telegram Channel in packages/channels/src/telegram/. grammy. AxelChannel impl. Polling mode (Phase D). 4096 char limit. typingIndicator via sendChatAction. Per plan L8 + ADR-009. TDD mandatory. | EDGE-001, DEVOPS-005 |
 | EDGE-005 | P1 | dev-edge | Implement Gateway HTTP + WebSocket in packages/gateway/src/. Routes per openapi-v1.yaml: /health, /api/v1/chat, /api/v1/memory/search, /api/v1/session, /ws. WebSocket protocol per websocket-protocol.md. Security middleware: CORS, JWT auth, rate limiting, input validation (Zod), error redaction (ADR-011). Per plan L9 (lines 1564-1629). TDD mandatory. | EDGE-001, BOOTSTRAP-001 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
@@ -17,10 +16,7 @@
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| PLAN-AMEND-001 | arch | 0208C48 | C49–C50 |
-| EDGE-003 | dev-edge | 0208C49 | C49–C50 |
-| QA-017 | quality | 0208C49 | C50–C51 |
-| SYNC-005 | arch | 0208C49 | C50 (after PLAN-AMEND-001) |
+| BOOTSTRAP-001 | dev-edge | 0208C51 | C52–C53 |
 
 ## Cancelled
 
@@ -121,3 +117,7 @@
 | EDGE-002 | dev-edge | 0208C49 | CLI Channel AxelChannel impl. readline, streaming, start/stop lifecycle. 21 tests, 95.95% stmt. 529 tests total. |
 | FIX-INFRA-004 | dev-infra | 0208C49 | Migrated 24 files relative→@axel/core/* subpath imports. 154 infra tests pass. |
 | DEVOPS-006 | devops | 0208C49 | Subpath exports @axel/channels + @axel/gateway. Vitest setup files + coverage config. 508→529 tests. |
+| EDGE-003 | dev-edge | 0208C51 | Discord Channel AxelChannel impl. discord.js, 2000 char splitting, streaming message.edit(), reconnection. 29 tests, 92.33% stmt. 558 tests total. |
+| QA-017 | quality | 0208C51 | Phase D code review (EDGE-001/002): PASS. 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW. TDD PASS. §9 PASS. ADR-009 PASS. |
+| PLAN-AMEND-001 | coord (CTO) | 0208C51 | ADR-002 PG 16→17, migration-strategy PG 16→17 + sessions user_id + channel_history + idx. AUD-050/058 resolved. CTO override (arch 3 cycles stalled). |
+| SYNC-005 | coord (CTO) | 0208C51 | PLAN_SYNC.md Phase D: D.1-D.3 NOT_STARTED→IN_SYNC, D.4-D.6 NOT_STARTED, D.7 AMENDED. CTO override. |

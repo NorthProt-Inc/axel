@@ -6,7 +6,7 @@
 
 ## Overview
 
-Axel uses PostgreSQL 16 + pgvector 0.8 as the single persistent store.
+Axel uses PostgreSQL 17 + pgvector 0.8 as the single persistent store.
 This document defines the migration framework and the initial schema migrations.
 
 ### Principles
@@ -67,7 +67,7 @@ No external dependencies (e.g., Prisma, Knex) — just `pg` client + raw SQL fil
 **`001_extensions.sql` (up)**
 ```sql
 -- Migration 001: Enable required PostgreSQL extensions
--- Requires: PostgreSQL 16+, pgvector extension installed
+-- Requires: PostgreSQL 17+, pgvector extension installed
 
 CREATE EXTENSION IF NOT EXISTS vector;          -- pgvector for vector similarity search
 CREATE EXTENSION IF NOT EXISTS pg_trgm;         -- Trigram for text similarity
@@ -103,7 +103,9 @@ DROP EXTENSION IF EXISTS vector;
 CREATE TABLE sessions (
     id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     session_id      TEXT UNIQUE NOT NULL,
+    user_id         TEXT NOT NULL,
     channel_id      TEXT,
+    channel_history JSONB NOT NULL DEFAULT '[]'::jsonb,
     summary         TEXT,
     key_topics      JSONB NOT NULL DEFAULT '[]'::jsonb,
     emotional_tone  TEXT,
@@ -117,6 +119,7 @@ CREATE TABLE sessions (
 );
 
 CREATE INDEX idx_sessions_started ON sessions (started_at DESC);
+CREATE INDEX idx_sessions_user ON sessions (user_id, ended_at NULLS FIRST, started_at DESC);
 CREATE INDEX idx_sessions_channel ON sessions (channel_id, started_at DESC);
 CREATE INDEX idx_sessions_topics ON sessions USING gin (key_topics);
 
@@ -499,7 +502,7 @@ GitHub Actions workflow step:
 migration-test:
   services:
     postgres:
-      image: pgvector/pgvector:pg16
+      image: pgvector/pgvector:pg17
       env:
         POSTGRES_DB: axel_test
         POSTGRES_PASSWORD: test
