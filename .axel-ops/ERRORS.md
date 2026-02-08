@@ -25,6 +25,10 @@
 | ERR-017 | MEDIUM | quality | 0208 | TTFT '500ms 이내' not achievable as guarantee. Realistic: p50 ~400-500ms, p95 ~700-1000ms. | FIX-004 |
 | ERR-018 | MEDIUM | quality | 0208 | Docker cold start '<30s' only with cached images. First deploy exceeds 30s. | FIX-004 |
 | ERR-019 | LOW | quality | 0208 | tsdown attribution: 'OpenClaw 동일' should be 'Rolldown ecosystem'. | FIX-004 |
+| ERR-020 | **HIGH** | quality | 0208 | ToolDefinition type ownership: defined in MCP registry but used by LLM module. Creates reversed dependency (LLM→MCP instead of MCP→LLM). | FIX-003 |
+| ERR-021 | **HIGH** | quality | 0208 | Migration direction REVERSED in Section 5.2 line 1427: says 'embedding-001→text-embedding-004' but text-embedding-004 is deprecated. Contradicts Section 11 and ERR-011. | FIX-003 |
+| ERR-022 | MEDIUM | quality | 0208 | EmbeddingService.embed() singular vs LlmProvider.embed() plural signature inconsistency. ContextAssembler usage unclear. | FIX-004 |
+| ERR-023 | MEDIUM | quality | 0208 | Triple Layer numbering confusion: Package L0-L7 labels vs Turtle Stack Layer 0-10 vs Memory Layer 0-5. Package labels don't map to Turtle layers. | FIX-004 |
 
 ## Resolved
 

@@ -6,12 +6,12 @@
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| FIX-003 | P0 | arch | QA-003 HIGH issues: Redis/PG role clarification, embedding model update, tiktoken removal, IVFFlat formula fix, Gemini Flash latency | FIX-001 | 0208 |
+| FIX-003 | P0 | arch | QA-003 HIGH issues: Redis/PG role clarification, embedding model update, tiktoken removal, IVFFlat formula fix, Gemini Flash latency + QA-004 HIGH: ToolDefinition type ownership, migration direction reversal | FIX-001 | 0208 |
 | ADR-016 | P0 | arch | Redis role redefinition ADR — resolve ADR-002/003 tension, PG as authoritative source, Redis as ephemeral cache | FIX-003 | 0208 |
-| FIX-004 | P1 | arch | QA-003 MEDIUM/LOW issues: Zod v4 compat, countTokens async, TTFT target revision, Docker cold start qualifier, tsdown attribution | FIX-003 | 0208 |
+| FIX-004 | P1 | arch | QA-003+004 MEDIUM/LOW issues: Zod v4 compat, countTokens async, TTFT target revision, Docker cold start qualifier, tsdown attribution, EmbeddingService signature, Layer numbering cleanup | FIX-003 | 0208 |
+| FIX-005 | P1 | arch | QA-004 standalone fixes not requiring FIX-003: ToolDefinition → core/types extraction, migration direction text fix | — | 0208 |
 | ADR-017 | P1 | arch | Svelte 5 WebChat SPA decision ADR (based on RES-004) | — | 0208 |
 | ADR-018 | P1 | arch | Token counting strategy ADR: Anthropic SDK countTokens + per-model strategy (based on RES-002) | — | 0208 |
-| QA-004 | P1 | quality | Review Research outputs RES-002~005 for quality gates (sources, accuracy, completeness) | — | 0208 |
 
 ## In Progress
 
@@ -38,3 +38,4 @@
 | QA-001 | quality | 0207T2133 | 3 HIGH, 5 MEDIUM, 1 LOW issues found |
 | QA-002 | quality | 0207T2133 | 20/23 claude_reports mapped, 3 MEDIUM gaps |
 | QA-003 | quality | 0208T0037 | 5 HIGH, 4 MEDIUM, 1 LOW issues found (feasibility review) |
+| QA-004 | quality | 0208T0106 | 2 HIGH, 2 MEDIUM, 1 LOW issues found (cross-reference integrity) |

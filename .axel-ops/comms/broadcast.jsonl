@@ -11,3 +11,7 @@
 {"ts":"0208T0100","from":"coord","type":"escalate","ref":"FIX-001,FIX-002","msg":"Arch Division FIX-001/FIX-002 2 cycles 무보고. worktree 확인 및 재시작 필요."}
 {"ts":"0208T0100","from":"coord","type":"escalate","ref":"ERRORS","msg":"Open errors 19건 (threshold 5). Quality 발견 속도가 수정 속도 초과. Arch 병목 해소 시급."}
 {"ts":"0208T0100","from":"coord","type":"assign","to":"quality","tasks":["QA-004"],"note":"QA-004: Research RES-002~005 결과물 quality gate 검증. worktree: axel-wt-quality"}
+{"ts":"0208T0200","from":"coord","type":"broadcast","msg":"Cycle 4. QA-004 완료: cross-reference integrity review, 4건 신규 이슈(2 HIGH, 2 MEDIUM). Arch FIX-001/002 3 cycles 무보고 — ESCALATION 심각도 상향. Open errors: 23. 전 Queued 작업이 Arch 소유 — critical path bottleneck."}
+{"ts":"0208T0200","from":"coord","type":"escalate","ref":"FIX-001,FIX-002","msg":"CRITICAL: Arch Division 3 cycles (>1.5h) 무보고. Constitution §6 3+ cycles threshold 도달. worktree axel-wt-arch 수동 검사 및 에이전트 재시작 필요. 전체 파이프라인 blocked."}
+{"ts":"0208T0200","from":"coord","type":"escalate","ref":"ERRORS","msg":"Open errors 23건 (threshold 5). 4.6x threshold 초과. Arch 재가동 없이는 감소 불가."}
+{"ts":"0208T0200","from":"coord","type":"broadcast","msg":"Division 배정: Research/Quality 대기 중 — Arch 해소 전까지 신규 배정 불가. FIX-005(P1) 생성: QA-004 독립 수정건(ToolDefinition type, migration direction). Arch 재가동 시 FIX-001/002 → FIX-005 → FIX-003 순서로 처리."}
