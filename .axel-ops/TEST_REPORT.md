@@ -1,23 +1,23 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08 Cycle 38 (QA-014-PROACTIVE)
+> Last Updated: 2026-02-08 Cycle 39 (QA-015-PROACTIVE)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 289 |
-| Passing | 289 |
+| Total Tests | 330 |
+| Passing | 330 |
 | Failing | 0 |
-| Coverage (core, excl. types) | 100% stmts / 95.87% branch / 100% funcs / 100% lines |
-| Phase | B: Core Sprint (80% complete) |
+| Coverage (core, global) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
+| Phase | B: Core Sprint (100% — all 6 CORE tasks done) |
 
 ## Per-Package Status
 
 | Package | Tests | Pass | Fail | Coverage | Target | Gate |
 |---------|-------|------|------|----------|--------|------|
-| `packages/core/` | 289 | 289 | 0 | 100% stmts, 95.87% branch | 90% | **PASS** |
+| `packages/core/` | 330 | 330 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
 | `packages/infra/` | 0 | 0 | 0 | — | 80% | Pending Phase C |
 | `packages/channels/` | 0 | 0 | 0 | — | 75% | Pending Phase D |
 | `packages/gateway/` | 0 | 0 | 0 | — | 80% | Pending Phase D |
@@ -40,10 +40,13 @@
 | memory/meta-memory.ts | 100 | 100 | 100 | 100 | |
 | context/types.ts | 100 | 100 | 100 | 100 | Zod schema + interfaces |
 | context/assembler.ts | 100 | 100 | 100 | 100 | Priority assembly + binary-search truncation |
-| **Overall** | **100** | **95.87** | **100** | **100** | types/ and index.ts excluded per config |
+| orchestrator/types.ts | 100 | 100 | 100 | 100 | Zod schema + DI interfaces |
+| orchestrator/react-loop.ts | 98.67 | 92.85 | 100 | — | AsyncGenerator + error recovery |
+| orchestrator/session-router.ts | 100 | 100 | 100 | 100 | Thin DI wrapper |
+| **Overall** | **99.69** | **95.2** | **100** | **99.69** | types/ and index.ts excluded per config |
 
 > Coverage excludes `src/types/` (pure interfaces, no runtime code) and `src/**/index.ts` (barrel exports) per `vitest.config.ts`.
-> Context module coverage reported by dev-core: 100% stmt, 100% branch. Verified by QA-014-PROACTIVE via 289 test pass.
+> Orchestrator module coverage reported by dev-core: 98.67% stmt, 92.85% branch. Verified by QA-015-PROACTIVE via 330 test pass.
 
 ## TDD Compliance
 
@@ -54,27 +57,55 @@
 | 34 | CORE-005 | dev-core | `7ae9276d` (03:05:25) | `abf08200` (03:06:25) | +1m 00s | **YES** |
 | 36 | CORE-003 | dev-core | `c719a22` (03:31:05) | `abd5878` (03:33:08) | +2m 03s | **YES** |
 | 38 | CORE-004 | dev-core | `05daa1d` (03:45:04) | `a0f498f` (03:46:36) | +1m 32s | **YES** |
+| 39 | CORE-006 | dev-core | `588db3d` (03:56:13) | `dd7b8b4` (03:57:41) | +1m 28s | **YES** |
 
-All 5 completed CORE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN).
+All 6 completed CORE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN).
 
-## CONSTITUTION Compliance (QA-014-PROACTIVE: CORE-004)
+## CONSTITUTION Compliance (QA-015-PROACTIVE: CORE-006)
 
 | Rule | Check | Result |
 |------|-------|--------|
-| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** (05daa1d → a0f498f, +1m32s) |
-| Rule 9 (Package Boundary) | No cross-package imports in context/ | **PASS** (only relative paths + zod) |
-| Rule 10 (Test Gate) | 289 tests pass, coverage ≥ 90%, Biome clean, tsc clean | **PASS** |
-| Rule 14 (File Size) | No src file > 400 lines | **PASS** (max: 242 lines, assembler.ts) |
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** (588db3d → dd7b8b4, +1m28s) |
+| Rule 9 (Package Boundary) | No cross-package imports in orchestrator/ | **PASS** (only relative paths within core/ + zod) |
+| Rule 10 (Test Gate) | 330 tests pass, coverage ≥ 90%, Biome clean, tsc clean | **PASS** |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** (max: 269 lines, react-loop.ts) |
 
 ## Recent Test Runs
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 39 | quality (QA-015-PROACTIVE) | core | 330 pass, 0 fail | — | CORE-006 proactive review |
 | 38 | quality (QA-014-PROACTIVE) | core | 289 pass, 0 fail | — | CORE-004 proactive review |
 | 36 | quality (QA-013) | core | 241 pass, 0 fail | 583ms | Biome: 0 warnings. tsc: clean. |
 | 35 | quality (QA-012) | core | 121 pass, 0 fail | 483ms | Biome: 0 warnings. tsc: clean. |
 | 34 | dev-core (CORE-002+005) | core | 121 pass, 0 fail | — | Reported by dev-core |
 | 33 | dev-core (CORE-001) | core | 55 pass, 0 fail | — | Domain types first pass |
+
+## QA-015-PROACTIVE Code Review Findings (CORE-006: Orchestrator)
+
+### Issues Found: 0 CRITICAL, 0 HIGH, 4 MEDIUM, 3 LOW
+
+| # | Sev | Location | Description | Fix |
+|---|-----|----------|-------------|-----|
+| 1 | MEDIUM | orchestrator/types.ts:79-92 | Plan §4.6 LlmProvider specifies 4 members (id, chat, countTokens, healthCheck) and ChatParams has 7 fields. Implementation narrows to chat-only with 2-field LlmChatParams. Deliberate DI simplification — full LlmProvider belongs in infra. | Architect add PLAN_SYNC drift entry |
+| 2 | MEDIUM | orchestrator/types.ts:40 | Plan and ADR-014 UnifiedSession omit turnCount; implementation adds it. Field is useful and tested. | Architect update ADR-014 to include turnCount |
+| 3 | MEDIUM | orchestrator/types.ts:44-48 | Plan's SessionRouter interface (3 methods: resolveSession, switchChannel, endSession) replaced by SessionStore DI interface (5 methods). switchChannel() absorbed into resolve(). SessionRouter is now a thin wrapper class. Design improvement over plan. | Architect update PLAN_SYNC — document redesign rationale |
+| 4 | MEDIUM | react-loop.ts:70-77 | makeToolMessage/makeToolErrorMessage use empty sessionId ('') and turnId (0). Functionally acceptable for LLM context but downstream filtering could miscategorize. | Consider accepting sessionId from ReActLoopParams |
+| 5 | LOW | react-loop.ts:49-57 | chunkToEvent() accepts `{type: string, content: unknown}` instead of `LlmChatChunk` — loses type safety from discriminated union. | Change parameter type to LlmChatChunk |
+| 6 | LOW | react-loop.ts:233 | exponentialBackoff constants (100ms base, 5s cap) are reasonable but implicit. doneEvent() token usage hardcoded to zeros — production must aggregate from LLM. | Document for infra implementation |
+| 7 | LOW | session-router.ts:1-78 | Thin delegation wrapper — 6 methods are 1-line delegates except getChannelContext (10 lines). Justified for DI boundary and stable API surface. | No fix needed |
+
+### 7-Perspective Summary
+
+| Perspective | Finding |
+|-------------|---------|
+| 1. Design Quality | **Excellent.** Clean separation: ReActLoop (pure generator, no DI container awareness), SessionRouter (thin wrapper over SessionStore DI contract), types (Zod + interfaces). Constructor injection pattern consistent with project conventions. LlmProvider/ToolExecutor/SessionStore are deep modules — simple interface, rich behavior delegated to infra. Justified deviations from plan (narrowed DI contracts, SessionStore extraction). |
+| 2. Complexity & Readability | **Very Good.** react-loop.ts at 269 lines is the largest file but well-structured: helper functions extracted (chunkToEvent, executeToolCall, runIteration, runIterationSafe), clear separation between iteration logic and error handling. refactor commit `e697bd4` split reactLoop for Biome complexity compliance. |
+| 3. Security | **No issues.** No external input handling. Tool execution delegates to ToolExecutor (timeout-protected). Error messages use toErrorInfo() — no stack traces exposed. |
+| 4. Bugs & Reliability | **No bugs found.** Error recovery correctly handles: retryable ProviderError (backoff + retry), permanent ProviderError (stop), ToolError (error message to LLM for alternative action), total timeout, max iterations. AsyncGenerator cleanup is implicit (break exits for-await). |
+| 5. Changeability | **Good.** Adding new error types requires only extending toErrorInfo(). Adding new DI contracts follows established pattern. react-loop.ts could accept additional config (backoff params, retry limits) without structural changes. |
+| 6. Dead Code | **None found.** All exports used. All helper functions called. No commented-out code. |
+| 7. DRY | **Good.** makeToolMessage/makeToolErrorMessage share message construction pattern — could theoretically share a base, but differences (error field, content structure) justify separate functions. toErrorInfo() centralizes error conversion. |
 
 ## QA-014-PROACTIVE Code Review Findings (CORE-004: Context Assembly)
 
@@ -166,4 +197,5 @@ All 5 completed CORE tasks follow TDD protocol: test commits (RED) precede sourc
 | QA-011 | 19 | FIX-AUDIT verification | 3M new | 4 PASS, 1 CONDITIONAL |
 | QA-012 | 35 | Phase B code review (CORE-001+002+005) | 2M 3L | ALL CONSTITUTION gates PASS |
 | QA-013 | 36 | Phase B code review (CORE-003 memory M0-M5) | 3M 3L | ALL CONSTITUTION gates PASS |
-| **QA-014-PROACTIVE** | **38** | **Phase B code review (CORE-004 context assembly)** | **2M 1L** | **ALL CONSTITUTION gates PASS** |
+| QA-014-PROACTIVE | 38 | Phase B code review (CORE-004 context assembly) | 2M 1L | ALL CONSTITUTION gates PASS |
+| **QA-015-PROACTIVE** | **39** | **Phase B code review (CORE-006 orchestrator)** | **4M 3L** | **ALL CONSTITUTION gates PASS** |
