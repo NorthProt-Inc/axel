@@ -2,16 +2,19 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 62**: **1 CRITICAL (ERR-069, human decision pending). 1 HIGH (ERR-075, FIX-AUDIT-E-003 in progress devops).** ERR-070 resolved by FIX-SCHEMA-001 (CTO override). Open errors 3→2.
+> **Cycle 63**: **1 CRITICAL (ERR-069, human decision pending).** ERR-075 resolved by FIX-AUDIT-E-003 (devops). Open errors 2→1.
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
 | ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016). **RES-006 SOLUTION**: Truncate to **1536d** via Matryoshka embeddings (Google official, research-proven, zero infra changes, 50% storage savings). FIX-DIMENSION-001 created for ADR-016 amendment. **Requires human (Mark) decision** to approve 1536d strategy before Architect can execute. | INTEG-001 (devops) | 0208C56 |
-| ERR-075 | **HIGH** | Hardcoded DB credentials in migrate CLI — tools/migrate has fallback credentials. AUD-083. FIX-AUDIT-E-003 assigned to devops. | AUDIT-005 (audit) | 0208C59 |
 
 ## Resolved
+
+| ID | Resolution | Resolved By | Date |
+|----|------------|-------------|------|
+| ERR-075 | Hardcoded DB credentials removed from migrate CLI. Env vars enforced (DATABASE_URL or PG*). 5 new tests. 806 tests pass. AUD-083 resolved. | FIX-AUDIT-E-003 (devops) | 0208C63 |
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|

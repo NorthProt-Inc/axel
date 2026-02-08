@@ -2,21 +2,19 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 62**: **PHASE E: IN PROGRESS.** 15 tasks done. 801 tests, 63 files. 2 completed this cycle (FIX-SCHEMA-001 CTO override, SYNC-007 CTO override). ERR-070 resolved. FIX-AUDIT-E-003 in progress (devops). Open errors 2 (1 CRITICAL human, 1 HIGH).
+> **Cycle 63**: **PHASE E: EFFECTIVELY COMPLETE.** 16 tasks done, 806 tests, 64 files. FIX-AUDIT-E-003 completed (devops). Remaining: 2 human-blocked + 1 optional P2. Open errors 1 (ERR-069 CRITICAL human decision).
 
-## Queued
+## Queued (Human-Blocked / Optional)
 
-| ID | Priority | Division | Task | Depends On |
-|----|----------|----------|------|------------|
-| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ |
-| CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
-| FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). **Human decision needed before execution.** | RES-006 ✓ |
+| ID | Priority | Division | Task | Depends On | Blocker |
+|----|----------|----------|------|------------|---------|
+| FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). | RES-006 ✓ | **Human decision needed** |
+| CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — | **Human approval needed** |
+| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ | None (optional) |
 
 ## In Progress
 
-| ID | Division | Started | ETA |
-|----|----------|---------|-----|
-| FIX-AUDIT-E-003 | devops | 0208C61 | C63 |
+(none)
 
 ## Cancelled
 
@@ -143,3 +141,4 @@
 | QA-019 | quality | 0208C61 | Phase E integration review: PASS. 0C 0H 3M 4L. 801 tests. All CONSTITUTION gates PASS. Coverage all targets exceeded. |
 | FIX-SCHEMA-001 | coord (CTO) | 0208C62 | Sessions table schema drift fixed: channel_history JSONB→TEXT[], last_activity_at TIMESTAMPTZ added, idx_sessions_user updated. migration-strategy.md + 002_episodic_memory.sql aligned with PgSessionStore. ERR-070 resolved. |
 | SYNC-007 | coord (CTO) | 0208C62 | PLAN_SYNC Phase E: 7 subsections (E.1~E.7) mapped. Migration runner, InboundHandler, gateway integration, PG+Redis integration, channel bootstrap, E2E roundtrip, schema amendment all IN_SYNC. |
+| FIX-AUDIT-E-003 | devops | 0208C63 | AUD-083 hardcoded DB credentials removed from migrate CLI. Env vars enforced (DATABASE_URL or PG*). 5 new tests. 806 tests pass. ERR-075 resolved. |
