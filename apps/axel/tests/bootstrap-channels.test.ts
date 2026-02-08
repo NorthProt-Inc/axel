@@ -339,6 +339,47 @@ describe('bootstrap-channels', () => {
 			expect(events.length).toBeGreaterThanOrEqual(0);
 		});
 
+		it('passes tool definitions from toolRegistry to InboundHandler (AUD-093)', async () => {
+			const container = createMockContainer();
+			const personaEngine = createMockPersonaEngine();
+
+			const mockToolDefs = [
+				{
+					name: 'search_memory',
+					description: 'Search semantic memory',
+					category: 'memory' as const,
+					inputSchema: { type: 'object' },
+					requiresApproval: false,
+				},
+			];
+
+			(container.toolRegistry as { listAll: ReturnType<typeof vi.fn> }).listAll = vi
+				.fn()
+				.mockReturnValue(mockToolDefs);
+
+			// Mock the LLM provider to capture what tools it receives
+			let capturedTools: unknown;
+			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
+				.fn()
+				.mockImplementation((params: { tools: unknown }) => {
+					capturedTools = params.tools;
+					return (async function* () {
+						yield { type: 'message_delta' as const, content: 'Hello' };
+						yield { type: 'message_complete' as const, content: '' };
+					})();
+				});
+
+			const handleMessage = createHandleMessage(container, personaEngine);
+			await handleMessage({
+				userId: 'user-1',
+				channelId: 'gateway',
+				content: 'Hello',
+			});
+
+			// Tool definitions should be passed through to reactLoop (not empty)
+			expect(capturedTools).toEqual(mockToolDefs);
+		});
+
 		it('handles errors gracefully and returns error content', async () => {
 			const container = createMockContainer();
 			const personaEngine = createMockPersonaEngine();

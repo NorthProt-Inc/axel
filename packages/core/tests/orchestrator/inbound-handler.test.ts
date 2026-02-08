@@ -533,6 +533,92 @@ describe('createInboundHandler', () => {
 		});
 	});
 
+	describe('tool definitions wiring (AUD-093)', () => {
+		it('should pass toolDefinitions to reactLoop instead of empty array', async () => {
+			const store = makeSessionStore();
+			let capturedParams: unknown;
+			const llmProvider: LlmProvider = {
+				async *chat(params) {
+					capturedParams = params;
+					yield { type: 'text', content: 'response' };
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const toolDefs: ToolDefinition[] = [
+				{
+					name: 'search_memory',
+					description: 'Search semantic memory',
+					category: 'memory',
+					inputSchema: { type: 'object' },
+					requiresApproval: false,
+				},
+				{
+					name: 'execute_command',
+					description: 'Execute a system command',
+					category: 'system',
+					inputSchema: { type: 'object' },
+					requiresApproval: true,
+				},
+			];
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				toolDefinitions: toolDefs,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			// reactLoop receives the tool definitions via LLM chat params
+			const params = capturedParams as { tools: ToolDefinition[] };
+			expect(params.tools).toEqual(toolDefs);
+			expect(params.tools).toHaveLength(2);
+		});
+
+		it('should default to empty tools array when toolDefinitions not provided', async () => {
+			const store = makeSessionStore();
+			let capturedParams: unknown;
+			const llmProvider: LlmProvider = {
+				async *chat(params) {
+					capturedParams = params;
+					yield { type: 'text', content: 'response' };
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			const params = capturedParams as { tools: ToolDefinition[] };
+			expect(params.tools).toEqual([]);
+		});
+	});
+
 	describe('send callback signature', () => {
 		it('should call send with userId as target and OutboundMessage', async () => {
 			const store = makeSessionStore();
