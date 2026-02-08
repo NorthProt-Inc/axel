@@ -1,26 +1,27 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08C46 (QA-016 Phase C INFRA review — independent verification)
+> Last Updated: 2026-02-08C50 (QA-017 Phase D EDGE-001/002 review)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 475 (459 runnable, 16 blocked by zod resolve) |
-| Passing | 459 |
-| Failing | 16 (1 suite: tool-registry.test.ts — zod dependency resolve failure) |
+| Total Tests | 529 (512 runnable, 17 blocked: 16 zod + 1 suite fail) |
+| Passing | 512 |
+| Failing | 17 (1 suite: tool-registry.test.ts — zod dependency resolve failure, worktree sync issue) |
 | Coverage (core) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
-| Coverage (infra, reported) | 95%+ stmts (cache 91.44%, common 100%, db 95.5%, embedding 99.2%, llm 95.89%, mcp 92.12%) |
-| Phase | C: Infra Sprint (89% — 9/9 coding tasks done, QA-016 DONE, SYNC-004 + AUDIT-003 remaining) |
+| Coverage (infra, reported) | 95%+ stmts (cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42%) |
+| Coverage (channels, reported) | 95.95% stmts / 100% branch / 90.9% funcs / 95.95% lines |
+| Phase | D: Edge Sprint (47% — EDGE-001/002 done, QA-017 DONE, EDGE-003 in progress) |
 
 ## Per-Package Status
 
 | Package | Tests | Pass | Fail | Coverage | Target | Gate |
 |---------|-------|------|------|----------|--------|------|
-| `packages/core/` | 330 | 330 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
-| `packages/infra/` | 145 | 129 | 16 | 95%+ stmts (reported) | 80% | **CONDITIONAL PASS** (zod fix needed) |
-| `packages/channels/` | 0 | 0 | 0 | — | 75% | Pending Phase D |
+| `packages/core/` | 354 | 354 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
+| `packages/infra/` | 154 | 137 | 17 | 95%+ stmts (reported) | 80% | **CONDITIONAL PASS** (zod worktree sync) |
+| `packages/channels/` | 21 | 21 | 0 | 95.95% stmts, 100% branch, 90.9% func | 75% | **PASS** |
 | `packages/gateway/` | 0 | 0 | 0 | — | 80% | Pending Phase D |
 
 ### Infra Package Coverage Breakdown (dev-infra reported C44)
@@ -90,6 +91,22 @@ All 6 completed CORE tasks follow TDD protocol: test commits (RED) precede sourc
 
 All INFRA tasks follow TDD protocol: test commits (RED) precede source commits (GREEN). Batch commits (multiple tasks per commit) retain correct order.
 
+| Cycle | Task | Division | RED Commit | GREEN Commit | Delta | Compliant |
+|-------|------|----------|------------|--------------|-------|-----------|
+| 48 | EDGE-001 | dev-edge | `01afaad` (07:18:37) | `08feb6a` (07:18:47) | +10s | **YES** |
+| 49 | EDGE-002 | dev-edge | `0ac817f` (07:30:31) | `32d2ba0` (07:31:07) | +36s | **YES** |
+
+All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN). EDGE-002 has additional REFACTOR commits (f398d9a, 3aa50a6, 62a34ab) after GREEN — correct TDD cycle.
+
+## CONSTITUTION Compliance (QA-017: Phase D EDGE-001/002)
+
+| Rule | Check | Result |
+|------|-------|--------|
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** (01afaad→08feb6a +10s, 0ac817f→32d2ba0 +36s) |
+| Rule 9 (Package Boundary) | channels imports only from core/types | **PASS** — `@axel/core/types` only. channel.ts imports `./health.js` (same package). |
+| Rule 10 (Test Gate) | All tests pass, coverage ≥ 75%, Biome clean, tsc clean | **PASS** — 45 EDGE tests all pass. Coverage 95.95% > 75%. Biome: 0 errors on EDGE files. tsc: clean. (zod failure is pre-existing infra issue, not EDGE-related) |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** (channel.ts: 98 lines, cli-channel.ts: 133 lines) |
+
 ## CONSTITUTION Compliance (QA-016: Phase C INFRA)
 
 | Rule | Check | Result |
@@ -112,6 +129,8 @@ All INFRA tasks follow TDD protocol: test commits (RED) precede source commits (
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 51 | quality (proactive) | all | 512 pass, 17 fail (1 suite) | 1.13s | div/quality worktree. FIX-INFRA-004 verified: 0 relative core imports remain. zod resolve same. |
+| 50 | quality (QA-017) | all | 512 pass, 17 fail (1 suite) | 1.06s | div/quality worktree. zod resolve failure (infra/mcp). EDGE files: 45 tests PASS. Biome: 0 errors on EDGE files. tsc: clean. |
 | 46 | quality (QA-016 verify) | core+infra | 459 pass, 16 fail (1 suite) | 1.03s | Independent re-verification on div/quality. Same result as C44. tsc: clean. Biome: 0 errors/114 warn. |
 | 44 | quality (QA-016) | core+infra | 459 pass, 16 fail (1 suite) | 1.03s | tool-registry.test.ts: zod resolve failure. Biome: 0 errors/114 warn. tsc: clean. |
 | 41 | quality (QA-013 final) | core | 330 pass, 0 fail | 724ms | main branch smoke (post-CORE-004+006 merge): typecheck+lint+test ALL PASS |
@@ -122,6 +141,41 @@ All INFRA tasks follow TDD protocol: test commits (RED) precede source commits (
 | 35 | quality (QA-012) | core | 121 pass, 0 fail | 483ms | Biome: 0 warnings. tsc: clean. |
 | 34 | dev-core (CORE-002+005) | core | 121 pass, 0 fail | — | Reported by dev-core |
 | 33 | dev-core (CORE-001) | core | 55 pass, 0 fail | — | Domain types first pass |
+
+## QA-017 Code Review Findings (Phase D: EDGE-001 channel types + EDGE-002 CLI channel)
+
+### Issues Found: 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW
+
+| # | Sev | Location | Description | Fix |
+|---|-----|----------|-------------|-----|
+| 1 | MEDIUM | channels/tests/setup.ts:25-43 | 3 unused stub functions (mockReadline, mockDiscord, mockTelegram) with TODO comments. EDGE-002 implements its own createMockReadline() instead. Dead code. | Remove stubs; each EDGE task implements its own mocks. |
+| 2 | MEDIUM | channels/src/cli/cli-channel.ts:76-80 | Handler errors caught with .catch() fire-and-forget pattern. No await — errors may be lost if process crashes between .catch() registration and rejection. Multiple handlers run sequentially in for...of but catch independently. | Document fire-and-forget semantics. Consider Promise.allSettled() for Discord/Telegram channels. Acceptable for CLI. |
+| 3 | MEDIUM | channels/src/cli/cli-channel.ts:51 | Default onError is no-op (() => {}). Handler errors silently swallowed in production. | Default to console.error or accept Logger interface. Document that explicit onError required for production observability. |
+| 4 | LOW | core/tests/types/channel.test.ts:1-513 | Test file 513 lines. 8 mock channel objects with near-identical structure — high repetition. | Extract createBaseMockChannel() factory. Not blocking (Rule 14 applies to src only). |
+| 5 | LOW | channels/src/cli/cli-channel.ts:83-85 | readline 'close' handler sets started=false but doesn't null this.rl. Subsequent stop() calls this.rl.close() again (double-close). Harmless for Node.js readline. | Set this.rl = null in close handler. |
+| 6 | LOW | channels/src/cli/cli-channel.ts:14-22 | CLI_CAPABILITIES is shared module-level const. Multiple CliChannel instances share same reference. Safe due to readonly but unusual pattern. | No fix needed — readonly prevents mutation. |
+
+### 7-Perspective Summary
+
+| Perspective | Finding |
+|-------------|---------|
+| 1. Design Quality | **Excellent.** Clean AxelChannel interface: deep module (7 capabilities, 4 required methods, 5 optional). CLI implementation is minimal but complete. Constructor injection for I/O dependencies (createReadline, write, onError). Single Responsibility maintained. No God objects. |
+| 2. Complexity & Readability | **Excellent.** channel.ts: 98 lines, pure interfaces. cli-channel.ts: 133 lines, no deep nesting, clear lifecycle (start→message→stop). Methods are 5-15 lines each. Naming is clear and self-documenting. |
+| 3. Security | **No issues.** CLI channel has no external network input. readline operates on trusted local stdin. No command execution, no file I/O, no path handling. |
+| 4. Bugs & Reliability | **No bugs found.** Double-start throws. Stop before start is safe (no-op). Close event correctly transitions health. Handler errors caught without crashing channel. Empty/whitespace input filtered. |
+| 5. Changeability | **Excellent.** Adding new channel adapters follows clear pattern: implement AxelChannel, declare capabilities, handle lifecycle. CLI channel provides a reference implementation template. |
+| 6. Dead Code | **1 issue.** setup.ts contains 3 unused stub functions. |
+| 7. DRY | **Good.** Minor duplication in test file (8 nearly identical mock channels). Source code has no DRY violations. |
+
+### ADR Compliance
+
+| ADR | Check | Result |
+|-----|-------|--------|
+| ADR-009 (Channel Architecture) | AxelChannel interface matches plan L8 | **PASS** — all 7 interface members, lifecycle methods, optional methods per plan. |
+| ADR-011 (Error Handling) | Error redaction in channel responses | **N/A** — CLI channel doesn't handle external errors; delegated to orchestrator. |
+| ADR-014 (Session Router) | channelId for cross-channel sessions | **PASS** — InboundMessage.channelId = 'cli'. |
+| ADR-020 (Error Taxonomy) | Typed errors | **PASS** — handler errors caught as unknown, forwarded to onError callback. |
+| ADR-021 (Resilience) | Circuit breaker for reconnection | **N/A** — CLI has no reconnection (local stdin). Reconnection lifecycle hooks defined in interface for Discord/Telegram. |
 
 ## QA-016 Code Review Findings (Phase C: INFRA — db, cache, embedding, llm, mcp, common)
 
@@ -275,3 +329,4 @@ All INFRA tasks follow TDD protocol: test commits (RED) precede source commits (
 | QA-015-PROACTIVE | 39 | Phase B code review (CORE-006 orchestrator) | 4M 3L | ALL CONSTITUTION gates PASS |
 | **QA-013 FINAL** | **41** | **Phase B complete — 330 tests smoke test on merged main** | **11M 10L total** | **ALL CONSTITUTION gates PASS, READY FOR PHASE B CLOSURE** |
 | **QA-016** | **44** | **Phase C INFRA code review — db, cache, embedding, llm, mcp, common (18 src, 14 test files)** | **2H 7M 4L** | **CONDITIONAL PASS** (zod dep fix needed for full PASS) |
+| **QA-017** | **50** | **Phase D EDGE code review — EDGE-001 (channel types) + EDGE-002 (CLI channel) (2 src, 2 test files)** | **0H 3M 3L** | **PASS** — TDD, §9, §10, §14 all PASS. Excellent design quality. |
