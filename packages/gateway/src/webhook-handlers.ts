@@ -130,26 +130,29 @@ export function isDiscordInteraction(value: unknown): value is DiscordInteractio
 	const { type } = value as { type: unknown };
 	if (typeof type !== 'number') return false;
 
-	if ('data' in value) {
-		const { data } = value as { data: unknown };
-		if (typeof data !== 'object' || data === null) return false;
-		if (!('name' in data)) return false;
-		const { name } = data as { name: unknown };
-		if (typeof name !== 'string') return false;
-	}
-
-	if ('member' in value) {
-		const { member } = value as { member: unknown };
-		if (typeof member !== 'object' || member === null) return false;
-		if (!('user' in member)) return false;
-		const { user } = member as { user: unknown };
-		if (typeof user !== 'object' || user === null) return false;
-		if (!('id' in user)) return false;
-		const { id } = user as { id: unknown };
-		if (typeof id !== 'string') return false;
+	if ('data' in value && !isValidDiscordData((value as { data: unknown }).data)) return false;
+	if ('member' in value && !isValidDiscordMember((value as { member: unknown }).member)) {
+		return false;
 	}
 
 	return true;
+}
+
+function isValidDiscordData(data: unknown): boolean {
+	if (typeof data !== 'object' || data === null) return false;
+	if (!('name' in data)) return false;
+	const { name } = data as { name: unknown };
+	return typeof name === 'string';
+}
+
+function isValidDiscordMember(member: unknown): boolean {
+	if (typeof member !== 'object' || member === null) return false;
+	if (!('user' in member)) return false;
+	const { user } = member as { user: unknown };
+	if (typeof user !== 'object' || user === null) return false;
+	if (!('id' in user)) return false;
+	const { id } = user as { id: unknown };
+	return typeof id === 'string';
 }
 
 interface DiscordExtracted {
