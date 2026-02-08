@@ -74,6 +74,27 @@ function waitForMessage(ws: WebSocket): Promise<Record<string, unknown>> {
 	});
 }
 
+/** Collect WS messages until a 'done' or 'error' message, with timeout */
+function collectWsMessages(ws: WebSocket, timeoutMs = 5000): Promise<Record<string, unknown>[]> {
+	return new Promise((resolve, reject) => {
+		const messages: Record<string, unknown>[] = [];
+		const timeout = setTimeout(() => {
+			ws.removeAllListeners('message');
+			resolve(messages);
+		}, timeoutMs);
+
+		ws.on('message', (data: WebSocket.RawData) => {
+			const msg = JSON.parse(data.toString()) as Record<string, unknown>;
+			messages.push(msg);
+			if (msg.type === 'done' || msg.type === 'error') {
+				clearTimeout(timeout);
+				ws.removeAllListeners('message');
+				resolve(messages);
+			}
+		});
+	});
+}
+
 const authHeaders = {
 	authorization: 'Bearer test-auth-token-12345',
 	'content-type': 'application/json',
@@ -321,22 +342,13 @@ describe('INTEG-003: Gateway → Orchestrator Integration', () => {
 			);
 
 			const ws = await connectAndAuth(httpServer);
+			const collected = collectWsMessages(ws);
 
 			ws.send(JSON.stringify({ type: 'chat', content: 'Hello', channelId: 'webchat' }));
 
-			const messages: Record<string, unknown>[] = [];
-			// Collect messages until done
-			for (let i = 0; i < 5; i++) {
-				try {
-					const msg = await waitForMessage(ws);
-					messages.push(msg);
-					if (msg.type === 'done') break;
-				} catch {
-					break;
-				}
-			}
-
+			const messages = await collected;
 			const types = messages.map((m) => m.type);
+			expect(types).toContain('message_delta');
 			expect(types).toContain('done');
 
 			ws.close();

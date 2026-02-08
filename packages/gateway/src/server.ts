@@ -17,8 +17,40 @@ export interface GatewayConfig {
 	readonly rateLimitPerMinute: number;
 }
 
+/** Event emitted during streaming message processing */
+export interface MessageEvent {
+	readonly type: string;
+	readonly [key: string]: unknown;
+}
+
+/** Result from the message handler */
+export interface MessageResult {
+	readonly content: string;
+	readonly sessionId: string;
+	readonly channelSwitched: boolean;
+	readonly usage: {
+		readonly inputTokens: number;
+		readonly outputTokens: number;
+		readonly cacheReadTokens: number;
+		readonly cacheCreationTokens: number;
+	};
+}
+
+/**
+ * Message handler function injected via DI.
+ *
+ * Maps to InboundHandler in the composition root (apps/axel/).
+ * The optional onEvent callback enables streaming: each ReActEvent
+ * is forwarded to the caller for SSE/WS streaming.
+ */
+export type HandleMessage = (
+	message: { readonly userId: string; readonly channelId: string; readonly content: string },
+	onEvent?: (event: MessageEvent) => void,
+) => Promise<MessageResult>;
+
 export interface GatewayDeps {
 	readonly healthCheck: () => Promise<HealthStatus>;
+	readonly handleMessage?: HandleMessage;
 }
 
 type RouteHandler = (
@@ -260,6 +292,11 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			return;
 		}
 
+		if (parsed.type === 'chat') {
+			handleWsChatMessage(ws, parsed);
+			return;
+		}
+
 		ws.send(
 			JSON.stringify({
 				type: 'error',
@@ -267,6 +304,50 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 				requestId: generateRequestId(),
 			}),
 		);
+	}
+
+	function handleWsChatMessage(ws: WebSocket, parsed: Record<string, unknown>): void {
+		const requestId = generateRequestId();
+		const content = parsed.content;
+		const channelId = parsed.channelId;
+
+		if (typeof content !== 'string' || content.length === 0) {
+			ws.send(JSON.stringify({ type: 'error', error: 'Missing content', requestId }));
+			return;
+		}
+		if (typeof channelId !== 'string' || channelId.length === 0) {
+			ws.send(JSON.stringify({ type: 'error', error: 'Missing channelId', requestId }));
+			return;
+		}
+
+		if (!deps.handleMessage) {
+			ws.send(JSON.stringify({ type: 'error', error: 'Chat handler not configured', requestId }));
+			return;
+		}
+
+		deps
+			.handleMessage({ userId: 'gateway-user', channelId, content }, (event) => {
+				if (ws.readyState === ws.OPEN) {
+					ws.send(JSON.stringify(event));
+				}
+			})
+			.then((result) => {
+				if (ws.readyState === ws.OPEN) {
+					ws.send(
+						JSON.stringify({
+							type: 'done',
+							sessionId: result.sessionId,
+							usage: result.usage,
+						}),
+					);
+				}
+			})
+			.catch((err: unknown) => {
+				if (ws.readyState === ws.OPEN) {
+					const classified = classifyError(err, config.env);
+					ws.send(JSON.stringify({ type: 'error', error: classified.message, requestId }));
+				}
+			});
 	}
 
 	// ─── Route Handlers ───
@@ -301,13 +382,23 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			return;
 		}
 
+		if (!deps.handleMessage) {
+			sendError(res, 503, 'Chat handler not configured', requestId);
+			return;
+		}
+
+		const result = await deps.handleMessage({
+			userId: 'gateway-user',
+			channelId: chatInput.channelId,
+			content: chatInput.content,
+		});
+
 		sendJson(res, 200, {
-			content: `Echo: ${chatInput.content}`,
-			sessionId: 'stub-session',
+			content: result.content,
+			sessionId: result.sessionId,
 			requestId,
-			channelSwitched: false,
-			toolsUsed: [],
-			usage: { tokensIn: 0, tokensOut: 0, model: 'stub' },
+			channelSwitched: result.channelSwitched,
+			usage: result.usage,
 		});
 	}
 
@@ -323,18 +414,44 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			return;
 		}
 
+		if (!deps.handleMessage) {
+			sendError(res, 503, 'Chat handler not configured', requestId);
+			return;
+		}
+
 		res.writeHead(200, {
 			'Content-Type': 'text/event-stream',
 			'Cache-Control': 'no-cache',
 			Connection: 'keep-alive',
 		});
-		res.write(`event: session_info\ndata: ${JSON.stringify({ sessionId: 'stub-session' })}\n\n`);
-		res.write(
-			`event: message_delta\ndata: ${JSON.stringify({ content: `Echo: ${chatInput.content}` })}\n\n`,
-		);
-		res.write(
-			`event: done\ndata: ${JSON.stringify({ sessionId: 'stub-session', totalTokens: 0 })}\n\n`,
-		);
+
+		try {
+			const result = await deps.handleMessage(
+				{
+					userId: 'gateway-user',
+					channelId: chatInput.channelId,
+					content: chatInput.content,
+				},
+				(event) => {
+					res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
+				},
+			);
+
+			res.write(
+				`event: done\ndata: ${JSON.stringify({
+					sessionId: result.sessionId,
+					usage: result.usage,
+				})}\n\n`,
+			);
+		} catch (err: unknown) {
+			const classified = classifyError(err, config.env);
+			res.write(
+				`event: error\ndata: ${JSON.stringify({
+					error: classified.message,
+					requestId,
+				})}\n\n`,
+			);
+		}
 		res.end();
 	}
 

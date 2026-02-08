@@ -23,6 +23,12 @@ function createMockDeps(): GatewayDeps {
 			timestamp: new Date(),
 			uptime: 100,
 		}),
+		handleMessage: vi.fn().mockResolvedValue({
+			content: 'Mock response',
+			sessionId: 'sess-mock',
+			channelSwitched: false,
+			usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 },
+		}),
 	};
 }
 
