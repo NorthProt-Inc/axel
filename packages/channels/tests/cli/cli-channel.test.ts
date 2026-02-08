@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
 	AxelChannel,
 	InboundHandler,
 	InboundMessage,
 	OutboundMessage,
 } from '@axel/core/types';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CliChannel } from '../../src/cli/cli-channel.js';
 
 /** Stub readline.Interface for testing without real stdin/stdout */
@@ -109,9 +109,7 @@ describe('CliChannel', () => {
 			channel = new CliChannel({ createReadline: () => rl as never });
 
 			await channel.start();
-			await expect(channel.start()).rejects.toThrow(
-				'CLI channel already started',
-			);
+			await expect(channel.start()).rejects.toThrow('CLI channel already started');
 		});
 
 		it('is safe to stop when not started', async () => {
@@ -237,9 +235,9 @@ describe('CliChannel', () => {
 		});
 
 		it('send() throws when not started', async () => {
-			await expect(
-				channel.send('cli-user', { content: 'test' }),
-			).rejects.toThrow('CLI channel not started');
+			await expect(channel.send('cli-user', { content: 'test' })).rejects.toThrow(
+				'CLI channel not started',
+			);
 		});
 
 		it('sendStreaming() writes chunks incrementally', async () => {
@@ -260,7 +258,7 @@ describe('CliChannel', () => {
 				yield '!';
 			}
 
-			await channel.sendStreaming!('cli-user', testStream());
+			await channel.sendStreaming?.('cli-user', testStream());
 
 			const fullOutput = output.join('');
 			expect(fullOutput).toContain('Hello ');
@@ -273,9 +271,9 @@ describe('CliChannel', () => {
 				yield 'test';
 			}
 
-			await expect(
-				channel.sendStreaming!('cli-user', stream()),
-			).rejects.toThrow('CLI channel not started');
+			await expect(channel.sendStreaming?.('cli-user', stream())).rejects.toThrow(
+				'CLI channel not started',
+			);
 		});
 	});
 

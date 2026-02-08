@@ -98,9 +98,7 @@ export class CliChannel implements AxelChannel {
 	async healthCheck(): Promise<HealthStatus> {
 		const now = new Date();
 		const uptime =
-			this.started && this.startedAt
-				? (now.getTime() - this.startedAt.getTime()) / 1000
-				: 0;
+			this.started && this.startedAt ? (now.getTime() - this.startedAt.getTime()) / 1000 : 0;
 
 		return {
 			state: this.started ? 'healthy' : 'unhealthy',
@@ -122,10 +120,7 @@ export class CliChannel implements AxelChannel {
 		this.writeFn(`${msg.content}\n`);
 	}
 
-	async sendStreaming(
-		_target: string,
-		stream: AsyncIterable<string>,
-	): Promise<void> {
+	async sendStreaming(_target: string, stream: AsyncIterable<string>): Promise<void> {
 		if (!this.started) {
 			throw new Error('CLI channel not started');
 		}
