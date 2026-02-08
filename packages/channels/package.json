@@ -4,7 +4,10 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./cli": "./src/cli/index.ts",
+		"./discord": "./src/discord/index.ts",
+		"./telegram": "./src/telegram/index.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
