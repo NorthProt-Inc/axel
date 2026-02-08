@@ -1,5 +1,5 @@
 import { Marked } from 'marked';
-import { createHighlighter, type Highlighter } from 'shiki';
+import { type Highlighter, createHighlighter } from 'shiki';
 
 /**
  * Markdown renderer for WebChat.
@@ -72,18 +72,48 @@ function escapeHtml(text: string): string {
 
 /** Allowlist-based HTML sanitizer for XSS prevention. */
 const ALLOWED_TAGS = new Set([
-	'p', 'br', 'hr',
-	'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-	'strong', 'b', 'em', 'i', 'u', 's', 'del', 'ins', 'mark',
-	'code', 'pre', 'kbd', 'samp', 'var',
-	'ul', 'ol', 'li',
-	'blockquote', 'q',
+	'p',
+	'br',
+	'hr',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'strong',
+	'b',
+	'em',
+	'i',
+	'u',
+	's',
+	'del',
+	'ins',
+	'mark',
+	'code',
+	'pre',
+	'kbd',
+	'samp',
+	'var',
+	'ul',
+	'ol',
+	'li',
+	'blockquote',
+	'q',
 	'a',
 	'img',
-	'table', 'thead', 'tbody', 'tr', 'th', 'td',
-	'div', 'span',
-	'sup', 'sub',
-	'details', 'summary',
+	'table',
+	'thead',
+	'tbody',
+	'tr',
+	'th',
+	'td',
+	'div',
+	'span',
+	'sup',
+	'sub',
+	'details',
+	'summary',
 ]);
 
 const ALLOWED_ATTRS: Record<string, ReadonlySet<string>> = {
@@ -105,29 +135,38 @@ export function sanitizeHtml(html: string): string {
 	}
 
 	// Strip dangerous tags entirely (including content for script/style/iframe)
-	let result = html.replace(/<(script|style|iframe|object|embed|form|textarea|select|button|input)\b[^>]*>[\s\S]*?<\/\1>/gi, '');
+	let result = html.replace(
+		/<(script|style|iframe|object|embed|form|textarea|select|button|input)\b[^>]*>[\s\S]*?<\/\1>/gi,
+		'',
+	);
 	// Strip self-closing dangerous tags
-	result = result.replace(/<(script|style|iframe|object|embed|form|textarea|select|button|input)\b[^>]*\/?>/gi, '');
+	result = result.replace(
+		/<(script|style|iframe|object|embed|form|textarea|select|button|input)\b[^>]*\/?>/gi,
+		'',
+	);
 
 	// Process remaining tags: strip disallowed tags, filter attributes
-	result = result.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g, (match, tagName: string, attrs: string) => {
-		const tag = tagName.toLowerCase();
-		const isClosing = match.startsWith('</');
+	result = result.replace(
+		/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g,
+		(match, tagName: string, attrs: string) => {
+			const tag = tagName.toLowerCase();
+			const isClosing = match.startsWith('</');
 
-		if (!ALLOWED_TAGS.has(tag)) {
-			return '';
-		}
+			if (!ALLOWED_TAGS.has(tag)) {
+				return '';
+			}
 
-		if (isClosing) {
-			return `</${tag}>`;
-		}
+			if (isClosing) {
+				return `</${tag}>`;
+			}
 
-		const filteredAttrs = filterAttributes(tag, attrs);
-		const selfClose = match.endsWith('/>') ? ' /' : '';
-		return filteredAttrs.length > 0
-			? `<${tag} ${filteredAttrs}${selfClose}>`
-			: `<${tag}${selfClose}>`;
-	});
+			const filteredAttrs = filterAttributes(tag, attrs);
+			const selfClose = match.endsWith('/>') ? ' /' : '';
+			return filteredAttrs.length > 0
+				? `<${tag} ${filteredAttrs}${selfClose}>`
+				: `<${tag}${selfClose}>`;
+		},
+	);
 
 	return result;
 }
@@ -140,10 +179,9 @@ function filterAttributes(tag: string, attrString: string): string {
 
 	const attrs: string[] = [];
 	const attrPattern = /([a-zA-Z][a-zA-Z0-9_-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+))/g;
-	let attrMatch: RegExpExecArray | null;
 
-	while ((attrMatch = attrPattern.exec(attrString)) !== null) {
-		const name = attrMatch[1]!.toLowerCase();
+	for (const attrMatch of attrString.matchAll(attrPattern)) {
+		const name = (attrMatch[1] ?? '').toLowerCase();
 		const value = attrMatch[2] ?? attrMatch[3] ?? attrMatch[4] ?? '';
 
 		// Strip event handlers (on*)

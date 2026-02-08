@@ -74,10 +74,7 @@ export function parseSessionEndResponse(raw: string): SessionEndResult | null {
 	}
 }
 
-export function addSessionToList(
-	existing: readonly Session[],
-	info: SessionInfo,
-): Session[] {
+export function addSessionToList(existing: readonly Session[], info: SessionInfo): Session[] {
 	if (!info.session) {
 		return [...existing];
 	}
