@@ -156,3 +156,7 @@ If any P0 blocker has been open for 2+ cycles:
 - Use JSON-L format for all comms messages
 - Use Conventional Commits format for any descriptions
 - Be concise — every token costs money
+- **MUST commit and push at the end of every session**:
+  ```bash
+  git add -A && git commit -m "chore(ops): CTO cycle [N]" && git push origin main
+  ```

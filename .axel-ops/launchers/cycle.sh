@@ -100,7 +100,7 @@ run_division() {
 
     $CLAUDE -p \
         --model "$model" \
-        --permission-mode dontAsk \
+        --dangerously-skip-permissions \
         --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash,WebSearch,WebFetch" \
         --no-session-persistence \
         "$(cat "$prompt_file")" \

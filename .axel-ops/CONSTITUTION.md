@@ -11,7 +11,7 @@
 
 | Division | Code | Owned Directories | Model | Worktree |
 |----------|------|------------------|-------|----------|
-| **Coordinator** | `coord` | `.axel-ops/PROGRESS.md`, `.axel-ops/BACKLOG.md`, `.axel-ops/ERRORS.md`, `.axel-ops/METRICS.md`, `.axel-ops/comms/broadcast.jsonl` | opus | `axel` (main) |
+| **CTO (Coordinator)** | `coord` | `.axel-ops/PROGRESS.md`, `.axel-ops/BACKLOG.md`, `.axel-ops/ERRORS.md`, `.axel-ops/METRICS.md`, `.axel-ops/comms/broadcast.jsonl` | opus | `axel` (main) |
 | **Architect** | `arch` | `docs/plan/`, `docs/adr/`, `.axel-ops/PLAN_SYNC.md` | opus | `axel-wt-arch` |
 
 ### 1.2 Development Layer (TDD mandatory — see Rule 8)

@@ -82,7 +82,7 @@ unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
 $CLAUDE -p \
     --model "$MODEL" \
-    --permission-mode dontAsk \
+    --dangerously-skip-permissions \
     --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash,WebSearch,WebFetch" \
     --no-session-persistence \
     "$(cat "$OPS/prompts/$PROMPT")" \
