@@ -62,6 +62,10 @@ Based on the task type:
 
 **Plan Refinement** (PLAN-XXX):
 - Edit `docs/plan/axel-project-plan.md` or create supplementary docs
+- **VERSION BUMP**: Increment patch version (vX.Y.Z → vX.Y.Z+1) in 3 locations:
+  - Line 1: `# Project Axel: Technical Architecture Plan vX.Y.Z+1`
+  - Line ~19: `**버전**: vX.Y.Z+1 ...`
+  - Last line footer: `*NorthProt — Project Axel Technical Architecture Plan vX.Y.Z+1*`
 - Ensure all changes align with MISSION.md principles
 - Cross-reference relevant ADRs
 

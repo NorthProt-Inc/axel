@@ -112,7 +112,7 @@ wait $PID_ARCH $PID_RES $PID_QA
 # ── Phase 3: Merge Division results into main ──
 cd "$MAIN_REPO"
 for br in div/arch div/research div/quality; do
-    git merge "$br" --no-edit --quiet 2>>"$OPS/logs/cycle.log" || {
+    git merge "$br" --no-ff --no-edit --quiet 2>>"$OPS/logs/cycle.log" || {
         log "MERGE CONFLICT on $br — skipping, will retry next cycle"
         git merge --abort 2>/dev/null || true
     }
