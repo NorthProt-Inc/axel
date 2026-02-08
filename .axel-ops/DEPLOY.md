@@ -144,18 +144,33 @@ File: `.github/workflows/ci.yml`
 
 ### Usage
 
+**IMPORTANT**: Never use hardcoded credentials. Always use environment variables.
+
 ```bash
-# Apply all pending migrations
-DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
-  node tools/migrate/dist/cli.js up
+# Option 1: Using DATABASE_URL (recommended)
+export DATABASE_URL="postgresql://user:password@host:port/database"
+node tools/migrate/dist/cli.js up
+
+# Option 2: Using individual PG environment variables
+export PGHOST="localhost"
+export PGPORT="5432"
+export PGDATABASE="axel"
+export PGUSER="axel"
+export PGPASSWORD="your_secure_password"
+node tools/migrate/dist/cli.js up
 
 # Rollback specific migration
-DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
-  node tools/migrate/dist/cli.js down 6
+node tools/migrate/dist/cli.js down 6
 
 # Show migration status
-DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
-  node tools/migrate/dist/cli.js status
+node tools/migrate/dist/cli.js status
+```
+
+**Development Environment** (Docker Compose):
+```bash
+# Load credentials from .env file (not committed to git)
+export $(grep -v '^#' .env | xargs)
+node tools/migrate/dist/cli.js up
 ```
 
 ## Known Issues
@@ -169,6 +184,7 @@ DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
 | Issue | Cycle | Resolution |
 |-------|-------|-----------|
 | ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
+| AUD-083 HIGH: Hardcoded DB credentials in migrate CLI (AUDIT-005) | C61 | **RESOLVED (C61, FIX-AUDIT-E-003)**: Removed hardcoded fallback credentials ('axel_dev_password') from tools/migrate/src/cli.ts. Added validateEnvironment() to enforce explicit env vars (DATABASE_URL or PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD). Updated DEPLOY.md with secure usage examples. **Result: 5 new tests, 806 tests pass.** Security compliance verified. |
 
 ## Release History
 
