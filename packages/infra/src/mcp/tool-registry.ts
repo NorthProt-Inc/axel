@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { z } from 'zod';
 import type { ToolExecutor } from '../../../core/src/orchestrator/types.js';
@@ -234,14 +235,27 @@ class McpToolExecutor implements ToolExecutor {
  * Validate a file path against a base directory boundary.
  *
  * Security: prevents directory traversal (ADR-010, CONSTITUTION security rules).
- * Resolves symlinks and ensures the result is within basePath.
+ * Resolves symlinks via fs.realpath and ensures the result is within basePath.
  */
-function validatePath(inputPath: string, basePath: string): string {
+async function validatePath(inputPath: string, basePath: string): Promise<string> {
 	const resolved = path.resolve(basePath, inputPath);
 	if (!resolved.startsWith(basePath)) {
 		throw new Error(`Path '${inputPath}' escapes base directory '${basePath}'`);
 	}
-	return resolved;
+
+	// Resolve symlinks to prevent symlink-based traversal
+	let realResolved: string;
+	try {
+		realResolved = await fs.realpath(resolved);
+	} catch {
+		// Path does not exist yet — use the resolved path (for new file creation)
+		realResolved = resolved;
+	}
+
+	if (!realResolved.startsWith(basePath)) {
+		throw new Error(`Path '${inputPath}' resolves outside base directory '${basePath}'`);
+	}
+	return realResolved;
 }
 
 export {

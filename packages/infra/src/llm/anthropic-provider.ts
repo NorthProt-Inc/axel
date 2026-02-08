@@ -171,11 +171,15 @@ class AnthropicLlmProvider implements LlmProvider {
 	private *handleBlockStop(toolState: ToolCallState): Iterable<LlmChatChunk> {
 		if (!toolState.id || !toolState.name) return;
 
-		let args: Record<string, unknown> = {};
+		let args: Record<string, unknown>;
 		try {
 			args = JSON.parse(toolState.json) as Record<string, unknown>;
-		} catch {
-			// JSON parsing failure — pass empty args
+		} catch (error: unknown) {
+			throw new ProviderError(
+				`Malformed tool call JSON for '${toolState.name}': ${error instanceof Error ? error.message : String(error)}`,
+				'anthropic',
+				false,
+			);
 		}
 
 		const toolCall: ToolCallRequest = {
