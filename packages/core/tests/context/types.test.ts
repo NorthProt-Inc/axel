@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
-	ContextBudgetSchema,
-	DEFAULT_CONTEXT_BUDGET,
 	type AssembledContext,
 	type ContextBudget,
+	ContextBudgetSchema,
 	type ContextDataProvider,
 	type ContextSection,
+	DEFAULT_CONTEXT_BUDGET,
 	type TokenCounter,
 } from '../../src/context/types.js';
 
@@ -125,8 +125,8 @@ describe('ContextBudget', () => {
 					working_memory: 500,
 				},
 			};
-			expect(ctx.budgetUtilization['systemPrompt']).toBe(100);
-			expect(ctx.budgetUtilization['working_memory']).toBe(500);
+			expect(ctx.budgetUtilization.systemPrompt).toBe(100);
+			expect(ctx.budgetUtilization.working_memory).toBe(500);
 		});
 	});
 

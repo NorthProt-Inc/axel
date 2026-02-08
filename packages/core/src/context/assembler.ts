@@ -3,11 +3,11 @@ import type { MemorySearchResult } from '../types/memory.js';
 import type { SessionSummary } from '../types/session.js';
 import type { ToolDefinition } from '../types/tool.js';
 import {
-	DEFAULT_CONTEXT_BUDGET,
 	type AssembledContext,
 	type ContextBudget,
 	type ContextDataProvider,
 	type ContextSection,
+	DEFAULT_CONTEXT_BUDGET,
 	type TokenCounter,
 } from './types.js';
 
@@ -62,10 +62,7 @@ export class ContextAssembler {
 	async assemble(params: AssembleParams): Promise<AssembledContext> {
 		const { systemPrompt, userId, query, entityId } = params;
 
-		const truncatedSystemPrompt = await this.truncateToFit(
-			systemPrompt,
-			this.budget.systemPrompt,
-		);
+		const truncatedSystemPrompt = await this.truncateToFit(systemPrompt, this.budget.systemPrompt);
 		const systemTokens = truncatedSystemPrompt
 			? await this.counter.count(truncatedSystemPrompt)
 			: 0;
@@ -74,33 +71,75 @@ export class ContextAssembler {
 
 		// 1. Working Memory (M1)
 		const turns = await this.provider.getWorkingMemory(userId, DEFAULTS.workingMemoryLimit);
-		await this.addSection(sections, 'workingMemory', 'M1:working', formatTurns(turns), this.budget.workingMemory);
+		await this.addSection(
+			sections,
+			'workingMemory',
+			'M1:working',
+			formatTurns(turns),
+			this.budget.workingMemory,
+		);
 
 		// 2. Stream Buffer (M0)
 		const events = await this.provider.getStreamBuffer(userId);
-		await this.addSection(sections, 'streamBuffer', 'M0:stream', formatStreamEvents(events), this.budget.streamBuffer);
+		await this.addSection(
+			sections,
+			'streamBuffer',
+			'M0:stream',
+			formatStreamEvents(events),
+			this.budget.streamBuffer,
+		);
 
 		// 3. Semantic Search (M3)
 		const memories = await this.provider.searchSemantic(query, DEFAULTS.semanticSearchLimit);
-		await this.addSection(sections, 'semanticSearch', 'M3:semantic', formatSemanticResults(memories), this.budget.semanticSearch);
+		await this.addSection(
+			sections,
+			'semanticSearch',
+			'M3:semantic',
+			formatSemanticResults(memories),
+			this.budget.semanticSearch,
+		);
 
 		// 4. Graph Traversal (M4) — only if entityId provided
 		if (entityId !== undefined) {
 			const entities = await this.provider.traverseGraph(entityId, DEFAULTS.graphDepth);
-			await this.addSection(sections, 'graphTraversal', 'M4:conceptual', formatEntities(entities), this.budget.graphTraversal);
+			await this.addSection(
+				sections,
+				'graphTraversal',
+				'M4:conceptual',
+				formatEntities(entities),
+				this.budget.graphTraversal,
+			);
 		}
 
 		// 5. Session Archive (M2)
 		const summaries = await this.provider.getSessionArchive(userId, DEFAULTS.sessionArchiveDays);
-		await this.addSection(sections, 'sessionArchive', 'M2:episodic', formatSessionSummaries(summaries), this.budget.sessionArchive);
+		await this.addSection(
+			sections,
+			'sessionArchive',
+			'M2:episodic',
+			formatSessionSummaries(summaries),
+			this.budget.sessionArchive,
+		);
 
 		// 6. Meta Memory (M5)
 		const hotMemories = await this.provider.getMetaMemory(userId);
-		await this.addSection(sections, 'metaMemory', 'M5:meta', formatHotMemories(hotMemories), this.budget.metaMemory);
+		await this.addSection(
+			sections,
+			'metaMemory',
+			'M5:meta',
+			formatHotMemories(hotMemories),
+			this.budget.metaMemory,
+		);
 
 		// 7. Tool Definitions (last)
 		const tools = this.provider.getToolDefinitions();
-		await this.addSection(sections, 'toolDefinitions', 'tools', formatToolDefinitions(tools), this.budget.toolDefinitions);
+		await this.addSection(
+			sections,
+			'toolDefinitions',
+			'tools',
+			formatToolDefinitions(tools),
+			this.budget.toolDefinitions,
+		);
 
 		const sectionTokenSum = sections.reduce((sum, s) => sum + s.tokens, 0);
 		const budgetUtilization: Record<string, number> = { systemPrompt: systemTokens };
@@ -181,21 +220,15 @@ function formatStreamEvents(events: readonly StreamEvent[]): string {
 }
 
 function formatSemanticResults(results: readonly MemorySearchResult[]): string {
-	return results
-		.map((r) => `[${r.score}] ${r.memory.content}`)
-		.join('\n');
+	return results.map((r) => `[${r.score}] ${r.memory.content}`).join('\n');
 }
 
 function formatEntities(entities: readonly Entity[]): string {
-	return entities
-		.map((e) => `${e.entityType}: ${e.name} (mentions: ${e.mentionCount})`)
-		.join('\n');
+	return entities.map((e) => `${e.entityType}: ${e.name} (mentions: ${e.mentionCount})`).join('\n');
 }
 
 function formatSessionSummaries(summaries: readonly SessionSummary[]): string {
-	return summaries
-		.map((s) => `[${s.keyTopics.join(', ')}] ${s.summary}`)
-		.join('\n');
+	return summaries.map((s) => `[${s.keyTopics.join(', ')}] ${s.summary}`).join('\n');
 }
 
 function formatHotMemories(memories: readonly HotMemory[]): string {
@@ -205,7 +238,5 @@ function formatHotMemories(memories: readonly HotMemory[]): string {
 }
 
 function formatToolDefinitions(tools: readonly ToolDefinition[]): string {
-	return tools
-		.map((t) => `${t.name}: ${t.description}`)
-		.join('\n');
+	return tools.map((t) => `${t.name}: ${t.description}`).join('\n');
 }

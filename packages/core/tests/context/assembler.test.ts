@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ContextAssembler } from '../../src/context/assembler.js';
 import {
-	DEFAULT_CONTEXT_BUDGET,
 	type ContextDataProvider,
+	DEFAULT_CONTEXT_BUDGET,
 	type TokenCounter,
 } from '../../src/context/types.js';
 import type { Entity } from '../../src/memory/types.js';
@@ -169,7 +169,7 @@ describe('ContextAssembler', () => {
 				query: 'hello',
 			});
 
-			expect(result.budgetUtilization['systemPrompt']).toBeGreaterThan(0);
+			expect(result.budgetUtilization.systemPrompt).toBeGreaterThan(0);
 		});
 
 		it('assembles working memory turns', async () => {
@@ -189,16 +189,14 @@ describe('ContextAssembler', () => {
 
 			const wmSection = result.sections.find((s) => s.source === 'M1:working');
 			expect(wmSection).toBeDefined();
-			expect(wmSection!.tokens).toBeGreaterThan(0);
-			expect(wmSection!.content).toContain('Hello');
-			expect(wmSection!.content).toContain('World');
+			expect(wmSection?.tokens).toBeGreaterThan(0);
+			expect(wmSection?.content).toContain('Hello');
+			expect(wmSection?.content).toContain('World');
 		});
 
 		it('assembles stream buffer events', async () => {
 			const provider = makeEmptyProvider();
-			(provider.getStreamBuffer as ReturnType<typeof vi.fn>).mockResolvedValue([
-				makeStreamEvent(),
-			]);
+			(provider.getStreamBuffer as ReturnType<typeof vi.fn>).mockResolvedValue([makeStreamEvent()]);
 			const counter = makeEstimateCounter();
 			const assembler = new ContextAssembler(provider, counter);
 
@@ -210,7 +208,7 @@ describe('ContextAssembler', () => {
 
 			const streamSection = result.sections.find((s) => s.source === 'M0:stream');
 			expect(streamSection).toBeDefined();
-			expect(streamSection!.tokens).toBeGreaterThan(0);
+			expect(streamSection?.tokens).toBeGreaterThan(0);
 		});
 
 		it('assembles semantic search results', async () => {
@@ -229,14 +227,12 @@ describe('ContextAssembler', () => {
 
 			const semSection = result.sections.find((s) => s.source === 'M3:semantic');
 			expect(semSection).toBeDefined();
-			expect(semSection!.content).toContain('Important fact about the user');
+			expect(semSection?.content).toContain('Important fact about the user');
 		});
 
 		it('assembles graph traversal results', async () => {
 			const provider = makeEmptyProvider();
-			(provider.traverseGraph as ReturnType<typeof vi.fn>).mockResolvedValue([
-				makeEntity('Alice'),
-			]);
+			(provider.traverseGraph as ReturnType<typeof vi.fn>).mockResolvedValue([makeEntity('Alice')]);
 			const counter = makeEstimateCounter();
 			const assembler = new ContextAssembler(provider, counter);
 
@@ -249,7 +245,7 @@ describe('ContextAssembler', () => {
 
 			const graphSection = result.sections.find((s) => s.source === 'M4:conceptual');
 			expect(graphSection).toBeDefined();
-			expect(graphSection!.content).toContain('Alice');
+			expect(graphSection?.content).toContain('Alice');
 		});
 
 		it('assembles session archive results', async () => {
@@ -268,7 +264,7 @@ describe('ContextAssembler', () => {
 
 			const archiveSection = result.sections.find((s) => s.source === 'M2:episodic');
 			expect(archiveSection).toBeDefined();
-			expect(archiveSection!.content).toContain('Discussed weather');
+			expect(archiveSection?.content).toContain('Discussed weather');
 		});
 
 		it('assembles meta memory results', async () => {
@@ -287,7 +283,7 @@ describe('ContextAssembler', () => {
 
 			const metaSection = result.sections.find((s) => s.source === 'M5:meta');
 			expect(metaSection).toBeDefined();
-			expect(metaSection!.content).toContain('Frequently accessed fact');
+			expect(metaSection?.content).toContain('Frequently accessed fact');
 		});
 
 		it('assembles tool definitions', async () => {
@@ -307,8 +303,8 @@ describe('ContextAssembler', () => {
 
 			const toolSection = result.sections.find((s) => s.name === 'toolDefinitions');
 			expect(toolSection).toBeDefined();
-			expect(toolSection!.content).toContain('web_search');
-			expect(toolSection!.content).toContain('file_read');
+			expect(toolSection?.content).toContain('web_search');
+			expect(toolSection?.content).toContain('file_read');
 		});
 
 		it('uses token counter for accurate counting', async () => {
@@ -335,15 +331,11 @@ describe('ContextAssembler', () => {
 			(provider.getWorkingMemory as ReturnType<typeof vi.fn>).mockResolvedValue([
 				makeTurn('Turn1', 1),
 			]);
-			(provider.getStreamBuffer as ReturnType<typeof vi.fn>).mockResolvedValue([
-				makeStreamEvent(),
-			]);
+			(provider.getStreamBuffer as ReturnType<typeof vi.fn>).mockResolvedValue([makeStreamEvent()]);
 			(provider.searchSemantic as ReturnType<typeof vi.fn>).mockResolvedValue([
 				makeMemorySearchResult('Semantic result'),
 			]);
-			(provider.traverseGraph as ReturnType<typeof vi.fn>).mockResolvedValue([
-				makeEntity('Bob'),
-			]);
+			(provider.traverseGraph as ReturnType<typeof vi.fn>).mockResolvedValue([makeEntity('Bob')]);
 			(provider.getSessionArchive as ReturnType<typeof vi.fn>).mockResolvedValue([
 				makeSessionSummary('Session summary'),
 			]);
@@ -429,7 +421,7 @@ describe('ContextAssembler', () => {
 
 			const wmSection = result.sections.find((s) => s.source === 'M1:working');
 			expect(wmSection).toBeDefined();
-			expect(wmSection!.tokens).toBeLessThanOrEqual(100);
+			expect(wmSection?.tokens).toBeLessThanOrEqual(100);
 		});
 
 		it('truncates systemPrompt that exceeds budget', async () => {
@@ -452,7 +444,7 @@ describe('ContextAssembler', () => {
 				query: 'test',
 			});
 
-			expect(result.budgetUtilization['systemPrompt']).toBeLessThanOrEqual(100);
+			expect(result.budgetUtilization.systemPrompt).toBeLessThanOrEqual(100);
 		});
 
 		it('preserves front of content on truncation (plan: 앞부분 유지, 뒷부분 절삭)', async () => {
@@ -482,10 +474,10 @@ describe('ContextAssembler', () => {
 			expect(wmSection).toBeDefined();
 			// Formatted: "user: ABCDEFGHIJKLMNOPQRSTUVWXYZ" (31 chars)
 			// Truncated to 10 chars → should start with "user: ABCD"
-			expect(wmSection!.content.startsWith('user: ')).toBe(true);
-			expect(wmSection!.content.length).toBeLessThanOrEqual(10);
+			expect(wmSection?.content.startsWith('user: ')).toBe(true);
+			expect(wmSection?.content.length).toBeLessThanOrEqual(10);
 			// Should NOT contain the full original content
-			expect(wmSection!.content).not.toContain('Z');
+			expect(wmSection?.content).not.toContain('Z');
 		});
 
 		it('totalTokens equals sum of systemPrompt tokens + all section tokens', async () => {
@@ -506,7 +498,7 @@ describe('ContextAssembler', () => {
 			});
 
 			const sectionTokenSum = result.sections.reduce((sum, s) => sum + s.tokens, 0);
-			const systemTokens = result.budgetUtilization['systemPrompt'] ?? 0;
+			const systemTokens = result.budgetUtilization.systemPrompt ?? 0;
 			expect(result.totalTokens).toBe(sectionTokenSum + systemTokens);
 		});
 	});
@@ -524,7 +516,7 @@ describe('ContextAssembler', () => {
 			});
 
 			expect(result.sections).toHaveLength(0);
-			expect(result.totalTokens).toBe(result.budgetUtilization['systemPrompt']);
+			expect(result.totalTokens).toBe(result.budgetUtilization.systemPrompt);
 		});
 
 		it('handles empty systemPrompt', async () => {
@@ -539,7 +531,7 @@ describe('ContextAssembler', () => {
 			});
 
 			expect(result.systemPrompt).toBe('');
-			expect(result.budgetUtilization['systemPrompt']).toBe(0);
+			expect(result.budgetUtilization.systemPrompt).toBe(0);
 		});
 
 		it('skips graph traversal when no entityId provided', async () => {
@@ -622,8 +614,8 @@ describe('ContextAssembler', () => {
 			});
 
 			const wmSection = result.sections.find((s) => s.source === 'M1:working');
-			expect(wmSection!.content).toContain('user: Hello');
-			expect(wmSection!.content).toContain('assistant: Hi there!');
+			expect(wmSection?.content).toContain('user: Hello');
+			expect(wmSection?.content).toContain('assistant: Hi there!');
 		});
 
 		it('formats semantic results with score', async () => {
@@ -641,15 +633,13 @@ describe('ContextAssembler', () => {
 			});
 
 			const semSection = result.sections.find((s) => s.source === 'M3:semantic');
-			expect(semSection!.content).toContain('The sky is blue');
-			expect(semSection!.content).toContain('0.9');
+			expect(semSection?.content).toContain('The sky is blue');
+			expect(semSection?.content).toContain('0.9');
 		});
 
 		it('formats entities with type and name', async () => {
 			const provider = makeEmptyProvider();
-			(provider.traverseGraph as ReturnType<typeof vi.fn>).mockResolvedValue([
-				makeEntity('Alice'),
-			]);
+			(provider.traverseGraph as ReturnType<typeof vi.fn>).mockResolvedValue([makeEntity('Alice')]);
 			const counter = makeEstimateCounter();
 			const assembler = new ContextAssembler(provider, counter);
 
@@ -661,8 +651,8 @@ describe('ContextAssembler', () => {
 			});
 
 			const graphSection = result.sections.find((s) => s.source === 'M4:conceptual');
-			expect(graphSection!.content).toContain('Alice');
-			expect(graphSection!.content).toContain('person');
+			expect(graphSection?.content).toContain('Alice');
+			expect(graphSection?.content).toContain('person');
 		});
 
 		it('formats session summaries', async () => {
@@ -680,7 +670,7 @@ describe('ContextAssembler', () => {
 			});
 
 			const archSection = result.sections.find((s) => s.source === 'M2:episodic');
-			expect(archSection!.content).toContain('Talked about AI');
+			expect(archSection?.content).toContain('Talked about AI');
 		});
 
 		it('formats tool definitions with name and description', async () => {
@@ -698,8 +688,8 @@ describe('ContextAssembler', () => {
 			});
 
 			const toolSection = result.sections.find((s) => s.name === 'toolDefinitions');
-			expect(toolSection!.content).toContain('search');
-			expect(toolSection!.content).toContain('Tool search');
+			expect(toolSection?.content).toContain('search');
+			expect(toolSection?.content).toContain('Tool search');
 		});
 
 		it('formats stream events with type and metadata', async () => {
@@ -717,7 +707,7 @@ describe('ContextAssembler', () => {
 			});
 
 			const streamSection = result.sections.find((s) => s.source === 'M0:stream');
-			expect(streamSection!.content).toContain('typing_start');
+			expect(streamSection?.content).toContain('typing_start');
 		});
 
 		it('formats meta memory hot memories', async () => {
@@ -735,7 +725,7 @@ describe('ContextAssembler', () => {
 			});
 
 			const metaSection = result.sections.find((s) => s.source === 'M5:meta');
-			expect(metaSection!.content).toContain('User likes coffee');
+			expect(metaSection?.content).toContain('User likes coffee');
 		});
 	});
 
@@ -757,9 +747,9 @@ describe('ContextAssembler', () => {
 			});
 
 			const wmSection = result.sections.find((s) => s.source === 'M1:working');
-			expect(wmSection!.content).toContain('First message');
-			expect(wmSection!.content).toContain('Second message');
-			expect(wmSection!.content).toContain('Third message');
+			expect(wmSection?.content).toContain('First message');
+			expect(wmSection?.content).toContain('Second message');
+			expect(wmSection?.content).toContain('Third message');
 		});
 
 		it('combines multiple semantic results', async () => {
@@ -778,8 +768,8 @@ describe('ContextAssembler', () => {
 			});
 
 			const semSection = result.sections.find((s) => s.source === 'M3:semantic');
-			expect(semSection!.content).toContain('Fact A');
-			expect(semSection!.content).toContain('Fact B');
+			expect(semSection?.content).toContain('Fact A');
+			expect(semSection?.content).toContain('Fact B');
 		});
 	});
 });
