@@ -1,9 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type {
-	MetaMemory,
-	AccessPattern,
-	HotMemory,
-} from '../../../core/src/memory/types.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AccessPattern, HotMemory, MetaMemory } from '../../../core/src/memory/types.js';
 
 // ─── Mock PG Pool ───
 
@@ -83,10 +79,10 @@ describe('PgMetaMemory', () => {
 			const hotMems = await mem.getHotMemories(10);
 
 			expect(hotMems).toHaveLength(2);
-			expect(hotMems[0]!.memoryId).toBe(1);
-			expect(hotMems[0]!.uuid).toBe('mem-1');
-			expect(hotMems[0]!.accessCount).toBe(50);
-			expect(hotMems[0]!.channelDiversity).toBe(3);
+			expect(hotMems[0]?.memoryId).toBe(1);
+			expect(hotMems[0]?.uuid).toBe('mem-1');
+			expect(hotMems[0]?.accessCount).toBe(50);
+			expect(hotMems[0]?.channelDiversity).toBe(3);
 
 			const [sql] = mockPool.query.mock.calls[0] as [string, unknown[]];
 			expect(sql).toContain('hot_memories');
@@ -96,10 +92,7 @@ describe('PgMetaMemory', () => {
 	describe('getPrefetchCandidates()', () => {
 		it('should return UUIDs of likely-needed memories', async () => {
 			mockPool.query.mockResolvedValue({
-				rows: [
-					{ uuid: 'mem-1' },
-					{ uuid: 'mem-2' },
-				],
+				rows: [{ uuid: 'mem-1' }, { uuid: 'mem-2' }],
 				rowCount: 2,
 			});
 

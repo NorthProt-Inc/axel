@@ -66,10 +66,7 @@ class AxelPgPool {
 	}> {
 		const client = await this.pool.connect();
 		return {
-			async query<T extends Record<string, unknown>>(
-				text: string,
-				params?: readonly unknown[],
-			) {
+			async query<T extends Record<string, unknown>>(text: string, params?: readonly unknown[]) {
 				const result = await client.query(text, params);
 				return {
 					rows: result.rows as T[],

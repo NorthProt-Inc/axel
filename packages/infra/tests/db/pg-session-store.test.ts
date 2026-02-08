@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SessionSummary } from '../../../core/src/types/session.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-	SessionStore,
-	UnifiedSession,
 	ResolvedSession,
 	SessionStats,
+	SessionStore,
+	UnifiedSession,
 } from '../../../core/src/orchestrator/types.js';
+import type { SessionSummary } from '../../../core/src/types/session.js';
 
 // ─── Mock PG Pool ───
 
@@ -156,7 +156,7 @@ describe('PgSessionStore', () => {
 			const session = await store.getActive('user-1');
 
 			expect(session).not.toBeNull();
-			expect(session!.sessionId).toBe('sess-1');
+			expect(session?.sessionId).toBe('sess-1');
 		});
 
 		it('should return null when no active session', async () => {

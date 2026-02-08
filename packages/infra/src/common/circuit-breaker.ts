@@ -78,10 +78,7 @@ class CircuitBreaker {
 
 	private onFailure(): void {
 		this.failureCount++;
-		if (
-			this._state === 'half_open' ||
-			this.failureCount >= this.config.failureThreshold
-		) {
+		if (this._state === 'half_open' || this.failureCount >= this.config.failureThreshold) {
 			this._state = 'open';
 			this.openedAt = Date.now();
 		}
@@ -93,9 +90,4 @@ class CircuitBreaker {
 	}
 }
 
-export {
-	CircuitBreaker,
-	CircuitOpenError,
-	type CircuitBreakerConfig,
-	type CircuitState,
-};
+export { CircuitBreaker, CircuitOpenError, type CircuitBreakerConfig, type CircuitState };

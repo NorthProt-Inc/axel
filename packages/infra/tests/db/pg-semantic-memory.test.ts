@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Memory, MemoryType } from '../../../core/src/types/memory.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-	SemanticMemory,
-	NewMemory,
-	SemanticQuery,
-	ScoredMemory,
 	DecayResult,
+	NewMemory,
+	ScoredMemory,
+	SemanticMemory,
+	SemanticQuery,
 } from '../../../core/src/memory/types.js';
+import type { Memory, MemoryType } from '../../../core/src/types/memory.js';
 
 // ─── Mock PG Pool ───
 
@@ -92,7 +92,7 @@ describe('PgSemanticMemory', () => {
 
 			await mem.store(newMem);
 
-			const params = mockPool.query.mock.calls[0]![1] as unknown[];
+			const params = mockPool.query.mock.calls[0]?.[1] as unknown[];
 			// The embedding should be serialized as a pgvector string like '[0.1,0.2,0.3]'
 			const embeddingParam = params.find(
 				(p) => typeof p === 'string' && (p as string).startsWith('['),
@@ -139,9 +139,9 @@ describe('PgSemanticMemory', () => {
 			const results = await mem.search(query);
 
 			expect(results).toHaveLength(1);
-			expect(results[0]!.memory.uuid).toBe('mem-1');
-			expect(results[0]!.vectorScore).toBeCloseTo(0.95);
-			expect(results[0]!.finalScore).toBeCloseTo(0.7 * 0.95 + 0.3 * 0.7);
+			expect(results[0]?.memory.uuid).toBe('mem-1');
+			expect(results[0]?.vectorScore).toBeCloseTo(0.95);
+			expect(results[0]?.finalScore).toBeCloseTo(0.7 * 0.95 + 0.3 * 0.7);
 		});
 
 		it('should apply minImportance filter', async () => {
@@ -237,7 +237,7 @@ describe('PgSemanticMemory', () => {
 				hybridSearch: true,
 			});
 
-			expect(results[0]!.finalScore).toBeCloseTo(0.7 * 0.8 + 0.3 * 0.6);
+			expect(results[0]?.finalScore).toBeCloseTo(0.7 * 0.8 + 0.3 * 0.6);
 		});
 	});
 
@@ -317,8 +317,8 @@ describe('PgSemanticMemory', () => {
 			const result = await mem.getByUuid('mem-1');
 
 			expect(result).not.toBeNull();
-			expect(result!.uuid).toBe('mem-1');
-			expect(result!.content).toBe('test content');
+			expect(result?.uuid).toBe('mem-1');
+			expect(result?.content).toBe('test content');
 		});
 
 		it('should return null for unknown UUID', async () => {

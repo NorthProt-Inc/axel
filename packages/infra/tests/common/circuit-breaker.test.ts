@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Types (will be implemented in src/common/circuit-breaker.ts) ───
 
@@ -35,18 +35,14 @@ describe('CircuitBreaker', () => {
 
 	describe('CLOSED state (normal operation)', () => {
 		it('should start in closed state', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			expect(breaker.state).toBe('closed');
 		});
 
 		it('should pass through successful calls', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			const result = await breaker.execute(async () => 42);
@@ -56,9 +52,7 @@ describe('CircuitBreaker', () => {
 		});
 
 		it('should propagate errors from the wrapped function', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			await expect(
@@ -69,9 +63,7 @@ describe('CircuitBreaker', () => {
 		});
 
 		it('should track failure count without opening if below threshold', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// 2 failures (threshold is 3)
@@ -87,9 +79,7 @@ describe('CircuitBreaker', () => {
 		});
 
 		it('should reset failure count on success', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// 2 failures
@@ -119,9 +109,7 @@ describe('CircuitBreaker', () => {
 
 	describe('CLOSED → OPEN transition', () => {
 		it('should open after consecutive failures reach threshold', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			for (let i = 0; i < 3; i++) {
@@ -138,9 +126,7 @@ describe('CircuitBreaker', () => {
 
 	describe('OPEN state (blocking)', () => {
 		it('should reject calls immediately without invoking the function', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// Open the circuit
@@ -161,9 +147,7 @@ describe('CircuitBreaker', () => {
 
 	describe('OPEN → HALF_OPEN transition', () => {
 		it('should transition to half_open after cooldown period', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// Open the circuit
@@ -190,9 +174,7 @@ describe('CircuitBreaker', () => {
 
 	describe('HALF_OPEN state', () => {
 		it('should close circuit on successful probe', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// Open the circuit
@@ -213,9 +195,7 @@ describe('CircuitBreaker', () => {
 		});
 
 		it('should reopen circuit on failed probe', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// Open the circuit
@@ -242,9 +222,7 @@ describe('CircuitBreaker', () => {
 
 	describe('reset()', () => {
 		it('should reset to closed state', async () => {
-			const { CircuitBreaker: CB } = await import(
-				'../../src/common/circuit-breaker.js'
-			);
+			const { CircuitBreaker: CB } = await import('../../src/common/circuit-breaker.js');
 			const breaker: CircuitBreaker = new CB(DEFAULT_CONFIG);
 
 			// Open the circuit

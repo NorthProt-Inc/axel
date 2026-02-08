@@ -1,10 +1,10 @@
-import type { SessionSummary } from '../../../core/src/types/session.js';
 import type {
-	SessionStore,
-	UnifiedSession,
 	ResolvedSession,
 	SessionStats,
+	SessionStore,
+	UnifiedSession,
 } from '../../../core/src/orchestrator/types.js';
+import type { SessionSummary } from '../../../core/src/types/session.js';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**
@@ -20,10 +20,7 @@ class PgSessionStore implements SessionStore {
 		this.pool = pool;
 	}
 
-	async resolve(
-		userId: string,
-		channelId: string,
-	): Promise<ResolvedSession> {
+	async resolve(userId: string, channelId: string): Promise<ResolvedSession> {
 		const activeResult = await this.pool.query(
 			`SELECT session_id, user_id, channel_id, channel_history,
 			        started_at, last_activity_at, turn_count
@@ -202,10 +199,7 @@ interface EndedSessionRow {
 	ended_at: Date;
 }
 
-function toUnifiedSession(
-	row: SessionRow,
-	activeChannelId: string,
-): UnifiedSession {
+function toUnifiedSession(row: SessionRow, activeChannelId: string): UnifiedSession {
 	return {
 		sessionId: row.session_id,
 		userId: row.user_id,

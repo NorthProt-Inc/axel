@@ -1,8 +1,5 @@
 import type { ComponentHealth } from '../../core/src/types/health.js';
-import {
-	CircuitBreaker,
-	type CircuitBreakerConfig,
-} from '../common/circuit-breaker.js';
+import { CircuitBreaker, type CircuitBreakerConfig } from '../common/circuit-breaker.js';
 
 /** Task type for asymmetric embedding (ADR-016) */
 type EmbeddingTaskType = 'RETRIEVAL_DOCUMENT' | 'RETRIEVAL_QUERY';
@@ -64,10 +61,7 @@ class GeminiEmbeddingService {
 		this.circuitBreaker = new CircuitBreaker(circuitBreakerConfig);
 	}
 
-	async embed(
-		text: string,
-		taskType: EmbeddingTaskType,
-	): Promise<Float32Array> {
+	async embed(text: string, taskType: EmbeddingTaskType): Promise<Float32Array> {
 		if (text.length === 0) {
 			throw new Error('Text must not be empty');
 		}
@@ -109,9 +103,7 @@ class GeminiEmbeddingService {
 						})),
 					}),
 				);
-				return response.embeddings.map((e) =>
-					this.toFloat32Array(e.values),
-				);
+				return response.embeddings.map((e) => this.toFloat32Array(e.values));
 			});
 			results.push(...chunkResults);
 		}
@@ -140,9 +132,7 @@ class GeminiEmbeddingService {
 	private toFloat32Array(values: readonly number[]): Float32Array {
 		const dim = this.config.dimension;
 		if (values.length < dim) {
-			throw new Error(
-				`Embedding dimension mismatch: expected ${dim}, got ${values.length}`,
-			);
+			throw new Error(`Embedding dimension mismatch: expected ${dim}, got ${values.length}`);
 		}
 		const arr = new Float32Array(dim);
 		for (let i = 0; i < dim; i++) {
@@ -172,10 +162,7 @@ class GeminiEmbeddingService {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	private chunkArray<T>(
-		arr: readonly T[],
-		size: number,
-	): readonly (readonly T[])[] {
+	private chunkArray<T>(arr: readonly T[], size: number): readonly (readonly T[])[] {
 		const chunks: T[][] = [];
 		for (let i = 0; i < arr.length; i += size) {
 			chunks.push(arr.slice(i, i + size) as T[]);

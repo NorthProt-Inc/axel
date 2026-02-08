@@ -1,13 +1,13 @@
-import type { ComponentHealth } from '../../../core/src/types/health.js';
-import type { Memory } from '../../../core/src/types/memory.js';
 import type {
-	SemanticMemory,
-	NewMemory,
-	SemanticQuery,
-	ScoredMemory,
 	DecayResult,
 	DecayRunConfig,
+	NewMemory,
+	ScoredMemory,
+	SemanticMemory,
+	SemanticQuery,
 } from '../../../core/src/memory/types.js';
+import type { ComponentHealth } from '../../../core/src/types/health.js';
+import type { Memory } from '../../../core/src/types/memory.js';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**
@@ -68,8 +68,7 @@ class PgSemanticMemory implements SemanticMemory {
 			paramIdx++;
 		}
 
-		const whereClause =
-			conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
 		params.push(query.limit);
 
@@ -91,17 +90,12 @@ class PgSemanticMemory implements SemanticMemory {
 	}
 
 	async decay(config: DecayRunConfig): Promise<DecayResult> {
-		const statsResult = await this.pool.query(
-			`SELECT importance FROM memories`,
-		);
-		const allImportances = (statsResult.rows as { importance: number }[]).map(
-			(r) => r.importance,
-		);
+		const statsResult = await this.pool.query('SELECT importance FROM memories');
+		const allImportances = (statsResult.rows as { importance: number }[]).map((r) => r.importance);
 
-		const deleteResult = await this.pool.query(
-			`DELETE FROM memories WHERE importance < $1`,
-			[config.threshold],
-		);
+		const deleteResult = await this.pool.query('DELETE FROM memories WHERE importance < $1', [
+			config.threshold,
+		]);
 
 		const processed = allImportances.length;
 		const deleted = deleteResult.rowCount ?? 0;

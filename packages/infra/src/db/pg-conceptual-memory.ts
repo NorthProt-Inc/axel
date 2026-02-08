@@ -1,11 +1,11 @@
-import type { ComponentHealth } from '../../../core/src/types/health.js';
 import type {
 	ConceptualMemory,
-	NewEntity,
-	NewRelation,
 	Entity,
 	GraphNode,
+	NewEntity,
+	NewRelation,
 } from '../../../core/src/memory/types.js';
+import type { ComponentHealth } from '../../../core/src/types/health.js';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**
@@ -43,10 +43,7 @@ class PgConceptualMemory implements ConceptualMemory {
 		);
 	}
 
-	async traverse(
-		entityId: string,
-		maxDepth: number,
-	): Promise<readonly GraphNode[]> {
+	async traverse(entityId: string, maxDepth: number): Promise<readonly GraphNode[]> {
 		const result = await this.pool.query(
 			`WITH RECURSIVE traversal AS (
 				SELECT r.target_id, r.relation_type, r.weight, 1 AS depth
@@ -82,10 +79,7 @@ class PgConceptualMemory implements ConceptualMemory {
 		return toEntity(result.rows[0] as EntityRow);
 	}
 
-	async getRelated(
-		entityId: string,
-		relationType?: string,
-	): Promise<readonly Entity[]> {
+	async getRelated(entityId: string, relationType?: string): Promise<readonly Entity[]> {
 		const params: unknown[] = [entityId];
 		let sql = `
 			SELECT e.entity_id, e.name, e.entity_type, e.mentions AS mention_count,
@@ -95,7 +89,7 @@ class PgConceptualMemory implements ConceptualMemory {
 			WHERE r.source_id = $1`;
 
 		if (relationType !== undefined) {
-			sql += ` AND r.relation_type = $2`;
+			sql += ' AND r.relation_type = $2';
 			params.push(relationType);
 		}
 

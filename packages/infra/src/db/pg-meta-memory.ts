@@ -1,9 +1,5 @@
+import type { AccessPattern, HotMemory, MetaMemory } from '../../../core/src/memory/types.js';
 import type { ComponentHealth } from '../../../core/src/types/health.js';
-import type {
-	MetaMemory,
-	AccessPattern,
-	HotMemory,
-} from '../../../core/src/memory/types.js';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**
@@ -25,12 +21,7 @@ class PgMetaMemory implements MetaMemory {
 			`INSERT INTO memory_access_patterns
 			 (query_text, matched_memory_ids, relevance_scores, channel_id)
 			 VALUES ($1, $2, $3, $4)`,
-			[
-				pattern.queryText,
-				pattern.matchedMemoryIds,
-				pattern.relevanceScores,
-				pattern.channelId,
-			],
+			[pattern.queryText, pattern.matchedMemoryIds, pattern.relevanceScores, pattern.channelId],
 		);
 	}
 
@@ -45,10 +36,7 @@ class PgMetaMemory implements MetaMemory {
 		return (result.rows as HotMemoryRow[]).map(toHotMemory);
 	}
 
-	async getPrefetchCandidates(
-		_userId: string,
-		channelId: string,
-	): Promise<readonly string[]> {
+	async getPrefetchCandidates(_userId: string, channelId: string): Promise<readonly string[]> {
 		const result = await this.pool.query(
 			`SELECT DISTINCT m.uuid
 			 FROM memory_access_patterns p,
@@ -63,9 +51,7 @@ class PgMetaMemory implements MetaMemory {
 	}
 
 	async refreshView(): Promise<void> {
-		await this.pool.query(
-			'REFRESH MATERIALIZED VIEW CONCURRENTLY hot_memories',
-		);
+		await this.pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY hot_memories');
 	}
 
 	async pruneOldPatterns(olderThanDays: number): Promise<number> {

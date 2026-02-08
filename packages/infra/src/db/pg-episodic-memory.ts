@@ -1,10 +1,10 @@
-import type { ComponentHealth } from '../../../core/src/types/health.js';
-import type { SessionSummary } from '../../../core/src/types/session.js';
 import type {
-	EpisodicMemory,
 	CreateSessionParams,
+	EpisodicMemory,
 	MessageRecord,
 } from '../../../core/src/memory/types.js';
+import type { ComponentHealth } from '../../../core/src/types/health.js';
+import type { SessionSummary } from '../../../core/src/types/session.js';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**
@@ -26,12 +26,7 @@ class PgEpisodicMemory implements EpisodicMemory {
 			`INSERT INTO sessions (session_id, user_id, channel_id, metadata, started_at)
 			 VALUES ($1, $2, $3, $4, NOW())
 			 RETURNING session_id`,
-			[
-				sessionId,
-				params.userId,
-				params.channelId,
-				JSON.stringify(params.metadata ?? {}),
-			],
+			[sessionId, params.userId, params.channelId, JSON.stringify(params.metadata ?? {})],
 		);
 		return sessionId;
 	}
@@ -48,10 +43,7 @@ class PgEpisodicMemory implements EpisodicMemory {
 		}
 	}
 
-	async addMessage(
-		sessionId: string,
-		message: MessageRecord,
-	): Promise<void> {
+	async addMessage(sessionId: string, message: MessageRecord): Promise<void> {
 		await this.pool.query(
 			`INSERT INTO messages (session_id, role, content, channel_id, timestamp, token_count)
 			 VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -64,16 +56,12 @@ class PgEpisodicMemory implements EpisodicMemory {
 				message.tokenCount,
 			],
 		);
-		await this.pool.query(
-			`UPDATE sessions SET turn_count = turn_count + 1 WHERE session_id = $1`,
-			[sessionId],
-		);
+		await this.pool.query('UPDATE sessions SET turn_count = turn_count + 1 WHERE session_id = $1', [
+			sessionId,
+		]);
 	}
 
-	async getRecentSessions(
-		userId: string,
-		limit: number,
-	): Promise<readonly SessionSummary[]> {
+	async getRecentSessions(userId: string, limit: number): Promise<readonly SessionSummary[]> {
 		const result = await this.pool.query(
 			`SELECT session_id, summary, key_topics, emotional_tone,
 			        turn_count, channel_id, started_at, ended_at
@@ -86,10 +74,7 @@ class PgEpisodicMemory implements EpisodicMemory {
 		return (result.rows as SessionRow[]).map(toSessionSummary);
 	}
 
-	async searchByTopic(
-		topic: string,
-		limit: number,
-	): Promise<readonly SessionSummary[]> {
+	async searchByTopic(topic: string, limit: number): Promise<readonly SessionSummary[]> {
 		const result = await this.pool.query(
 			`SELECT session_id, summary, key_topics, emotional_tone,
 			        turn_count, channel_id, started_at, ended_at
@@ -103,10 +88,7 @@ class PgEpisodicMemory implements EpisodicMemory {
 		return (result.rows as SessionRow[]).map(toSessionSummary);
 	}
 
-	async searchByContent(
-		query: string,
-		limit: number,
-	): Promise<readonly MessageRecord[]> {
+	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {
 		const result = await this.pool.query(
 			`SELECT role, content, channel_id, timestamp, token_count
 			 FROM messages

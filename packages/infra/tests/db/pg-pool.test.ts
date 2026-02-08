@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentHealth } from '../../../core/src/types/health.js';
 
 // ─── Types for the PG Pool wrapper (will be implemented in src) ───
@@ -97,27 +97,20 @@ describe('AxelPgPool', () => {
 			const { AxelPgPool } = await import('../../src/db/index.js');
 			const pool: PgPool = new AxelPgPool(mockPool as any, DEFAULT_CONFIG);
 
-			await pool.query('INSERT INTO sessions (session_id) VALUES ($1)', [
+			await pool.query('INSERT INTO sessions (session_id) VALUES ($1)', ['sess-1']);
+
+			expect(mockPool.query).toHaveBeenCalledWith('INSERT INTO sessions (session_id) VALUES ($1)', [
 				'sess-1',
 			]);
-
-			expect(mockPool.query).toHaveBeenCalledWith(
-				'INSERT INTO sessions (session_id) VALUES ($1)',
-				['sess-1'],
-			);
 		});
 
 		it('should propagate database errors', async () => {
-			mockPool.query.mockRejectedValue(
-				new Error('connection refused'),
-			);
+			mockPool.query.mockRejectedValue(new Error('connection refused'));
 
 			const { AxelPgPool } = await import('../../src/db/index.js');
 			const pool: PgPool = new AxelPgPool(mockPool as any, DEFAULT_CONFIG);
 
-			await expect(
-				pool.query('SELECT 1'),
-			).rejects.toThrow();
+			await expect(pool.query('SELECT 1')).rejects.toThrow();
 		});
 	});
 

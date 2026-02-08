@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
 	ConceptualMemory,
-	NewEntity,
-	NewRelation,
 	Entity,
 	GraphNode,
+	NewEntity,
+	NewRelation,
 } from '../../../core/src/memory/types.js';
 
 // ─── Mock PG Pool ───
@@ -143,10 +143,10 @@ describe('PgConceptualMemory', () => {
 			const nodes = await mem.traverse('ent-1', 3);
 
 			expect(nodes).toHaveLength(2);
-			expect(nodes[0]!.entity.name).toBe('pnpm');
-			expect(nodes[0]!.depth).toBe(1);
-			expect(nodes[1]!.entity.name).toBe('Biome');
-			expect(nodes[1]!.depth).toBe(2);
+			expect(nodes[0]?.entity.name).toBe('pnpm');
+			expect(nodes[0]?.depth).toBe(1);
+			expect(nodes[1]?.entity.name).toBe('Biome');
+			expect(nodes[1]?.depth).toBe(2);
 
 			const [sql] = mockPool.query.mock.calls[0] as [string, unknown[]];
 			expect(sql).toContain('RECURSIVE');
@@ -189,8 +189,8 @@ describe('PgConceptualMemory', () => {
 			const entity = await mem.findEntity('Mark');
 
 			expect(entity).not.toBeNull();
-			expect(entity!.name).toBe('Mark');
-			expect(entity!.entityType).toBe('person');
+			expect(entity?.name).toBe('Mark');
+			expect(entity?.entityType).toBe('person');
 		});
 
 		it('should return null for unknown entity', async () => {
@@ -228,7 +228,7 @@ describe('PgConceptualMemory', () => {
 			const related = await mem.getRelated('ent-1');
 
 			expect(related).toHaveLength(1);
-			expect(related[0]!.name).toBe('TypeScript');
+			expect(related[0]?.name).toBe('TypeScript');
 		});
 
 		it('should filter by relation type when provided', async () => {

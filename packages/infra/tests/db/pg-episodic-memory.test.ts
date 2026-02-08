@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SessionSummary } from '../../../core/src/types/session.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-	EpisodicMemory,
 	CreateSessionParams,
+	EpisodicMemory,
 	MessageRecord,
 } from '../../../core/src/memory/types.js';
+import type { SessionSummary } from '../../../core/src/types/session.js';
 
 // ─── Mock PG Pool ───
 
@@ -83,9 +83,7 @@ describe('PgEpisodicMemory', () => {
 			const { PgEpisodicMemory } = await import('../../src/db/index.js');
 			const mem: EpisodicMemory = new PgEpisodicMemory(mockPool as any);
 
-			await expect(
-				mem.endSession('nonexistent', 'summary'),
-			).rejects.toThrow(/not found/i);
+			await expect(mem.endSession('nonexistent', 'summary')).rejects.toThrow(/not found/i);
 		});
 	});
 
@@ -161,8 +159,8 @@ describe('PgEpisodicMemory', () => {
 			const sessions = await mem.getRecentSessions('user-1', 5);
 
 			expect(sessions).toHaveLength(1);
-			expect(sessions[0]!.sessionId).toBe('sess-1');
-			expect(sessions[0]!.summary).toBe('Discussed TypeScript');
+			expect(sessions[0]?.sessionId).toBe('sess-1');
+			expect(sessions[0]?.summary).toBe('Discussed TypeScript');
 
 			const [sql, params] = mockPool.query.mock.calls[0] as [string, unknown[]];
 			expect(sql).toContain('WHERE');
@@ -230,7 +228,7 @@ describe('PgEpisodicMemory', () => {
 			const results = await mem.searchByContent('pgvector', 5);
 
 			expect(results).toHaveLength(1);
-			expect(results[0]!.content).toContain('pgvector');
+			expect(results[0]?.content).toContain('pgvector');
 		});
 	});
 

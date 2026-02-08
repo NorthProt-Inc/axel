@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentHealth } from '../../../core/src/types/health.js';
 
 // ─── Types for the Embedding Service (will be implemented in src) ───
@@ -40,20 +40,22 @@ interface MockGeminiBatchResponse {
 
 function createMockGeminiClient() {
 	return {
-		embedContent: vi.fn<
-			(params: {
-				content: { parts: { text: string }[] };
-				taskType: string;
-			}) => Promise<MockGeminiResponse>
-		>(),
-		batchEmbedContents: vi.fn<
-			(params: {
-				requests: readonly {
+		embedContent:
+			vi.fn<
+				(params: {
 					content: { parts: { text: string }[] };
 					taskType: string;
-				}[];
-			}) => Promise<MockGeminiBatchResponse>
-		>(),
+				}) => Promise<MockGeminiResponse>
+			>(),
+		batchEmbedContents:
+			vi.fn<
+				(params: {
+					requests: readonly {
+						content: { parts: { text: string }[] };
+						taskType: string;
+					}[];
+				}) => Promise<MockGeminiBatchResponse>
+			>(),
 	};
 }
 
@@ -90,13 +92,8 @@ describe('GeminiEmbeddingService', () => {
 				embedding: { values: fakeValues },
 			});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			const result = await service.embed('hello world', 'RETRIEVAL_DOCUMENT');
 
@@ -110,13 +107,8 @@ describe('GeminiEmbeddingService', () => {
 				embedding: { values: fakeValues },
 			});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			await service.embed('test query', 'RETRIEVAL_QUERY');
 
@@ -128,17 +120,10 @@ describe('GeminiEmbeddingService', () => {
 		});
 
 		it('should reject empty text', async () => {
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
-			await expect(
-				service.embed('', 'RETRIEVAL_DOCUMENT'),
-			).rejects.toThrow();
+			await expect(service.embed('', 'RETRIEVAL_DOCUMENT')).rejects.toThrow();
 		});
 
 		it('should retry on transient API errors', async () => {
@@ -147,13 +132,11 @@ describe('GeminiEmbeddingService', () => {
 				.mockRejectedValueOnce(new Error('503 Service Unavailable'))
 				.mockResolvedValueOnce({ embedding: { values: fakeValues } });
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, retryBaseMs: 1 },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				retryBaseMs: 1,
+			});
 
 			const result = await service.embed('hello', 'RETRIEVAL_DOCUMENT');
 
@@ -162,39 +145,28 @@ describe('GeminiEmbeddingService', () => {
 		});
 
 		it('should throw ProviderError after max retries exhausted', async () => {
-			mockClient.embedContent.mockRejectedValue(
-				new Error('503 Service Unavailable'),
-			);
+			mockClient.embedContent.mockRejectedValue(new Error('503 Service Unavailable'));
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, maxRetries: 2, retryBaseMs: 1 },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				maxRetries: 2,
+				retryBaseMs: 1,
+			});
 
-			await expect(
-				service.embed('hello', 'RETRIEVAL_DOCUMENT'),
-			).rejects.toThrow();
+			await expect(service.embed('hello', 'RETRIEVAL_DOCUMENT')).rejects.toThrow();
 		});
 
 		it('should not retry on non-retryable errors (e.g., 400)', async () => {
-			mockClient.embedContent.mockRejectedValue(
-				new Error('400 Bad Request'),
-			);
+			mockClient.embedContent.mockRejectedValue(new Error('400 Bad Request'));
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, retryBaseMs: 1 },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				retryBaseMs: 1,
+			});
 
-			await expect(
-				service.embed('hello', 'RETRIEVAL_DOCUMENT'),
-			).rejects.toThrow();
+			await expect(service.embed('hello', 'RETRIEVAL_DOCUMENT')).rejects.toThrow();
 			expect(mockClient.embedContent).toHaveBeenCalledTimes(1);
 		});
 	});
@@ -207,13 +179,8 @@ describe('GeminiEmbeddingService', () => {
 				embeddings: fakeEmbeddings.map((v) => ({ values: v })),
 			});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			const results = await service.embedBatch(texts, 'RETRIEVAL_DOCUMENT');
 
@@ -238,13 +205,11 @@ describe('GeminiEmbeddingService', () => {
 				};
 			});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, batchSize },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				batchSize,
+			});
 
 			const results = await service.embedBatch(texts, 'RETRIEVAL_DOCUMENT');
 
@@ -254,27 +219,15 @@ describe('GeminiEmbeddingService', () => {
 		});
 
 		it('should reject empty array', async () => {
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
-			await expect(
-				service.embedBatch([], 'RETRIEVAL_DOCUMENT'),
-			).rejects.toThrow();
+			await expect(service.embedBatch([], 'RETRIEVAL_DOCUMENT')).rejects.toThrow();
 		});
 
 		it('should reject batch with any empty text', async () => {
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			await expect(
 				service.embedBatch(['hello', '', 'world'], 'RETRIEVAL_DOCUMENT'),
@@ -289,18 +242,13 @@ describe('GeminiEmbeddingService', () => {
 					embeddings: [{ values: fakeEmbedding }, { values: fakeEmbedding }],
 				});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, retryBaseMs: 1 },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				retryBaseMs: 1,
+			});
 
-			const results = await service.embedBatch(
-				['hello', 'world'],
-				'RETRIEVAL_DOCUMENT',
-			);
+			const results = await service.embedBatch(['hello', 'world'], 'RETRIEVAL_DOCUMENT');
 
 			expect(results).toHaveLength(2);
 			expect(mockClient.batchEmbedContents).toHaveBeenCalledTimes(2);
@@ -309,49 +257,37 @@ describe('GeminiEmbeddingService', () => {
 
 	describe('Circuit Breaker', () => {
 		it('should open circuit after consecutive failures exceed threshold', async () => {
-			mockClient.embedContent.mockRejectedValue(
-				new Error('503 Service Unavailable'),
-			);
+			mockClient.embedContent.mockRejectedValue(new Error('503 Service Unavailable'));
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, maxRetries: 1, retryBaseMs: 1 },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				maxRetries: 1,
+				retryBaseMs: 1,
+			});
 
 			// Exhaust circuit breaker threshold (5 failures)
 			for (let i = 0; i < 5; i++) {
-				await service
-					.embed('test', 'RETRIEVAL_DOCUMENT')
-					.catch(() => {});
+				await service.embed('test', 'RETRIEVAL_DOCUMENT').catch(() => {});
 			}
 
 			// Next call should fail fast with circuit open
-			await expect(
-				service.embed('test', 'RETRIEVAL_DOCUMENT'),
-			).rejects.toThrow(/circuit/i);
+			await expect(service.embed('test', 'RETRIEVAL_DOCUMENT')).rejects.toThrow(/circuit/i);
 		});
 
 		it('should report degraded health when circuit is open', async () => {
-			mockClient.embedContent.mockRejectedValue(
-				new Error('503 Service Unavailable'),
-			);
+			mockClient.embedContent.mockRejectedValue(new Error('503 Service Unavailable'));
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				{ ...DEFAULT_CONFIG, maxRetries: 1, retryBaseMs: 1 },
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, {
+				...DEFAULT_CONFIG,
+				maxRetries: 1,
+				retryBaseMs: 1,
+			});
 
 			// Trigger circuit open
 			for (let i = 0; i < 5; i++) {
-				await service
-					.embed('test', 'RETRIEVAL_DOCUMENT')
-					.catch(() => {});
+				await service.embed('test', 'RETRIEVAL_DOCUMENT').catch(() => {});
 			}
 
 			const health = await service.healthCheck();
@@ -361,13 +297,8 @@ describe('GeminiEmbeddingService', () => {
 
 	describe('healthCheck()', () => {
 		it('should return healthy when service is operational', async () => {
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			const health = await service.healthCheck();
 
@@ -383,13 +314,8 @@ describe('GeminiEmbeddingService', () => {
 				embedding: { values: overSizedValues },
 			});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
 			const result = await service.embed('hello', 'RETRIEVAL_DOCUMENT');
 			expect(result.length).toBe(3072);
@@ -401,17 +327,10 @@ describe('GeminiEmbeddingService', () => {
 				embedding: { values: underSizedValues },
 			});
 
-			const { GeminiEmbeddingService } = await import(
-				'../../src/embedding/index.js'
-			);
-			const service: EmbeddingService = new GeminiEmbeddingService(
-				mockClient,
-				DEFAULT_CONFIG,
-			);
+			const { GeminiEmbeddingService } = await import('../../src/embedding/index.js');
+			const service: EmbeddingService = new GeminiEmbeddingService(mockClient, DEFAULT_CONFIG);
 
-			await expect(
-				service.embed('hello', 'RETRIEVAL_DOCUMENT'),
-			).rejects.toThrow(/dimension/i);
+			await expect(service.embed('hello', 'RETRIEVAL_DOCUMENT')).rejects.toThrow(/dimension/i);
 		});
 	});
 });
