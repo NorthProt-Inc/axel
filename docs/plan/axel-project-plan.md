@@ -2054,17 +2054,18 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 
 | 항목 | 상태 | 산출물 |
 |------|------|--------|
-| ADR 상세 문서 | **완료** | ADR-001~016 (docs/adr/) |
+| ADR 상세 문서 | **완료** | ADR-001~021 (docs/adr/) |
 | API 스펙 (OpenAPI 3.0) | **완료** | `docs/plan/openapi-v1.yaml`, `websocket-protocol.md` |
 | PostgreSQL 마이그레이션 전략 | **완료** | `docs/plan/migration-strategy.md` |
-| 성능 벤치마크 계획 | **대기** | RES-001 (pgvector IVFFlat vs HNSW) 결과 필요 |
-| 에이전트 분산 작업 계획 | **대기** | Coordinator 할당 필요 |
+| 성능 벤치마크 계획 | **완료** | RES-001 (HNSW 권장, 하이브리드 접근) |
+| Research 결과 | **완료** | RES-001~005 (docs/research/) |
+| Quality 검토 | **완료** | QA-001~008 (3 PASS, 2 CONDITIONAL → FIX-MED 후 전면 PASS 대상) |
+| FIX-MED (MEDIUM/LOW 이슈 해소) | **완료** | 22개 에러 수정, plan body 전면 업데이트 |
 
-### 아직 필요한 것
+### 남은 작업
 
-- **Research Division 결과**: RES-001~005 (pgvector 벤치마크, 토크나이저, 프레임워크 비교 등)
-- **Quality Division 검토**: QA-001 (plan 내부 일관성), QA-002 (claude_reports 매핑 완전성)
-- **v3.0 통합 문서**: 모든 하위 문서를 하나의 coherent plan으로 통합
+- **QA-009**: FIX-MED 결과에 대한 최종 quality gate sign-off (Quality Division)
+- **v3.0 통합**: QA-009 PASS 후 plan finalization 선언
 
 ---
 
