@@ -1,201 +1,183 @@
-# RES-001: pgvector IVFFlat vs HNSW Index Comparison
+# RES-001: pgvector IVFFlat vs HNSW Index Performance Comparison
 
 > Date: 2026-02-07
-> Author: Research Division
-> Related: ADR-015 (Adaptive Decay v2)
+> Author: Research Division (Claude Sonnet 4.5)
+> Related: ADR-002 (PostgreSQL + pgvector single DB)
 
 ## Question
 
-For Axel's 6-layer memory architecture with expected vector counts ranging from 1K to 100K embeddings, which pgvector index algorithm (IVFFlat or HNSW) provides the best trade-off between query performance, build time, and memory usage?
+Which pgvector index type (IVFFlat or HNSW) should Axel use for vector similarity search on datasets ranging from 1K to 100K embedding vectors, considering query performance, index build time, memory usage, and recall accuracy?
 
 ## Methodology
 
-- **Documentation review**: Official pgvector documentation, Neon, Supabase, AWS technical blogs
-- **Web search**: Recent benchmarks (2025-2026) from production deployments
-- **Focus areas**: Build time, query latency, recall rates, memory usage across 1K-100K vector range
-- **Constraints considered**: Single-user initially, self-hosted, TypeScript stack, PostgreSQL+pgvector
+1. **Web search** for official pgvector documentation and community benchmarks
+2. **Documentation review** of pgvector GitHub repository for index specifications
+3. **Benchmark analysis** from multiple sources (AWS, Jonathan Katz blog, WebSearch aggregation)
+4. **Parameter comparison** for index creation and query tuning options
 
 ## Findings
 
-### Option A: IVFFlat (Inverted File with Flat Compression)
+### Option A: HNSW (Hierarchical Navigable Small World)
 
 #### Description
-IVFFlat uses k-means clustering to divide vectors into lists, then searches only the closest lists to the query vector. Requires training phase (table must contain data before index creation).
+HNSW creates a multilayer graph structure enabling efficient nearest-neighbor search through hierarchical navigation.
 
-#### Performance Metrics (1M vectors, 50 dimensions)
-- **Build time**: 128 seconds
-- **Query speed**: 2.6 QPS (queries per second)
-- **Memory usage**: 257 MB
-- **Query latency**: ~2.4 ms (at high recall)
-- **Recall**: Typically 100% for datasets >1K vectors with proper configuration
-
-#### Configuration Parameters
+#### Creation & Parameters
 ```sql
--- Index creation
-CREATE INDEX ON vectors USING ivfflat (embedding vector_l2_ops)
-WITH (lists = [rows/1000 for ≤1M rows, sqrt(rows) for >1M]);
-
--- Query tuning
-SET ivfflat.probes = [lists/10 for ≤1M rows, sqrt(lists) for >1M];
+CREATE INDEX ON items USING hnsw (embedding vector_l2_ops);
 ```
 
+**Build-time parameters:**
+- `m`: Maximum connections per layer (default: 16)
+- `ef_construction`: Size of dynamic candidate list during building (default: 64)
+
+**Query-time parameters:**
+- `hnsw.ef_search`: Dynamic candidate list size for search (default: 40)
+
 #### Pros
-- **Fast build times**: 128s vs 4,065s for HNSW on 1M vectors
-- **Low memory usage**: 257 MB vs 729 MB for HNSW on 1M vectors
-- **Memory efficient**: Uses less RAM during index creation
-- **Resource friendly**: Suitable for constrained environments
-- **Predictable costs**: Lower infrastructure requirements
+- **Superior query performance**: ~1.5ms per query vs 2.4ms for IVFFlat (at recall 0.998)
+- **Better throughput**: 40.5 QPS vs 2.6 QPS for IVFFlat (~15.5x faster)
+- **Excellent speed-recall tradeoff**: 30x QPS boost and 30x p99 latency improvement over IVFFlat at 99% recall
+- **Dynamic data resilience**: Handles index updates well without requiring recalculation
+- **No training phase**: Can create index immediately without pre-existing data
+- **Logarithmic scaling**: Search time scales better as dataset grows
 
 #### Cons
-- **Lower query performance**: 2.6 QPS vs 40.5 QPS for HNSW
-- **Training required**: Must have data before creating index
-- **Variable latency**: P95 latencies show more variance (141-219ms @ 1M vectors)
-- **Cluster imbalance**: Fixed lists can create uneven distribution (up to 10K vectors in some clusters)
-- **Poor dynamic updates**: Performance degrades with frequent insertions
+- **Very slow index build**: 32x slower than IVFFlat (4,065s vs 128s in one benchmark)
+  - SIFT-128 (1M vectors): 12.20-25.23 minutes
+  - DBpedia (1M vectors, 1536-dim): 49.40-82.35 minutes
+- **High memory consumption**: 2.8x larger index size (729MB vs 257MB at recall 0.998)
+  - MNIST: 4.5x larger than IVFFlat
+  - GLOVE: 1.3x larger than IVFFlat
+- **Requires more `maintenance_work_mem`**: Performance degrades significantly if graph doesn't fit in memory during build
 
-#### Sources
-- [Neon: Optimize pgvector search](https://neon.com/docs/ai/ai-vector-search-optimization)
-- [Dev.to: A Guide to pgvector, IVFFlat, and HNSW](https://dev.to/cubesoft/vector-search-demystified-a-guide-to-pgvector-ivfflat-and-hnsw-36hf)
-- [Mastra: Benchmarking pgvector RAG performance](https://mastra.ai/blog/pgvector-perf)
+#### Performance Numbers
+| Metric | HNSW | IVFFlat | Ratio |
+|--------|------|---------|-------|
+| Query time (recall 0.998) | 1.5ms | 2.4ms | 1.6x faster |
+| QPS (recall 0.998) | 40.5 | 2.6 | 15.5x faster |
+| Index build time | 4,065s | 128s | 32x slower |
+| Index size (recall 0.998) | 729MB | 257MB | 2.8x larger |
+
+#### Source
+[GitHub: pgvector/pgvector](https://github.com/pgvector/pgvector)
 
 ---
 
-### Option B: HNSW (Hierarchical Navigable Small World)
+### Option B: IVFFlat (Inverted File Flat)
 
 #### Description
-HNSW builds a multi-layer graph structure where each layer contains nodes connected to nearby neighbors, enabling efficient approximate nearest neighbor search. No training phase required.
+IVFFlat divides the vector space into partitions (lists) and searches only the nearest partitions, similar to inverted indexes in text search.
 
-#### Performance Metrics (1M vectors, 50 dimensions)
-- **Build time**: 4,065 seconds (single-threaded), **9.5 minutes** (parallel with pgvector 0.6+)
-- **Query speed**: 40.5 QPS (15.6x faster than IVFFlat)
-- **Memory usage**: 729 MB
-- **Query latency**: ~1.5 ms (at high recall)
-- **Recall**: Typically 99-100% with proper ef_search tuning
-
-#### Configuration Parameters
+#### Creation & Parameters
 ```sql
--- Index creation
-CREATE INDEX ON vectors USING hnsw (embedding vector_l2_ops)
-WITH (m = 16, ef_construction = 64);
-
--- Query tuning
-SET hnsw.ef_search = 40;  -- Must be ≥ LIMIT value
+CREATE INDEX ON items USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
 ```
 
+**Build-time parameters:**
+- `lists`: Number of partitions
+  - Recommended: `rows/1000` for datasets up to 1M rows
+  - Recommended: `sqrt(rows)` for larger datasets
+
+**Query-time parameters:**
+- `ivfflat.probes`: Number of lists to search (default: 1)
+  - Recommended: `sqrt(lists)` for balanced performance
+
 #### Pros
-- **Superior query performance**: 40.5 QPS vs 2.6 QPS for IVFFlat (15.6x faster)
-- **Lower query latency**: ~1.5ms vs ~2.4ms for IVFFlat
-- **Consistent latency**: P95 latencies 125-161ms vs 141-219ms for IVFFlat @ 1M vectors
-- **No training required**: Can create index before data insertion
-- **Dynamic friendly**: Better for frequent updates
-- **Parallel build support**: 9x faster with pgvector 0.6+ (9.5min vs 1h27min)
-- **30x throughput improvement** over IVFFlat at 99% recall (latest benchmarks)
+- **Very fast index build**: 12x-42x faster than HNSW
+  - Example: 128 seconds vs 4,065 seconds (32x faster)
+  - SIFT-128 (1M vectors): 0.61-3.58 minutes
+  - DBpedia (1M vectors): 16.55-16.68 minutes
+- **Low memory usage**: 2.8x smaller index size (257MB vs 729MB)
+- **Simpler configuration**: Fewer tuning parameters
+- **Predictable behavior**: Linear search time relationship with probes
 
 #### Cons
-- **Slower initial build**: 4,065s vs 128s for IVFFlat (single-threaded)
-- **Higher memory usage**: 729 MB vs 257 MB for IVFFlat
-- **Complex tuning**: More parameters (m, ef_construction, ef_search)
-- **Memory constraints**: Shows notice when exceeds `maintenance_work_mem`
+- **Poor query performance**: ~2.4ms per query (1.6x slower than HNSW)
+- **Low throughput at high recall**: 2.6 QPS vs 40.5 QPS for HNSW (15.5x slower)
+- **Linear scaling with probes**: Search time grows linearly as more lists are checked
+- **Recall degrades with updates**: Centroids are not recalculated after index creation, causing recall to deteriorate as data changes
+- **Requires data before indexing**: Needs existing data for optimal recall (training phase)
+- **Poor speed-recall tradeoff**: High throughput only achievable at low recall levels
 
-#### Sources
-- [GitHub: pgvector official repository](https://github.com/pgvector/pgvector)
-- [Supabase: pgvector 0.6.0 - 30x faster parallel builds](https://supabase.com/blog/pgvector-fast-builds)
-- [Jonathan Katz: The 150x pgvector speedup](https://jkatz05.com/post/postgres/pgvector-performance-150x-speedup/)
+#### Performance Numbers
+See HNSW table above for direct comparison.
+
+#### Source
+[GitHub: pgvector/pgvector](https://github.com/pgvector/pgvector)
 
 ---
 
 ## Comparison Matrix
 
-| Criterion | IVFFlat | HNSW | Winner |
-|-----------|---------|------|--------|
-| **Build Time** (1M vectors) | 128s | 4,065s (single) / 570s (parallel) | IVFFlat |
-| **Query Speed** (QPS) | 2.6 | 40.5 | **HNSW** |
-| **Query Latency** | ~2.4ms | ~1.5ms | **HNSW** |
-| **Memory Usage** | 257 MB | 729 MB | IVFFlat |
-| **Recall @ 1K+ vectors** | ~100% | 99-100% | Tie |
-| **Dynamic Updates** | Poor | Good | **HNSW** |
-| **Setup Complexity** | Medium | Medium-High | IVFFlat |
-| **Latency Consistency** | Variable (P95: 141-219ms) | Consistent (P95: 125-161ms) | **HNSW** |
-| **Resource Requirements** | Low | Medium | IVFFlat |
-| **Training Required** | Yes (blocks early indexing) | No | **HNSW** |
-
-### Performance at Different Scales
-
-| Dataset Size | IVFFlat Query Latency | HNSW Query Latency | HNSW Advantage |
-|--------------|----------------------|-------------------|----------------|
-| 10K vectors | ~20-30ms | ~5-10ms | 2-3x faster |
-| 100K vectors | ~40-60ms | ~10-15ms | 3-4x faster |
-| 500K vectors | ~66-70ms (median) | ~20-25ms (est.) | ~3x faster |
-| 1M vectors | ~100-150ms | ~30-40ms | 3-4x faster |
+| Criterion | HNSW | IVFFlat | Winner |
+|-----------|------|---------|--------|
+| **Query Speed** (recall 0.998) | 1.5ms | 2.4ms | HNSW (1.6x) |
+| **Throughput** (recall 0.998) | 40.5 QPS | 2.6 QPS | HNSW (15.5x) |
+| **Index Build Time** | 4,065s | 128s | IVFFlat (32x) |
+| **Index Size** | 729MB | 257MB | IVFFlat (2.8x) |
+| **Speed-Recall Tradeoff** | Excellent | Poor | HNSW |
+| **Scalability** | Logarithmic | Linear | HNSW |
+| **Dynamic Updates** | Resilient | Degrades | IVFFlat |
+| **Setup Complexity** | Medium (2 params) | Low (1 param) | IVFFlat |
+| **Memory During Build** | High | Moderate | IVFFlat |
+| **Training Phase** | Not required | Required | HNSW |
 
 ## Recommendation
 
-**Choose HNSW** for Axel's memory system.
+**Use HNSW for Axel's vector similarity search.**
 
 ### Rationale
 
-1. **Query performance is critical**: Axel's memory retrieval happens in real-time during user interactions. HNSW's 15.6x query throughput advantage and 1.5ms latency directly improves user experience.
+1. **Query performance is critical**: Axel is a read-heavy agent application where user interactions require fast retrieval. HNSW's 15.5x throughput advantage and 1.6x query speed improvement directly impact user experience.
 
-2. **Build time is one-time cost**: With pgvector 0.6+ parallel builds, HNSW takes ~9.5 minutes for 1M vectors. For Axel's expected 1K-100K range, build times will be **under 60 seconds** even single-threaded, making the difference negligible.
+2. **Index build time is acceptable**: Axel's expected dataset (1K-100K vectors) is small compared to benchmarks (1M vectors). Even at 32x slower build, HNSW will complete in seconds to minutes for Axel's scale during initialization or batch updates.
 
-3. **Dynamic memory evolution**: Axel's memory grows continuously. HNSW handles incremental updates better than IVFFlat, which suffers from cluster imbalance over time.
+3. **Dynamic workload**: Axel's memory will grow incrementally as users interact. HNSW's resilience to updates avoids the recall degradation problem that plagues IVFFlat.
 
-4. **Self-hosted environment**: Axel runs on user hardware with modern CPUs (likely 4-16 cores). The 729 MB memory footprint at 1M vectors scales to **~73 MB at 100K vectors**, well within reasonable limits.
+4. **Memory footprint is manageable**: 2.8x larger index (e.g., ~3MB for 1K vectors with 1536 dimensions) is negligible on modern hardware.
 
-5. **No training blocker**: HNSW allows index creation before data population, enabling cleaner migration scripts and testing workflows.
+5. **Future-proof scaling**: HNSW's logarithmic scaling ensures performance remains acceptable as dataset grows beyond 100K vectors.
 
-6. **Future-proof**: As Axel scales beyond 100K vectors, HNSW's superior performance becomes increasingly valuable. IVFFlat's limitations would require later migration.
+6. **No training phase**: HNSW can build indexes immediately, simplifying deployment and testing workflows.
 
-### Configuration Recommendations for Axel
+### Configuration Recommendations
 
+**For Axel's initial deployment (1K-10K vectors):**
 ```sql
--- For 1K-100K vectors (Phase 1)
-CREATE INDEX ON memory_vectors USING hnsw (embedding vector_l2_ops)
+CREATE INDEX memory_embeddings_idx
+ON memory_embeddings
+USING hnsw (embedding vector_cosine_ops)
 WITH (m = 16, ef_construction = 64);
-
--- Query-time tuning
-SET hnsw.ef_search = 40;  -- Balance speed/accuracy
-
--- For >100K vectors (future scaling)
--- Consider m = 24, ef_construction = 100 for higher recall
 ```
 
-### Cost-Benefit Analysis
+**Query-time setting:**
+```sql
+SET hnsw.ef_search = 40;  -- Default is sufficient for high recall
+```
 
-| Aspect | IVFFlat | HNSW | Impact |
-|--------|---------|------|--------|
-| Initial build (@100K) | ~12s | ~60s (single) / ~10s (parallel) | Low (one-time) |
-| Query latency | ~40ms | ~10ms | **High (every query)** |
-| Memory overhead | ~26 MB | ~73 MB | Low (~47 MB diff) |
-| Maintenance complexity | Medium | Medium | Neutral |
-| Long-term scalability | Poor | Excellent | **High** |
+**PostgreSQL config:**
+```
+maintenance_work_mem = 512MB  -- Ensure graph fits in memory during index build
+max_parallel_maintenance_workers = 4  -- Accelerate index creation
+```
 
-### Risk Assessment
+### When to Reconsider
 
-**HNSW Risks**:
-- Memory constraints on very low-end hardware: Mitigated by 73 MB @ 100K being reasonable
-- Complex parameter tuning: Mitigated by sane defaults (m=16, ef_construction=64)
+- If Axel's dataset grows beyond 1M vectors and index build time becomes prohibitive (>1 hour)
+- If memory constraints are extreme (e.g., embedded devices with <2GB RAM)
+- If 99% recall is not required and 90-95% recall is acceptable
 
-**IVFFlat Risks**:
-- Performance degradation over time: **High impact** for autonomous agent
-- Poor dynamic update handling: **Blocks** continuous learning scenarios
-- Migration pain later: Requires reindexing and query rewrites
+In these edge cases, IVFFlat with carefully tuned `lists` and `probes` could be a fallback option.
 
-## Implementation Notes
-
-1. Use pgvector **0.6.0+** for parallel HNSW builds (9x speedup)
-2. Enable `maintenance_work_mem = 2GB` during index creation
-3. Monitor `pg_stat_statements` for actual query patterns
-4. Consider binary quantization (pgvector 0.7.0+) if vectors exceed 1M for 100x build speedup
+---
 
 ## Sources
 
-- [Neon: Optimize pgvector search](https://neon.com/docs/ai/ai-vector-search-optimization)
-- [GitHub: pgvector official repository](https://github.com/pgvector/pgvector)
-- [Supabase: pgvector 0.6.0 - 30x faster parallel builds](https://supabase.com/blog/pgvector-fast-builds)
-- [Jonathan Katz: The 150x pgvector speedup](https://jkatz05.com/post/postgres/pgvector-performance-150x-speedup/)
-- [Mastra: Benchmarking pgvector RAG performance](https://mastra.ai/blog/pgvector-perf)
-- [Dev.to: A Guide to pgvector, IVFFlat, and HNSW](https://dev.to/cubesoft/vector-search-demystified-a-guide-to-pgvector-ivfflat-and-hnsw-36hf)
-- [Railway: Hosting Postgres with pgvector](https://blog.railway.com/p/hosting-postgres-with-pgvector)
-- [AWS: Optimize generative AI applications with pgvector indexing](https://aws.amazon.com/blogs/database/optimize-generative-ai-applications-with-pgvector-indexing-a-deep-dive-into-ivfflat-and-hnsw-techniques/)
-- [Google Cloud: Faster similarity search performance with pgvector indexes](https://cloud.google.com/blog/products/databases/faster-similarity-search-performance-with-pgvector-indexes)
+- [GitHub: pgvector/pgvector](https://github.com/pgvector/pgvector)
+- [Optimize generative AI applications with pgvector indexing: A deep dive into IVFFlat and HNSW techniques | Amazon Web Services](https://aws.amazon.com/blogs/database/optimize-generative-ai-applications-with-pgvector-indexing-a-deep-dive-into-ivfflat-and-hnsw-techniques/)
+- [Comparing IVFFlat and HNSW in pgvector | Medium](https://medium.com/@emreks/comparing-ivfflat-and-hnsw-with-pgvector-performance-analysis-on-diverse-datasets-e1626505bc9a)
+- [Vector Indexes in Postgres using pgvector: IVFFlat vs HNSW | Tembo](https://legacy.tembo.io/blog/vector-indexes-in-pgvector/)
+- [PGVector: HNSW vs IVFFlat — A Comprehensive Study | Medium](https://medium.com/@bavalpreetsinghh/pgvector-hnsw-vs-ivfflat-a-comprehensive-study-21ce0aaab931)
+- [An early look at HNSW performance with pgvector | Jonathan Katz](https://jkatz05.com/post/postgres/pgvector-hnsw-performance/)
+- [Faster similarity search performance with pgvector indexes | Google Cloud Blog](https://cloud.google.com/blog/products/databases/faster-similarity-search-performance-with-pgvector-indexes)
