@@ -1,4 +1,4 @@
-import type { ComponentHealth } from '../../../core/src/types/health.js';
+import type { ComponentHealth } from '@axel/core/types';
 
 /** PG pool configuration */
 interface PgPoolConfig {

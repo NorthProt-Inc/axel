@@ -1,5 +1,5 @@
-import type { AccessPattern, HotMemory, MetaMemory } from '../../../core/src/memory/types.js';
-import type { ComponentHealth } from '../../../core/src/types/health.js';
+import type { AccessPattern, HotMemory, MetaMemory } from '@axel/core/memory';
+import type { ComponentHealth } from '@axel/core/types';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**

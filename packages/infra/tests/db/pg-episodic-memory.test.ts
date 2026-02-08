@@ -3,8 +3,8 @@ import type {
 	CreateSessionParams,
 	EpisodicMemory,
 	MessageRecord,
-} from '../../../core/src/memory/types.js';
-import type { SessionSummary } from '../../../core/src/types/session.js';
+} from '@axel/core/memory';
+import type { SessionSummary } from '@axel/core/types';
 
 // ─── Mock PG Pool ───
 

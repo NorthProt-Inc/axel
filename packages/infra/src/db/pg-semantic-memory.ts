@@ -5,9 +5,8 @@ import type {
 	ScoredMemory,
 	SemanticMemory,
 	SemanticQuery,
-} from '../../../core/src/memory/types.js';
-import type { ComponentHealth } from '../../../core/src/types/health.js';
-import type { Memory } from '../../../core/src/types/memory.js';
+} from '@axel/core/memory';
+import type { ComponentHealth, Memory } from '@axel/core/types';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**

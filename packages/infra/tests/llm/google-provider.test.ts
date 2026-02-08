@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { LlmChatChunk } from '../../../core/src/orchestrator/types.js';
+import type { LlmChatChunk } from '@axel/core/orchestrator';
 
 // ─── Mock Google Generative AI Client ───
 
@@ -238,7 +238,7 @@ describe('GoogleLlmProvider', () => {
 	describe('chat — error handling', () => {
 		it('should throw ProviderError on API failure', async () => {
 			const { GoogleLlmProvider } = await importModule();
-			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const { ProviderError } = await import('@axel/core/types');
 			const provider = new GoogleLlmProvider(client as any, {
 				model: 'gemini-2.0-flash',
 			});
@@ -270,7 +270,7 @@ describe('GoogleLlmProvider', () => {
 
 		it('should mark 429/503 errors as retryable', async () => {
 			const { GoogleLlmProvider } = await importModule();
-			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const { ProviderError } = await import('@axel/core/types');
 			const provider = new GoogleLlmProvider(client as any, {
 				model: 'gemini-2.0-flash',
 			});
@@ -305,7 +305,7 @@ describe('GoogleLlmProvider', () => {
 
 		it('should mark 400 errors as non-retryable', async () => {
 			const { GoogleLlmProvider } = await importModule();
-			const { ProviderError } = await import('../../../core/src/types/errors.js');
+			const { ProviderError } = await import('@axel/core/types');
 			const provider = new GoogleLlmProvider(client as any, {
 				model: 'gemini-2.0-flash',
 			});

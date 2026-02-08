@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AccessPattern, HotMemory, MetaMemory } from '../../../core/src/memory/types.js';
+import type { AccessPattern, HotMemory, MetaMemory } from '@axel/core/memory';
 
 // ─── Mock PG Pool ───
 

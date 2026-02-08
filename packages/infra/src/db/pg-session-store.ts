@@ -3,8 +3,8 @@ import type {
 	SessionStats,
 	SessionStore,
 	UnifiedSession,
-} from '../../../core/src/orchestrator/types.js';
-import type { SessionSummary } from '../../../core/src/types/session.js';
+} from '@axel/core/orchestrator';
+import type { SessionSummary } from '@axel/core/types';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**

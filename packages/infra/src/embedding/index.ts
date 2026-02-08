@@ -1,4 +1,4 @@
-import type { ComponentHealth } from '../../core/src/types/health.js';
+import type { ComponentHealth } from '@axel/core/types';
 import { CircuitBreaker, type CircuitBreakerConfig } from '../common/circuit-breaker.js';
 
 /** Task type for asymmetric embedding (ADR-016) */

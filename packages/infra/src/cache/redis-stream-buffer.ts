@@ -1,5 +1,5 @@
-import type { StreamBuffer, StreamEvent, StreamEventType } from '../../../core/src/memory/types.js';
-import type { ComponentHealth } from '../../../core/src/types/health.js';
+import type { StreamBuffer, StreamEvent, StreamEventType } from '@axel/core/memory';
+import type { ComponentHealth } from '@axel/core/types';
 
 /** Minimal Redis client interface for Streams */
 interface RedisStreamClient {
