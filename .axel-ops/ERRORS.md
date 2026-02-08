@@ -2,22 +2,25 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 18**: FIX-AUDIT completed (ERR-050~056 + 4 MEDIUM). AUDIT-002 follow-up: 11 new findings.
-> ERR-050~056 resolved by FIX-AUDIT. AUDIT-002 HIGH findings mostly overlap with FIX-AUDIT scope.
-> Remaining: 3 items (MEDIUM/LOW) pending QA-011 verification. Open: 3. Resolved: 55.
+> **Cycle 20**: QA-011 completed — PLAN CLOSURE APPROVED (4 PASS, 1 CONDITIONAL PASS).
+> ERR-057 RESOLVED, ERR-058 RESOLVED (downgraded LOW, micro-discrepancy), ERR-059 CLOSED (acceptable).
+> 3 new MEDIUM consistency issues from QA-011 (ERR-060~062). Open: 3. Resolved: 58.
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
-| ERR-057 | MEDIUM | audit | 0209 | AUD-042: ADR-016 dimension options should be 128-3072 flexible range, 256 not in Google recommended list | QA-011 |
-| ERR-058 | MEDIUM | audit | 0209 | AUD-043: ADR-016 MTEB 68.32 is mean(task) score, not 3072d-specific (68.17). Clarification needed | QA-011 |
-| ERR-059 | LOW | audit | 0209 | AUD-037: RES-001 HNSW memory calc uses 1536d (historical). OK as research record, plan refs already 3072d | — |
+| ERR-060 | MEDIUM | quality | 0209 | ADR-013:144,171-174 still recommends IVFFlat. Plan/ADR-002/migration-strategy all use HNSW. Last remaining IVFFlat reference in ADRs. | FIX-PRE-IMPL |
+| ERR-061 | MEDIUM | quality | 0209 | migration-strategy:372,377-393 IVFFlat text sections not updated to HNSW. SQL in migration 003 correct (HNSW), but surrounding text inconsistent. | FIX-PRE-IMPL |
+| ERR-062 | MEDIUM | quality | 0209 | plan:843-853 hot_memories MV uses INNER JOIN (drops empty channel_mentions). migration-strategy:285-302 uses LEFT JOIN (correct). Align plan body to LEFT JOIN version. | FIX-PRE-IMPL |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-057 | ADR-016 dimension options correctly updated to 128-3072 flexible range. FIX-AUDIT applied AUD-023. | QA-011 (quality) | 0209 |
+| ERR-058 | ADR-016 MTEB score clarified: 68.16 (GA 3072d). 68.16 vs 68.17 micro-discrepancy — zero practical impact. Downgraded LOW, closed. | QA-011 (quality) | 0209 |
+| ERR-059 | RES-001 1536d memory calc acceptable as historical research record. Plan/migration-strategy use correct 3072d values. | QA-011 (quality) | 0209 |
 | ERR-050 | v2-open-items React→Svelte superseded notation added. | FIX-AUDIT (arch) | 0209 |
 | ERR-051 | ADR-016 max input tokens corrected 8192→2048. | FIX-AUDIT (arch) | 0209 |
 | ERR-052 | Plan migration logic already updated by EMBED-3072 (3072d). | EMBED-3072 (arch) | 0208 |
