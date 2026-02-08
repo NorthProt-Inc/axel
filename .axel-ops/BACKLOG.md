@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 68 (CTO update)**: **POST-RELEASE HARDENING.** HARDEN-003/004/005 completed. **FIX-DIMENSION-001 + CONST-AMEND-001 resolved by Mark(Human) directly** — approved and applied in CTO session. 835 tests (799 pass, 36 skip), 69 files. Open errors: **0**.
+> **Cycle 70 (CTO update)**: **ALL HARDENING COMPLETE.** HARDEN-006/007 completed (dev-edge). All 5 hardening tasks done. 835+ tests, 69+ files, gateway 95.65% stmt. **0 open errors. 0 queued. 0 in progress.** Project fully complete — all phases (A→E) + post-release hardening finished.
 
 ## Queued (Human-Blocked)
 
@@ -14,10 +14,7 @@
 
 ## In Progress
 
-| ID | Priority | Division | Task | Started |
-|----|----------|----------|------|---------|
-| HARDEN-006 | P3 | dev-edge | QA-020-M3: handleDiscordCommand sends DEFERRED response after awaiting handleMessage. Discord expects DEFERRED immediately, then follow-up via webhook PATCH. Refactor to fire-and-forget pattern with interaction callback URL. TDD mandatory. | 0208C68 |
-| HARDEN-007 | P3 | dev-edge | QA-020-L3 + AUD-094: SSE stream writeHead (server.ts:316-320) missing X-Content-Type-Options + X-Frame-Options headers. Add security headers for consistency with AUD-086 fix. Also fix startedAt timing (set in start() not factory). TDD mandatory. | 0208C68 |
+(none)
 
 ## Cancelled
 
@@ -155,3 +152,5 @@
 | HARDEN-005 | dev-edge | 0208C68 | AUD-087: trustedProxies config + getClientIp X-Forwarded-For parsing. Right-to-left walk, skip trusted IPs. 5 tests. TDD RED→GREEN→REFACTOR. |
 | FIX-DIMENSION-001 | **Mark (Human direct)** | 0208C68 | **Mark(Human) approved and directly applied** 3072d→1536d Matryoshka truncation. 16 files updated (source, tests, ADRs, plan docs, SQL migration). HNSW index activated. 835 tests pass. ERR-069 resolved. Commits: `6120a90` + `228a146`. |
 | CONST-AMEND-001 | **Mark (Human direct)** | 0208C68 | **Mark(Human) approved and directly applied** §9 amendment: infra imports expanded from `core/src/types/` to `@axel/core/{types,memory,orchestrator}`. AUD-046/047 resolved. |
+| HARDEN-006 | dev-edge | 0208C70 | QA-020-M3: Discord DEFERRED fire-and-forget pattern. DiscordFollowUp DI callback. discordApplicationId config. 6 tests. TDD RED→GREEN. |
+| HARDEN-007 | dev-edge | 0208C70 | QA-020-L3 + AUD-094: SSE security headers (X-Content-Type-Options, X-Frame-Options) + startedAt moved to start() listen callback. 4 tests. TDD RED→GREEN. |
