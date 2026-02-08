@@ -2,19 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 44**: **Phase C (Infra Sprint) 89%.** 9/9 coding tasks done. 475 tests pass. Lint 0 errors. QA-016 (quality review) + SYNC-004 (PLAN_SYNC) remaining.
+> **Cycle 45**: **Phase C (Infra Sprint) 89%.** 9/9 coding tasks done. 475 tests pass. Lint 0 errors. QA-016 + SYNC-004 + AUDIT-003 remaining.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
+| AUDIT-003 | P2 | audit | Phase C code audit — INFRA-001~005, COMMON-CB. TDD, §9, file size, ADR compliance. 10+ cycles since last audit. | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
 | QA-016 | quality | 0208C44 | C46 |
-| SYNC-004 | arch | 0208C43 | C45 |
+| SYNC-004 | arch | 0208C43 | C46 |
 
 ## Cancelled
 

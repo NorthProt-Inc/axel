@@ -2,21 +2,21 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 44
+## Current Cycle: 45
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
 | coord | — | 44 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-003, resolved C41) | **Active** (SYNC-004 — 2 cycles) |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-003, resolved C41) | **Active** (SYNC-004 — 3 cycles, metric-alert) |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | Idle — all CORE tasks complete |
 | dev-infra | 1 cycle | 6 (INFRA-001~005, COMMON-CB) | 0 | Idle — all INFRA tasks complete |
 | dev-edge | — | 0 | 0 | Pending Phase D |
 | quality | — | 2 (QA-011, QA-013) | 1 (QA-012, cancelled C39) | **Active** (QA-016) |
 | research | — | 0 | 0 | Idle |
 | devops | 1 cycle | 11 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004) | 0 | Idle — DEVOPS-004 complete |
-| audit | 1 cycle | 1 (AUDIT-002) | 0 | Idle |
+| audit | 1 cycle | 1 (AUDIT-002) | 0 | **Active** (AUDIT-003 assigned C45) |
 
 ## Bottleneck Indicators
 
@@ -68,3 +68,4 @@
 | 42 | dev-infra, devops | 2 (SYNC-003, QA-013) | 0 | **PHASE B COMPLETE → PHASE C KICKOFF.** SYNC-003+QA-013 done. Phase C: INFRA-001+004 assigned, DEVOPS-002/003 assigned. |
 | 43 | dev-infra, devops, arch | 5 (INFRA-001, INFRA-004, COMMON-CB, DEVOPS-002, DEVOPS-003) | 0 | **5 TASKS MERGED.** 419 tests pass. Phase C 56%. INFRA-002/003/005 assigned. SYNC-004+DEVOPS-004 assigned. 1 merge conflict resolved. |
 | 44 | coord, quality, arch | 4 (INFRA-002, INFRA-003, INFRA-005, DEVOPS-004) | 0 | **ALL INFRA CODING COMPLETE.** 475 tests pass. Phase C 89%. Biome lint fixes applied. QA-016 assigned (unblocked). SYNC-004 2 cycles. |
+| 45 | quality, arch, audit | 0 | 0 | No completions. SYNC-004 3 cycles (metric-alert). QA-016 2 cycles. AUDIT-003 created+assigned. 475 tests pass. |
