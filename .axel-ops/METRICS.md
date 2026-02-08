@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 67
+## Current Cycle: 68
 
 ## Division Performance (Last 10 Cycles)
 
@@ -12,7 +12,7 @@
 | arch | 2.5 cycles | 5 | 4 (all CTO override) | Idle |
 | dev-core | 1 cycle | 8 | 0 | Idle |
 | dev-infra | 1 cycle | 11 (+1: FIX-HARDEN-001) | 0 | Idle |
-| dev-edge | 1 cycle | 16 (+1: FIX-HARDEN-002) | 0 | Idle |
+| dev-edge | 1 cycle | 19 (+3: HARDEN-003/004/005) | 0 | Active |
 | quality | 1 cycle | 7 (+1: QA-020) | 1 (QA-012, cancelled C39) | Idle |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
 | devops | 1 cycle | 16 | 0 | Idle |
@@ -35,7 +35,7 @@
 | `packages/core/` | 90% | 95.2% (branches), 99.69% (stmts), 100% (funcs/lines) | +5% over target |
 | `packages/infra/` | 80% | cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42% | +15% over target |
 | `packages/channels/` | 75% | CLI 95.95%, Discord 90.27%, Telegram 93.18% | +15% over target |
-| `packages/gateway/` | 80% | 95.28% stmt (post INTEG-008 + FIX-AUDIT-E-004) | +15% over target |
+| `packages/gateway/` | 80% | 95.47% stmt, 87.77% branch (post HARDEN-003/004/005) | +15% over target |
 | `apps/axel/` | — | bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48% | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 
@@ -49,7 +49,7 @@
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
 | E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
-| Post-Release Hardening | **ACTIVE** | 67 | — | 5 tasks (3 in progress, 2 queued). QA-020 MEDIUM findings + AUD-087. |
+| Post-Release Hardening | **ACTIVE** | 67 | — | 5 tasks (3 done, 2 in progress). HARDEN-003/004/005 done. HARDEN-006/007 assigned. |
 
 ## Cycle History (Last 10)
 
@@ -68,3 +68,4 @@
 | 65 | dev-edge, quality, dev-infra | 2 (INTEG-008, FIX-AUDIT-E-004) | 0 | **2 TASKS DONE.** INTEG-008 (webhook routes, 17 tests), FIX-AUDIT-E-004 (headers+cast). **816 tests, 66 files.** Gateway 95.28% stmt. Phase E executable work done. QA-020 + 2 hardening tasks assigned. |
 | 66 | quality, dev-infra, dev-edge | 3 (QA-020, FIX-HARDEN-001, FIX-HARDEN-002) | 0 | **PHASE E COMPLETE.** QA-020 final review PASS (0C 0H 3M 4L). FIX-HARDEN-001 (AUD-088), FIX-HARDEN-002 (AUD-093). **834 tests (798 pass, 36 skip), 66 files.** tsc+biome clean. All 20 executable tasks done. All Divisions idle. 2 human-blocked tasks remain. |
 | 67 | dev-edge | 0 | 0 | **POST-RELEASE HARDENING.** All 5 phases complete. 5 hardening tasks from QA-020 MEDIUM + AUD-087. HARDEN-003/004/005 assigned to dev-edge (type safety + proxy rate limiting). HARDEN-006/007 queued P3. |
+| 68 | dev-edge | 3 (HARDEN-003/004/005) | 0 | **3 HARDENING TASKS DONE.** Telegram type guard (16 tests), Discord type guard (16 tests), proxy-aware rate limiting (5 tests). **835 tests, 69 files.** Gateway 95.47% stmt. HARDEN-006/007 assigned. |

@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 67**: **ALL PHASES COMPLETE → POST-RELEASE HARDENING.** 5 hardening tasks created from QA-020 MEDIUM findings + AUD-087. 3 assigned to dev-edge (HARDEN-003/004/005). 2 queued P3 (HARDEN-006/007). 2 human-blocked tasks unchanged. Open errors 1 (ERR-069 CRITICAL human decision).
+> **Cycle 68**: **POST-RELEASE HARDENING.** HARDEN-003/004/005 completed (type guards + proxy rate limiting). 2 queued P3 (HARDEN-006/007). 2 human-blocked tasks unchanged. Open errors 1 (ERR-069 CRITICAL human decision). 835 tests (799 pass, 36 skip), 69 files.
 
 ## Queued (Human-Blocked)
 
@@ -13,18 +13,14 @@
 
 ## Queued (Hardening)
 
-| ID | Priority | Division | Task | Depends On |
-|----|----------|----------|------|------------|
-| HARDEN-006 | P3 | dev-edge | QA-020-M3: handleDiscordCommand sends DEFERRED response after awaiting handleMessage. Discord expects DEFERRED immediately, then follow-up via webhook PATCH. Refactor to fire-and-forget pattern with interaction callback URL. | — |
-| HARDEN-007 | P3 | dev-edge | QA-020-L3 + AUD-094: SSE stream writeHead (server.ts:316-320) missing X-Content-Type-Options + X-Frame-Options headers. Add security headers for consistency with AUD-086 fix. Also fix startedAt timing (set in start() not factory). | — |
+(none)
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| HARDEN-003 | P2 | dev-edge | QA-020-M1: Replace nested type assertions in extractTelegramMessage (webhook-handlers.ts:89-115) with lightweight TelegramUpdate interface + type guard. Eliminate 4-level Record<string,unknown> casting chain. TDD mandatory. | 0208C67 |
-| HARDEN-004 | P2 | dev-edge | QA-020-M2: Replace nested type assertions in extractDiscordInteraction (webhook-handlers.ts:222-261) with Discord interaction interface + type guard. Same pattern as HARDEN-003. TDD mandatory. | 0208C67 |
-| HARDEN-005 | P2 | dev-edge | AUD-087: Rate limiting proxy-unaware. Add optional trustedProxies config to GatewayConfig. When set, parse X-Forwarded-For for client IP instead of req.socket.remoteAddress. TDD mandatory. | 0208C67 |
+| HARDEN-006 | P3 | dev-edge | QA-020-M3: handleDiscordCommand sends DEFERRED response after awaiting handleMessage. Discord expects DEFERRED immediately, then follow-up via webhook PATCH. Refactor to fire-and-forget pattern with interaction callback URL. TDD mandatory. | 0208C68 |
+| HARDEN-007 | P3 | dev-edge | QA-020-L3 + AUD-094: SSE stream writeHead (server.ts:316-320) missing X-Content-Type-Options + X-Frame-Options headers. Add security headers for consistency with AUD-086 fix. Also fix startedAt timing (set in start() not factory). TDD mandatory. | 0208C68 |
 
 ## Cancelled
 
@@ -157,3 +153,6 @@
 | QA-020 | quality | 0208C66 | Final Phase E review: PASS. 0C 0H 3M 4L. 831 tests verified. All CONSTITUTION gates PASS. TDD PASS. Coverage all targets exceeded. |
 | FIX-HARDEN-001 | dev-infra | 0208C66 | AUD-088 hardcoded fallback credentials removed from pg-redis-integration.test.ts. requireEnv() enforced. 190 infra tests pass. |
 | FIX-HARDEN-002 | dev-edge | 0208C66 | AUD-093 ToolRegistry tool definitions wired into InboundHandler. toolDefinitions: ToolDefinition[] in InboundHandlerDeps. 819 tests (64/66 files). |
+| HARDEN-003 | dev-edge | 0208C68 | QA-020-M1: TelegramUpdate interface + isTelegramUpdate type guard. 16 tests. Eliminates 4-level Record casting chain. TDD RED→GREEN→REFACTOR. |
+| HARDEN-004 | dev-edge | 0208C68 | QA-020-M2: DiscordInteraction interface + isDiscordInteraction type guard. Extracted isValidDiscordData + isValidDiscordMember helpers. 16 tests. TDD RED→GREEN→REFACTOR. |
+| HARDEN-005 | dev-edge | 0208C68 | AUD-087: trustedProxies config + getClientIp X-Forwarded-For parsing. Right-to-left walk, skip trusted IPs. 5 tests. TDD RED→GREEN→REFACTOR. |
