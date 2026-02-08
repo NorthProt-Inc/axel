@@ -10,6 +10,7 @@ export interface GatewayConfig {
 	readonly rateLimitPerMinute: number;
 	readonly telegramWebhookSecret?: string;
 	readonly discordPublicKey?: string;
+	readonly trustedProxies?: readonly string[];
 }
 
 /** Event emitted during streaming message processing */
