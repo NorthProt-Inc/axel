@@ -35,7 +35,11 @@ run_division() {
     log "=== $div START (worktree: $worktree, model: $model) ==="
 
     cd "$worktree"
-    git pull --rebase --quiet 2>/dev/null || true
+    # Sync division branch with latest main (local, no network needed)
+    git rebase main --quiet 2>&1 || {
+        git rebase --abort 2>/dev/null || true
+        log "$div REBASE onto main FAILED — running with current state"
+    }
 
     set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
     unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
@@ -96,11 +100,6 @@ EOF
     git push origin main --quiet || true
 fi
 
-# Push main to Division branches so they have latest state
-for br in div/arch div/research div/quality; do
-    git push origin "main:$br" --quiet 2>/dev/null || true
-done
-
 # ── Phase 2: 3 Divisions in parallel ──
 run_division "arch"     "opus"   "/home/northprot/projects/axel-wt-arch"     &
 PID_ARCH=$!
@@ -115,12 +114,16 @@ wait $PID_ARCH $PID_RES $PID_QA
 # ── Phase 3: Merge Division results into main ──
 cd "$MAIN_REPO"
 for br in div/arch div/research div/quality; do
-    git fetch origin "$br" --quiet 2>/dev/null || true
-    git merge "origin/$br" --no-edit --quiet 2>/dev/null || {
+    git merge "$br" --no-edit --quiet 2>/dev/null || {
         log "MERGE CONFLICT on $br — skipping, will retry next cycle"
         git merge --abort 2>/dev/null || true
     }
 done
+
+# Push all branches to origin
 git push origin main --quiet 2>/dev/null || true
+for br in div/arch div/research div/quality; do
+    git push origin "$br" --quiet 2>/dev/null || true
+done
 
 log "CYCLE $CYCLE_ID COMPLETE"

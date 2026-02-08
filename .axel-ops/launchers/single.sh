@@ -35,7 +35,13 @@ echo "  Log:      $OPS/logs/${DIV}_${TS}.log"
 echo ""
 
 cd "$WT"
-git pull --rebase --quiet 2>/dev/null || true
+# Sync with main (for divisions only)
+if [ "$DIV" != "coordinator" ]; then
+    git rebase main --quiet 2>&1 || {
+        git rebase --abort 2>/dev/null || true
+        echo "WARNING: rebase onto main failed, running with current state"
+    }
+fi
 set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
 unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
