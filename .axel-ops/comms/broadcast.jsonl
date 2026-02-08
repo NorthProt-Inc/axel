@@ -2,3 +2,7 @@
 {"ts":"0207T2100","from":"coord","type":"assign","to":"arch","tasks":["PLAN-001","ADR-013","ADR-014"],"note":"P0 3건 배정. PLAN-001 우선 처리 후 ADR-013/014 병렬. worktree: axel-wt-arch"}
 {"ts":"0207T2100","from":"coord","type":"assign","to":"research","tasks":["RES-001","RES-002","RES-003"],"note":"P1 3건 배정. RES-001 우선(ADR-015 dependency). worktree: axel-wt-research"}
 {"ts":"0207T2100","from":"coord","type":"assign","to":"quality","tasks":["QA-001"],"note":"P2 1건 배정. v2.0 plan 내부 일관성 검증. worktree: axel-wt-quality"}
+{"ts":"0207T2200","from":"coord","type":"broadcast","msg":"Cycle 2. 9 tasks done, 9 issues logged. Arch 6/6 완료(PLAN-001~003, ADR-013~015). Research RES-001 완료. Quality QA-001+002 완료, 9 이슈 발견."}
+{"ts":"0207T2200","from":"coord","type":"assign","to":"arch","tasks":["FIX-001","FIX-002"],"note":"FIX-001: Quality 이슈 8건 plan 반영(ERR-001~002,004~009). FIX-002: ADR-001~012 개별 파일 생성(ERR-003). worktree: axel-wt-arch"}
+{"ts":"0207T2200","from":"coord","type":"assign","to":"quality","tasks":["QA-003"],"note":"QA-003: Arch cycle 1 outputs 리뷰 (ADR-013/014/015, PLAN-002/003, openapi-v1.yaml). worktree: axel-wt-quality"}
+{"ts":"0207T2200","from":"coord","type":"issue","ref":"research","msg":"RES-002, RES-003 보고 없음. Research Division 다음 사이클에 상태 보고 요청."}
