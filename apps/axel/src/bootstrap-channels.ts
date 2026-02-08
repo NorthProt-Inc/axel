@@ -1,16 +1,16 @@
 import { CliChannel } from '@axel/channels/cli';
 import { DiscordChannel } from '@axel/channels/discord';
 import { TelegramChannel } from '@axel/channels/telegram';
-import {
-	type InboundHandlerDeps,
-	type SendCallback,
-	createInboundHandler,
-} from '@axel/core/orchestrator';
+import { type SendCallback, createInboundHandler } from '@axel/core/orchestrator';
 import type { PersonaEngine } from '@axel/core/persona';
 import type { AxelChannel } from '@axel/core/types';
 import type { HandleMessage, MessageResult } from '@axel/gateway';
 import type { AxelConfig } from './config.js';
 import type { Container } from './container.js';
+
+/** Fallback error message for gateway HandleMessage */
+const GATEWAY_ERROR_MESSAGE =
+	'죄송합니다, 요청을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 
 /**
  * Create channel instances based on configuration.
@@ -40,6 +40,17 @@ export function createChannels(config: AxelConfig): AxelChannel[] {
 	return channels;
 }
 
+/** Build InboundHandler from container + persona engine */
+function buildHandler(container: Container, personaEngine: PersonaEngine) {
+	return createInboundHandler({
+		sessionRouter: container.sessionRouter,
+		contextAssembler: container.contextAssembler,
+		llmProvider: container.anthropicProvider,
+		toolExecutor: container.toolExecutor,
+		personaEngine,
+	});
+}
+
 /**
  * Wire InboundHandler to each channel's onMessage callback.
  *
@@ -52,15 +63,7 @@ export function wireChannels(
 	container: Container,
 	personaEngine: PersonaEngine,
 ): void {
-	const handlerDeps: InboundHandlerDeps = {
-		sessionRouter: container.sessionRouter,
-		contextAssembler: container.contextAssembler,
-		llmProvider: container.anthropicProvider,
-		toolExecutor: container.toolExecutor,
-		personaEngine,
-	};
-
-	const handler = createInboundHandler(handlerDeps);
+	const handler = buildHandler(container, personaEngine);
 
 	for (const channel of channels) {
 		const sendCallback: SendCallback = (target, msg) => channel.send(target, msg);
@@ -70,10 +73,6 @@ export function wireChannels(
 		});
 	}
 }
-
-/** Fallback error message for gateway HandleMessage */
-const GATEWAY_ERROR_MESSAGE =
-	'죄송합니다, 요청을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 
 /**
  * Create a HandleMessage adapter for the gateway.
@@ -86,15 +85,7 @@ export function createHandleMessage(
 	container: Container,
 	personaEngine: PersonaEngine,
 ): HandleMessage {
-	const handlerDeps: InboundHandlerDeps = {
-		sessionRouter: container.sessionRouter,
-		contextAssembler: container.contextAssembler,
-		llmProvider: container.anthropicProvider,
-		toolExecutor: container.toolExecutor,
-		personaEngine,
-	};
-
-	const handler = createInboundHandler(handlerDeps);
+	const handler = buildHandler(container, personaEngine);
 
 	return async (message, onEvent?): Promise<MessageResult> => {
 		let responseContent = '';
@@ -105,7 +96,6 @@ export function createHandleMessage(
 		};
 
 		try {
-			// Resolve session for sessionId
 			const resolved = await container.sessionRouter.resolveSession(
 				message.userId,
 				message.channelId,
@@ -122,7 +112,6 @@ export function createHandleMessage(
 				sendCapture,
 			);
 
-			// Forward events if callback provided
 			if (onEvent) {
 				onEvent({ type: 'message_complete', content: responseContent });
 			}
