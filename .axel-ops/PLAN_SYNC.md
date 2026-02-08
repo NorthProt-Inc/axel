@@ -319,6 +319,64 @@ Source: plan L8, ADR-009
 | migration-strategy:9,70,502 | `docs/plan/migration-strategy.md` | AMENDED | C51 | PG 16→17. CI image pg16→pg17. |
 | migration-strategy:103-117 | `docs/plan/migration-strategy.md` | AMENDED | C51 | sessions table: user_id TEXT NOT NULL + channel_history JSONB added. idx_sessions_user added. Aligns with PgSessionStore implementation (AUD-050). |
 
+## Phase E: Integration
+
+### E.1 Migration Runner (INTEG-001)
+
+Source: plan §7 deployment, migration-strategy.md
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| Migration Runner | `tools/migrate/src/migrator.ts` | IN_SYNC | C62 | 6 SQL migrations, schema_migrations table, up/down/status CLI. 10 tests. ERR-069 discovered (pgvector 2000d limit). |
+| Migration SQL | `tools/migrate/migrations/001~006` | IN_SYNC | C62 | FIX-SCHEMA-001: sessions channel_history JSONB→TEXT[], last_activity_at added, idx_sessions_user updated. |
+
+### E.2 InboundHandler (INTEG-002 + FIX-AUDIT-E-002)
+
+Source: plan L7
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L7 InboundHandler | `packages/core/src/orchestrator/inbound-handler.ts` | `createInboundHandler`, `InboundHandlerDeps`, `ErrorInfo` | IN_SYNC | C62 | Factory with DI. Pipeline: resolveSession→assemble→reactLoop→send. FIX-AUDIT-E-002: onError callback with ErrorInfo. 375 core tests. |
+
+### E.3 Gateway Integration (INTEG-003/004 + FIX-AUDIT-E-001)
+
+Source: plan L9
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L9 Gateway Refactor | `packages/gateway/src/{types,http-utils,ws-handler,route-handlers}.ts` | `HandleMessage`, `GatewayDeps` | IN_SYNC | C62 | HandleMessage DI injection. 12/12 plan routes implemented. FIX-AUDIT-E-001: WS 64KB limit, rate limit eviction, timestamp. 82 tests, 94.79% stmt. |
+| L9 Partial Routes | `packages/gateway/src/route-handlers.ts` | route factory | IN_SYNC | C62 | D.5 NOT_STARTED→IN_SYNC. 6 routes: memory/search, memory/stats, session, session/end, tools, tools/execute. INTEG-004. |
+
+### E.4 PG+Redis Integration (INTEG-006)
+
+Source: ADR-002, ADR-003, ADR-013
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| Integration Tests | `packages/infra/tests/integration/pg-redis-integration.test.ts` | IN_SYNC | C62 | 36 tests across 7 layers. Testcontainers PG17+Redis7. Full memory pipeline verified. |
+
+### E.5 Channel Bootstrap (INTEG-005)
+
+Source: plan L8 bootstrap
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| Channel Wiring | `apps/axel/src/bootstrap-channels.ts` | `createChannels`, `wireChannels`, `createHandleMessage` | IN_SYNC | C62 | Config-based channel creation (CLI/Discord/Telegram). InboundHandler wiring. 16 tests, 98.85% stmt. |
+
+### E.6 E2E Roundtrip (INTEG-007)
+
+Source: plan L7-L9 integration
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| E2E Test | `apps/axel/tests/e2e-message-roundtrip.test.ts` | IN_SYNC | C62 | CLI→InboundHandler→mockLLM→memory→response. 8 tests. Full roundtrip verified. |
+
+### E.7 Schema Amendment (FIX-SCHEMA-001)
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| sessions table | `migration-strategy.md`, `002_episodic_memory.sql` | AMENDED | C62 | channel_history JSONB→TEXT[] (PgSessionStore array_append compatibility). last_activity_at TIMESTAMPTZ added. idx_sessions_user uses last_activity_at. ERR-070 resolved. |
+
 ## Drift Log
 
 | Cycle | Section | Direction | Resolution | Resolved By |
@@ -352,3 +410,10 @@ Source: plan L8, ADR-009
 | 55 | D.4 Telegram Channel | NOT_STARTED→IN_SYNC | EDGE-004 (TelegramChannel, 23 tests, 97.66% stmt). grammy Bot API, polling, 4096 char splitting. | coord (CTO override, SYNC-006) |
 | 55 | D.5 Gateway | NOT_STARTED→IN_SYNC | EDGE-005 + FIX-GATEWAY-001. 32 tests, 87.01% stmt. WS first-message auth (ADR-019), rate limiting, 32KB body limit. 4/12 routes implemented (8 deferred to Phase E). | coord (CTO override, SYNC-006) |
 | 55 | D.6 Bootstrap | NOT_STARTED→IN_SYNC | BOOTSTRAP-001. config (Zod), container (~20 services), lifecycle (4-phase shutdown), main. 33 tests, 86.95% stmt. | coord (CTO override, SYNC-006) |
+| 62 | E.1 Migration Runner | NOT_STARTED→IN_SYNC | INTEG-001 (tools/migrate, 10 tests). 6 SQL migrations. ERR-069 discovered. FIX-SCHEMA-001 applied (sessions TEXT[] + last_activity_at). | coord (CTO override, SYNC-007) |
+| 62 | E.2 InboundHandler | NOT_STARTED→IN_SYNC | INTEG-002 (core/orchestrator/inbound-handler.ts, 12+9 tests). createInboundHandler factory. FIX-AUDIT-E-002 onError callback. 375 core tests. | coord (CTO override, SYNC-007) |
+| 62 | E.3 Gateway Integration | NOT_STARTED→IN_SYNC | INTEG-003/004 (gateway refactored: types.ts, http-utils.ts, ws-handler.ts, route-handlers.ts). HandleMessage DI. 12/12 routes. 82 gateway tests, 94.79% stmt. FIX-AUDIT-E-001 applied. | coord (CTO override, SYNC-007) |
+| 62 | E.4 PG+Redis Integration | NOT_STARTED→IN_SYNC | INTEG-006 (infra/tests/integration, 36 tests). 7 layers verified. Testcontainers PG17+Redis7. | coord (CTO override, SYNC-007) |
+| 62 | E.5 Channel Bootstrap | NOT_STARTED→IN_SYNC | INTEG-005 (apps/axel/src/bootstrap-channels.ts, 16 tests, 98.85% stmt). createChannels + wireChannels + createHandleMessage. | coord (CTO override, SYNC-007) |
+| 62 | E.6 E2E Roundtrip | NOT_STARTED→IN_SYNC | INTEG-007 (apps/axel/tests/e2e-message-roundtrip.test.ts, 8 tests). CLI→InboundHandler→mockLLM→memory→response. | coord (CTO override, SYNC-007) |
+| 62 | E.7 Schema Fix | DRIFT→AMENDED | FIX-SCHEMA-001. sessions table: channel_history JSONB→TEXT[], last_activity_at added, idx_sessions_user updated. ERR-070 resolved. | coord (CTO override, SYNC-007) |

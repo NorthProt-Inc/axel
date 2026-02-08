@@ -2,28 +2,28 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 61
+## Current Cycle: 62
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 61 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 4 (all CTO override) | **3 cycles stalled → CTO override** (FIX-SCHEMA-001 + SYNC-007) |
-| dev-core | 1 cycle | 8 (+FIX-AUDIT-E-002) | 0 | Idle |
+| coord | — | 62 cycles | 0 | Active (FIX-SCHEMA-001 + SYNC-007 CTO override done) |
+| arch | 2.5 cycles | 5 | 4 (all CTO override) | Idle (last stall resolved by CTO C62) |
+| dev-core | 1 cycle | 8 | 0 | Idle |
 | dev-infra | 1 cycle | 10 | 0 | Idle |
-| dev-edge | 1 cycle | 13 (+FIX-AUDIT-E-001) | 0 | Idle |
-| quality | 1 cycle | 6 (+QA-019) | 1 (QA-012, cancelled C39) | Idle |
+| dev-edge | 1 cycle | 13 | 0 | Idle |
+| quality | 1 cycle | 6 | 1 (QA-012, cancelled C39) | Idle |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 15 | 0 | Assigned — FIX-AUDIT-E-003 |
+| devops | 1 cycle | 15 | 0 | In Progress — FIX-AUDIT-E-003 |
 | audit | 1 cycle | 4 | 0 | Idle |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 3 (1 CRITICAL human, 1 HIGH, 1 MEDIUM) | 5 | OK (down from 7) |
-| Stalled Tasks (3+ cycles) | 1 (arch FIX-SCHEMA-001+SYNC-007 → CTO override) | 0 | **CTO OVERRIDE APPLIED** |
+| Open Errors | 2 (1 CRITICAL human, 1 HIGH) | 5 | OK (down from 3) |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK (CTO override resolved) |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -48,7 +48,7 @@
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
-| E: Integration | **ACTIVE** | 56 | — | 73% (11/15 done, 3 in progress, 3 queued) |
+| E: Integration | **ACTIVE** | 56 | — | 88% (15/17 done, 1 in progress, 3 queued) |
 
 ## Cycle History (Last 10)
 
@@ -66,3 +66,4 @@
 | 59 | dev-edge, arch, audit | 2 (INTEG-005, AUDIT-005) | 5 (ERR-071~075 HIGH from AUDIT-005) | **2 TASKS DONE.** 766 tests, 61 files. INTEG-005: channel bootstrap wiring 98.85% stmt. AUDIT-005: 0C 5H 7M 4L. FIX-AUDIT-E-001 created. Arch FIX-SCHEMA-001+SYNC-007 in progress. Open errors 7 (over threshold). Phase E **62%**. |
 | 60 | dev-edge, dev-core, quality, arch | 1 (INTEG-007) | 0 new | **1 TASK DONE.** INTEG-007 E2E roundtrip (8 tests). 774 tests, 62 files. QA-019 unblocked. FIX-AUDIT-E-001 split into 3 Division tasks, assigned. Arch 2 cycles (watch). Phase E **67%**. |
 | 61 | dev-edge, dev-core, quality | 3 (FIX-AUDIT-E-001, FIX-AUDIT-E-002, QA-019) | 0 new (4 resolved) | **3 TASKS DONE.** Gateway security (AUD-079/080/082), InboundHandler onError (AUD-081), Phase E review PASS. **801 tests, 63 files.** ERR-071~074 resolved. Open errors 7→3. Arch 3 cycles stalled → CTO override. FIX-AUDIT-E-003 assigned devops. Phase E **73%**. |
+| 62 | coord | 2 (FIX-SCHEMA-001, SYNC-007) | 0 (1 resolved: ERR-070) | **2 TASKS DONE (CTO override).** Sessions schema fix (JSONB→TEXT[], last_activity_at). PLAN_SYNC Phase E 7 subsections mapped. Open errors 3→2. FIX-AUDIT-E-003 in progress (devops). Phase E **88%**. |

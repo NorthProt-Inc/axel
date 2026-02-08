@@ -2,20 +2,20 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 61**: **1 CRITICAL (ERR-069, human decision pending). 1 HIGH (ERR-075, FIX-AUDIT-E-003 assigned to devops). 1 MEDIUM (ERR-070, FIX-SCHEMA-001 CTO override).** 4 errors resolved (ERR-071~074) by FIX-AUDIT-E-001 + FIX-AUDIT-E-002.
+> **Cycle 62**: **1 CRITICAL (ERR-069, human decision pending). 1 HIGH (ERR-075, FIX-AUDIT-E-003 in progress devops).** ERR-070 resolved by FIX-SCHEMA-001 (CTO override). Open errors 3→2.
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
 | ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016). **RES-006 SOLUTION**: Truncate to **1536d** via Matryoshka embeddings (Google official, research-proven, zero infra changes, 50% storage savings). FIX-DIMENSION-001 created for ADR-016 amendment. **Requires human (Mark) decision** to approve 1536d strategy before Architect can execute. | INTEG-001 (devops) | 0208C56 |
-| ERR-070 | **MEDIUM** | Sessions table schema drift: PgSessionStore uses TEXT[] for channel_history and expects last_activity_at column. Migration 002 defines channel_history as JSONB and lacks last_activity_at. Integration test (INTEG-006) used TEXT[] + last_activity_at to match adapter code. FIX-SCHEMA-001 **CTO override** (arch 3 cycles stalled). | INTEG-006 (dev-infra) | 0208C58 |
 | ERR-075 | **HIGH** | Hardcoded DB credentials in migrate CLI — tools/migrate has fallback credentials. AUD-083. FIX-AUDIT-E-003 assigned to devops. | AUDIT-005 (audit) | 0208C59 |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-070 | Sessions table schema drift fixed: channel_history JSONB→TEXT[], last_activity_at TIMESTAMPTZ added, idx_sessions_user updated. migration-strategy.md + 002_episodic_memory.sql aligned with PgSessionStore. | FIX-SCHEMA-001 (coord CTO override) | 0208C62 |
 | ERR-074 | Missing timestamp fixed — gateway adds `timestamp: Date.now()` in HTTP chat, SSE stream, WS handler. HandleMessage type updated. AUD-082 resolved. | FIX-AUDIT-E-001 (dev-edge) | 0208C61 |
 | ERR-073 | InboundHandler silent error discard fixed — onError callback with ErrorInfo interface. Backward compatible. AUD-081 resolved. | FIX-AUDIT-E-002 (dev-core) | 0208C61 |
 | ERR-072 | Rate limit bucket memory leak fixed — evictStaleBuckets() lazy cleanup of entries >2x window age. getRateLimitBucketCount() for observability. AUD-080 resolved. | FIX-AUDIT-E-001 (dev-edge) | 0208C61 |

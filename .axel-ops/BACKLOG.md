@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 61**: **PHASE E: IN PROGRESS.** 13 tasks done. 801 tests, 63 files. 3 completed this cycle (FIX-AUDIT-E-001, FIX-AUDIT-E-002, QA-019). Arch FIX-SCHEMA-001 + SYNC-007 **3 cycles stalled → CTO override**. FIX-AUDIT-E-003 assigned to devops. Open errors 3 (down from 7).
+> **Cycle 62**: **PHASE E: IN PROGRESS.** 15 tasks done. 801 tests, 63 files. 2 completed this cycle (FIX-SCHEMA-001 CTO override, SYNC-007 CTO override). ERR-070 resolved. FIX-AUDIT-E-003 in progress (devops). Open errors 2 (1 CRITICAL human, 1 HIGH).
 
 ## Queued
 
@@ -16,9 +16,7 @@
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-SCHEMA-001 | coord (CTO) | 0208C58 | C62 (CTO override, arch 3 cycles stalled) |
-| SYNC-007 | coord (CTO) | 0208C58 | C62 (CTO override, arch 3 cycles stalled) |
-| FIX-AUDIT-E-003 | devops | 0208C61 | C62 |
+| FIX-AUDIT-E-003 | devops | 0208C61 | C63 |
 
 ## Cancelled
 
@@ -143,3 +141,5 @@
 | FIX-AUDIT-E-001 | dev-edge | 0208C61 | AUD-079 WS message size limit (64KB), AUD-080 rate limit bucket eviction, AUD-082 missing timestamp. 82 gateway tests, 94.79% stmt. TDD RED→GREEN→REFACTOR. |
 | FIX-AUDIT-E-002 | dev-core | 0208C61 | AUD-081 InboundHandler onError callback. ErrorInfo interface. 375 core tests, 9 new. TDD RED→GREEN→REFACTOR. |
 | QA-019 | quality | 0208C61 | Phase E integration review: PASS. 0C 0H 3M 4L. 801 tests. All CONSTITUTION gates PASS. Coverage all targets exceeded. |
+| FIX-SCHEMA-001 | coord (CTO) | 0208C62 | Sessions table schema drift fixed: channel_history JSONB→TEXT[], last_activity_at TIMESTAMPTZ added, idx_sessions_user updated. migration-strategy.md + 002_episodic_memory.sql aligned with PgSessionStore. ERR-070 resolved. |
+| SYNC-007 | coord (CTO) | 0208C62 | PLAN_SYNC Phase E: 7 subsections (E.1~E.7) mapped. Migration runner, InboundHandler, gateway integration, PG+Redis integration, channel bootstrap, E2E roundtrip, schema amendment all IN_SYNC. |
