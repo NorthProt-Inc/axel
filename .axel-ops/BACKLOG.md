@@ -2,25 +2,26 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 59**: **PHASE E: IN PROGRESS.** 9 tasks done (+INTEG-005, AUDIT-005). 766 tests, 61 files. AUDIT-005: 5 HIGH findings → FIX-AUDIT-E-001 created. Arch FIX-SCHEMA-001 + SYNC-007 in progress. INTEG-007 unblocked.
+> **Cycle 60**: **PHASE E: IN PROGRESS.** 10 tasks done (+INTEG-007). 774 tests, 62 files. FIX-AUDIT-E-001 split into 3 Division-specific tasks. QA-019 unblocked. Arch FIX-SCHEMA-001 + SYNC-007 in progress (2 cycles).
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-005 ✓ |
 | INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ |
-| QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. 766 tests. | INTEG-005 ✓, INTEG-007 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 | FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). **Human decision needed before execution.** | RES-006 ✓ |
-| FIX-AUDIT-E-001 | P1 | dev-edge+dev-infra | Fix 5 HIGH from AUDIT-005: (1) AUD-079 WS message size limit (gateway, dev-edge), (2) AUD-080 rate limit bucket memory leak (gateway, dev-edge), (3) AUD-081 InboundHandler silent error discard → add logging (core, dev-core), (4) AUD-082 missing timestamp in gateway→InboundMessage (gateway, dev-edge), (5) AUD-083 hardcoded DB credentials in migrate CLI (tools/migrate, devops). TDD mandatory. | — |
+| FIX-AUDIT-E-003 | P1 | devops | Fix AUD-083: hardcoded DB credentials in tools/migrate CLI — remove fallback credentials, require explicit env vars. TDD mandatory. | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-SCHEMA-001 | arch | 0208C58 | C60 |
-| SYNC-007 | arch | 0208C58 | C60 |
+| FIX-SCHEMA-001 | arch | 0208C58 | C61 |
+| SYNC-007 | arch | 0208C58 | C61 |
+| FIX-AUDIT-E-001 | dev-edge | 0208C60 | C61 |
+| FIX-AUDIT-E-002 | dev-core | 0208C60 | C61 |
+| QA-019 | quality | 0208C60 | C61 |
 
 ## Cancelled
 
@@ -141,3 +142,4 @@
 | RES-006 | research | 0208C58 | pgvector dimension limits research. PRIMARY: 1536d Matryoshka truncation (Google official, research-proven). 25 sources. docs/research/RES-006-pgvector-dimension-limits.md. |
 | INTEG-005 | dev-edge | 0208C59 | Channel bootstrap wiring: createChannels, wireChannels, createHandleMessage. CLI/Discord/Telegram config-based. main.ts updated. 16 tests, 766 total. bootstrap-channels 98.85% stmt. |
 | AUDIT-005 | audit | 0208C59 | Phase E integration security audit: 0C 5H 7M 4L (AUD-079~094). FIX-GATEWAY-001 prior fixes verified. New HIGH: WS msg size, rate limit leak, silent errors, missing timestamp, hardcoded creds. |
+| INTEG-007 | dev-edge | 0208C60 | E2E integration test: CLI→InboundHandler→mock LLM→memory→response. 8 tests, 774 total (62 files). Full roundtrip verified. |

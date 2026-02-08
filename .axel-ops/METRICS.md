@@ -2,28 +2,28 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 59
+## Current Cycle: 60
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 59 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 3 (all CTO override) | In Progress — FIX-SCHEMA-001 + SYNC-007 (1 cycle) |
-| dev-core | 1 cycle | 7 (CORE-001~006, INTEG-002) | 0 | Idle — no tasks |
+| coord | — | 60 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 3 (all CTO override) | In Progress — FIX-SCHEMA-001 + SYNC-007 (2 cycles, watch) |
+| dev-core | 1 cycle | 7 (CORE-001~006, INTEG-002) | 0 | Assigned — FIX-AUDIT-E-002 |
 | dev-infra | 1 cycle | 10 (INFRA-001~005, COMMON-CB, FIX-INFRA-002/003/004, INTEG-006) | 0 | Idle |
-| dev-edge | 1 cycle | 11 (+INTEG-005) | 0 | Idle — INTEG-007 + FIX-AUDIT-E-001 queued |
-| quality | 1 cycle | 5 (QA-011, QA-013, QA-016, QA-017, QA-018) | 1 (QA-012, cancelled C39) | Idle — QA-019 blocked (needs INTEG-007) |
+| dev-edge | 1 cycle | 12 (+INTEG-007) | 0 | Assigned — FIX-AUDIT-E-001 (3 gateway fixes) |
+| quality | 1 cycle | 5 (QA-011, QA-013, QA-016, QA-017, QA-018) | 1 (QA-012, cancelled C39) | Assigned — QA-019 |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 15 (SCAFFOLD-001~007 + FIX + DEVOPS-002~006 + FIX-INFRA-001 + INTEG-001) | 0 | Idle |
+| devops | 1 cycle | 15 (SCAFFOLD-001~007 + FIX + DEVOPS-002~006 + FIX-INFRA-001 + INTEG-001) | 0 | Idle — FIX-AUDIT-E-003 queued |
 | audit | 1 cycle | 4 (+AUDIT-005) | 0 | Idle — AUDIT-005 done |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 7 (1 CRITICAL w/ solution, 5 HIGH, 1 MEDIUM) | 5 | **OVER THRESHOLD — FIX-AUDIT-E-001 created for 5 HIGH. ERR-069 human decision pending** |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
+| Open Errors | 7 (1 CRITICAL w/ solution, 5 HIGH, 1 MEDIUM) | 5 | **OVER THRESHOLD — FIX-AUDIT-E-001/002/003 assigned. ERR-069 human decision pending** |
+| Stalled Tasks (3+ cycles) | 0 (arch at 2 cycles, watch) | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -48,13 +48,12 @@
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
-| E: Integration | **ACTIVE** | 56 | — | 62% (9/15 done, 2 in progress, 6 queued) |
+| E: Integration | **ACTIVE** | 56 | — | 67% (10/15 done, 5 in progress, 4 queued) |
 
 ## Cycle History (Last 10)
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 49 | dev-edge, dev-infra, devops, arch | 3 (EDGE-002, FIX-INFRA-004, DEVOPS-006) | 0 | **3 TASKS DONE.** 529 tests, 43 files. QA-017+EDGE-003 assigned. Phase D **47%**. |
 | 50 | dev-edge, quality, arch | 0 | 0 | No completions. PLAN-AMEND-001 at 3 cycles (watch). 529 tests pass. Phase D 47%. |
 | 51 | dev-edge, quality, coord | 4 (EDGE-003, QA-017, PLAN-AMEND-001, SYNC-005) | 0 | **4 TASKS DONE.** 558 tests. CTO override on PLAN-AMEND-001/SYNC-005 (arch 3 cycles stalled). Phase D **73%**. |
 | 52 | dev-edge, coord | 1 (BOOTSTRAP-001) | 0 | **BOOTSTRAP-001 DONE.** 591 tests. EDGE-004+EDGE-005 assigned parallel. Phase D **80%**. |
@@ -65,3 +64,4 @@
 | 57 | dev-edge, dev-infra, research | 3 (INTEG-001, INTEG-002, FIX-MEDIUM-001) | 1 (ERR-069 CRITICAL) | **3 TASKS DONE.** 686 tests, 58 files. ERR-069 pgvector 2000d CRITICAL. RES-006 assigned. INTEG-003/004 (dev-edge), INTEG-006 (dev-infra) assigned. Phase E **25%**. |
 | 58 | dev-edge, dev-infra, research | 4 (INTEG-003, INTEG-004, INTEG-006, RES-006) | 1 (ERR-070 MEDIUM schema drift) | **4 TASKS DONE.** 760 tests, 61 files. Gateway 94.53% stmt. ERR-069 solution: 1536d Matryoshka (RES-006). Schema drift ERR-070 (sessions table). INTEG-005+AUDIT-005 unblocked. FIX-DIMENSION-001+FIX-SCHEMA-001 created. Phase E **54%**. |
 | 59 | dev-edge, arch, audit | 2 (INTEG-005, AUDIT-005) | 5 (ERR-071~075 HIGH from AUDIT-005) | **2 TASKS DONE.** 766 tests, 61 files. INTEG-005: channel bootstrap wiring 98.85% stmt. AUDIT-005: 0C 5H 7M 4L. FIX-AUDIT-E-001 created. Arch FIX-SCHEMA-001+SYNC-007 in progress. Open errors 7 (over threshold). Phase E **62%**. |
+| 60 | dev-edge, dev-core, quality, arch | 1 (INTEG-007) | 0 new | **1 TASK DONE.** INTEG-007 E2E roundtrip (8 tests). 774 tests, 62 files. QA-019 unblocked. FIX-AUDIT-E-001 split into 3 Division tasks, assigned. Arch 2 cycles (watch). Phase E **67%**. |
