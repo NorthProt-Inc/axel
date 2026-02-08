@@ -403,9 +403,7 @@ describe('AnthropicLlmProvider', () => {
 			const toolChunk = chunks.find((c) => c.type === 'tool_call');
 			if (toolChunk?.type === 'tool_call') {
 				// In the fixed version, malformed JSON should not silently produce empty args
-				expect(Object.keys(toolChunk.content.args as Record<string, unknown>)).not.toHaveLength(
-					0,
-				);
+				expect(Object.keys(toolChunk.content.args as Record<string, unknown>)).not.toHaveLength(0);
 			}
 		});
 	});

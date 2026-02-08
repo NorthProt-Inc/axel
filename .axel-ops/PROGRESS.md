@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **D: EDGE SPRINT — KICKOFF**
-- **Cycle**: 47
-- **Last Updated**: 2026-02-08C47
-- **STATUS**: **Phase D KICKOFF.** FIX-INFRA-001 completed (zod dep resolved, 475/475 tests pass, 0 skips). ERR-064/065 resolved → 0 open errors. **Phase D BACKLOG created:** EDGE-001~005 (channel types + CLI + Discord + Telegram + Gateway), BOOTSTRAP-001 (DI container), DEVOPS-005/006 (deps + exports), SYNC-005, QA-017. Plus carry-over: FIX-INFRA-002~004, PLAN-AMEND-001, CONST-AMEND-001. **15 tasks queued, 0 in progress.** EDGE-001 (P0, channel types) + FIX-INFRA-002/003 (P1, parallel) + DEVOPS-005 (P0, deps) assigned. Smoke test: **475 tests, 41 files**, typecheck+lint clean.
+- **Phase**: **D: EDGE SPRINT — IN PROGRESS**
+- **Cycle**: 48
+- **Last Updated**: 2026-02-08C48
+- **STATUS**: **4 tasks completed.** EDGE-001 (channel types, 24 tests), FIX-INFRA-002 (bare catches fixed), FIX-INFRA-003 (mutable state + symlink + JSON.parse), DEVOPS-005 (channel/gateway deps). Biome format error fixed by CTO. Smoke test: **508 tests, 42 files**, typecheck+lint clean. **EDGE-002 (P0, CLI channel) assigned + unblocked.** DEVOPS-006, PLAN-AMEND-001, FIX-INFRA-004 assigned parallel. 0 open errors. Phase D 27% (4/15 tasks done).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 11 |
+| Queued | 7 |
 | In Progress | 4 |
-| Done | 70 |
+| Done | 74 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -28,50 +28,29 @@
 | 1 | 0207 | First operational cycle. Assigned: arch(PLAN-001,ADR-013,ADR-014), research(RES-001,RES-002,RES-003), quality(QA-001). No drift detected. No errors. |
 | 2 | 0207 | **Highly productive cycle.** Arch completed 6 tasks (PLAN-001/002/003, ADR-013~015) including Queued items ahead of schedule. Research RES-001 completed. Quality QA-001+002 completed, 9 issues (3 HIGH). Created FIX-001 (plan fixes), FIX-002 (ADR-001~012 creation), QA-003 (review arch outputs). Assigned to next cycle. RES-002/003 still in progress. Open errors: 9. |
 | 3 | 0208 | **Research cleared entire queue** (RES-002~005 done). **Quality QA-003 feasibility review** found 10 new issues (5 HIGH) — notably ERR-010: Redis/PG MISSION drift. **Arch silent** — FIX-001/FIX-002 no report for 2 cycles. **3 ESCALATIONS**: (1) MISSION drift ERR-010, (2) Arch FIX-001/002 stall, (3) 19 open errors exceeding threshold. Assigned QA-004. |
-| 4 | 0208 | **Quality QA-004 completed** — cross-reference integrity review found 4 new issues (2 HIGH). **Arch FIX-001/FIX-002 still stalled — 3 cycles.** Escalation severity increased. Open errors: 23. All Queued tasks Arch-owned. |
-| 5 | 0208 | **Quality QA-005 completed** — security design review found 10 new issues (3 HIGH). **Arch 4 cycles stalled.** Open errors: 33 (6.6x threshold). |
-| 6 | 0208 | **Quality QA-006 completed** — implementability review found 13 new issues (8 HIGH). **Arch 5 cycles stalled.** Open errors: 46 (9.2x threshold). Quality review angles exhausted. |
-| 7 | 0208 | **BACKLOG RESTRUCTURE.** QA-007 comprehensive review completed: synthesized 45 issues into 4 root causes and 7 Work Packages. Cancelled FIX-001~009 + 4 ADRs (13 items). Simplified dependency chains — WP-1/3/7 have no dependencies. Arch stall 6 cycles. Open errors: 48 (9.6x threshold). |
-| 8 | 0208 | **No progress.** All 3 Divisions idle. Arch 7 cycles stalled. Open errors: 48 (unchanged). |
-| 9 | 0208 | **No external progress.** Arch 8 cycles stalled (>4h). Coordinator decided to directly execute WP-1/WP-3 to break deadlock. |
-| 10 | 0208 | **MAJOR BREAKTHROUGH.** Arch completed ALL Work Packages (WP-1~7) + ADR-017 + ADR-018 in single commit (15351d8). **8 tasks completed.** 23 errors resolved. Open errors: 48→24 (50% reduction). ADR-001~021 now all exist (21 files). Plan factual corrections applied. Core domain types defined. Error taxonomy, resilience patterns, auth strategy, lifecycle specs all documented. **ERR-QG1 downgraded to PENDING** — Quality gate re-verification assigned as QA-008. **WP-4** (Redis role clarification) assigned to Arch as only remaining P0. **FIX-MED** queued (17 MEDIUM/LOW items, depends on WP-4). **ESCALATION LIFTED** for Arch stall. Pipeline fully unblocked. |
-| 11 | 0208 | **CONVERGENCE.** WP-4 completed (6466f1d): ADR-003 updated with PG-first write pattern, 5 critical functions error handling. ERR-010 partially resolved (ADR done, plan body pending), ERR-038 resolved. QA-008 completed: quality gate re-verification — **3 PASS** (Completeness, Traceability, Sources), **2 CONDITIONAL PASS** (Consistency, Feasibility). 3 new issues found (ERR-047~049): React→Svelte plan refs, ToolDefinition dup, latency citation. All absorbed into FIX-MED. **FIX-MED assigned to Arch** — last major task. QA-009 queued (final sign-off, depends FIX-MED). No drift. No P0 blockers. |
-| 12 | 0208 | **NEAR-FINAL.** FIX-MED completed (commit 38472fa): 22 MEDIUM/LOW issues resolved in plan body. Key fixes: React→Svelte refs (3 locations), ToolDefinition dedup, LlmProvider.embed() removal, DI container ~20 services, TTFT/Docker qualifiers, Redis shadow write in plan, credential redaction spec, security test cases, channel reconnection lifecycle, streaming error handling, PersonaEngine hot-reload, Meta Memory feedback loop. **QA-009 assigned to Quality** — final sign-off. If PASS on all 5 gates → plan finalization. No drift. No P0 blockers. Open errors: 25→1 (ERR-QG1 CONDITIONAL pending QA-009). |
-| 13 | 0208 | **PLAN FINALIZED.** QA-009 completed (commit 9ac0aeb): ALL 5 CONSTITUTION §3 quality gates PASS — Consistency, Completeness, Traceability, Feasibility, Sources. ERR-QG1 RESOLVED. Open errors: 1→0. Total tasks completed: 30. Total errors resolved: 48. No drift. No blockers. **Planning phase complete.** All Divisions idle. Awaiting human decision on implementation phase kickoff. |
-| 14–27 | 0208 | STEADY STATE. Awaiting Phase A kickoff (6 cycles idle anti-pattern). |
-| 28 | 0208 | **PHASE A KICKOFF.** Autonomous phase transition. BACKLOG populated: SCAFFOLD-001~007 (devops) + SYNC-001 (arch). SCAFFOLD-001/002/003 assigned (P0, no deps). DevOps + Arch activated. |
-| 29 | 0208 | **Phase A in progress.** DevOps SCAFFOLD-001/002/003 in progress. SCAFFOLD-006 additionally assigned. |
-| 30 | 0208 | **SCAFFOLD-001~006 COMPLETE but REVERTED.** ENV issue (Node.js 18). ERR-063 ownership violation. SCAFFOLD-FIX created. ENV-001 P0 escalated. |
-| 31 | 0208 | **PHASE A MILESTONE ACHIEVED.** ENV-001 resolved. ERR-063 resolved. Milestone verified: install+typecheck+test+lint pass. |
-| 32 | 0208 | **PHASE B ACTIVE.** SYNC-001 (arch), CORE-001 (dev-core), SCAFFOLD-007 (devops) assigned. CORE-001/SYNC-001 dep relaxed. |
-| 33 | 0208 | **3 TASKS COMPLETED.** SYNC-001 (PLAN_SYNC.md Phase B contracts), CORE-001 (55 tests, 10 src files), SCAFFOLD-007 (CI pipeline). Merge reverts resolved via checkout. Smoke test PASS. CORE-002 + CORE-005 assigned (parallel, no deps). DEVOPS-001 queued (coverage tooling). |
-| 34 | 0208 | **3 TASKS COMPLETED + MERGE.** CORE-002 (decay, 34 tests), CORE-005 (persona, 32 tests) merged to main. DEVOPS-001 (coverage-v8) done by CTO. Lint fixes applied (Biome). Smoke test: 121 tests, typecheck+lint clean, coverage 93%+. CORE-003 assigned. QA-012 assigned. Arch activated for PLAN_SYNC. |
-| 35 | 0208 | **In progress.** CORE-003 (dev-core), QA-012 (quality), SYNC-002 (arch) all in progress — no new completions. Smoke test: 121 tests pass. 0 errors, no drift. |
-| 36 | 0208 | **2 TASKS COMPLETED.** CORE-003 (memory layers M0-M5, 8 src + 7 test files, 241 tests, 100% stmt, 95% branch) + SYNC-002 (PLAN_SYNC B.1/B.2/B.5 IN_SYNC). Smoke test: 241 tests pass, typecheck+lint clean. CORE-004 (context assembly) assigned to dev-core. QA-013 (CORE-003 review) + SYNC-003 (PLAN_SYNC B.3 update) queued. Phase B 80%. |
-| 37 | 0208 | **No new completions.** CORE-004 (dev-core), QA-012 (quality), SYNC-003 (arch) in progress. SYNC-003 assigned — deps met (CORE-003 ✅). QA-012 at 3 cycles — metric-alert issued, monitoring. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
-| 38 | 0208 | **QA-012 scope reduced (auto-remediation).** 4 cycles stalled — scope narrowed from CORE-001+002+005 to CORE-001 types only. CORE-002+005 review absorbed into QA-013. CORE-004 (dev-core), SYNC-003 (arch) in progress. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
-| 39 | 0208 | **QA-012 cancelled (5 cycles stalled).** CORE-001 types already verified by SYNC-002. Scope absorbed into QA-013 (CORE-002+003+005 review). QA-013 assigned to quality. CORE-004 (dev-core), SYNC-003 (arch) in progress. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
-| 40 | 0208 | **ALL CORE TASKS COMPLETE.** CORE-004 (context assembly, 289 tests, 100% coverage) + CORE-006 (orchestrator, 330 tests, 99.69% stmt) merged to main. Smoke test: 330 tests pass, typecheck+lint clean. Phase B 95%. SYNC-003 scope expanded (B.3+B.4+B.6). QA-013 scope expanded (CORE-001~006 full review). 0 errors, no drift. |
-| 41 | 0208 | **No new completions.** SYNC-003 (arch, 4 cycles — metric-alert) + QA-013 (quality, 2 cycles) in progress. Smoke test: 330 tests pass, typecheck+lint clean. 0 errors, no drift. SYNC-003 will be escalated (CTO direct execution) if no completion by C42. |
-| 42 | 0208 | **PHASE B COMPLETE → PHASE C KICKOFF.** SYNC-003 done (B.3+B.4+B.6 IN_SYNC, 100% plan-code sync) + QA-013 done (330 tests smoke test, ALL gates PASS). Phase B: 56 tasks, 330 tests, 99.69% stmt. **Phase C (Infra Sprint) started.** 9 tasks created: INFRA-001~005, DEVOPS-002/003, QA-016, SYNC-004. INFRA-001 (persistence, P0) + INFRA-004 (embedding, P1) assigned parallel. DEVOPS-002/003 (deps+testcontainers) assigned. 0 errors, no drift. |
-| 43 | 0208 | **5 TASKS MERGED.** INFRA-001 (PG persistence, 6 adapters, 62 tests, 95.5% stmt), INFRA-004 (embedding, 16 tests, 99.18% stmt), COMMON-CB (circuit breaker, 11 tests), DEVOPS-002 (npm deps), DEVOPS-003 (testcontainers) all merged to main. Smoke test: 419 tests pass, typecheck+lint clean. **Phase C 56%.** Plan-amendment received (sessions user_id). INFRA-002/003/005 all unblocked — assigned to dev-infra. SYNC-004 partial + PLAN-AMEND-001 assigned to arch. DEVOPS-004 (core exports) created. 1 new issue (ERR-064 LOW). |
-| 44 | 0208 | **4 TASKS MERGED — ALL INFRA CODING COMPLETE.** INFRA-002 (Redis cache, 25 tests, 91.44% stmt), INFRA-003 (LLM adapters, 15 tests, 95.89% stmt), INFRA-005 (MCP registry, 16 tests, 92.12% stmt), DEVOPS-004 (core subpath exports). Biome lint fixes applied (5 files). Smoke test: **475 tests, 41 files pass**, typecheck+lint clean. **Phase C 89%.** All 9 coding tasks done. QA-016 unblocked — assigned to quality. SYNC-004 (arch) in progress (2 cycles). Dev-infra added zod dep. 1 open issue (ERR-064 LOW, unchanged). |
-| 45 | 0208 | **No new completions.** SYNC-004 (arch, 3 cycles — metric-alert) + QA-016 (quality, 2 cycles) in progress. AUDIT-003 created (Phase C code audit, 13+ cycles since AUDIT-002). Smoke test: 475 tests pass, typecheck+lint clean. 1 error (ERR-064 LOW). No drift. |
-| 46 | 0208 | **PHASE C COMPLETE.** QA-016 done (CONDITIONAL PASS: 2H 7M 4L, 459/475 tests — zod fix needed). AUDIT-003 done (6H 8M 5L, TDD 100%, file size PASS). SYNC-004 done (CTO override — PLAN_SYNC Phase C all IN_SYNC). **3 tasks completed, 69 total.** FIX-INFRA-001~004 + PLAN-AMEND-001 + CONST-AMEND-001 created. ERR-065 MEDIUM. Phase D transition pending FIX-INFRA-001. |
-| 47 | 0208 | **PHASE D KICKOFF.** FIX-INFRA-001 done (zod dep fix, 475 tests, 0 skips). ERR-064/065 resolved → 0 open errors. Phase D BACKLOG: EDGE-001~005 + BOOTSTRAP-001 + DEVOPS-005/006 + SYNC-005 + QA-017 created. Carry-over: FIX-INFRA-002~004, PLAN-AMEND-001, CONST-AMEND-001. **15 tasks queued.** EDGE-001 (P0) + FIX-INFRA-002/003 (P1) + DEVOPS-005 (P0) assigned. Dev-Edge activated (first time). |
+| 4–9 | 0208 | Quality reviews completed (QA-004~007). Arch stalled 8 cycles. Open errors peaked at 48. BACKLOG restructured into WP-1~7. |
+| 10 | 0208 | **MAJOR BREAKTHROUGH.** Arch completed WP-1~7 + ADR-017/018. 8 tasks, 23 errors resolved. Open errors 48→24. |
+| 11–12 | 0208 | **CONVERGENCE.** WP-4 + FIX-MED completed. Open errors 25→1. |
+| 13 | 0208 | **PLAN FINALIZED.** ALL 5 quality gates PASS. Open errors 0. |
+| 14–27 | 0208 | STEADY STATE. Awaiting Phase A kickoff. |
+| 28–31 | 0208 | **PHASE A.** Scaffold + milestone verified. |
+| 32–41 | 0208 | **PHASE B: CORE SPRINT.** 6 CORE tasks (330 tests, 99.69% stmt). SYNC-001~003. QA-013 ALL PASS. |
+| 42–46 | 0208 | **PHASE C: INFRA SPRINT.** INFRA-001~005 + COMMON-CB (475 tests). QA-016, AUDIT-003 done. |
+| 47 | 0208 | **PHASE D KICKOFF.** FIX-INFRA-001 done. 15 Phase D tasks created. EDGE-001 + FIX-INFRA-002/003 + DEVOPS-005 assigned. |
+| 48 | 0208 | **4 TASKS COMPLETED.** EDGE-001 (AxelChannel interface, 24 tests), FIX-INFRA-002 (bare catches→typed, PG fallbacks), FIX-INFRA-003 (mutable→per-instance, symlink, JSON.parse), DEVOPS-005 (channel/gateway deps). Biome format fix (CTO). Smoke: **508 tests, 42 files**, typecheck+lint clean. EDGE-002 (P0) + DEVOPS-006 + PLAN-AMEND-001 + FIX-INFRA-004 assigned. Phase D 27%. 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C47 | Cycle 47 | Active |
-| Architecture | 0208C43 | — | Idle (PLAN-AMEND-001 + SYNC-005 queued, activated next when EDGE-002 done) |
+| Coordinator | 0208C48 | Cycle 48 | Active |
+| Architecture | 0208C48 | PLAN-AMEND-001 | **Active** — ADR-002 PG 16→17, migration-strategy user_id |
 | Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
-| Dev-Infra | 0208C47 | FIX-INFRA-002, FIX-INFRA-003 | **Active** — Phase C fix tasks (parallel) |
-| Dev-Edge | 0208C47 | EDGE-001 | **Active** — First activation. Channel types (P0). |
+| Dev-Infra | 0208C48 | FIX-INFRA-004 | **Active** — relative imports → @axel/core/* subpath exports |
+| Dev-Edge | 0208C48 | EDGE-002 | **Active** — CLI Channel implementation (P0) |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C46 | — | Idle (QA-017 queued, activated when EDGE-002+ done) |
-| DevOps | 0208C47 | DEVOPS-005 | **Active** — Channel/gateway dependencies |
+| Quality | 0208C46 | — | Idle (QA-017 queued, activated when EDGE-002 done) |
+| DevOps | 0208C48 | DEVOPS-006 | **Active** — channels/gateway subpath exports + vitest config |
 | Audit | 0208C46 | — | Idle (next audit at Phase D milestone) |
 
 ## Human Intervention Needed
