@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AxelConfigSchema, loadConfig, type AxelConfig } from '../src/config.js';
+import { type AxelConfig, AxelConfigSchema, loadConfig } from '../src/config.js';
 
 describe('AxelConfigSchema', () => {
 	describe('validation', () => {

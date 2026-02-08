@@ -43,17 +43,20 @@ export async function aggregateHealth(
 		}),
 	);
 
-	for (const result of results) {
+	for (let i = 0; i < results.length; i++) {
+		const result = results[i];
+		if (result === undefined) continue;
+
 		if (result.status === 'fulfilled') {
 			checks[result.value.name] = result.value.health;
 			worstState = worseState(worstState, result.value.health.state);
 		} else {
-			const name =
-				targets[results.indexOf(result)]?.name ?? 'unknown';
+			const name = targets[i]?.name ?? 'unknown';
+			const reason: unknown = result.reason;
 			checks[name] = {
 				state: 'unhealthy',
 				latencyMs: null,
-				message: result.reason instanceof Error ? result.reason.message : String(result.reason),
+				message: reason instanceof Error ? reason.message : String(reason),
 				lastChecked: new Date(),
 			};
 			worstState = 'unhealthy';
@@ -85,8 +88,8 @@ export async function startupHealthCheck(
 	const status = await aggregateHealth(targets);
 	if (status.state === 'unhealthy') {
 		const failedNames = Object.entries(status.checks)
-			.filter(([, c]) => c.state === 'unhealthy')
-			.map(([name]) => name);
+			.filter(([, c]: [string, ComponentHealth]) => c.state === 'unhealthy')
+			.map(([name]: [string, ComponentHealth]) => name);
 		throw new Error(`Startup health check failed: ${failedNames.join(', ')}`);
 	}
 	return status;

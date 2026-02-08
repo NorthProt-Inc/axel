@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createContainer, type Container, type ContainerDeps } from '../src/container.js';
+import { type Container, type ContainerDeps, createContainer } from '../src/container.js';
 
 function createMockDeps(): ContainerDeps {
 	const mockPgPool = {

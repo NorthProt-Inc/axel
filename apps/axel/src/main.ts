@@ -1,6 +1,6 @@
 import { loadConfig } from './config.js';
-import { createContainer, type ContainerDeps } from './container.js';
-import { gracefulShutdown, startupHealthCheck, type HealthCheckTarget } from './lifecycle.js';
+import { type ContainerDeps, createContainer } from './container.js';
+import { gracefulShutdown, startupHealthCheck } from './lifecycle.js';
 
 const SHUTDOWN_TIMEOUT_MS = 30_000;
 

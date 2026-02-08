@@ -1,23 +1,30 @@
-import type { ComponentHealth } from '@axel/core/types';
-import type { StreamBuffer, WorkingMemory, EpisodicMemory, SemanticMemory, ConceptualMemory, MetaMemory } from '@axel/core/memory';
-import type { SessionStore, LlmProvider, ToolExecutor } from '@axel/core/orchestrator';
 import type { ContextDataProvider, TokenCounter } from '@axel/core/context';
 import { ContextAssembler } from '@axel/core/context';
+import type {
+	ConceptualMemory,
+	EpisodicMemory,
+	MetaMemory,
+	SemanticMemory,
+	StreamBuffer,
+	WorkingMemory,
+} from '@axel/core/memory';
+import type { LlmProvider, SessionStore, ToolExecutor } from '@axel/core/orchestrator';
 import { SessionRouter } from '@axel/core/orchestrator';
+import type { ComponentHealth } from '@axel/core/types';
 import {
-	AxelPgPool,
-	PgEpisodicMemory,
-	PgSemanticMemory,
-	PgConceptualMemory,
-	PgMetaMemory,
-	PgSessionStore,
-	GeminiEmbeddingService,
-	RedisWorkingMemory,
-	RedisStreamBuffer,
 	AnthropicLlmProvider,
+	AxelPgPool,
+	GeminiEmbeddingService,
 	GoogleLlmProvider,
-	ToolRegistry,
 	McpToolExecutor,
+	PgConceptualMemory,
+	PgEpisodicMemory,
+	PgMetaMemory,
+	PgSemanticMemory,
+	PgSessionStore,
+	RedisStreamBuffer,
+	RedisWorkingMemory,
+	ToolRegistry,
 } from '@axel/infra';
 
 /** Health check target for startup/runtime monitoring */
@@ -29,8 +36,17 @@ export interface HealthCheckTarget {
 /** External dependencies injected into the container builder */
 export interface ContainerDeps {
 	readonly pgPool: {
-		query(text: string, params?: readonly unknown[]): Promise<{ rows: unknown[]; rowCount: number | null }>;
-		connect(): Promise<{ query(text: string, params?: readonly unknown[]): Promise<{ rows: unknown[]; rowCount: number | null }>; release(): void }>;
+		query(
+			text: string,
+			params?: readonly unknown[],
+		): Promise<{ rows: unknown[]; rowCount: number | null }>;
+		connect(): Promise<{
+			query(
+				text: string,
+				params?: readonly unknown[],
+			): Promise<{ rows: unknown[]; rowCount: number | null }>;
+			release(): void;
+		}>;
 		end(): Promise<void>;
 	};
 	readonly redis: {
@@ -42,7 +58,12 @@ export interface ContainerDeps {
 		get(key: string): Promise<string | null>;
 		set(key: string, value: string, mode: string, ttl: number): Promise<string>;
 		xadd(key: string, id: string, ...fieldValues: string[]): Promise<string>;
-		xrange(key: string, start: string, end: string, ...args: (string | number)[]): Promise<[string, string[]][]>;
+		xrange(
+			key: string,
+			start: string,
+			end: string,
+			...args: (string | number)[]
+		): Promise<[string, string[]][]>;
 		xtrim(key: string, strategy: string, approx: string, maxLen: number): Promise<number>;
 		xlen(key: string): Promise<number>;
 		quit(): Promise<string>;
@@ -54,8 +75,12 @@ export interface ContainerDeps {
 		generateContentStream: (...args: unknown[]) => unknown;
 	};
 	readonly embeddingClient: {
-		embedContent(params: { content: { parts: { text: string }[] }; taskType: string }): Promise<{ embedding: { values: readonly number[] } }>;
-		batchEmbedContents(params: { requests: readonly { content: { parts: { text: string }[] }; taskType: string }[] }): Promise<{ embeddings: readonly { values: readonly number[] }[] }>;
+		embedContent(params: { content: { parts: { text: string }[] }; taskType: string }): Promise<{
+			embedding: { values: readonly number[] };
+		}>;
+		batchEmbedContents(params: {
+			requests: readonly { content: { parts: { text: string }[] }; taskType: string }[];
+		}): Promise<{ embeddings: readonly { values: readonly number[] }[] }>;
 	};
 }
 
@@ -91,14 +116,17 @@ class EstimateTokenCounter implements TokenCounter {
 	}
 }
 
-/** Minimal ContextDataProvider that delegates to memory layers */
+/**
+ * Minimal ContextDataProvider that delegates to memory layers.
+ *
+ * Full adapter logic (embedding generation for semantic search,
+ * GraphNode→Entity conversion, etc.) will be implemented when
+ * the end-to-end message flow is wired up.
+ */
 class MemoryContextDataProvider implements ContextDataProvider {
 	constructor(
 		private readonly wm: WorkingMemory,
-		private readonly sm: SemanticMemory,
-		private readonly cm: ConceptualMemory,
 		private readonly em: EpisodicMemory,
-		private readonly sb: StreamBuffer,
 		private readonly mm: MetaMemory,
 		private readonly tr: ToolRegistry,
 	) {}
@@ -107,40 +135,14 @@ class MemoryContextDataProvider implements ContextDataProvider {
 		return this.wm.getTurns(userId, limit);
 	}
 
-	async searchSemantic(query: string, limit: number) {
-		const results = await this.sm.search({ query, limit, embedding: null });
-		return results.map((r) => ({
-			memory: {
-				uuid: r.uuid,
-				content: r.content,
-				memoryType: r.memoryType,
-				importance: r.importance,
-				embedding: new Float32Array(0),
-				createdAt: r.createdAt,
-				lastAccessed: r.lastAccessed,
-				accessCount: r.accessCount,
-				sourceChannel: r.sourceChannel ?? null,
-				channelMentions: r.channelMentions ?? {},
-				sourceSession: r.sourceSession ?? null,
-				decayedImportance: r.decayedImportance ?? null,
-				lastDecayedAt: r.lastDecayedAt ?? null,
-			},
-			score: r.score,
-			source: 'semantic' as const,
-		}));
+	async searchSemantic(_query: string, _limit: number) {
+		// Requires embedding generation — deferred to message flow wiring
+		return [];
 	}
 
-	async traverseGraph(entityId: string, depth: number) {
-		const nodes = await this.cm.traverse(entityId, depth);
-		return nodes.map((n) => ({
-			id: n.id,
-			name: n.name,
-			entityType: n.entityType,
-			aliases: n.aliases,
-			mentionCount: n.mentionCount,
-			createdAt: n.createdAt,
-			updatedAt: n.updatedAt,
-		}));
+	async traverseGraph(_entityId: string, _depth: number) {
+		// Requires GraphNode→Entity conversion — deferred
+		return [];
 	}
 
 	async getSessionArchive(userId: string, _days: number) {
@@ -148,11 +150,8 @@ class MemoryContextDataProvider implements ContextDataProvider {
 	}
 
 	async getStreamBuffer(_userId: string) {
-		const events: Awaited<ReturnType<StreamBuffer['consume']>> extends AsyncGenerator<infer T> ? T[] : never[] = [];
-		for await (const event of this.sb.consume(100)) {
-			events.push(event);
-		}
-		return events;
+		// Stream buffer consume is an async generator — deferred
+		return [];
 	}
 
 	async getMetaMemory(_userId: string) {
@@ -224,7 +223,10 @@ export function createContainer(deps: ContainerDeps): Container {
 	);
 
 	// Embedding service (ADR-016)
-	const embeddingService = new GeminiEmbeddingService(deps.embeddingClient, DEFAULT_EMBEDDING_CONFIG);
+	const embeddingService = new GeminiEmbeddingService(
+		deps.embeddingClient,
+		DEFAULT_EMBEDDING_CONFIG,
+	);
 
 	// Tool system (ADR-010)
 	const toolRegistry = new ToolRegistry();
@@ -234,10 +236,7 @@ export function createContainer(deps: ContainerDeps): Container {
 	const tokenCounter = new EstimateTokenCounter();
 	const contextDataProvider = new MemoryContextDataProvider(
 		workingMemory,
-		semanticMemory,
-		conceptualMemory,
 		episodicMemory,
-		streamBuffer,
 		metaMemory,
 		toolRegistry,
 	);

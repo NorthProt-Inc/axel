@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
 import type { ComponentHealth, HealthStatus } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-	startupHealthCheck,
-	gracefulShutdown,
-	aggregateHealth,
 	type HealthCheckTarget,
 	type ShutdownableContainer,
+	aggregateHealth,
+	gracefulShutdown,
+	startupHealthCheck,
 } from '../src/lifecycle.js';
 
 function healthyComponent(): ComponentHealth {
@@ -30,8 +30,8 @@ describe('aggregateHealth', () => {
 		return aggregateHealth(targets).then((status) => {
 			expect(status.state).toBe('healthy');
 			expect(Object.keys(status.checks)).toHaveLength(2);
-			expect(status.checks['pg']?.state).toBe('healthy');
-			expect(status.checks['redis']?.state).toBe('healthy');
+			expect(status.checks.pg?.state).toBe('healthy');
+			expect(status.checks.redis?.state).toBe('healthy');
 			expect(status.uptime).toBeGreaterThanOrEqual(0);
 		});
 	});
@@ -79,8 +79,8 @@ describe('aggregateHealth', () => {
 
 		const status = await aggregateHealth(targets);
 		expect(status.state).toBe('unhealthy');
-		expect(status.checks['redis']?.state).toBe('unhealthy');
-		expect(status.checks['redis']?.message).toContain('connection reset');
+		expect(status.checks.redis?.state).toBe('unhealthy');
+		expect(status.checks.redis?.message).toContain('connection reset');
 	});
 
 	it('returns healthy for empty targets', async () => {
@@ -174,7 +174,7 @@ describe('gracefulShutdown', () => {
 
 	it('handles channel stop errors gracefully', async () => {
 		const container = createMockContainer();
-		(container.channels[0]!.stop as ReturnType<typeof vi.fn>).mockRejectedValue(
+		(container.channels[0]?.stop as ReturnType<typeof vi.fn>).mockRejectedValue(
 			new Error('disconnect failed'),
 		);
 
@@ -182,7 +182,7 @@ describe('gracefulShutdown', () => {
 		await expect(gracefulShutdown(container)).resolves.not.toThrow();
 
 		// Other channel should still be stopped
-		expect(container.channels[1]!.stop).toHaveBeenCalled();
+		expect(container.channels[1]?.stop).toHaveBeenCalled();
 		// Flush should still happen
 		expect(container.workingMemory.flush).toHaveBeenCalled();
 	});
@@ -202,9 +202,7 @@ describe('gracefulShutdown', () => {
 
 	it('handles redis quit errors gracefully', async () => {
 		const container = createMockContainer();
-		(container.redis.quit as ReturnType<typeof vi.fn>).mockRejectedValue(
-			new Error('redis error'),
-		);
+		(container.redis.quit as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('redis error'));
 
 		await expect(gracefulShutdown(container)).resolves.not.toThrow();
 

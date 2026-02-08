@@ -136,7 +136,13 @@ export type AxelConfig = z.infer<typeof AxelConfigSchema>;
 
 // ─── Environment variable mapping (plan lines 689+) ───
 
-function parseOptionalInt(val: string | undefined): number | undefined {
+/** Type-safe env var getter that satisfies both noUncheckedIndexedAccess and Biome */
+function getEnv(env: Record<string, string | undefined>, key: string): string | undefined {
+	return env[key];
+}
+
+function getEnvInt(env: Record<string, string | undefined>, key: string): number | undefined {
+	const val = env[key];
 	if (val === undefined) return undefined;
 	const n = Number.parseInt(val, 10);
 	return Number.isNaN(n) ? undefined : n;
@@ -150,41 +156,41 @@ function parseOptionalInt(val: string | undefined): number | undefined {
  */
 export function loadConfig(env: Record<string, string | undefined> = process.env): AxelConfig {
 	const raw: Record<string, unknown> = {
-		env: env['AXEL_ENV'],
-		port: parseOptionalInt(env['AXEL_PORT']),
-		host: env['AXEL_HOST'],
-		timezone: env['AXEL_TIMEZONE'],
+		env: getEnv(env, 'AXEL_ENV'),
+		port: getEnvInt(env, 'AXEL_PORT'),
+		host: getEnv(env, 'AXEL_HOST'),
+		timezone: getEnv(env, 'AXEL_TIMEZONE'),
 		db: {
-			url: env['AXEL_DB_URL'],
-			maxConnections: parseOptionalInt(env['AXEL_DB_MAX_CONNECTIONS']),
+			url: getEnv(env, 'AXEL_DB_URL'),
+			maxConnections: getEnvInt(env, 'AXEL_DB_MAX_CONNECTIONS'),
 		},
 		redis: {
-			url: env['AXEL_REDIS_URL'],
-			connectTimeoutMs: parseOptionalInt(env['AXEL_REDIS_CONNECT_TIMEOUT_MS']),
-			commandTimeoutMs: parseOptionalInt(env['AXEL_REDIS_COMMAND_TIMEOUT_MS']),
-			maxRetriesPerRequest: parseOptionalInt(env['AXEL_REDIS_MAX_RETRIES']),
+			url: getEnv(env, 'AXEL_REDIS_URL'),
+			connectTimeoutMs: getEnvInt(env, 'AXEL_REDIS_CONNECT_TIMEOUT_MS'),
+			commandTimeoutMs: getEnvInt(env, 'AXEL_REDIS_COMMAND_TIMEOUT_MS'),
+			maxRetriesPerRequest: getEnvInt(env, 'AXEL_REDIS_MAX_RETRIES'),
 		},
 		llm: {
 			anthropic: {
-				apiKey: env['AXEL_ANTHROPIC_API_KEY'],
-				model: env['AXEL_ANTHROPIC_MODEL'],
-				thinkingBudget: parseOptionalInt(env['AXEL_ANTHROPIC_THINKING_BUDGET']),
-				maxTokens: parseOptionalInt(env['AXEL_ANTHROPIC_MAX_TOKENS']),
+				apiKey: getEnv(env, 'AXEL_ANTHROPIC_API_KEY'),
+				model: getEnv(env, 'AXEL_ANTHROPIC_MODEL'),
+				thinkingBudget: getEnvInt(env, 'AXEL_ANTHROPIC_THINKING_BUDGET'),
+				maxTokens: getEnvInt(env, 'AXEL_ANTHROPIC_MAX_TOKENS'),
 			},
 			google: {
-				apiKey: env['AXEL_GOOGLE_API_KEY'],
-				flashModel: env['AXEL_GOOGLE_FLASH_MODEL'],
-				embeddingModel: env['AXEL_GOOGLE_EMBEDDING_MODEL'],
-				embeddingDimension: parseOptionalInt(env['AXEL_GOOGLE_EMBEDDING_DIMENSION']),
+				apiKey: getEnv(env, 'AXEL_GOOGLE_API_KEY'),
+				flashModel: getEnv(env, 'AXEL_GOOGLE_FLASH_MODEL'),
+				embeddingModel: getEnv(env, 'AXEL_GOOGLE_EMBEDDING_MODEL'),
+				embeddingDimension: getEnvInt(env, 'AXEL_GOOGLE_EMBEDDING_DIMENSION'),
 			},
 		},
 		channels: buildChannelConfig(env),
 		security: {
-			maxRequestsPerMinute: parseOptionalInt(env['AXEL_MAX_REQUESTS_PER_MINUTE']),
+			maxRequestsPerMinute: getEnvInt(env, 'AXEL_MAX_REQUESTS_PER_MINUTE'),
 		},
 		persona: {
-			path: env['AXEL_PERSONA_PATH'],
-			hotReload: env['AXEL_PERSONA_HOT_RELOAD'] === 'false' ? false : undefined,
+			path: getEnv(env, 'AXEL_PERSONA_PATH'),
+			hotReload: getEnv(env, 'AXEL_PERSONA_HOT_RELOAD') === 'false' ? false : undefined,
 		},
 	};
 
@@ -195,18 +201,15 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 function buildChannelConfig(
 	env: Record<string, string | undefined>,
 ): Record<string, unknown> | undefined {
-	const discord = env['AXEL_DISCORD_BOT_TOKEN']
-		? { botToken: env['AXEL_DISCORD_BOT_TOKEN'] }
-		: undefined;
-
-	const telegram = env['AXEL_TELEGRAM_BOT_TOKEN']
-		? { botToken: env['AXEL_TELEGRAM_BOT_TOKEN'] }
-		: undefined;
+	const discordToken = getEnv(env, 'AXEL_DISCORD_BOT_TOKEN');
+	const telegramToken = getEnv(env, 'AXEL_TELEGRAM_BOT_TOKEN');
+	const discord = discordToken ? { botToken: discordToken } : undefined;
+	const telegram = telegramToken ? { botToken: telegramToken } : undefined;
 
 	if (discord === undefined && telegram === undefined) return undefined;
 	const result: Record<string, unknown> = {};
-	if (discord) result['discord'] = discord;
-	if (telegram) result['telegram'] = telegram;
+	if (discord) result.discord = discord;
+	if (telegram) result.telegram = telegram;
 	return result;
 }
 
