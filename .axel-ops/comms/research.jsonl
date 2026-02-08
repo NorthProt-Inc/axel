@@ -12,3 +12,5 @@
 {"ts":"0207T2157","from":"research","type":"done","task":"RES-005","out":"docs/research/RES-005-github-actions-ci-cd.md","note":"Complete CI/CD workflow with affected-only execution (12x faster), remote caching, OIDC security, ready-to-use .github/workflows examples"}
 {"ts":"0207T2202","from":"research","type":"claim","task":"RES-001","note":"Starting pgvector index comparison"}
 {"ts":"0207T2204","from":"research","type":"done","task":"RES-001","out":"docs/research/RES-001-pgvector-index-comparison.md","note":"HNSW recommended: 15.5x throughput advantage, 1.6x faster queries, logarithmic scaling, resilient to updates despite 32x slower build time"}
+{"ts":"0207T2210","from":"research","type":"claim","task":"RES-001","note":"Starting pgvector index comparison"}
+{"ts":"0207T2213","from":"research","type":"done","task":"RES-001","out":"docs/research/RES-001-pgvector-index-comparison.md","note":"Hybrid approach: IVFFlat (L2-5) + HNSW (L6). Memory-efficient strategy with migration path."}
