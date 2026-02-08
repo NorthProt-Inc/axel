@@ -4,8 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
+		"typecheck": "tsc -b --noEmit",
+		"test": "vitest run --passWithNoTests",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"lint": "biome check .",

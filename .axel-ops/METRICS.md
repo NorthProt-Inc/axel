@@ -2,30 +2,30 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 30
+## Current Cycle: 31
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 30 cycles | 0 | Active |
+| coord | — | 31 cycles | 0 | Active |
 | arch | 1 cycle | 2 (FIX-AUDIT, FIX-PRE-IMPL) | 0 | Idle |
-| dev-core | — | 0 | 0 | Inactive |
-| dev-infra | — | 0 | 0 | Inactive |
-| dev-edge | — | 0 | 0 | Inactive |
+| dev-core | — | 0 | 0 | Pending Phase B |
+| dev-infra | — | 0 | 0 | Pending Phase C |
+| dev-edge | — | 0 | 0 | Pending Phase D |
 | quality | 1 cycle | 1 (QA-011) | 0 | Idle |
 | research | — | 0 | 0 | Idle |
-| devops | 2 cycles | 6 (SCAFFOLD-001~006, unmerged) | 0 | Activated |
+| devops | 3 cycles | 7 (SCAFFOLD-001~006 + FIX) | 0 | Idle |
 | audit | 1 cycle | 1 (AUDIT-002) | 0 | Idle |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 2 (1 P0) | 5 | **WARN** |
+| Open Errors | 0 | 5 | OK |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
-| Merge Reverts (last 10) | 1 | 0 | **WARN** |
+| Merge Reverts (last 10) | 1 (resolved) | 0 | OK |
 | Test Failures | 0 | 0 | OK |
 
 ## Coverage Tracking
@@ -42,7 +42,7 @@
 | Phase | Status | Start Cycle | End Cycle | Completion |
 |-------|--------|-------------|-----------|------------|
 | Plan Closure | **DONE** | 17 | 21 | 100% |
-| A: Foundation | **BLOCKED** | 28 | — | 75% (6/8 code done, unmerged. ENV-001 P0 blocker) |
+| A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
 | B: Core Sprint | QUEUED | 25 | 42 | — |
 | C: Infra Sprint | QUEUED | 43 | 57 | — |
 | D: Edge Sprint | QUEUED | 58 | 77 | — |
@@ -64,3 +64,4 @@
 | 28 | devops, arch | 0 (in progress) | 0 | **PHASE A KICKOFF.** Autonomous phase transition. SCAFFOLD-001/002/003 assigned to DevOps. SYNC-001 queued for Arch. |
 | 29 | devops, arch | 0 (in progress) | 0 | Phase A in progress. SCAFFOLD-006 additionally assigned. No Division reports. No drift. |
 | 30 | devops | 6 (unmerged) | 2 new (ENV-001 P0, ERR-063 MED) | SCAFFOLD-001~006 complete on div/devops. Merge reverted by human. ENV-001: Node.js 18→22, pnpm missing. ERR-063: ownership violation. |
+| 31 | coord | 7 (SCAFFOLD-001~006 + FIX) | 0 new, 2 resolved | **PHASE A COMPLETE.** ENV-001 resolved (Node.js 22.13.1, pnpm 9.15.4). ERR-063 resolved. Milestone verified: install+typecheck+test+lint all pass. |

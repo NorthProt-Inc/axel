@@ -61,6 +61,10 @@
 		"formatter": {
 			"enabled": true,
 			"indentStyle": "tab"
+		},
+		"parser": {
+			"allowComments": true,
+			"allowTrailingCommas": true
 		}
 	}
 }

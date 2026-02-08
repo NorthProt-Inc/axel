@@ -2,33 +2,26 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 30**: Phase A (Foundation). SCAFFOLD-001~006 code complete on div/devops but **reverted from main** (0afbf38). 2 blockers: Node.js upgrade + remerge. SCAFFOLD-007 + SYNC-001 queued.
+> **Cycle 31**: Phase A COMPLETE. Phase B (Core Sprint) BACKLOG created. Dev-Core activated.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| SCAFFOLD-FIX | P0 | devops | Fix ownership violation (remove packages/core/src/types/index.ts from div/devops), rebase div/devops on main | — | 0208C30 |
-| SCAFFOLD-007 | P2 | devops | Create .github/workflows/ci.yml (lint → typecheck → test) | SCAFFOLD-005, ENV-001 resolved | 0208C28 |
-| SYNC-001 | P1 | arch | Create initial PLAN_SYNC.md interface mappings for Phase A | — | 0208C28 |
+| SCAFFOLD-007 | P2 | devops | Create .github/workflows/ci.yml (lint → typecheck → test) | — | 0208C28 |
+| SYNC-001 | P1 | arch | Update PLAN_SYNC.md with Phase B interface mappings + contracts | — | 0208C28 |
+| CORE-001 | P0 | dev-core | Core domain types: AxelMessage, Conversation, Session, Memory, Tool types (plan §3.5). TDD: tests first. | SYNC-001 | 0208C31 |
+| CORE-002 | P0 | dev-core | Adaptive Decay engine: exponential decay, access boost, consolidation threshold (ADR-015). TDD. | CORE-001 | 0208C31 |
+| CORE-003 | P1 | dev-core | Memory Layers: 6-layer architecture M0-M5 interfaces + in-memory stubs (ADR-013). TDD. | CORE-001 | 0208C31 |
+| CORE-004 | P1 | dev-core | Context Assembly: context window builder, token budget allocation (plan §4.4). TDD. | CORE-001, CORE-003 | 0208C31 |
+| CORE-005 | P1 | dev-core | Persona Engine: persona loading, hot-reload, template rendering (plan §4.5). TDD. | CORE-001 | 0208C31 |
+| CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001, CORE-003, CORE-004, CORE-005 | 0208C31 |
+| QA-012 | P1 | quality | Phase B: Core types + Decay review (after CORE-001 + CORE-002 done) | CORE-001, CORE-002 | 0208C31 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-
-## Done (Pending Merge)
-
-> These tasks are code-complete on div/devops but reverted from main (commit 0afbf38). Require SCAFFOLD-FIX + ENV-001 resolution before remerge.
-
-| ID | Division | Completed | Output | Branch |
-|----|----------|-----------|--------|--------|
-| SCAFFOLD-001 | devops | 0208C30 | pnpm-workspace.yaml, package.json | div/devops |
-| SCAFFOLD-002 | devops | 0208C30 | tsconfig.base.json | div/devops |
-| SCAFFOLD-003 | devops | 0208C30 | biome.json | div/devops |
-| SCAFFOLD-004 | devops | 0208C30 | packages/*/package.json + tsconfig.json | div/devops |
-| SCAFFOLD-005 | devops | 0208C30 | vitest.config.ts (root + per-package) | div/devops |
-| SCAFFOLD-006 | devops | 0208C30 | docker/docker-compose.dev.yml | div/devops |
 
 ## Cancelled
 
@@ -89,3 +82,10 @@
 | AUDIT-002 | audit | 0209T0031 | Follow-up verification: 4 HIGH, 5 MEDIUM, 2 LOW findings. Most HIGH overlap with FIX-AUDIT scope. |
 | QA-011 | quality | 0209T0335 | PLAN CLOSURE APPROVED: 4 PASS, 1 CONDITIONAL PASS. 3 MEDIUM non-blocking issues. ERR-050~056 verified. |
 | FIX-PRE-IMPL | arch | 0209T0500 | 3 MEDIUM consistency fixes (ERR-060~062). ADR-013 IVFFlat→HNSW, migration-strategy IVFFlat→HNSW, plan hot_memories LEFT JOIN. Plan v2.0.4. |
+| SCAFFOLD-001 | devops | 0208C31 | pnpm-workspace.yaml, package.json |
+| SCAFFOLD-002 | devops | 0208C31 | tsconfig.base.json |
+| SCAFFOLD-003 | devops | 0208C31 | biome.json |
+| SCAFFOLD-004 | devops | 0208C31 | packages/*/package.json + tsconfig.json |
+| SCAFFOLD-005 | devops | 0208C31 | vitest.config.ts (root + per-package) |
+| SCAFFOLD-006 | devops | 0208C31 | docker/docker-compose.dev.yml |
+| SCAFFOLD-FIX | devops+coord | 0208C31 | Ownership violation fixed, tsconfig.json/package.json/biome.json corrected, milestone verified |

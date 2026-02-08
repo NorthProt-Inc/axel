@@ -2,19 +2,18 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 30**: 2 new issues. ENV-001 (P0 blocker: Node.js/pnpm). ERR-063 (MEDIUM: ownership violation).
+> **Cycle 31**: All issues resolved. 0 open errors.
 
 ## Open
 
-| ID | Severity | Reporter | Date | Description | Assigned |
-|----|----------|----------|------|-------------|----------|
-| ENV-001 | P0 | devops | 0208C30 | Node.js 18.19.1 detected, need 22 LTS. pnpm not installed. Phase A milestone blocked. | **HUMAN** |
-| ERR-063 | MEDIUM | coord | 0208C30 | DevOps created packages/core/src/types/index.ts — dev-core ownership (Constitution Rule 1). Must remove from div/devops before remerge. | SCAFFOLD-FIX (devops) |
+(none)
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ENV-001 | Node.js 22.13.1 confirmed. pnpm 9.15.4 available (npx/packageManager). | CTO (coord) | 0208C31 |
+| ERR-063 | Ownership violation file (packages/core/src/types/index.ts) already removed in SCAFFOLD-FIX (5b4de15). | SCAFFOLD-FIX (devops) | 0208C31 |
 | ERR-060 | ADR-013:144,171-174 IVFFlat→HNSW rewritten. Comparison table + index decision section aligned. | FIX-PRE-IMPL (arch) | 0209 |
 | ERR-061 | migration-strategy:372,377-393 IVFFlat text→HNSW. Execution order + index note rewritten. | FIX-PRE-IMPL (arch) | 0209 |
 | ERR-062 | plan:843-853 hot_memories MV INNER JOIN→LEFT JOIN LATERAL aligned with migration-strategy. | FIX-PRE-IMPL (arch) | 0209 |
