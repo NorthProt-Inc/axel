@@ -1,0 +1,4 @@
+{"ts":"0207T2100","from":"coord","type":"broadcast","msg":"Cycle 1 시작. 첫 운영 사이클 — 전 Division 작업 개시."}
+{"ts":"0207T2100","from":"coord","type":"assign","to":"arch","tasks":["PLAN-001","ADR-013","ADR-014"],"note":"P0 3건 배정. PLAN-001 우선 처리 후 ADR-013/014 병렬. worktree: axel-wt-arch"}
+{"ts":"0207T2100","from":"coord","type":"assign","to":"research","tasks":["RES-001","RES-002","RES-003"],"note":"P1 3건 배정. RES-001 우선(ADR-015 dependency). worktree: axel-wt-research"}
+{"ts":"0207T2100","from":"coord","type":"assign","to":"quality","tasks":["QA-001"],"note":"P2 1건 배정. v2.0 plan 내부 일관성 검증. worktree: axel-wt-quality"}
