@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SessionSummary } from '@axel/core/types';
+import type { SessionSummary } from '../../../core/src/types/session.js';
 import type {
 	SessionStore,
 	UnifiedSession,
 	ResolvedSession,
 	SessionStats,
-} from '@axel/core/orchestrator';
+} from '../../../core/src/orchestrator/types.js';
 
 // ─── Mock PG Pool ───
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ComponentHealth } from '@axel/core/types';
+import type { ComponentHealth } from '../../../core/src/types/health.js';
 
 // ─── Types for the PG Pool wrapper (will be implemented in src) ───
 

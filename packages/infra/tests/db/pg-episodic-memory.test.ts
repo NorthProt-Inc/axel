@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SessionSummary } from '@axel/core/types';
+import type { SessionSummary } from '../../../core/src/types/session.js';
 import type {
 	EpisodicMemory,
 	CreateSessionParams,
 	MessageRecord,
-} from '@axel/core/memory';
+} from '../../../core/src/memory/types.js';
 
 // ─── Mock PG Pool ───
 

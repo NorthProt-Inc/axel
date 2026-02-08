@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ComponentHealth } from '@axel/core/types';
+import type { ComponentHealth } from '../../../core/src/types/health.js';
 
 // ─── Types for the Embedding Service (will be implemented in src) ───
 

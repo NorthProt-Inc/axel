@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Memory, MemoryType } from '@axel/core/types';
+import type { Memory, MemoryType } from '../../../core/src/types/memory.js';
 import type {
 	SemanticMemory,
 	NewMemory,
 	SemanticQuery,
 	ScoredMemory,
 	DecayResult,
-} from '@axel/core/memory';
+} from '../../../core/src/memory/types.js';
 
 // ─── Mock PG Pool ───
 

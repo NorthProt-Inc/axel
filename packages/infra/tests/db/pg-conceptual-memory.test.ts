@@ -5,7 +5,7 @@ import type {
 	NewRelation,
 	Entity,
 	GraphNode,
-} from '@axel/core/memory';
+} from '../../../core/src/memory/types.js';
 
 // ─── Mock PG Pool ───
 

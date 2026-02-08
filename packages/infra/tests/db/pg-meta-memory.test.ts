@@ -3,7 +3,7 @@ import type {
 	MetaMemory,
 	AccessPattern,
 	HotMemory,
-} from '@axel/core/memory';
+} from '../../../core/src/memory/types.js';
 
 // ─── Mock PG Pool ───
 
