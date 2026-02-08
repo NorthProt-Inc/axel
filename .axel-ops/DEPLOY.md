@@ -184,6 +184,7 @@ node tools/migrate/dist/cli.js up
 | Issue | Cycle | Resolution |
 |-------|-------|-----------|
 | ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
+| AUD-083 HIGH: Hardcoded DB credentials in migrate CLI (AUDIT-005) | C61 | **RESOLVED (C61, FIX-AUDIT-E-003)**: Removed hardcoded fallback credentials ('axel_dev_password') from tools/migrate/src/cli.ts. Added validateEnvironment() to enforce explicit env vars (DATABASE_URL or PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD). Updated DEPLOY.md with secure usage examples. **Result: 5 new tests, 806 tests pass.** Security compliance verified. |
 
 ## Release History
 
