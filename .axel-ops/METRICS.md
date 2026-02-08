@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 73
+## Current Cycle: 74
 
 ## Division Performance (Last 10 Cycles)
 
@@ -22,7 +22,7 @@
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 0 | 5 | OK |
+| Open Errors | 4 | 5 | WARN |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
@@ -69,3 +69,4 @@
 | 71 | (none) | 0 | 0 | **STEADY STATE.** Roadmap exhausted. 0 drift, 0 errors, 118 tasks done. Awaiting next direction. |
 | 72 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
 | 73 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
+| 74 | devops, arch | 0 | 4 (ERR-082~085) | **RUNTIME BOOTSTRAP FIX.** 4 migration errors. FIX-MIGRATION-001 (devops), FIX-MIGRATION-002 (arch) assigned. |

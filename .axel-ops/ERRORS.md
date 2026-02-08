@@ -2,17 +2,28 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 68 (CTO update)**: **0 CRITICAL. ERR-069 RESOLVED** — Mark(Human) approved 1536d Matryoshka strategy and directly applied FIX-DIMENSION-001 + CONST-AMEND-001 in CTO session (0208C68). 835 tests pass. Open errors: **0**.
+> **Cycle 74 (CTO update)**: 4 errors open (3 HIGH, 1 MEDIUM). ERR-082~085 discovered during runtime bootstrap by Mark(Human). Migration files need repair. Fix tasks created: FIX-MIGRATION-001 (devops), FIX-MIGRATION-002 (arch).
 
 ## Open
 
-(none)
+| ID | Description | Severity | Discovered |
+|----|-------------|----------|------------|
+| ERR-082 | Migration 002 schema drift: `messages` 테이블에 `created_at`, `token_count` 컬럼 정의 없음. `redis-working-memory.ts`는 `created_at` 사용, `pg-episodic-memory.ts`는 `timestamp` 사용 — 컬럼명 불일치. DB에는 docker exec로 둘 다 존재하나 migration 파일 미반영. | HIGH | Runtime bootstrap |
+| ERR-083 | Migration 007 SQL 문법 에러: `ALTER COLUMN TYPE ... USING` 절에 subquery 사용 불가 (PG 제약). docker exec로 우회 적용됨. migration 파일 자체는 깨진 상태. | HIGH | Runtime bootstrap |
+| ERR-084 | `session_summaries` 테이블 migration 파일 부재. docker exec로 생성됨. 008 migration 파일 필요. | HIGH | Runtime bootstrap |
+| ERR-085 | `migration-strategy.md` 미반영: 007/008 마이그레이션, messages 컬럼 변경사항 문서화 안 됨. | MEDIUM | Runtime bootstrap |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
-| ERR-069 | pgvector 2000d limit resolved: **Mark(Human) approved 1536d Matryoshka truncation** and directly applied changes across 16 files (source, tests, ADRs, plan docs, SQL migration). HNSW index now active. 835 tests pass. Commits: `6120a90` (auto CTO cycle) + `228a146` (plan docs). | **Mark (CTO direct)** | 0208C68 |
+| ERR-076 | Runtime deps factory 구현: `apps/axel/src/runtime-deps.ts` 생성, `main.ts` bootstrap 호출 추가, `.env` AXEL_ 변수, `package.json` dev 스크립트. | **Mark (Human)** | Runtime bootstrap |
+| ERR-077 | Node.js `.ts` 실행 불가: `tsx` devDependency 추가, dev 스크립트 `node` → `tsx` 변경. | **Mark (Human)** | Runtime bootstrap |
+| ERR-078 | `sessions` 테이블 drift: `last_activity_at` 컬럼 누락 + `channel_history` JSONB→TEXT[] 변환. docker exec로 적용. | **Mark (Human)** | Runtime bootstrap |
+| ERR-079 | `messages` 테이블 drift: `created_at`, `token_count` 컬럼 누락. docker exec로 추가. | **Mark (Human)** | Runtime bootstrap |
+| ERR-080 | `session_summaries` 테이블 누락. docker exec로 생성. | **Mark (Human)** | Runtime bootstrap |
+| ERR-081 | Anthropic SDK `messages.create({stream:true})` → `Promise<Stream>` 반환하나 `ContainerDeps`는 `AsyncIterable` 기대. `runtime-deps.ts`에 async generator bridge 적용. | **Mark (Human)** | Runtime bootstrap |
+| ERR-069 | pgvector 2000d limit resolved: **Mark(Human) approved 1536d Matryoshka truncation** and directly applied changes across 16 files (source, tests, ADRs, plan docs, SQL migration). HNSW index now active. 835 tests pass. Commits: `6120a90` (auto CTO cycle) + `228a146` (plan docs). | **Mark (Human)** | 0208C68 |
 | ERR-075 | Hardcoded DB credentials removed from migrate CLI. Env vars enforced (DATABASE_URL or PG*). 5 new tests. 806 tests pass. AUD-083 resolved. | FIX-AUDIT-E-003 (devops) | 0208C63 |
 
 | ID | Resolution | Resolved By | Date |

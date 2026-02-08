@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **ALL PHASES COMPLETE — ALL HARDENING COMPLETE**
-- **Cycle**: 72
-- **Last Updated**: 2026-02-08C72
-- **STATUS**: **PROJECT COMPLETE.** All phases (A→E) + all 5 post-release hardening tasks finished. **835+ tests, 69+ files.** Gateway 95.65% stmt. 0 open errors. 0 queued. 0 in progress. 118 tasks done. Awaiting next direction from Mark.
+- **Phase**: **POST-RELEASE — RUNTIME BOOTSTRAP FIX**
+- **Cycle**: 74
+- **Last Updated**: 2026-02-08C74
+- **STATUS**: 4 runtime bootstrap errors found (ERR-082~085). Migration files need repair. 2 fix tasks created: FIX-MIGRATION-001 (devops P1), FIX-MIGRATION-002 (arch P2). 835+ tests, 69+ files.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 0 |
+| In Progress | 2 |
 | Done | 118 (+FIX-DIMENSION-001, CONST-AMEND-001) |
 | Cancelled | 14 |
 
-## Open Errors: 0
+## Open Errors: 4 (3 HIGH, 1 MEDIUM)
 
 ## Cycle History
 
@@ -63,19 +63,20 @@
 | 71 | 0208 | **STEADY STATE (justified).** All phase roadmap stages complete (Plan Closure → A → B → C → D → E → Hardening). 0 drift, 0 errors, 0 queued tasks. No anti-pattern: roadmap exhausted. Awaiting next direction from Mark. |
 | 72 | 0208 | **STEADY STATE.** Drift detection CLEAN. 0 errors, 0 queued, 0 in progress. Roadmap exhausted. Awaiting next direction from Mark. |
 | 73 | 0208 | **STEADY STATE.** Drift detection CLEAN. 0 errors, 0 queued, 0 in progress. Roadmap exhausted. Awaiting next direction from Mark. |
+| 74 | 0208 | **RUNTIME BOOTSTRAP FIX.** 4 new errors (ERR-082~085) from Mark's runtime bootstrap. Migration 002 missing columns, 007 broken SQL, 008 missing table, docs stale. 2 fix tasks created: FIX-MIGRATION-001 (devops P1), FIX-MIGRATION-002 (arch P2). Activated devops + arch. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C73 | Cycle 73 | Active |
-| Architecture | 0208C58 | — | Idle |
+| Coordinator | 0208C74 | Cycle 74 | Active |
+| Architecture | 0208C74 | FIX-MIGRATION-002 | Assigned |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C66 | — | Idle |
-| Dev-Edge | 0208C70 | — | Idle (all tasks done) |
+| Dev-Edge | 0208C70 | — | Idle |
 | Research | 0208C58 | — | Idle |
 | Quality | 0208C66 | — | Idle |
-| DevOps | 0208C63 | — | Idle |
+| DevOps | 0208C74 | FIX-MIGRATION-001 | Assigned |
 | Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed

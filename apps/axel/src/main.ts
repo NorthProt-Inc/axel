@@ -97,3 +97,12 @@ function createStubPersonaEngine(): PersonaEngine {
 		updatePreference: async () => {},
 	};
 }
+
+// ─── Application entry point ───
+
+import { createRuntimeDeps } from './runtime-deps.js';
+
+bootstrap(process.env, createRuntimeDeps).catch((err: unknown) => {
+	console.error('Fatal:', err);
+	process.exit(1);
+});

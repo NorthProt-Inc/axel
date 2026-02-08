@@ -2,19 +2,18 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 70 (CTO update)**: **ALL HARDENING COMPLETE.** HARDEN-006/007 completed (dev-edge). All 5 hardening tasks done. 835+ tests, 69+ files, gateway 95.65% stmt. **0 open errors. 0 queued. 0 in progress.** Project fully complete — all phases (A→E) + post-release hardening finished.
+> **Cycle 74 (CTO update)**: 4 runtime bootstrap errors discovered (ERR-082~085). Migration files need repair. 2 fix tasks created and assigned.
 
-## Queued (Human-Blocked)
-
-(none)
-
-## Queued (Hardening)
+## Queued
 
 (none)
 
 ## In Progress
 
-(none)
+| ID | Priority | Division | Task | Started |
+|----|----------|----------|------|---------|
+| FIX-MIGRATION-001 | P1 | devops | Fix migration files: (1) 002 messages 테이블에 `created_at TIMESTAMPTZ DEFAULT NOW()`, `token_count INTEGER DEFAULT 0` 컬럼 추가. (2) 007 ALTER COLUMN TYPE USING subquery → PG 호환 방식 재작성. (3) 008 migration 신규: `session_summaries` 테이블. ERR-082/083/084. | 0208C74 |
+| FIX-MIGRATION-002 | P2 | arch | migration-strategy.md 업데이트: 007/008 마이그레이션 + messages 컬럼 변경사항 문서화. ERR-085. | 0208C74 |
 
 ## Cancelled
 

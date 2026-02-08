@@ -7,19 +7,25 @@
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"dev": "node --watch ./src/main.ts",
+		"dev": "tsx --env-file=../../.env --watch ./src/main.ts",
 		"start": "node ./dist/main.js"
 	},
 	"dependencies": {
-		"@axel/core": "workspace:*",
-		"@axel/infra": "workspace:*",
+		"@anthropic-ai/sdk": "^0.74.0",
 		"@axel/channels": "workspace:*",
+		"@axel/core": "workspace:*",
 		"@axel/gateway": "workspace:*",
-		"zod": "^4.3.6",
-		"pino": "^9.7.0"
+		"@axel/infra": "workspace:*",
+		"@google/generative-ai": "^0.24.1",
+		"ioredis": "^5.9.2",
+		"pg": "^8.18.0",
+		"pino": "^9.7.0",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@types/node": "^22.10.5",
+		"@types/pg": "^8.16.0",
+		"tsx": "^4.21.0",
 		"typescript": "^5.7.3",
 		"vitest": "^3.0.8"
 	}
