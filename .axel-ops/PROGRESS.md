@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **B: CORE SPRINT — ACTIVE**
-- **Cycle**: 32
-- **Last Updated**: 2026-02-08C32
-- **STATUS**: **Phase B in progress.** SYNC-001 (arch), CORE-001 (dev-core), SCAFFOLD-007 (devops) assigned and in progress. CORE-001 dependency on SYNC-001 relaxed — plan §3.5 provides sufficient spec for parallel execution. Critical path: CORE-001 → CORE-002 → QA-012.
+- **Cycle**: 34
+- **Last Updated**: 2026-02-08C34
+- **STATUS**: **Phase B 60% complete.** CORE-002 (decay) + CORE-005 (persona) merged to main. DEVOPS-001 (coverage tooling) done. Smoke test: 121 tests pass, lint+typecheck clean, coverage 90%+. CORE-003 (memory layers) assigned to dev-core. QA-012 (core types + decay review) assigned to quality. Arch activated for PLAN_SYNC update. Critical path: CORE-003 → CORE-004 → CORE-006.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 6 |
-| In Progress | 3 |
-| Done | 44 |
+| Queued | 2 |
+| In Progress | 2 |
+| Done | 50 |
 | Cancelled | 13 |
 
 ## Open Errors: 0
@@ -38,38 +38,27 @@
 | 11 | 0208 | **CONVERGENCE.** WP-4 completed (6466f1d): ADR-003 updated with PG-first write pattern, 5 critical functions error handling. ERR-010 partially resolved (ADR done, plan body pending), ERR-038 resolved. QA-008 completed: quality gate re-verification — **3 PASS** (Completeness, Traceability, Sources), **2 CONDITIONAL PASS** (Consistency, Feasibility). 3 new issues found (ERR-047~049): React→Svelte plan refs, ToolDefinition dup, latency citation. All absorbed into FIX-MED. **FIX-MED assigned to Arch** — last major task. QA-009 queued (final sign-off, depends FIX-MED). No drift. No P0 blockers. |
 | 12 | 0208 | **NEAR-FINAL.** FIX-MED completed (commit 38472fa): 22 MEDIUM/LOW issues resolved in plan body. Key fixes: React→Svelte refs (3 locations), ToolDefinition dedup, LlmProvider.embed() removal, DI container ~20 services, TTFT/Docker qualifiers, Redis shadow write in plan, credential redaction spec, security test cases, channel reconnection lifecycle, streaming error handling, PersonaEngine hot-reload, Meta Memory feedback loop. **QA-009 assigned to Quality** — final sign-off. If PASS on all 5 gates → plan finalization. No drift. No P0 blockers. Open errors: 25→1 (ERR-QG1 CONDITIONAL pending QA-009). |
 | 13 | 0208 | **PLAN FINALIZED.** QA-009 completed (commit 9ac0aeb): ALL 5 CONSTITUTION §3 quality gates PASS — Consistency, Completeness, Traceability, Feasibility, Sources. ERR-QG1 RESOLVED. Open errors: 1→0. Total tasks completed: 30. Total errors resolved: 48. No drift. No blockers. **Planning phase complete.** All Divisions idle. Awaiting human decision on implementation phase kickoff. |
-| 14 | 0208 | **STEADY STATE.** No drift detected. No new comms from any Division. All state files current. 0 queued, 0 in progress, 30 done, 0 errors. Planning phase complete — awaiting human decision on implementation kickoff. |
-| 15 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 30 done, 0 errors. Awaiting human decision on implementation kickoff. |
-| 16 | 0208 | **AUDIT CYCLE.** No drift. No new Division comms (Audit Division created but not yet active). AUDIT-001 formally assigned to Audit Division — embedding 768d→3072d factual correction + ADR/plan cross-check + model/version verification. 0 queued, 1 in progress, 30 done, 0 errors. |
-| 17 | 0208 | **AUDIT RESULTS PROCESSED.** AUDIT-001 completed: 34 findings (22 HIGH, 8 MEDIUM, 4 LOW). Arch EMBED-3072 completed: 6 files updated for 768d→3072d. Quality QA-010 completed: proactive impact analysis + drift check PASS. 7 residual findings remain (ERR-050~056). FIX-AUDIT assigned to Arch (residual corrections: ADR-016 max tokens, v2-open-items React→Svelte, migration-strategy 3072d recalc, rate limit). QA-011 queued (depends FIX-AUDIT). No drift. No P0 blockers. Open errors: 0→7. |
-| 18 | 0209 | **AUDIT REMEDIATION COMPLETE.** FIX-AUDIT done (a59952b): ERR-050~056 corrected + 4 additional MEDIUM fixes (AUD-023~026). Plan v2.0.3. AUDIT-002 follow-up done (322b29f): 11 findings, most overlap with FIX-AUDIT. Quality QA-011-PREP: baseline analysis + checklist prepared. All 3 branches merged to main. Open errors: 7→3 (2 MEDIUM, 1 LOW). QA-011 in progress. No drift. No P0 blockers. |
-| 19 | 0209 | **No new output.** QA-011 in progress. All other Divisions idle. |
-| 20 | 0209 | **PLAN CLOSURE APPROVED.** QA-011 completed: 4 PASS, 1 CONDITIONAL PASS. ERR-057~059 resolved/closed. 3 new MEDIUM items (ERR-060~062): ADR-013 IVFFlat remnant, migration-strategy IVFFlat text, hot_memories MV SQL diff. FIX-PRE-IMPL assigned to Arch — last cleanup before implementation kickoff. No drift. No P0 blockers. Open errors: 3→0→3 (turnover). |
-| 21 | 0209 | **PLAN CLOSURE 100% COMPLETE.** FIX-PRE-IMPL done (f553f8f): ERR-060~062 resolved. Plan v2.0.4. All consistency items fixed. 0 queued, 0 in progress, 37 done, 0 open errors. All Divisions idle. **AWAITING HUMAN DECISION: Implementation Phase A kickoff.** |
-| 22 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 37 done, 0 errors. Awaiting human decision on Phase A kickoff. |
-| 23 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 37 done, 0 errors. Awaiting human decision on Phase A kickoff. |
-| 24 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 37 done, 0 errors. Awaiting human decision on Phase A kickoff. |
-| 25 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 37 done, 0 errors. Awaiting human decision on Phase A kickoff. |
-| 26 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 37 done, 0 errors. Awaiting human decision on Phase A kickoff. |
-| 27 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 37 done, 0 errors. Awaiting human decision on Phase A kickoff. |
-| 28 | 0208 | **PHASE A KICKOFF.** Autonomous phase transition (Plan Closure complete cycle 21, 6-cycle steady-state anti-pattern broken). BACKLOG populated: SCAFFOLD-001~007 (devops) + SYNC-001 (arch). SCAFFOLD-001/002/003 assigned (P0, no deps). DevOps + Arch activated. |
-| 29 | 0208 | **Phase A in progress.** DevOps SCAFFOLD-001/002/003 in progress (1 cycle, no report — normal). SCAFFOLD-006 (docker-compose, no deps) additionally assigned. No drift. No errors. |
-| 30 | 0208 | **SCAFFOLD-001~006 COMPLETE but REVERTED.** DevOps reported 6 tasks done + ENV issue (Node.js 18, pnpm missing). Merge to main reverted by human (0afbf38). Ownership violation detected (ERR-063: core/src/types/index.ts). SCAFFOLD-FIX created. ENV-001 P0 blocker escalated. |
-| 31 | 0208 | **PHASE A MILESTONE ACHIEVED.** ENV-001 resolved: Node.js 22.13.1, pnpm 9.15.4 (npx). ERR-063 resolved (SCAFFOLD-FIX 5b4de15). div/devops reapplied (e004ae2). Milestone verified: install, typecheck, test, lint all pass. SCAFFOLD-001~006 + SCAFFOLD-FIX Done. Phase A complete. |
-| 32 | 0208 | **PHASE B ACTIVE.** SYNC-001 (arch), CORE-001 (dev-core), SCAFFOLD-007 (devops) assigned in parallel. CORE-001 SYNC-001 dependency relaxed (plan §3.5 sufficient). 3 in progress, 6 queued, 0 errors. No drift. |
+| 14–27 | 0208 | STEADY STATE. Awaiting Phase A kickoff (6 cycles idle anti-pattern). |
+| 28 | 0208 | **PHASE A KICKOFF.** Autonomous phase transition. BACKLOG populated: SCAFFOLD-001~007 (devops) + SYNC-001 (arch). SCAFFOLD-001/002/003 assigned (P0, no deps). DevOps + Arch activated. |
+| 29 | 0208 | **Phase A in progress.** DevOps SCAFFOLD-001/002/003 in progress. SCAFFOLD-006 additionally assigned. |
+| 30 | 0208 | **SCAFFOLD-001~006 COMPLETE but REVERTED.** ENV issue (Node.js 18). ERR-063 ownership violation. SCAFFOLD-FIX created. ENV-001 P0 escalated. |
+| 31 | 0208 | **PHASE A MILESTONE ACHIEVED.** ENV-001 resolved. ERR-063 resolved. Milestone verified: install+typecheck+test+lint pass. |
+| 32 | 0208 | **PHASE B ACTIVE.** SYNC-001 (arch), CORE-001 (dev-core), SCAFFOLD-007 (devops) assigned. CORE-001/SYNC-001 dep relaxed. |
+| 33 | 0208 | **3 TASKS COMPLETED.** SYNC-001 (PLAN_SYNC.md Phase B contracts), CORE-001 (55 tests, 10 src files), SCAFFOLD-007 (CI pipeline). Merge reverts resolved via checkout. Smoke test PASS. CORE-002 + CORE-005 assigned (parallel, no deps). DEVOPS-001 queued (coverage tooling). |
+| 34 | 0208 | **3 TASKS COMPLETED + MERGE.** CORE-002 (decay, 34 tests), CORE-005 (persona, 32 tests) merged to main. DEVOPS-001 (coverage-v8) done by CTO. Lint fixes applied (Biome). Smoke test: 121 tests, typecheck+lint clean, coverage 93%+. CORE-003 assigned. QA-012 assigned. Arch activated for PLAN_SYNC. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C32 | Cycle 32 | Active |
-| Architecture | 0208C32 | SYNC-001 | Active |
-| Dev-Core | 0208C32 | CORE-001 | Active |
+| Coordinator | 0208C34 | Cycle 34 | Active |
+| Architecture | 0208C34 | SYNC-002 | Activated (PLAN_SYNC update for CORE-002/005) |
+| Dev-Core | 0208C34 | CORE-003 | Active (memory layers) |
 | Dev-Infra | — | — | Pending Phase C |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0209T0335 | — | Idle |
-| DevOps | 0208C32 | SCAFFOLD-007 | Active |
+| Quality | 0208C34 | QA-012 | Active (core types + decay review) |
+| DevOps | 0208C34 | — | Idle (DEVOPS-001 done) |
 | Audit | 0209T0031 | — | Idle |
 
 ## Human Intervention Needed

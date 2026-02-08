@@ -26,5 +26,8 @@ __pycache__/
 # Logs (keep structure, ignore contents)
 .axel-ops/logs/*.log
 
+# Coverage
+coverage/
+
 # Claude Code
 .claude/

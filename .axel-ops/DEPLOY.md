@@ -6,8 +6,8 @@
 
 | Component | Status | Version | Notes |
 |-----------|--------|---------|-------|
-| Node.js | ⚠️ MISMATCH | 18.19.1 (need 22 LTS) | Runtime — upgrade required |
-| pnpm | ❌ MISSING | — (need 9.x) | Package manager — install required |
+| Node.js | ✅ READY | 22.13.1 | Runtime — ready for Phase B |
+| pnpm | ✅ READY | 9.15.4 (via npx) | Package manager — functional |
 | PostgreSQL | ⏳ PENDING | 17 | + pgvector extension |
 | Redis | ⏳ PENDING | 7 | Ephemeral cache |
 | Docker Compose | ⏳ PENDING | — | Dev environment |
@@ -41,7 +41,12 @@ File: `docker/docker-compose.dev.yml`
 
 | Workflow | Trigger | Steps | Status |
 |----------|---------|-------|--------|
-| CI | push, PR | lint → typecheck → test | NOT_CREATED |
+| CI | push to main, PRs | lint → typecheck → test | ✅ CREATED |
+
+File: `.github/workflows/ci.yml`
+- Node.js 22, pnpm 9
+- pnpm store caching enabled
+- Sequential: lint → typecheck → test
 
 ## Release History
 
