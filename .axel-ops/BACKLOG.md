@@ -2,23 +2,19 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 43**: **Phase C (Infra Sprint) 56%.** 5/9 tasks done: INFRA-001, INFRA-004, COMMON-CB, DEVOPS-002, DEVOPS-003 merged. 419 tests pass. 3 INFRA tasks + QA-016 + SYNC-004 remaining.
+> **Cycle 44**: **Phase C (Infra Sprint) 89%.** 9/9 coding tasks done. 475 tests pass. Lint 0 errors. QA-016 (quality review) + SYNC-004 (PLAN_SYNC) remaining.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| QA-016 | P1 | quality | Phase C code review — all INFRA modules. TDD, §9 boundary, coverage 80%+. | INFRA-002, INFRA-003, INFRA-005 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| INFRA-002 | dev-infra | 0208C43 | C45 |
-| INFRA-003 | dev-infra | 0208C43 | C45 |
-| INFRA-005 | dev-infra | 0208C43 | C45 |
-| SYNC-004 | arch | 0208C43 | C44 |
-| DEVOPS-004 | devops | 0208C43 | C44 |
+| QA-016 | quality | 0208C44 | C46 |
+| SYNC-004 | arch | 0208C43 | C45 |
 
 ## Cancelled
 
@@ -104,3 +100,7 @@
 | INFRA-001 | dev-infra | 0208C43 | L2 PG persistence: 6 adapters (Episodic, Semantic, Conceptual, Meta, Session, Pool). 62 tests, 95.5% stmt. ADR-002/013/021. |
 | INFRA-004 | dev-infra | 0208C43 | L5 Embedding: GeminiEmbeddingService, 3072d, batch, retry, circuit breaker. 16 tests, 99.18% stmt. ADR-016. |
 | COMMON-CB | dev-infra | 0208C43 | Circuit breaker (ADR-021): closed→open→half_open state machine. 11 tests, 100% stmt. packages/infra/src/common/. |
+| INFRA-002 | dev-infra | 0208C44 | L2 Redis cache: RedisWorkingMemory (PG-first, cache-aside, TTL 3600s) + RedisStreamBuffer (Redis Streams). 25 tests, 91.44% stmt. ADR-003. |
+| INFRA-003 | dev-infra | 0208C44 | L5 LLM adapters: AnthropicLlmProvider + GoogleLlmProvider. Streaming, tool calling, circuit breaker. 15 tests, 95.89% stmt. ADR-020/021. |
+| INFRA-005 | dev-infra | 0208C44 | L6 MCP registry: defineTool(), ToolRegistry, McpToolExecutor, validatePath. 16 tests, 92.12% stmt. ADR-010. |
+| DEVOPS-004 | devops | 0208C44 | Core subpath exports: @axel/core/{types,memory,decay,context,persona,orchestrator}. 475 tests pass. |

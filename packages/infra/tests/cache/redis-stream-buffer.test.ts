@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StreamEventType } from '../../../core/src/memory/types.js';
 
 // ─── Mock Types ───
@@ -30,8 +30,7 @@ function makeEventInput(overrides?: Record<string, unknown>) {
 	};
 }
 
-const importModule = async () =>
-	import('../../src/cache/redis-stream-buffer.js');
+const importModule = async () => import('../../src/cache/redis-stream-buffer.js');
 
 describe('RedisStreamBuffer', () => {
 	let redis: MockRedisClient;
@@ -88,13 +87,16 @@ describe('RedisStreamBuffer', () => {
 			redis.xrange.mockResolvedValue([
 				[
 					'1707400000000-0',
-					['data', JSON.stringify({
-						type: 'typing_start',
-						userId: 'user-1',
-						channelId: 'discord',
-						timestamp: '2026-02-08T10:00:00.000Z',
-						metadata: {},
-					})],
+					[
+						'data',
+						JSON.stringify({
+							type: 'typing_start',
+							userId: 'user-1',
+							channelId: 'discord',
+							timestamp: '2026-02-08T10:00:00.000Z',
+							metadata: {},
+						}),
+					],
 				],
 			]);
 
@@ -131,13 +133,7 @@ describe('RedisStreamBuffer', () => {
 				// empty
 			}
 
-			expect(redis.xrange).toHaveBeenCalledWith(
-				'axel:stream:events',
-				'-',
-				'+',
-				'COUNT',
-				5,
-			);
+			expect(redis.xrange).toHaveBeenCalledWith('axel:stream:events', '-', '+', 'COUNT', 5);
 		});
 	});
 
@@ -150,12 +146,7 @@ describe('RedisStreamBuffer', () => {
 			const removed = await sb.trim(100);
 
 			expect(removed).toBe(3);
-			expect(redis.xtrim).toHaveBeenCalledWith(
-				'axel:stream:events',
-				'MAXLEN',
-				'~',
-				100,
-			);
+			expect(redis.xtrim).toHaveBeenCalledWith('axel:stream:events', 'MAXLEN', '~', 100);
 		});
 	});
 

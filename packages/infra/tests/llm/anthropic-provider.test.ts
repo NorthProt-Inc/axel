@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LlmChatChunk, LlmChatParams } from '../../../core/src/orchestrator/types.js';
 import type { ToolDefinition } from '../../../core/src/types/tool.js';
 
@@ -44,7 +44,10 @@ function createMockAnthropicClient(): MockAnthropicClient {
 
 function makeTextStreamEvents(text: string) {
 	return [
-		{ type: 'message_start', message: { id: 'msg_1', type: 'message', role: 'assistant', content: [], stop_reason: null } },
+		{
+			type: 'message_start',
+			message: { id: 'msg_1', type: 'message', role: 'assistant', content: [], stop_reason: null },
+		},
 		{ type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } },
 		{ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } },
 		{ type: 'content_block_stop', index: 0 },
@@ -54,9 +57,20 @@ function makeTextStreamEvents(text: string) {
 
 function makeToolCallStreamEvents(toolName: string, args: Record<string, unknown>) {
 	return [
-		{ type: 'message_start', message: { id: 'msg_2', type: 'message', role: 'assistant', content: [], stop_reason: null } },
-		{ type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 'call_1', name: toolName } },
-		{ type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: JSON.stringify(args) } },
+		{
+			type: 'message_start',
+			message: { id: 'msg_2', type: 'message', role: 'assistant', content: [], stop_reason: null },
+		},
+		{
+			type: 'content_block_start',
+			index: 0,
+			content_block: { type: 'tool_use', id: 'call_1', name: toolName },
+		},
+		{
+			type: 'content_block_delta',
+			index: 0,
+			delta: { type: 'input_json_delta', partial_json: JSON.stringify(args) },
+		},
 		{ type: 'content_block_stop', index: 0 },
 		{ type: 'message_stop' },
 	];
@@ -64,7 +78,10 @@ function makeToolCallStreamEvents(toolName: string, args: Record<string, unknown
 
 function makeThinkingStreamEvents(thinking: string) {
 	return [
-		{ type: 'message_start', message: { id: 'msg_3', type: 'message', role: 'assistant', content: [], stop_reason: null } },
+		{
+			type: 'message_start',
+			message: { id: 'msg_3', type: 'message', role: 'assistant', content: [], stop_reason: null },
+		},
 		{ type: 'content_block_start', index: 0, content_block: { type: 'thinking', thinking: '' } },
 		{ type: 'content_block_delta', index: 0, delta: { type: 'thinking_delta', thinking } },
 		{ type: 'content_block_stop', index: 0 },
@@ -81,8 +98,7 @@ async function* toAsyncIterable<T>(items: T[]): AsyncIterable<T> {
 	}
 }
 
-const importModule = async () =>
-	import('../../src/llm/anthropic-provider.js');
+const importModule = async () => import('../../src/llm/anthropic-provider.js');
 
 describe('AnthropicLlmProvider', () => {
 	let client: MockAnthropicClient;
@@ -98,19 +114,28 @@ describe('AnthropicLlmProvider', () => {
 				model: 'claude-sonnet-4-5-20250929',
 				maxTokens: 4096,
 			});
-			client.messages.create.mockReturnValue(
-				toAsyncIterable(makeTextStreamEvents('Hello!')),
-			);
+			client.messages.create.mockReturnValue(toAsyncIterable(makeTextStreamEvents('Hello!')));
 
 			const chunks: LlmChatChunk[] = [];
 			for await (const chunk of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Hi',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
 				tools: [],
 			})) {
 				chunks.push(chunk);
 			}
 
-			expect(chunks.some(c => c.type === 'text' && c.content === 'Hello!')).toBe(true);
+			expect(chunks.some((c) => c.type === 'text' && c.content === 'Hello!')).toBe(true);
 		});
 	});
 
@@ -127,19 +152,32 @@ describe('AnthropicLlmProvider', () => {
 
 			const chunks: LlmChatChunk[] = [];
 			for await (const chunk of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Read file', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
-				tools: [{
-					name: 'read_file',
-					description: 'Read a file',
-					category: 'file',
-					inputSchema: {},
-					requiresApproval: false,
-				}],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Read file',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
+				tools: [
+					{
+						name: 'read_file',
+						description: 'Read a file',
+						category: 'file',
+						inputSchema: {},
+						requiresApproval: false,
+					},
+				],
 			})) {
 				chunks.push(chunk);
 			}
 
-			const toolChunk = chunks.find(c => c.type === 'tool_call');
+			const toolChunk = chunks.find((c) => c.type === 'tool_call');
 			expect(toolChunk).toBeDefined();
 			if (toolChunk?.type === 'tool_call') {
 				expect(toolChunk.content.toolName).toBe('read_file');
@@ -161,14 +199,25 @@ describe('AnthropicLlmProvider', () => {
 
 			const chunks: LlmChatChunk[] = [];
 			for await (const chunk of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Complex question', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Complex question',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
 				tools: [],
 			})) {
 				chunks.push(chunk);
 			}
 
-			expect(chunks.some(c => c.type === 'thinking')).toBe(true);
-			expect(chunks.some(c => c.type === 'text')).toBe(true);
+			expect(chunks.some((c) => c.type === 'thinking')).toBe(true);
+			expect(chunks.some((c) => c.type === 'text')).toBe(true);
 		});
 	});
 
@@ -186,7 +235,18 @@ describe('AnthropicLlmProvider', () => {
 			const chunks: LlmChatChunk[] = [];
 			await expect(async () => {
 				for await (const chunk of provider.chat({
-					messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Hi',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
 					tools: [],
 				})) {
 					chunks.push(chunk);
@@ -209,7 +269,18 @@ describe('AnthropicLlmProvider', () => {
 
 			try {
 				for await (const _ of provider.chat({
-					messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Hi',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
 					tools: [],
 				})) {
 					// consume
@@ -236,7 +307,18 @@ describe('AnthropicLlmProvider', () => {
 
 			try {
 				for await (const _ of provider.chat({
-					messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Hi',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
 					tools: [],
 				})) {
 					// consume
@@ -256,26 +338,37 @@ describe('AnthropicLlmProvider', () => {
 				model: 'claude-sonnet-4-5-20250929',
 				maxTokens: 4096,
 			});
-			client.messages.create.mockReturnValue(
-				toAsyncIterable(makeTextStreamEvents('OK')),
-			);
+			client.messages.create.mockReturnValue(toAsyncIterable(makeTextStreamEvents('OK')));
 
-			const tools: ToolDefinition[] = [{
-				name: 'test_tool',
-				description: 'A test tool',
-				category: 'system',
-				inputSchema: { type: 'object', properties: { x: { type: 'number' } } },
-				requiresApproval: false,
-			}];
+			const tools: ToolDefinition[] = [
+				{
+					name: 'test_tool',
+					description: 'A test tool',
+					category: 'system',
+					inputSchema: { type: 'object', properties: { x: { type: 'number' } } },
+					requiresApproval: false,
+				},
+			];
 
 			for await (const _ of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Use tool', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Use tool',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
 				tools,
 			})) {
 				// consume
 			}
 
-			const createArgs = client.messages.create.mock.calls[0]![0] as Record<string, unknown>;
+			const createArgs = client.messages.create.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(createArgs.tools).toBeDefined();
 			expect((createArgs.tools as any[])[0].name).toBe('test_tool');
 		});
@@ -286,18 +379,27 @@ describe('AnthropicLlmProvider', () => {
 				model: 'claude-sonnet-4-5-20250929',
 				maxTokens: 4096,
 			});
-			client.messages.create.mockReturnValue(
-				toAsyncIterable(makeTextStreamEvents('OK')),
-			);
+			client.messages.create.mockReturnValue(toAsyncIterable(makeTextStreamEvents('OK')));
 
 			for await (const _ of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Hi',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
 				tools: [],
 			})) {
 				// consume
 			}
 
-			const createArgs = client.messages.create.mock.calls[0]![0] as Record<string, unknown>;
+			const createArgs = client.messages.create.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(createArgs.stream).toBe(true);
 		});
 	});

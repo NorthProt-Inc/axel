@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LlmChatChunk } from '../../../core/src/orchestrator/types.js';
 
 // ─── Mock Google Generative AI Client ───
@@ -56,8 +56,7 @@ function makeToolCallStreamResponse(toolName: string, args: Record<string, unkno
 	};
 }
 
-const importModule = async () =>
-	import('../../src/llm/google-provider.js');
+const importModule = async () => import('../../src/llm/google-provider.js');
 
 describe('GoogleLlmProvider', () => {
 	let model: MockGoogleModel;
@@ -76,19 +75,28 @@ describe('GoogleLlmProvider', () => {
 			const provider = new GoogleLlmProvider(client as any, {
 				model: 'gemini-2.0-flash',
 			});
-			model.generateContentStream.mockResolvedValue(
-				makeTextStreamResponse('Bonjour!'),
-			);
+			model.generateContentStream.mockResolvedValue(makeTextStreamResponse('Bonjour!'));
 
 			const chunks: LlmChatChunk[] = [];
 			for await (const chunk of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Salut', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Salut',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
 				tools: [],
 			})) {
 				chunks.push(chunk);
 			}
 
-			expect(chunks.some(c => c.type === 'text' && c.content === 'Bonjour!')).toBe(true);
+			expect(chunks.some((c) => c.type === 'text' && c.content === 'Bonjour!')).toBe(true);
 		});
 	});
 
@@ -104,19 +112,32 @@ describe('GoogleLlmProvider', () => {
 
 			const chunks: LlmChatChunk[] = [];
 			for await (const chunk of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Search', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
-				tools: [{
-					name: 'search_web',
-					description: 'Search the web',
-					category: 'research',
-					inputSchema: {},
-					requiresApproval: false,
-				}],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Search',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
+				tools: [
+					{
+						name: 'search_web',
+						description: 'Search the web',
+						category: 'research',
+						inputSchema: {},
+						requiresApproval: false,
+					},
+				],
 			})) {
 				chunks.push(chunk);
 			}
 
-			const toolChunk = chunks.find(c => c.type === 'tool_call');
+			const toolChunk = chunks.find((c) => c.type === 'tool_call');
 			expect(toolChunk).toBeDefined();
 			if (toolChunk?.type === 'tool_call') {
 				expect(toolChunk.content.toolName).toBe('search_web');
@@ -135,7 +156,18 @@ describe('GoogleLlmProvider', () => {
 
 			try {
 				for await (const _ of provider.chat({
-					messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Hi',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
 					tools: [],
 				})) {
 					// consume
@@ -158,7 +190,18 @@ describe('GoogleLlmProvider', () => {
 
 			try {
 				for await (const _ of provider.chat({
-					messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Hi',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
 					tools: [],
 				})) {
 					// consume
@@ -182,7 +225,18 @@ describe('GoogleLlmProvider', () => {
 
 			try {
 				for await (const _ of provider.chat({
-					messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
+					messages: [
+						{
+							sessionId: 's1',
+							turnId: 1,
+							role: 'user',
+							content: 'Hi',
+							channelId: 'cli',
+							timestamp: new Date(),
+							emotionalContext: '',
+							metadata: {},
+						},
+					],
 					tools: [],
 				})) {
 					// consume
@@ -201,14 +255,30 @@ describe('GoogleLlmProvider', () => {
 			const provider = new GoogleLlmProvider(client as any, {
 				model: 'gemini-2.0-flash',
 			});
-			model.generateContentStream.mockResolvedValue(
-				makeTextStreamResponse('Hi'),
-			);
+			model.generateContentStream.mockResolvedValue(makeTextStreamResponse('Hi'));
 
 			for await (const _ of provider.chat({
 				messages: [
-					{ sessionId: 's1', turnId: 1, role: 'system', content: 'You are Axel', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} },
-					{ sessionId: 's1', turnId: 2, role: 'user', content: 'Hello', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} },
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'system',
+						content: 'You are Axel',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+					{
+						sessionId: 's1',
+						turnId: 2,
+						role: 'user',
+						content: 'Hello',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
 				],
 				tools: [],
 			})) {
@@ -216,7 +286,7 @@ describe('GoogleLlmProvider', () => {
 			}
 
 			expect(model.generateContentStream).toHaveBeenCalledOnce();
-			const args = model.generateContentStream.mock.calls[0]![0] as Record<string, unknown>;
+			const args = model.generateContentStream.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(args).toBeDefined();
 		});
 
@@ -225,24 +295,35 @@ describe('GoogleLlmProvider', () => {
 			const provider = new GoogleLlmProvider(client as any, {
 				model: 'gemini-2.0-flash',
 			});
-			model.generateContentStream.mockResolvedValue(
-				makeTextStreamResponse('OK'),
-			);
+			model.generateContentStream.mockResolvedValue(makeTextStreamResponse('OK'));
 
 			for await (const _ of provider.chat({
-				messages: [{ sessionId: 's1', turnId: 1, role: 'user', content: 'Hi', channelId: 'cli', timestamp: new Date(), emotionalContext: '', metadata: {} }],
-				tools: [{
-					name: 'test_tool',
-					description: 'Test',
-					category: 'system',
-					inputSchema: { type: 'object', properties: {} },
-					requiresApproval: false,
-				}],
+				messages: [
+					{
+						sessionId: 's1',
+						turnId: 1,
+						role: 'user',
+						content: 'Hi',
+						channelId: 'cli',
+						timestamp: new Date(),
+						emotionalContext: '',
+						metadata: {},
+					},
+				],
+				tools: [
+					{
+						name: 'test_tool',
+						description: 'Test',
+						category: 'system',
+						inputSchema: { type: 'object', properties: {} },
+						requiresApproval: false,
+					},
+				],
 			})) {
 				// consume
 			}
 
-			const callArgs = model.generateContentStream.mock.calls[0]![0] as Record<string, unknown>;
+			const callArgs = model.generateContentStream.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(callArgs).toBeDefined();
 		});
 	});

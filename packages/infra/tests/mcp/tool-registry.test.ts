@@ -1,9 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import type { ToolResult } from '../../../core/src/types/tool.js';
 
-const importModule = async () =>
-	import('../../src/mcp/tool-registry.js');
+const importModule = async () => import('../../src/mcp/tool-registry.js');
 
 describe('ToolRegistry', () => {
 	describe('defineTool', () => {
@@ -135,7 +134,7 @@ describe('ToolRegistry', () => {
 
 			const all = registry.listAll();
 			expect(all).toHaveLength(2);
-			expect(all.map(t => t.name)).toEqual(['tool_a', 'tool_b']);
+			expect(all.map((t) => t.name)).toEqual(['tool_a', 'tool_b']);
 		});
 
 		it('should throw on duplicate tool name', async () => {
@@ -158,24 +157,28 @@ describe('ToolRegistry', () => {
 			const { ToolRegistry, defineTool } = await importModule();
 			const registry = new ToolRegistry();
 
-			registry.register(defineTool({
-				name: 'file_tool',
-				description: 'File op',
-				category: 'file',
-				schema: z.object({}),
-				handler: async () => ({ callId: 'c1', success: true, content: null, durationMs: 0 }),
-			}));
-			registry.register(defineTool({
-				name: 'mem_tool',
-				description: 'Memory op',
-				category: 'memory',
-				schema: z.object({}),
-				handler: async () => ({ callId: 'c1', success: true, content: null, durationMs: 0 }),
-			}));
+			registry.register(
+				defineTool({
+					name: 'file_tool',
+					description: 'File op',
+					category: 'file',
+					schema: z.object({}),
+					handler: async () => ({ callId: 'c1', success: true, content: null, durationMs: 0 }),
+				}),
+			);
+			registry.register(
+				defineTool({
+					name: 'mem_tool',
+					description: 'Memory op',
+					category: 'memory',
+					schema: z.object({}),
+					handler: async () => ({ callId: 'c1', success: true, content: null, durationMs: 0 }),
+				}),
+			);
 
 			const fileTools = registry.listByCategory('file');
 			expect(fileTools).toHaveLength(1);
-			expect(fileTools[0]!.name).toBe('file_tool');
+			expect(fileTools[0]?.name).toBe('file_tool');
 		});
 	});
 });
@@ -185,18 +188,20 @@ describe('McpToolExecutor', () => {
 		const { ToolRegistry, defineTool, McpToolExecutor } = await importModule();
 		const registry = new ToolRegistry();
 
-		registry.register(defineTool({
-			name: 'add_numbers',
-			description: 'Add two numbers',
-			category: 'system',
-			schema: z.object({ a: z.number(), b: z.number() }),
-			handler: async (args) => ({
-				callId: 'c1',
-				success: true,
-				content: args.a + args.b,
-				durationMs: 1,
+		registry.register(
+			defineTool({
+				name: 'add_numbers',
+				description: 'Add two numbers',
+				category: 'system',
+				schema: z.object({ a: z.number(), b: z.number() }),
+				handler: async (args) => ({
+					callId: 'c1',
+					success: true,
+					content: args.a + args.b,
+					durationMs: 1,
+				}),
 			}),
-		}));
+		);
 
 		const executor = new McpToolExecutor(registry);
 		const result = await executor.execute(
@@ -227,18 +232,20 @@ describe('McpToolExecutor', () => {
 		const { ToolRegistry, defineTool, McpToolExecutor } = await importModule();
 		const registry = new ToolRegistry();
 
-		registry.register(defineTool({
-			name: 'strict_tool',
-			description: 'Requires specific input',
-			category: 'system',
-			schema: z.object({ name: z.string().min(1) }),
-			handler: async () => ({
-				callId: 'c1',
-				success: true,
-				content: 'ok',
-				durationMs: 1,
+		registry.register(
+			defineTool({
+				name: 'strict_tool',
+				description: 'Requires specific input',
+				category: 'system',
+				schema: z.object({ name: z.string().min(1) }),
+				handler: async () => ({
+					callId: 'c1',
+					success: true,
+					content: 'ok',
+					durationMs: 1,
+				}),
 			}),
-		}));
+		);
 
 		const executor = new McpToolExecutor(registry);
 		const result = await executor.execute(
@@ -254,15 +261,17 @@ describe('McpToolExecutor', () => {
 		const { ToolRegistry, defineTool, McpToolExecutor } = await importModule();
 		const registry = new ToolRegistry();
 
-		registry.register(defineTool({
-			name: 'failing_tool',
-			description: 'Always fails',
-			category: 'system',
-			schema: z.object({}),
-			handler: async () => {
-				throw new Error('Internal tool error');
-			},
-		}));
+		registry.register(
+			defineTool({
+				name: 'failing_tool',
+				description: 'Always fails',
+				category: 'system',
+				schema: z.object({}),
+				handler: async () => {
+					throw new Error('Internal tool error');
+				},
+			}),
+		);
 
 		const executor = new McpToolExecutor(registry);
 		const result = await executor.execute(
@@ -278,16 +287,18 @@ describe('McpToolExecutor', () => {
 		const { ToolRegistry, defineTool, McpToolExecutor } = await importModule();
 		const registry = new ToolRegistry();
 
-		registry.register(defineTool({
-			name: 'slow_tool',
-			description: 'Very slow',
-			category: 'system',
-			schema: z.object({}),
-			handler: async () => {
-				await new Promise(resolve => setTimeout(resolve, 10_000));
-				return { callId: 'c1', success: true, content: 'done', durationMs: 10000 };
-			},
-		}));
+		registry.register(
+			defineTool({
+				name: 'slow_tool',
+				description: 'Very slow',
+				category: 'system',
+				schema: z.object({}),
+				handler: async () => {
+					await new Promise((resolve) => setTimeout(resolve, 10_000));
+					return { callId: 'c1', success: true, content: 'done', durationMs: 10000 };
+				},
+			}),
+		);
 
 		const executor = new McpToolExecutor(registry);
 		const result = await executor.execute(
@@ -305,35 +316,45 @@ describe('McpToolExecutor', () => {
 			const registry = new ToolRegistry();
 			const allowlist = ['git', 'ls', 'cat'];
 
-			registry.register(defineTool({
-				name: 'execute_command',
-				description: 'Execute a system command',
-				category: 'system',
-				schema: z.object({
-					command: z.string(),
-					args: z.array(z.string()).default([]),
+			registry.register(
+				defineTool({
+					name: 'execute_command',
+					description: 'Execute a system command',
+					category: 'system',
+					schema: z.object({
+						command: z.string(),
+						args: z.array(z.string()).default([]),
+					}),
+					requiresApproval: true,
+					handler: async (input) => ({
+						callId: 'c1',
+						success: true,
+						content: `executed: ${input.command}`,
+						durationMs: 5,
+					}),
 				}),
-				requiresApproval: true,
-				handler: async (input) => ({
-					callId: 'c1',
-					success: true,
-					content: `executed: ${input.command}`,
-					durationMs: 5,
-				}),
-			}));
+			);
 
 			const executor = new McpToolExecutor(registry, { commandAllowlist: allowlist });
 
 			// Allowed command
 			const okResult = await executor.execute(
-				{ toolName: 'execute_command', args: { command: 'git', args: ['status'] }, callId: 'call-ok' },
+				{
+					toolName: 'execute_command',
+					args: { command: 'git', args: ['status'] },
+					callId: 'call-ok',
+				},
 				5000,
 			);
 			expect(okResult.success).toBe(true);
 
 			// Blocked command
 			const blockedResult = await executor.execute(
-				{ toolName: 'execute_command', args: { command: 'rm', args: ['-rf', '/'] }, callId: 'call-bad' },
+				{
+					toolName: 'execute_command',
+					args: { command: 'rm', args: ['-rf', '/'] },
+					callId: 'call-bad',
+				},
 				5000,
 			);
 			expect(blockedResult.success).toBe(false);

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Turn } from '../../../core/src/memory/types.js';
 
 // ─── Mock Types ───
@@ -46,8 +46,7 @@ function makeTurn(overrides?: Partial<Turn>): Turn {
 }
 
 // Deferred import — source file does not exist yet (RED phase)
-const importModule = async () =>
-	import('../../src/cache/redis-working-memory.js');
+const importModule = async () => import('../../src/cache/redis-working-memory.js');
 
 describe('RedisWorkingMemory', () => {
 	let redis: MockRedisClient;
@@ -95,11 +94,8 @@ describe('RedisWorkingMemory', () => {
 
 			await wm.pushTurn('user-1', turn);
 
-			expect(redis.rpush).toHaveBeenCalledWith(
-				'axel:working:user-1:turns',
-				expect.any(String),
-			);
-			const serialized = redis.rpush.mock.calls[0]![1] as string;
+			expect(redis.rpush).toHaveBeenCalledWith('axel:working:user-1:turns', expect.any(String));
+			const serialized = redis.rpush.mock.calls[0]?.[1] as string;
 			const parsed = JSON.parse(serialized);
 			expect(parsed.content).toBe('Hello Axel');
 		});
@@ -110,15 +106,8 @@ describe('RedisWorkingMemory', () => {
 
 			await wm.pushTurn('user-1', makeTurn());
 
-			expect(redis.ltrim).toHaveBeenCalledWith(
-				'axel:working:user-1:turns',
-				-20,
-				-1,
-			);
-			expect(redis.expire).toHaveBeenCalledWith(
-				'axel:working:user-1:turns',
-				3600,
-			);
+			expect(redis.ltrim).toHaveBeenCalledWith('axel:working:user-1:turns', -20, -1);
+			expect(redis.expire).toHaveBeenCalledWith('axel:working:user-1:turns', 3600);
 		});
 
 		it('should still succeed if Redis fails (PG is source of truth)', async () => {
@@ -141,7 +130,7 @@ describe('RedisWorkingMemory', () => {
 			const result = await wm.getTurns('user-1', 20);
 
 			expect(result).toHaveLength(1);
-			expect(result[0]!.content).toBe('Hello Axel');
+			expect(result[0]?.content).toBe('Hello Axel');
 			expect(pg.query).not.toHaveBeenCalled();
 		});
 
@@ -165,7 +154,7 @@ describe('RedisWorkingMemory', () => {
 			const result = await wm.getTurns('user-1', 20);
 
 			expect(result).toHaveLength(1);
-			expect(result[0]!.content).toBe('From PG');
+			expect(result[0]?.content).toBe('From PG');
 			expect(pg.query).toHaveBeenCalled();
 		});
 
@@ -189,7 +178,7 @@ describe('RedisWorkingMemory', () => {
 			const result = await wm.getTurns('user-1', 20);
 
 			expect(result).toHaveLength(1);
-			expect(result[0]!.content).toBe('PG fallback');
+			expect(result[0]?.content).toBe('PG fallback');
 		});
 
 		it('should respect the limit parameter', async () => {
@@ -198,11 +187,7 @@ describe('RedisWorkingMemory', () => {
 
 			await wm.getTurns('user-1', 5);
 
-			expect(redis.lrange).toHaveBeenCalledWith(
-				'axel:working:user-1:turns',
-				-5,
-				-1,
-			);
+			expect(redis.lrange).toHaveBeenCalledWith('axel:working:user-1:turns', -5, -1);
 		});
 	});
 
