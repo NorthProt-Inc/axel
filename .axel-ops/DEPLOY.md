@@ -6,12 +6,13 @@
 
 | Component | Status | Version | Notes |
 |-----------|--------|---------|-------|
-| Node.js | ✅ READY | 22.13.1 | Runtime — ready for Phase B |
+| Node.js | ✅ READY | 22.13.1 | Runtime — ready for Phase E |
 | pnpm | ✅ READY | 9.15.4 (via npx) | Package manager — functional |
-| PostgreSQL | ⏳ PENDING | 17 | + pgvector extension |
-| Redis | ⏳ PENDING | 7 | Ephemeral cache |
-| Docker Compose | ⏳ PENDING | — | Dev environment |
-| GitHub Actions | ⏳ PENDING | — | CI/CD |
+| PostgreSQL | ✅ READY | 17 + pgvector 0.8.1 | Docker Compose running, schema migrated (6 migrations applied) |
+| Redis | ✅ READY | 7 Alpine | Docker Compose running |
+| Docker Compose | ✅ READY | — | Dev environment operational |
+| GitHub Actions | ✅ READY | — | CI workflow active |
+| Migration Tool | ✅ READY | @axel/migrate 0.1.0 | DB migration runner (tools/migrate/), 10 tests pass |
 
 ## Monorepo Scaffolding
 
@@ -110,7 +111,58 @@ File: `.github/workflows/ci.yml`
 | `@axel/gateway/middleware` | `./src/middleware/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
 | `@axel/gateway/websocket` | `./src/websocket/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
 
-**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 508 tests pass (C48), typecheck+lint clean.
+**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 646 tests pass (C55), typecheck+lint clean.
+
+## Migration Tool
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| `@axel/migrate` | ✅ OPERATIONAL | TypeScript migration runner in tools/migrate/ |
+| Runner Implementation | ✅ COMPLETE | migrator.ts (sequential, transactional, idempotent) |
+| CLI | ✅ COMPLETE | cli.ts (up/down/status commands) |
+| SQL Migrations | ✅ COMPLETE | 6 migrations (001-006) with rollback support |
+| Tests | ✅ PASS | 10 tests, testcontainers (PG17+pgvector) |
+| Docker Compose Integration | ✅ VERIFIED | All 6 migrations applied to axel-postgres container |
+
+### Migrations Applied
+
+| Version | Name | Status | Applied At |
+|---------|------|--------|------------|
+| 001 | extensions | ✅ APPLIED | 2026-02-08 18:00:42 |
+| 002 | episodic_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
+| 003 | semantic_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
+| 004 | conceptual_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
+| 005 | meta_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
+| 006 | interaction_logs | ✅ APPLIED | 2026-02-08 18:00:42 |
+
+### Schema Verified
+
+- ✅ pgvector extension 0.8.1 enabled
+- ✅ Tables: sessions, messages, memories, entities, relations, memory_access_patterns, interaction_logs
+- ✅ Materialized view: hot_memories
+- ✅ All indexes created (except memories vector index — see ERR-069)
+
+### Usage
+
+```bash
+# Apply all pending migrations
+DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
+  node tools/migrate/dist/cli.js up
+
+# Rollback specific migration
+DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
+  node tools/migrate/dist/cli.js down 6
+
+# Show migration status
+DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
+  node tools/migrate/dist/cli.js status
+```
+
+## Known Issues
+
+| ID | Severity | Description | Status |
+|----|----------|-------------|--------|
+| ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016), which is **INCOMPATIBLE**. Options: (1) Downgrade to ≤2000d (requires ADR-016 amendment), (2) Wait for pgvector 0.9+, (3) Unindexed vector search (unacceptable), (4) Alternative vector DB (violates ADR-002). TEMPORARY: memories table created WITHOUT vector index. Vector search will use sequential scan. **Escalate to Coordinator immediately.** | ⚠️ OPEN |
 
 ## Known Issues (Resolved)
 

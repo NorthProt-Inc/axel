@@ -2,13 +2,13 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 56**: **0 open errors.** Phase E kickoff. No new errors.
+> **Cycle 56**: **1 CRITICAL OPEN.** Phase E kickoff. ERR-069: pgvector 2000d hard limit vs plan 3072d.
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
-| *(none)* | | | | |
+| ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016, RES-003). This is a **FUNDAMENTAL INCOMPATIBILITY**. Options: (1) Amend ADR-016 to ≤2000d (e.g., 1536d or 2000d), (2) Wait for pgvector 0.9+ with higher dimension support, (3) Use unindexed vector search (sequential scan — unacceptable for production), (4) Use alternative vector DB (Qdrant, Weaviate, etc. — violates ADR-002 single PG DB). TEMPORARY SOLUTION: memories table created WITHOUT vector index (migration 003). Vector search will perform sequential scans. **BLOCKS production deployment.** Requires immediate Coordinator escalation + human (Mark) decision. | INTEG-001 (devops) | 0208C56 |
 
 ## Resolved
 
