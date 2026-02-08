@@ -2,30 +2,25 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 58**: **PHASE E: IN PROGRESS.** 7 tasks done (INTEG-001~004, INTEG-006, FIX-MEDIUM-001, RES-006). 760 tests, 61 files. ERR-069 CRITICAL resolved by RES-006: 1536d Matryoshka recommended. FIX-DIMENSION-001 + FIX-SCHEMA-001 created. Human decision needed on dimension strategy.
+> **Cycle 59**: **PHASE E: IN PROGRESS.** 9 tasks done (+INTEG-005, AUDIT-005). 766 tests, 61 files. AUDIT-005: 5 HIGH findings → FIX-AUDIT-E-001 created. Arch FIX-SCHEMA-001 + SYNC-007 in progress. INTEG-007 unblocked.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| ~~INTEG-005~~ | ~~P1~~ | ~~dev-edge~~ | ~~Channel bootstrap wiring~~ | ~~INTEG-003 ✓~~ |
-| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-005 |
+| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-005 ✓ |
 | INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ |
-| ~~SYNC-007~~ | ~~P1~~ | ~~arch~~ | ~~PLAN_SYNC Phase E update~~ | ~~INTEG-003 ✓~~ |
-| QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. 760 tests. | INTEG-005, INTEG-007 |
-| ~~AUDIT-005~~ | ~~P1~~ | ~~audit~~ | ~~Phase E integration security audit~~ | ~~INTEG-003 ✓, INTEG-006 ✓~~ |
+| QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. 766 tests. | INTEG-005 ✓, INTEG-007 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 | FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). **Human decision needed before execution.** | RES-006 ✓ |
-| ~~FIX-SCHEMA-001~~ | ~~P1~~ | ~~arch~~ | ~~Sessions schema drift reconciliation~~ | ~~INTEG-006 ✓~~ |
+| FIX-AUDIT-E-001 | P1 | dev-edge+dev-infra | Fix 5 HIGH from AUDIT-005: (1) AUD-079 WS message size limit (gateway, dev-edge), (2) AUD-080 rate limit bucket memory leak (gateway, dev-edge), (3) AUD-081 InboundHandler silent error discard → add logging (core, dev-core), (4) AUD-082 missing timestamp in gateway→InboundMessage (gateway, dev-edge), (5) AUD-083 hardcoded DB credentials in migrate CLI (tools/migrate, devops). TDD mandatory. | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| INTEG-005 | dev-edge | 0208C58 | C59 |
-| FIX-SCHEMA-001 | arch | 0208C58 | C59 |
-| SYNC-007 | arch | 0208C58 | C59 |
-| AUDIT-005 | audit | 0208C58 | C59 |
+| FIX-SCHEMA-001 | arch | 0208C58 | C60 |
+| SYNC-007 | arch | 0208C58 | C60 |
 
 ## Cancelled
 
@@ -144,3 +139,5 @@
 | INTEG-004 | dev-edge | 0208C58 | 6 remaining gateway routes: memory/search, memory/stats, session, session/end, tools, tools/execute. route-handlers.ts factory. 78 gateway tests total. |
 | INTEG-006 | dev-infra | 0208C58 | PG+Redis integration test: 36 tests across 7 layers. Testcontainers PG17+Redis7. Full memory pipeline verified. Schema drift noted (plan-amendment sent). |
 | RES-006 | research | 0208C58 | pgvector dimension limits research. PRIMARY: 1536d Matryoshka truncation (Google official, research-proven). 25 sources. docs/research/RES-006-pgvector-dimension-limits.md. |
+| INTEG-005 | dev-edge | 0208C59 | Channel bootstrap wiring: createChannels, wireChannels, createHandleMessage. CLI/Discord/Telegram config-based. main.ts updated. 16 tests, 766 total. bootstrap-channels 98.85% stmt. |
+| AUDIT-005 | audit | 0208C59 | Phase E integration security audit: 0C 5H 7M 4L (AUD-079~094). FIX-GATEWAY-001 prior fixes verified. New HIGH: WS msg size, rate limit leak, silent errors, missing timestamp, hardcoded creds. |

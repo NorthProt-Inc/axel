@@ -2,27 +2,27 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 58
+## Current Cycle: 59
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 58 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 3 (all CTO override) | Idle — FIX-DIMENSION-001 + FIX-SCHEMA-001 + SYNC-007 queued |
+| coord | — | 59 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001~003) | 3 (all CTO override) | In Progress — FIX-SCHEMA-001 + SYNC-007 (1 cycle) |
 | dev-core | 1 cycle | 7 (CORE-001~006, INTEG-002) | 0 | Idle — no tasks |
-| dev-infra | 1 cycle | 10 (INFRA-001~005, COMMON-CB, FIX-INFRA-002/003/004, INTEG-006) | 0 | Idle — INTEG-006 done |
-| dev-edge | 1 cycle | 10 (EDGE-001~005, BOOTSTRAP-001, FIX-GATEWAY-001, FIX-MEDIUM-001, INTEG-003, INTEG-004) | 0 | Idle — INTEG-005 queued |
-| quality | 1 cycle | 5 (QA-011, QA-013, QA-016, QA-017, QA-018) | 1 (QA-012, cancelled C39) | Idle — QA-019 blocked |
-| research | 1 cycle | 1 (RES-006) | 0 | Idle — RES-006 done |
-| devops | 1 cycle | 15 (SCAFFOLD-001~007 + FIX + DEVOPS-002~006 + FIX-INFRA-001 + INTEG-001) | 0 | Idle — INTEG-001 done |
-| audit | 1 cycle | 3 (AUDIT-002, AUDIT-003, AUDIT-004) | 0 | Idle — AUDIT-005 unblocked |
+| dev-infra | 1 cycle | 10 (INFRA-001~005, COMMON-CB, FIX-INFRA-002/003/004, INTEG-006) | 0 | Idle |
+| dev-edge | 1 cycle | 11 (+INTEG-005) | 0 | Idle — INTEG-007 + FIX-AUDIT-E-001 queued |
+| quality | 1 cycle | 5 (QA-011, QA-013, QA-016, QA-017, QA-018) | 1 (QA-012, cancelled C39) | Idle — QA-019 blocked (needs INTEG-007) |
+| research | 1 cycle | 1 (RES-006) | 0 | Idle |
+| devops | 1 cycle | 15 (SCAFFOLD-001~007 + FIX + DEVOPS-002~006 + FIX-INFRA-001 + INTEG-001) | 0 | Idle |
+| audit | 1 cycle | 4 (+AUDIT-005) | 0 | Idle — AUDIT-005 done |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 2 (1 CRITICAL w/ solution, 1 MEDIUM) | 5 | **WARNING — ERR-069 human decision pending** |
+| Open Errors | 7 (1 CRITICAL w/ solution, 5 HIGH, 1 MEDIUM) | 5 | **OVER THRESHOLD — FIX-AUDIT-E-001 created for 5 HIGH. ERR-069 human decision pending** |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
@@ -36,7 +36,7 @@
 | `packages/infra/` | 80% | cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42% | +15% over target |
 | `packages/channels/` | 75% | CLI 95.95%, Discord 90.27%, Telegram 93.18% | +15% over target |
 | `packages/gateway/` | 80% | 94.53% stmt (post INTEG-003/004) | +14% over target |
-| `apps/axel/` | — | 86.95% stmt | — |
+| `apps/axel/` | — | bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48% | — |
 | `tools/migrate/` | — | 10 tests | — |
 
 ## Sprint Progress
@@ -48,7 +48,7 @@
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
-| E: Integration | **ACTIVE** | 56 | — | 54% (7/13 done, 0 in progress, 9 queued) |
+| E: Integration | **ACTIVE** | 56 | — | 62% (9/15 done, 2 in progress, 6 queued) |
 
 ## Cycle History (Last 10)
 
@@ -64,3 +64,4 @@
 | 56 | devops, dev-core, dev-edge | 0 | 0 | **PHASE E KICKOFF.** 12 tasks created. INTEG-001 (P0 migration), INTEG-002 (P0 InboundHandler), FIX-MEDIUM-001 (P2 8 fixes) assigned. Phase E 0%. |
 | 57 | dev-edge, dev-infra, research | 3 (INTEG-001, INTEG-002, FIX-MEDIUM-001) | 1 (ERR-069 CRITICAL) | **3 TASKS DONE.** 686 tests, 58 files. ERR-069 pgvector 2000d CRITICAL. RES-006 assigned. INTEG-003/004 (dev-edge), INTEG-006 (dev-infra) assigned. Phase E **25%**. |
 | 58 | dev-edge, dev-infra, research | 4 (INTEG-003, INTEG-004, INTEG-006, RES-006) | 1 (ERR-070 MEDIUM schema drift) | **4 TASKS DONE.** 760 tests, 61 files. Gateway 94.53% stmt. ERR-069 solution: 1536d Matryoshka (RES-006). Schema drift ERR-070 (sessions table). INTEG-005+AUDIT-005 unblocked. FIX-DIMENSION-001+FIX-SCHEMA-001 created. Phase E **54%**. |
+| 59 | dev-edge, arch, audit | 2 (INTEG-005, AUDIT-005) | 5 (ERR-071~075 HIGH from AUDIT-005) | **2 TASKS DONE.** 766 tests, 61 files. INTEG-005: channel bootstrap wiring 98.85% stmt. AUDIT-005: 0C 5H 7M 4L. FIX-AUDIT-E-001 created. Arch FIX-SCHEMA-001+SYNC-007 in progress. Open errors 7 (over threshold). Phase E **62%**. |

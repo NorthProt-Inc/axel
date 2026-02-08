@@ -2,14 +2,19 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 58**: **1 CRITICAL (ERR-069) — SOLUTION FOUND (RES-006).** 1536d Matryoshka truncation recommended. Human decision pending. 1 NEW MEDIUM (ERR-070 schema drift).
+> **Cycle 59**: **1 CRITICAL (ERR-069, human decision pending). 1 MEDIUM (ERR-070, FIX-SCHEMA-001 in progress). 5 NEW HIGH from AUDIT-005 (ERR-071~075) → FIX-AUDIT-E-001 created.**
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
 | ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016). **RES-006 SOLUTION**: Truncate to **1536d** via Matryoshka embeddings (Google official, research-proven, zero infra changes, 50% storage savings). FIX-DIMENSION-001 created for ADR-016 amendment. **Requires human (Mark) decision** to approve 1536d strategy before Architect can execute. | INTEG-001 (devops) | 0208C56 |
-| ERR-070 | **MEDIUM** | Sessions table schema drift: PgSessionStore uses TEXT[] for channel_history and expects last_activity_at column. Migration 002 defines channel_history as JSONB and lacks last_activity_at. Integration test (INTEG-006) used TEXT[] + last_activity_at to match adapter code. FIX-SCHEMA-001 created. | INTEG-006 (dev-infra) | 0208C58 |
+| ERR-070 | **MEDIUM** | Sessions table schema drift: PgSessionStore uses TEXT[] for channel_history and expects last_activity_at column. Migration 002 defines channel_history as JSONB and lacks last_activity_at. Integration test (INTEG-006) used TEXT[] + last_activity_at to match adapter code. FIX-SCHEMA-001 in progress (arch). | INTEG-006 (dev-infra) | 0208C58 |
+| ERR-071 | **HIGH** | WS message size limit missing — no cap on WebSocket message payload size. DoS vector via oversized messages. AUD-079. FIX-AUDIT-E-001 scope. | AUDIT-005 (audit) | 0208C59 |
+| ERR-072 | **HIGH** | Rate limit bucket memory leak — in-memory per-IP sliding window never evicts old entries. Long-running server accumulates unbounded Map entries. AUD-080. FIX-AUDIT-E-001 scope. | AUDIT-005 (audit) | 0208C59 |
+| ERR-073 | **HIGH** | InboundHandler silent error discard — catch block consumes errors with no logging or observability. AUD-081. FIX-AUDIT-E-001 scope. | AUDIT-005 (audit) | 0208C59 |
+| ERR-074 | **HIGH** | Missing timestamp in gateway→InboundMessage construction — gateway creates InboundMessage without required timestamp field. AUD-082. FIX-AUDIT-E-001 scope. | AUDIT-005 (audit) | 0208C59 |
+| ERR-075 | **HIGH** | Hardcoded DB credentials in migrate CLI — tools/migrate has fallback credentials. AUD-083. FIX-AUDIT-E-001 scope. | AUDIT-005 (audit) | 0208C59 |
 
 ## Resolved
 
