@@ -33,7 +33,7 @@ axnmihn은 3개의 분리된 스토리지를 사용했다:
 ### Schema Overview
 
 - `sessions`, `messages` — Episodic Memory (Layer 2)
-- `memories` + `vector(768)` — Semantic Memory (Layer 3, pgvector)
+- `memories` + `vector(3072)` — Semantic Memory (Layer 3, pgvector)
 - `entities`, `relations` — Conceptual Memory (Layer 4)
 - `memory_access_patterns` + `hot_memories` MV — Meta Memory (Layer 5)
 - `interaction_logs` — 텔레메트리

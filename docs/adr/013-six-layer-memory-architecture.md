@@ -140,7 +140,7 @@ interface EpisodicMemory {
 | Aspect | axnmihn | Axel |
 |--------|---------|------|
 | Storage | ChromaDB (별도 프로세스) | pgvector (같은 DB) |
-| Embedding model | Gemini embedding-001 (768d) | **gemini-embedding-001 (768d)** (PLAN-001) |
+| Embedding model | Gemini embedding-001 (768d) | **gemini-embedding-001 (3072d)** (ADR-016) |
 | Index | ChromaDB default | IVFFlat (lists=100, 1K vectors 기준) |
 | Search | Vector only | **Hybrid** — vector + trigram + metadata |
 | Decay | Python batch (C++ SIMD) | TypeScript 순수 함수 (ADR-015) |

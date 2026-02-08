@@ -160,7 +160,7 @@ CREATE TABLE memories (
     content             TEXT NOT NULL,
     memory_type         TEXT NOT NULL CHECK (memory_type IN ('fact', 'preference', 'insight', 'conversation')),
     importance          REAL NOT NULL DEFAULT 0.5 CHECK (importance >= 0 AND importance <= 1),
-    embedding           vector(768) NOT NULL,
+    embedding           vector(3072) NOT NULL,
 
     -- Decay metadata
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -460,7 +460,7 @@ WHERE e1.entity_id IS NULL OR e2.entity_id IS NULL;
 ### Why Re-embed?
 
 axnmihn used `text-embedding-004` (deprecated 2026-01-14).
-Axel uses `gemini-embedding-001` (768d, PLAN-001 decision).
+Axel uses `gemini-embedding-001` (3072d full dimension, ADR-016).
 
 These are **different embedding models** — vectors from text-embedding-004
 are NOT compatible with gemini-embedding-001 embeddings.
@@ -471,7 +471,7 @@ Direct vector copy would produce meaningless similarity scores.
 ```
 1. Extract content + metadata from ChromaDB (Python script)
 2. For each memory's content text:
-   a. Call Gemini gemini-embedding-001 API (768d output)
+   a. Call Gemini gemini-embedding-001 API (3072d output)
    b. Batch: 100 texts per API call
    c. Rate limit: ~1,500 RPM (Gemini free tier)
 3. INSERT into PostgreSQL memories table with new embedding
