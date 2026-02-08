@@ -179,8 +179,24 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		}
 	}
 
+	function getClientIp(req: http.IncomingMessage): string {
+		const socketIp = req.socket.remoteAddress ?? 'unknown';
+		if (!config.trustedProxies || config.trustedProxies.length === 0) return socketIp;
+
+		const xff = req.headers['x-forwarded-for'];
+		if (typeof xff !== 'string') return socketIp;
+
+		const trustedSet = new Set(config.trustedProxies);
+		const ips = xff.split(',').map((ip) => ip.trim());
+		for (let i = ips.length - 1; i >= 0; i--) {
+			const ip = ips[i];
+			if (ip !== undefined && !trustedSet.has(ip)) return ip;
+		}
+		return socketIp;
+	}
+
 	function checkRateLimit(req: http.IncomingMessage): boolean {
-		const clientIp = req.socket.remoteAddress ?? 'unknown';
+		const clientIp = getClientIp(req);
 		const now = Date.now();
 		const windowStart = now - RATE_LIMIT_WINDOW_MS;
 

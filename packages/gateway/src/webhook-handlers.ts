@@ -22,6 +22,167 @@ export function createWebhookHandlers(
 	};
 }
 
+// ─── Telegram Types (HARDEN-003) ───
+
+/** Lightweight Telegram Update interface for type-safe extraction. */
+export interface TelegramUpdate {
+	readonly message: {
+		readonly from: {
+			readonly id: number;
+			readonly is_bot: boolean;
+		};
+		readonly chat: {
+			readonly id: number;
+		};
+		readonly text?: string;
+		readonly date?: number;
+	};
+}
+
+/**
+ * Type guard: validates the structural shape of a Telegram Update.
+ * Uses `in` narrowing to avoid Record<string,unknown> index-signature casts.
+ */
+export function isTelegramUpdate(value: unknown): value is TelegramUpdate {
+	if (typeof value !== 'object' || value === null) return false;
+	if (!('message' in value)) return false;
+
+	const { message } = value as { message: unknown };
+	if (typeof message !== 'object' || message === null) return false;
+	if (!('from' in message) || !('chat' in message)) return false;
+
+	const { from, chat } = message as { from: unknown; chat: unknown };
+	if (typeof from !== 'object' || from === null) return false;
+	if (!('id' in from)) return false;
+
+	const { id: fromId } = from as { id: unknown };
+	if (typeof fromId !== 'number') return false;
+
+	if (typeof chat !== 'object' || chat === null) return false;
+	if (!('id' in chat)) return false;
+
+	const { id: chatId } = chat as { id: unknown };
+	if (typeof chatId !== 'number') return false;
+
+	return true;
+}
+
+interface TelegramExtractedMessage {
+	readonly userId: string;
+	readonly channelId: string;
+	readonly content: string;
+	readonly timestamp: number;
+}
+
+/**
+ * Extract message fields from a validated TelegramUpdate.
+ * Returns null for bot messages, empty text, or missing text.
+ */
+export function extractTelegramMessage(update: TelegramUpdate): TelegramExtractedMessage | null {
+	const { message } = update;
+
+	if (message.from.is_bot) return null;
+
+	const text = typeof message.text === 'string' ? message.text.trim() : '';
+	if (text.length === 0) return null;
+
+	const userId = String(message.from.id);
+	const channelId = String(message.chat.id);
+	const timestamp = typeof message.date === 'number' ? message.date * 1000 : Date.now();
+
+	return { userId, channelId, content: text, timestamp };
+}
+
+// ─── Discord Types (HARDEN-004) ───
+
+/** Discord interaction option. */
+interface DiscordCommandOption {
+	readonly name: string;
+	readonly value?: string;
+}
+
+/** Lightweight Discord Interaction interface for type-safe extraction. */
+export interface DiscordInteraction {
+	readonly type: number;
+	readonly data?: {
+		readonly name: string;
+		readonly options?: readonly DiscordCommandOption[];
+	};
+	readonly member?: {
+		readonly user: {
+			readonly id: string;
+		};
+	};
+	readonly user?: {
+		readonly id: string;
+	};
+	readonly channel_id?: string;
+}
+
+/**
+ * Type guard: validates the structural shape of a Discord Interaction.
+ * Uses `in` narrowing to avoid Record<string,unknown> index-signature casts.
+ */
+export function isDiscordInteraction(value: unknown): value is DiscordInteraction {
+	if (typeof value !== 'object' || value === null) return false;
+	if (!('type' in value)) return false;
+
+	const { type } = value as { type: unknown };
+	if (typeof type !== 'number') return false;
+
+	if ('data' in value && !isValidDiscordData((value as { data: unknown }).data)) return false;
+	if ('member' in value && !isValidDiscordMember((value as { member: unknown }).member)) {
+		return false;
+	}
+
+	return true;
+}
+
+function isValidDiscordData(data: unknown): boolean {
+	if (typeof data !== 'object' || data === null) return false;
+	if (!('name' in data)) return false;
+	const { name } = data as { name: unknown };
+	return typeof name === 'string';
+}
+
+function isValidDiscordMember(member: unknown): boolean {
+	if (typeof member !== 'object' || member === null) return false;
+	if (!('user' in member)) return false;
+	const { user } = member as { user: unknown };
+	if (typeof user !== 'object' || user === null) return false;
+	if (!('id' in user)) return false;
+	const { id } = user as { id: unknown };
+	return typeof id === 'string';
+}
+
+interface DiscordExtracted {
+	readonly userId: string;
+	readonly channelId: string;
+	readonly content: string;
+}
+
+/** Extract userId, channelId, content from a validated DiscordInteraction. */
+export function extractDiscordInteraction(interaction: DiscordInteraction): DiscordExtracted {
+	const userId = interaction.member?.user.id ?? interaction.user?.id ?? '';
+	const channelId = interaction.channel_id ?? '';
+	const content = extractDiscordContent(interaction);
+	return { userId, channelId, content };
+}
+
+function extractDiscordContent(interaction: DiscordInteraction): string {
+	const data = interaction.data;
+	if (!data) return '';
+
+	if (data.options) {
+		const messageOpt = data.options.find((opt) => opt.name === 'message');
+		if (messageOpt && typeof messageOpt.value === 'string') {
+			return messageOpt.value;
+		}
+	}
+
+	return `/${data.name}`;
+}
+
 // ─── Telegram Webhook ───
 
 function createTelegramHandler(config: GatewayConfig, deps: GatewayDeps): RouteHandler {
@@ -40,6 +201,11 @@ function createTelegramHandler(config: GatewayConfig, deps: GatewayDeps): RouteH
 		const parsed = parseJsonBody(body);
 		if (!parsed) {
 			sendError(res, 400, 'Invalid JSON body', requestId);
+			return;
+		}
+
+		if (!isTelegramUpdate(parsed)) {
+			sendJson(res, 200, { ok: true });
 			return;
 		}
 
@@ -79,41 +245,6 @@ function verifyTelegramSecret(req: http.IncomingMessage, config: GatewayConfig):
 	return crypto.timingSafeEqual(headerBuf, secretBuf);
 }
 
-interface TelegramExtractedMessage {
-	readonly userId: string;
-	readonly channelId: string;
-	readonly content: string;
-	readonly timestamp: number;
-}
-
-function extractTelegramMessage(update: Record<string, unknown>): TelegramExtractedMessage | null {
-	const message = update.message;
-	if (typeof message !== 'object' || message === null) return null;
-
-	const msg = message as Record<string, unknown>;
-	const from = msg.from;
-	if (typeof from !== 'object' || from === null) return null;
-
-	const fromObj = from as Record<string, unknown>;
-	if (fromObj.is_bot === true) return null;
-
-	const text = typeof msg.text === 'string' ? msg.text.trim() : '';
-	if (text.length === 0) return null;
-
-	const userId = String(fromObj.id ?? '');
-	if (userId.length === 0) return null;
-
-	const chat = msg.chat;
-	const channelId =
-		typeof chat === 'object' && chat !== null
-			? String((chat as Record<string, unknown>).id ?? '')
-			: '';
-
-	const date = typeof msg.date === 'number' ? msg.date * 1000 : Date.now();
-
-	return { userId, channelId, content: text, timestamp: date };
-}
-
 // ─── Discord Webhook ───
 
 /** Discord interaction types */
@@ -143,14 +274,17 @@ function createDiscordHandler(config: GatewayConfig, deps: GatewayDeps): RouteHa
 			return;
 		}
 
-		const interactionType = parsed.type;
+		if (!isDiscordInteraction(parsed)) {
+			sendJson(res, 200, { ok: true });
+			return;
+		}
 
-		if (interactionType === INTERACTION_PING) {
+		if (parsed.type === INTERACTION_PING) {
 			sendJson(res, 200, { type: RESPONSE_PONG });
 			return;
 		}
 
-		if (interactionType === INTERACTION_APPLICATION_COMMAND) {
+		if (parsed.type === INTERACTION_APPLICATION_COMMAND) {
 			await handleDiscordCommand(res, parsed, deps, requestId);
 			return;
 		}
@@ -192,7 +326,7 @@ function verifyDiscordSignature(
 
 async function handleDiscordCommand(
 	res: http.ServerResponse,
-	interaction: Record<string, unknown>,
+	interaction: DiscordInteraction,
 	deps: GatewayDeps,
 	requestId: string,
 ): Promise<void> {
@@ -211,52 +345,4 @@ async function handleDiscordCommand(
 	});
 
 	sendJson(res, 200, { type: RESPONSE_DEFERRED });
-}
-
-interface DiscordExtracted {
-	readonly userId: string;
-	readonly channelId: string;
-	readonly content: string;
-}
-
-function extractDiscordInteraction(interaction: Record<string, unknown>): DiscordExtracted {
-	const userId = extractDiscordUserId(interaction);
-	const channelId = typeof interaction.channel_id === 'string' ? interaction.channel_id : '';
-	const content = extractDiscordContent(interaction);
-	return { userId, channelId, content };
-}
-
-function extractDiscordUserId(interaction: Record<string, unknown>): string {
-	const fromMember = extractUserIdFromObject(interaction.member, 'user');
-	if (fromMember.length > 0) return fromMember;
-	return extractUserIdFromObject(interaction, 'user');
-}
-
-function extractUserIdFromObject(source: unknown, userKey: string): string {
-	if (typeof source !== 'object' || source === null) return '';
-	const obj = source as Record<string, unknown>;
-	const user = obj[userKey];
-	if (typeof user !== 'object' || user === null) return '';
-	return String((user as Record<string, unknown>).id ?? '');
-}
-
-function extractDiscordContent(interaction: Record<string, unknown>): string {
-	const data = interaction.data;
-	if (typeof data !== 'object' || data === null) return '';
-
-	const dataObj = data as Record<string, unknown>;
-	const options = dataObj.options;
-	if (Array.isArray(options)) {
-		const messageOpt = options.find(
-			(opt): opt is Record<string, unknown> =>
-				typeof opt === 'object' &&
-				opt !== null &&
-				(opt as Record<string, unknown>).name === 'message',
-		);
-		if (messageOpt && typeof messageOpt.value === 'string') {
-			return messageOpt.value;
-		}
-	}
-
-	return typeof dataObj.name === 'string' ? `/${dataObj.name}` : '';
 }
