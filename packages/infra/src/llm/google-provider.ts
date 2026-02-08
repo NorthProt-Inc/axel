@@ -48,8 +48,6 @@ function isRetryableStatus(error: unknown): boolean {
 	return msg.includes('429') || msg.includes('503') || msg.includes('ECONNRESET');
 }
 
-let toolCallCounter = 0;
-
 /**
  * Google Generative AI LLM Provider (ADR-020).
  *
@@ -59,6 +57,7 @@ let toolCallCounter = 0;
 class GoogleLlmProvider implements LlmProvider {
 	private readonly client: GoogleGenAIClient;
 	private readonly config: GoogleProviderConfig;
+	private toolCallCounter = 0;
 
 	constructor(client: GoogleGenAIClient, config: GoogleProviderConfig) {
 		this.client = client;
@@ -136,10 +135,10 @@ class GoogleLlmProvider implements LlmProvider {
 			}
 
 			if ('functionCall' in part) {
-				toolCallCounter++;
+				this.toolCallCounter++;
 				const toolCall: ToolCallRequest = {
 					toolName: part.functionCall.name,
-					callId: `google_call_${toolCallCounter}`,
+					callId: `google_call_${this.toolCallCounter}`,
 					args: part.functionCall.args,
 				};
 				yield { type: 'tool_call', content: toolCall };

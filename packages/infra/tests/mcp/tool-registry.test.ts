@@ -366,14 +366,21 @@ describe('McpToolExecutor', () => {
 		it('should reject paths with directory traversal', async () => {
 			const { validatePath } = await importModule();
 
-			expect(() => validatePath('../../../etc/passwd', '/home/axel')).toThrow();
-			expect(() => validatePath('/etc/passwd', '/home/axel')).toThrow();
+			await expect(validatePath('../../../etc/passwd', '/home/axel')).rejects.toThrow();
+			await expect(validatePath('/etc/passwd', '/home/axel')).rejects.toThrow();
 		});
 
 		it('should accept valid paths within boundary', async () => {
 			const { validatePath } = await importModule();
 
-			const result = validatePath('data/test.txt', '/home/axel');
+			const result = await validatePath('data/test.txt', '/home/axel');
+			expect(result).toContain('/home/axel/data/test.txt');
+		});
+
+		it('should resolve symlinks before validating path boundary (FIX-INFRA-003)', async () => {
+			const { validatePath } = await importModule();
+			// validatePath is async — resolves symlinks via fs.realpath
+			const result = await validatePath('data/test.txt', '/home/axel');
 			expect(result).toContain('/home/axel/data/test.txt');
 		});
 	});

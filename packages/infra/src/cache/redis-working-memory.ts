@@ -70,7 +70,7 @@ class RedisWorkingMemory implements WorkingMemory {
 				await this.redis.ltrim(key, -MAX_TURNS, -1);
 				await this.redis.expire(key, TTL_SECONDS);
 				this.onRedisSuccess();
-			} catch {
+			} catch (error: unknown) {
 				this.onRedisFailure();
 			}
 		}
@@ -86,7 +86,7 @@ class RedisWorkingMemory implements WorkingMemory {
 					this.onRedisSuccess();
 					return cached.map((s) => JSON.parse(s) as Turn);
 				}
-			} catch {
+			} catch (error: unknown) {
 				this.onRedisFailure();
 			}
 		}
@@ -120,11 +120,18 @@ class RedisWorkingMemory implements WorkingMemory {
 				const summary = await this.redis.get(`axel:working:${userId}:summary`);
 				this.onRedisSuccess();
 				return summary;
-			} catch {
+			} catch (error: unknown) {
 				this.onRedisFailure();
+				// PG fallback — fall through to PG query below
 			}
 		}
-		return null;
+
+		// PG fallback
+		const result = await this.pg.query<{ summary: string }>(
+			'SELECT summary FROM session_summaries WHERE session_id = $1 ORDER BY created_at DESC LIMIT 1',
+			[userId],
+		);
+		return result.rows[0]?.summary ?? null;
 	}
 
 	async compress(userId: string): Promise<void> {
@@ -134,8 +141,28 @@ class RedisWorkingMemory implements WorkingMemory {
 		try {
 			const cached = await this.redis.lrange(key, 0, -1);
 			turns = cached.map((s) => JSON.parse(s) as Turn);
-		} catch {
-			return;
+		} catch (error: unknown) {
+			this.onRedisFailure();
+			// PG fallback — read turns from PG
+			const result = await this.pg.query<{
+				turn_id: number;
+				role: string;
+				content: string;
+				channel_id: string;
+				created_at: Date;
+				token_count: number;
+			}>(
+				'SELECT turn_id, role, content, channel_id, created_at, token_count FROM messages WHERE session_id = $1 ORDER BY created_at ASC',
+				[userId],
+			);
+			turns = result.rows.map((row) => ({
+				turnId: row.turn_id,
+				role: row.role as Turn['role'],
+				content: row.content,
+				channelId: row.channel_id,
+				timestamp: row.created_at,
+				tokenCount: row.token_count,
+			}));
 		}
 
 		if (turns.length === 0) return;
@@ -145,8 +172,8 @@ class RedisWorkingMemory implements WorkingMemory {
 
 		try {
 			await this.redis.set(`axel:working:${userId}:summary`, summary, 'EX', TTL_SECONDS);
-		} catch {
-			// Summary storage failure is non-critical
+		} catch (error: unknown) {
+			this.onRedisFailure();
 		}
 	}
 
@@ -175,15 +202,16 @@ class RedisWorkingMemory implements WorkingMemory {
 					);
 				}
 			}
-		} catch {
-			// If Redis read fails, data is already in PG
+		} catch (error: unknown) {
+			// If Redis read fails, data is already in PG (PG-first pattern)
+			this.onRedisFailure();
 		}
 
 		try {
 			await this.redis.del(turnsKey);
 			await this.redis.del(summaryKey);
-		} catch {
-			// Cleanup failure is non-critical
+		} catch (error: unknown) {
+			this.onRedisFailure();
 		}
 	}
 
@@ -192,7 +220,7 @@ class RedisWorkingMemory implements WorkingMemory {
 			await this.redis.del(`axel:working:${userId}:turns`);
 			await this.redis.del(`axel:working:${userId}:summary`);
 			this.onRedisSuccess();
-		} catch {
+		} catch (error: unknown) {
 			this.onRedisFailure();
 		}
 	}
@@ -214,7 +242,7 @@ class RedisWorkingMemory implements WorkingMemory {
 			await this.redis.get('axel:health:ping');
 			const latencyMs = Date.now() - start;
 			return { state: 'healthy', latencyMs, message: null, lastChecked: now };
-		} catch {
+		} catch (error: unknown) {
 			return {
 				state: 'degraded',
 				latencyMs: null,
