@@ -2,22 +2,21 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 20**: QA-011 completed — PLAN CLOSURE APPROVED (4 PASS, 1 CONDITIONAL PASS).
-> ERR-057 RESOLVED, ERR-058 RESOLVED (downgraded LOW, micro-discrepancy), ERR-059 CLOSED (acceptable).
-> 3 new MEDIUM consistency issues from QA-011 (ERR-060~062). Open: 3. Resolved: 58.
+> **Cycle 21**: FIX-PRE-IMPL completed (f553f8f). ERR-060~062 all resolved.
+> **PLAN CLOSURE 100% COMPLETE.** All consistency items fixed. Open: 0. Resolved: 61.
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
-| ERR-060 | MEDIUM | quality | 0209 | ADR-013:144,171-174 still recommends IVFFlat. Plan/ADR-002/migration-strategy all use HNSW. Last remaining IVFFlat reference in ADRs. | FIX-PRE-IMPL |
-| ERR-061 | MEDIUM | quality | 0209 | migration-strategy:372,377-393 IVFFlat text sections not updated to HNSW. SQL in migration 003 correct (HNSW), but surrounding text inconsistent. | FIX-PRE-IMPL |
-| ERR-062 | MEDIUM | quality | 0209 | plan:843-853 hot_memories MV uses INNER JOIN (drops empty channel_mentions). migration-strategy:285-302 uses LEFT JOIN (correct). Align plan body to LEFT JOIN version. | FIX-PRE-IMPL |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-060 | ADR-013:144,171-174 IVFFlat→HNSW rewritten. Comparison table + index decision section aligned. | FIX-PRE-IMPL (arch) | 0209 |
+| ERR-061 | migration-strategy:372,377-393 IVFFlat text→HNSW. Execution order + index note rewritten. | FIX-PRE-IMPL (arch) | 0209 |
+| ERR-062 | plan:843-853 hot_memories MV INNER JOIN→LEFT JOIN LATERAL aligned with migration-strategy. | FIX-PRE-IMPL (arch) | 0209 |
 | ERR-057 | ADR-016 dimension options correctly updated to 128-3072 flexible range. FIX-AUDIT applied AUD-023. | QA-011 (quality) | 0209 |
 | ERR-058 | ADR-016 MTEB score clarified: 68.16 (GA 3072d). 68.16 vs 68.17 micro-discrepancy — zero practical impact. Downgraded LOW, closed. | QA-011 (quality) | 0209 |
 | ERR-059 | RES-001 1536d memory calc acceptable as historical research record. Plan/migration-strategy use correct 3072d values. | QA-011 (quality) | 0209 |

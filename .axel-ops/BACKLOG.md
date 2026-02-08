@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 20**: QA-011 done — PLAN CLOSURE APPROVED. 3 MEDIUM consistency items → FIX-PRE-IMPL assigned to Arch.
+> **Cycle 21**: FIX-PRE-IMPL done. **PLAN CLOSURE 100% COMPLETE.** All queues empty. Awaiting implementation Phase A kickoff.
 
 ## Queued
 
@@ -13,7 +13,6 @@
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-PRE-IMPL | arch | 0209T0400 | 1 cycle |
 
 ## Cancelled
 
@@ -73,3 +72,4 @@
 | FIX-AUDIT | arch | 0209T0030 | ERR-050~056 (7 items) + AUD-023~026 (4 MEDIUM). ADR-016, v2-open-items, migration-strategy, plan v2.0.3. |
 | AUDIT-002 | audit | 0209T0031 | Follow-up verification: 4 HIGH, 5 MEDIUM, 2 LOW findings. Most HIGH overlap with FIX-AUDIT scope. |
 | QA-011 | quality | 0209T0335 | PLAN CLOSURE APPROVED: 4 PASS, 1 CONDITIONAL PASS. 3 MEDIUM non-blocking issues. ERR-050~056 verified. |
+| FIX-PRE-IMPL | arch | 0209T0500 | 3 MEDIUM consistency fixes (ERR-060~062). ADR-013 IVFFlat→HNSW, migration-strategy IVFFlat→HNSW, plan hot_memories LEFT JOIN. Plan v2.0.4. |
