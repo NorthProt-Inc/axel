@@ -1,0 +1,16 @@
+{
+	"name": "@axel/core",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"devDependencies": {
+		"typescript": "^5.7.3",
+		"vitest": "^3.0.8"
+	}
+}

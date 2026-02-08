@@ -1,0 +1,40 @@
+{
+	"compilerOptions": {
+		// Language and Environment
+		"target": "ES2024",
+		"module": "Node16",
+		"moduleResolution": "node16",
+		"lib": ["ES2024"],
+
+		// Type Checking (Strict Mode)
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+
+		// Modules
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"isolatedModules": true,
+
+		// Emit
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"composite": true,
+		"incremental": true,
+
+		// Interop Constraints
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+
+		// Skip Lib Check (for faster builds)
+		"skipLibCheck": true
+	}
+}
