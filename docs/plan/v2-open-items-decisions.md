@@ -8,32 +8,32 @@ v2.0 plan Section 11에 나열된 5개 미결 사항에 대한 결정.
 
 ---
 
-## 1. Embedding Model: gemini-embedding-001 (768d)
+## 1. Embedding Model: gemini-embedding-001 (3072d)
 
 ### Decision
 
-**gemini-embedding-001** (768d, Matryoshka truncation) 사용.
+**gemini-embedding-001** (3072d, full dimension) 사용.
 
 ### Rationale
 
 - **text-embedding-004는 2026-01-14 deprecated됨** — 선택지에서 제거
 - gemini-embedding-001은 MTEB 68.32 (#1 ranking), 100+ 언어 지원
-- Matryoshka Representation Learning 지원: 3072d → 768d → 256d 유연한 truncation
-- 768d at pgvector: 기존 axnmihn 768d와 동일 차원 → 마이그레이션 시 dimension 호환
-  - 단, embedding space가 다르므로 re-embed 필요 (Direct Copy 불가)
+- 3072d full dimension으로 최고 검색 품질 확보 (Mark directive — 2026-02-08)
+- Matryoshka Representation Learning 지원: 필요 시 768d/256d로 축소 가능 (역방향 유연성)
+- embedding space가 다르므로 re-embed 필요 (Direct Copy 불가)
 - Cost: $0.15/1M tokens (text-embedding-004 대비 소폭 상승, 허용 범위)
 
 ### v2.0 Plan Impact
 
-- Section 5.2: "옵션 A: Direct Copy" → **불가**. gemini-embedding-001로 re-embed 필수
-- Section 4 Layer 3: embedding 모델명 `embedding-001` → `gemini-embedding-001`로 변경
-- config schema: `embeddingModel` default를 `"gemini-embedding-001"`로 변경
+- Section 5.2: "옵션 A: Direct Copy" → **불가**. gemini-embedding-001 (3072d)로 re-embed 필수
+- Section 4 Layer 3: embedding 모델명 `embedding-001` → `gemini-embedding-001`로 변경, 차원 3072d
+- config schema: `embeddingModel` default를 `"gemini-embedding-001"`, `embeddingDimension` default를 `3072`로 변경
+- pgvector 컬럼: `vector(768)` → `vector(3072)` 변경
 - 마이그레이션 시간 추정: 1000개 × ~200ms = ~200초 (re-embed)
 
-### Future Option
+### Dimension Override Note
 
-필요 시 3072d full dimension으로 업그레이드 가능 (Matryoshka 특성상 768d prefix는 유효).
-pgvector 컬럼 타입만 변경하면 됨.
+Mark가 2026-02-08에 768d truncation 대신 3072d full dimension을 직접 지정. ADR-016의 원래 768d 결정을 override함.
 
 ---
 
@@ -173,7 +173,7 @@ Phase 2+:  pino → OpenTelemetry Collector → Grafana Cloud
 
 | # | Item | Decision | ADR |
 |---|------|----------|-----|
-| 1 | Embedding model | gemini-embedding-001 (768d) | ADR-016 (신규) |
+| 1 | Embedding model | gemini-embedding-001 (3072d) | ADR-016 (신규) |
 | 2 | WebChat framework | React (Vite) | — (plan 확정) |
 | 3 | CI/CD | GitHub Actions (3-stage) | — (plan 확정) |
 | 4 | Deployment | Docker Compose on VPS | — (plan 확정) |
