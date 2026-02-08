@@ -1,0 +1,519 @@
+# PostgreSQL Migration Strategy
+
+> PLAN-003 deliverable
+> Date: 2026-02-07
+> References: v2.0 Plan Section 4.2.1, ADR-002, ADR-013
+
+## Overview
+
+Axel uses PostgreSQL 16 + pgvector 0.8 as the single persistent store.
+This document defines the migration framework and the initial schema migrations.
+
+### Principles
+
+1. **Every migration is reversible** — every `up` has a corresponding `down`
+2. **Migrations are numbered sequentially** — `001`, `002`, ... (no timestamps in names, simple ordering)
+3. **Migrations are idempotent** — `IF NOT EXISTS` / `IF EXISTS` guards where possible
+4. **One concern per migration** — don't mix unrelated schema changes
+5. **Data migrations are separate** — schema changes and data transforms are in separate files
+6. **Test with rollback** — CI runs `up → seed → down → up` to verify reversibility
+
+### Directory Structure
+
+```
+packages/infra/src/db/migrations/
+├── 001_extensions.sql
+├── 001_extensions.down.sql
+├── 002_episodic_memory.sql
+├── 002_episodic_memory.down.sql
+├── 003_semantic_memory.sql
+├── 003_semantic_memory.down.sql
+├── 004_conceptual_memory.sql
+├── 004_conceptual_memory.down.sql
+├── 005_meta_memory.sql
+├── 005_meta_memory.down.sql
+├── 006_interaction_logs.sql
+├── 006_interaction_logs.down.sql
+└── README.md
+```
+
+### Migration Runner
+
+A lightweight runner (no ORM). Tracks applied migrations in a `schema_migrations` table:
+
+```sql
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version     INTEGER PRIMARY KEY,
+    name        TEXT NOT NULL,
+    applied_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+The runner:
+1. Reads all `*.sql` (up) files sorted by version number
+2. Compares against `schema_migrations` to find unapplied migrations
+3. Executes each pending migration in a transaction
+4. Records the version in `schema_migrations`
+5. For rollback: reads `*.down.sql` and removes from `schema_migrations`
+
+No external dependencies (e.g., Prisma, Knex) — just `pg` client + raw SQL files.
+
+---
+
+## Migration Files
+
+### 001: Extensions
+
+**`001_extensions.sql` (up)**
+```sql
+-- Migration 001: Enable required PostgreSQL extensions
+-- Requires: PostgreSQL 16+, pgvector extension installed
+
+CREATE EXTENSION IF NOT EXISTS vector;          -- pgvector for vector similarity search
+CREATE EXTENSION IF NOT EXISTS pg_trgm;         -- Trigram for text similarity
+CREATE EXTENSION IF NOT EXISTS pgcrypto;        -- gen_random_uuid()
+
+-- schema_migrations tracking table
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version     INTEGER PRIMARY KEY,
+    name        TEXT NOT NULL,
+    applied_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+**`001_extensions.down.sql`**
+```sql
+-- Rollback 001: Remove extensions
+-- WARNING: Dropping extensions will cascade to dependent objects.
+-- Only safe on empty database or during initial setup.
+
+DROP TABLE IF EXISTS schema_migrations;
+DROP EXTENSION IF EXISTS pgcrypto;
+DROP EXTENSION IF EXISTS pg_trgm;
+DROP EXTENSION IF EXISTS vector;
+```
+
+### 002: Episodic Memory
+
+**`002_episodic_memory.sql` (up)**
+```sql
+-- Migration 002: Episodic Memory tables (ADR-013 Layer 2)
+-- Sessions and messages for conversation history
+
+CREATE TABLE sessions (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    session_id      TEXT UNIQUE NOT NULL,
+    channel_id      TEXT,
+    summary         TEXT,
+    key_topics      JSONB NOT NULL DEFAULT '[]'::jsonb,
+    emotional_tone  TEXT,
+    turn_count      INTEGER NOT NULL DEFAULT 0,
+    started_at      TIMESTAMPTZ NOT NULL,
+    ended_at        TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT sessions_started_at_check
+        CHECK (started_at <= COALESCE(ended_at, NOW()))
+);
+
+CREATE INDEX idx_sessions_started ON sessions (started_at DESC);
+CREATE INDEX idx_sessions_channel ON sessions (channel_id, started_at DESC);
+CREATE INDEX idx_sessions_topics ON sessions USING gin (key_topics);
+
+CREATE TABLE messages (
+    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    session_id        TEXT NOT NULL REFERENCES sessions(session_id) ON DELETE CASCADE,
+    turn_id           INTEGER NOT NULL,
+    role              TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system', 'tool')),
+    content           TEXT NOT NULL,
+    channel_id        TEXT,
+    timestamp         TIMESTAMPTZ NOT NULL,
+    emotional_context TEXT NOT NULL DEFAULT 'neutral',
+    metadata          JSONB NOT NULL DEFAULT '{}'::jsonb,
+
+    UNIQUE (session_id, turn_id, role)
+);
+
+CREATE INDEX idx_messages_session ON messages (session_id, turn_id);
+CREATE INDEX idx_messages_timestamp ON messages (timestamp DESC);
+CREATE INDEX idx_messages_content_trgm ON messages USING gin (content gin_trgm_ops);
+```
+
+**`002_episodic_memory.down.sql`**
+```sql
+-- Rollback 002: Remove Episodic Memory tables
+
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS sessions;
+```
+
+### 003: Semantic Memory
+
+**`003_semantic_memory.sql` (up)**
+```sql
+-- Migration 003: Semantic Memory table (ADR-013 Layer 3)
+-- Vector-indexed long-term memories with pgvector
+
+CREATE TABLE memories (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    uuid                TEXT UNIQUE NOT NULL DEFAULT gen_random_uuid()::text,
+    content             TEXT NOT NULL,
+    memory_type         TEXT NOT NULL CHECK (memory_type IN ('fact', 'preference', 'insight', 'conversation')),
+    importance          REAL NOT NULL DEFAULT 0.5 CHECK (importance >= 0 AND importance <= 1),
+    embedding           vector(768) NOT NULL,
+
+    -- Decay metadata
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_accessed       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    access_count        INTEGER NOT NULL DEFAULT 1 CHECK (access_count >= 1),
+
+    -- Cross-channel metadata
+    source_channel      TEXT,
+    channel_mentions    JSONB NOT NULL DEFAULT '{}'::jsonb,
+    source_session      TEXT,
+
+    -- Decay state
+    decayed_importance  REAL CHECK (decayed_importance IS NULL OR (decayed_importance >= 0 AND decayed_importance <= 1)),
+    last_decayed_at     TIMESTAMPTZ
+);
+
+-- IVFFlat index for ~1,000 vectors. lists = ceil(sqrt(1000)) * ~3 ≈ 100.
+-- Review: switch to HNSW when vector count exceeds 10,000 (see ADR-013 notes).
+-- NOTE: IVFFlat requires training data. Index must be created AFTER initial data load.
+-- For empty table, create index after migration data import (see migration-data-import.md).
+-- On empty tables, the index will work but with suboptimal recall.
+CREATE INDEX idx_memories_embedding ON memories
+    USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
+CREATE INDEX idx_memories_importance ON memories (importance DESC);
+CREATE INDEX idx_memories_type ON memories (memory_type, importance DESC);
+CREATE INDEX idx_memories_accessed ON memories (last_accessed DESC);
+CREATE INDEX idx_memories_source_channel ON memories (source_channel)
+    WHERE source_channel IS NOT NULL;
+```
+
+**`003_semantic_memory.down.sql`**
+```sql
+-- Rollback 003: Remove Semantic Memory table
+
+DROP TABLE IF EXISTS memories;
+```
+
+### 004: Conceptual Memory
+
+**`004_conceptual_memory.sql` (up)**
+```sql
+-- Migration 004: Conceptual Memory tables (ADR-013 Layer 4)
+-- Knowledge graph: entities and relations
+
+CREATE TABLE entities (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    entity_id       TEXT UNIQUE NOT NULL,
+    name            TEXT NOT NULL,
+    entity_type     TEXT NOT NULL,
+    properties      JSONB NOT NULL DEFAULT '{}'::jsonb,
+    mentions        INTEGER NOT NULL DEFAULT 1 CHECK (mentions >= 1),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_accessed   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_entities_name ON entities USING gin (name gin_trgm_ops);
+CREATE INDEX idx_entities_type ON entities (entity_type);
+CREATE INDEX idx_entities_mentions ON entities (mentions DESC);
+
+CREATE TABLE relations (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    source_id       TEXT NOT NULL REFERENCES entities(entity_id) ON DELETE CASCADE,
+    target_id       TEXT NOT NULL REFERENCES entities(entity_id) ON DELETE CASCADE,
+    relation_type   TEXT NOT NULL,
+    weight          REAL NOT NULL DEFAULT 1.0 CHECK (weight >= 0),
+    context         TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (source_id, target_id, relation_type)
+);
+
+CREATE INDEX idx_relations_source ON relations (source_id);
+CREATE INDEX idx_relations_target ON relations (target_id);
+CREATE INDEX idx_relations_type ON relations (relation_type);
+```
+
+**`004_conceptual_memory.down.sql`**
+```sql
+-- Rollback 004: Remove Conceptual Memory tables
+
+DROP TABLE IF EXISTS relations;
+DROP TABLE IF EXISTS entities;
+```
+
+### 005: Meta Memory
+
+**`005_meta_memory.sql` (up)**
+```sql
+-- Migration 005: Meta Memory (ADR-013 Layer 5)
+-- Search pattern tracking and hot memory materialized view
+
+CREATE TABLE memory_access_patterns (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    query_text          TEXT NOT NULL,
+    matched_memory_ids  BIGINT[] NOT NULL,
+    relevance_scores    REAL[] NOT NULL,
+    channel_id          TEXT,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- Ensure arrays have same length
+    CONSTRAINT scores_match_ids
+        CHECK (array_length(matched_memory_ids, 1) = array_length(relevance_scores, 1))
+);
+
+CREATE INDEX idx_access_patterns_time ON memory_access_patterns (created_at DESC);
+CREATE INDEX idx_access_patterns_channel ON memory_access_patterns (channel_id, created_at DESC)
+    WHERE channel_id IS NOT NULL;
+
+-- Materialized view: frequently accessed memories in the last 7 days
+-- Corrected from v2.0 plan (fixed LATERAL jsonb_object_keys aggregation issue)
+--
+-- Logic:
+-- 1. Filter memories accessed in last 7 days
+-- 2. Count how many distinct channels mention each memory
+-- 3. Rank by access_count * channel_diversity
+--
+-- NOTE: jsonb_object_keys returns nothing for empty '{}' objects,
+-- so memories with no channel_mentions are excluded from channel_diversity.
+-- This is intentional: cross-channel memories are more valuable for prefetch.
+CREATE MATERIALIZED VIEW hot_memories AS
+SELECT
+    m.id,
+    m.uuid,
+    m.content,
+    m.memory_type,
+    m.importance,
+    m.access_count,
+    m.last_accessed,
+    COALESCE(cd.channel_count, 0) AS channel_diversity
+FROM memories m
+LEFT JOIN LATERAL (
+    SELECT COUNT(*) AS channel_count
+    FROM jsonb_object_keys(m.channel_mentions)
+) cd ON true
+WHERE m.last_accessed > NOW() - INTERVAL '7 days'
+ORDER BY m.access_count DESC, cd.channel_count DESC NULLS LAST
+LIMIT 100;
+
+-- Unique index required for REFRESH MATERIALIZED VIEW CONCURRENTLY
+CREATE UNIQUE INDEX idx_hot_memories_id ON hot_memories (id);
+```
+
+**`005_meta_memory.down.sql`**
+```sql
+-- Rollback 005: Remove Meta Memory
+
+DROP MATERIALIZED VIEW IF EXISTS hot_memories;
+DROP TABLE IF EXISTS memory_access_patterns;
+```
+
+### 006: Interaction Logs
+
+**`006_interaction_logs.sql` (up)**
+```sql
+-- Migration 006: Interaction logs (telemetry)
+-- Tracks LLM usage, latency, and tool calls per turn
+
+CREATE TABLE interaction_logs (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ts              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    session_id      TEXT,
+    channel_id      TEXT,
+    turn_id         INTEGER,
+    effective_model TEXT NOT NULL,
+    tier            TEXT NOT NULL,
+    router_reason   TEXT NOT NULL,
+    latency_ms      INTEGER CHECK (latency_ms IS NULL OR latency_ms >= 0),
+    ttft_ms         INTEGER CHECK (ttft_ms IS NULL OR ttft_ms >= 0),
+    tokens_in       INTEGER CHECK (tokens_in IS NULL OR tokens_in >= 0),
+    tokens_out      INTEGER CHECK (tokens_out IS NULL OR tokens_out >= 0),
+    tool_calls      JSONB NOT NULL DEFAULT '[]'::jsonb,
+    error           TEXT
+);
+
+CREATE INDEX idx_interaction_logs_ts ON interaction_logs (ts DESC);
+CREATE INDEX idx_interaction_logs_model ON interaction_logs (effective_model, ts DESC);
+CREATE INDEX idx_interaction_logs_session ON interaction_logs (session_id, turn_id)
+    WHERE session_id IS NOT NULL;
+
+-- Partition by month for efficient archival (optional, enable when data grows)
+-- Future: convert to partitioned table with monthly partitions
+```
+
+**`006_interaction_logs.down.sql`**
+```sql
+-- Rollback 006: Remove interaction logs
+
+DROP TABLE IF EXISTS interaction_logs;
+```
+
+---
+
+## Data Migration: axnmihn → Axel
+
+Data migration is handled by `tools/migrate/` (separate from schema migrations).
+See v2.0 Plan Section 5 for full details.
+
+### Execution Order
+
+```
+1. Run schema migrations (001-006)
+2. Run data migration tool:
+   a. SQLite sessions/messages → PostgreSQL sessions, messages
+   b. ChromaDB vectors → PostgreSQL memories (re-embed with gemini-embedding-001)
+   c. knowledge_graph.json → PostgreSQL entities, relations
+   d. dynamic_persona.json → file copy (no DB)
+3. Rebuild IVFFlat index (REINDEX) after bulk data load
+4. REFRESH MATERIALIZED VIEW hot_memories
+5. Run validation checks (see below)
+```
+
+### IVFFlat Index Note
+
+IVFFlat builds its clusters from existing data at index creation time.
+If the index is created on an empty table (migration 003), the clusters will be suboptimal.
+
+**Recommended approach for initial setup:**
+```sql
+-- 1. Create table WITHOUT IVFFlat index
+-- 2. Bulk insert migrated vectors
+-- 3. Then create the index:
+CREATE INDEX idx_memories_embedding ON memories
+    USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
+-- Or if index already exists from migration:
+REINDEX INDEX idx_memories_embedding;
+```
+
+The migration file includes the index for simplicity (works for new installs).
+The data migration tool should REINDEX after bulk import.
+
+### Validation Checks
+
+After migration, run these verification queries:
+
+```sql
+-- 1. Session count matches
+SELECT COUNT(*) FROM sessions;
+-- Expected: >= 1,600 (from axnmihn SQLite)
+
+-- 2. Message count matches
+SELECT COUNT(*) FROM messages;
+-- Expected: >= 3,200 (user+assistant pairs)
+
+-- 3. Memory count matches
+SELECT COUNT(*) FROM memories;
+-- Expected: >= 1,000 (from axnmihn ChromaDB)
+
+-- 4. Entity count matches
+SELECT COUNT(*) FROM entities;
+-- Expected: 1,396 (from knowledge_graph.json)
+
+-- 5. Relation count matches
+SELECT COUNT(*) FROM relations;
+-- Expected: 1,945 (from knowledge_graph.json)
+
+-- 6. Vector search works (sanity check)
+-- Requires a known embedding vector for "Mark"
+SELECT content, 1 - (embedding <=> '[...]') AS score
+FROM memories
+ORDER BY embedding <=> '[...]'
+LIMIT 5;
+
+-- 7. Graph traversal works
+WITH RECURSIVE traversal AS (
+    SELECT target_id, relation_type, weight, 1 AS depth
+    FROM relations WHERE source_id = 'mark'
+    UNION ALL
+    SELECT r.target_id, r.relation_type, r.weight, t.depth + 1
+    FROM relations r JOIN traversal t ON r.source_id = t.target_id
+    WHERE t.depth < 2
+)
+SELECT COUNT(DISTINCT target_id) FROM traversal;
+-- Expected: > 0
+
+-- 8. No orphaned messages (referential integrity)
+SELECT COUNT(*) FROM messages m
+LEFT JOIN sessions s ON m.session_id = s.session_id
+WHERE s.session_id IS NULL;
+-- Expected: 0
+
+-- 9. No orphaned relations
+SELECT COUNT(*) FROM relations r
+LEFT JOIN entities e1 ON r.source_id = e1.entity_id
+LEFT JOIN entities e2 ON r.target_id = e2.entity_id
+WHERE e1.entity_id IS NULL OR e2.entity_id IS NULL;
+-- Expected: 0
+```
+
+---
+
+## Vector Re-embedding Strategy
+
+### Why Re-embed?
+
+axnmihn used `text-embedding-004` (deprecated 2026-01-14).
+Axel uses `gemini-embedding-001` (768d, PLAN-001 decision).
+
+These are **different embedding models** — vectors from text-embedding-004
+are NOT compatible with gemini-embedding-001 embeddings.
+Direct vector copy would produce meaningless similarity scores.
+
+### Re-embedding Process
+
+```
+1. Extract content + metadata from ChromaDB (Python script)
+2. For each memory's content text:
+   a. Call Gemini gemini-embedding-001 API (768d output)
+   b. Batch: 100 texts per API call
+   c. Rate limit: ~1,500 RPM (Gemini free tier)
+3. INSERT into PostgreSQL memories table with new embedding
+4. Total: ~1,000 memories × 1 API call per 100 = ~10 API calls
+5. Estimated time: < 30 seconds
+6. Estimated cost: < $0.01 (Gemini embedding pricing)
+```
+
+### Rollback Plan
+
+If re-embedding produces poor quality results:
+1. Keep original ChromaDB as backup (do not delete)
+2. Re-run with different embedding model parameters
+3. Compare top-5 recall between old and new embeddings for test queries
+
+---
+
+## CI Migration Test
+
+GitHub Actions workflow step:
+
+```yaml
+migration-test:
+  services:
+    postgres:
+      image: pgvector/pgvector:pg16
+      env:
+        POSTGRES_DB: axel_test
+        POSTGRES_PASSWORD: test
+      ports:
+        - 5432:5432
+  steps:
+    - name: Run migrations up
+      run: pnpm --filter @axel/infra migrate:up
+    - name: Seed test data
+      run: pnpm --filter @axel/infra migrate:seed
+    - name: Run migrations down (full rollback)
+      run: pnpm --filter @axel/infra migrate:down --all
+    - name: Run migrations up again (verify re-apply)
+      run: pnpm --filter @axel/infra migrate:up
+    - name: Verify schema
+      run: pnpm --filter @axel/infra migrate:verify
+```
+
+This ensures all migrations are reversible and re-applicable.

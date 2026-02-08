@@ -1,0 +1,1092 @@
+openapi: 3.0.3
+info:
+  title: Axel Gateway API
+  description: |
+    Axel autonomous agent HTTP/WS gateway.
+
+    Authentication: Bearer JWT token in `Authorization` header.
+    All `/api/v1/*` endpoints require authentication unless noted.
+
+    Error responses follow a consistent format:
+    - Production: `{ error: string, requestId: string }`
+    - Development: `{ error: string, detail: string, stack: string, requestId: string }`
+
+    Rate limiting: 30 requests/minute per user (configurable).
+
+    References:
+    - v2.0 Plan Section 4, Layer 9 (Gateway)
+    - ADR-011: ENV-aware error handling
+    - ADR-014: Cross-Channel Session Router
+  version: 1.0.0
+  contact:
+    name: NorthProt
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://axel.northprot.com
+    description: Production
+
+tags:
+  - name: health
+    description: Health check endpoints (no auth required for basic)
+  - name: chat
+    description: Chat completion and streaming
+  - name: memory
+    description: Memory search and statistics
+  - name: session
+    description: Session management
+  - name: tools
+    description: Tool registry and execution
+  - name: webhooks
+    description: Channel webhook receivers
+
+paths:
+  # ═══════════════════════════════════════════
+  # HEALTH
+  # ═══════════════════════════════════════════
+
+  /health:
+    get:
+      tags: [health]
+      summary: Basic health check
+      description: Returns 200 if the server is running. No authentication required.
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthBasic"
+              example:
+                status: ok
+                timestamp: "2026-02-07T14:00:00Z"
+
+  /health/detailed:
+    get:
+      tags: [health]
+      summary: Detailed health check
+      description: |
+        Returns health status of all subsystems (PostgreSQL, Redis, LLM providers).
+        Requires authentication.
+      operationId: getHealthDetailed
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: All subsystems healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthDetailed"
+        "503":
+          description: One or more subsystems unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthDetailed"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ═══════════════════════════════════════════
+  # CHAT
+  # ═══════════════════════════════════════════
+
+  /api/v1/chat:
+    post:
+      tags: [chat]
+      summary: Send a chat message
+      description: |
+        Send a message to Axel and receive a complete response.
+
+        The Session Router (ADR-014) automatically resolves the user's active session.
+        If the session has expired (>30min inactivity), a new session is created.
+
+        For streaming responses, use `/api/v1/chat/stream` or the WebSocket endpoint.
+      operationId: postChat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+            example:
+              content: "어제 그 PR 리뷰 어떻게 됐어?"
+              channelId: webchat
+              media: []
+      responses:
+        "200":
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/chat/stream:
+    post:
+      tags: [chat]
+      summary: Send a chat message with SSE streaming
+      description: |
+        Same as POST `/api/v1/chat` but returns a Server-Sent Events stream.
+
+        Event types:
+        - `message_delta`: Incremental text content
+        - `thinking_delta`: Extended thinking content (if enabled)
+        - `tool_call`: Tool invocation notification
+        - `tool_result`: Tool execution result
+        - `session_info`: Session metadata (sent first)
+        - `done`: Stream complete with final metadata
+        - `error`: Error occurred during processing
+
+        Each event follows SSE format:
+        ```
+        event: message_delta
+        data: {"content": "어제 리뷰한 "}
+
+        event: message_delta
+        data: {"content": "PR은..."}
+
+        event: done
+        data: {"sessionId": "...", "totalTokens": 1234}
+        ```
+      operationId: postChatStream
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-Sent Events stream
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ═══════════════════════════════════════════
+  # MEMORY
+  # ═══════════════════════════════════════════
+
+  /api/v1/memory/search:
+    post:
+      tags: [memory]
+      summary: Search memories
+      description: |
+        Search across Semantic Memory (Layer 3) using hybrid search
+        (vector similarity + trigram text match).
+
+        Results are ranked by `finalScore = 0.7 * vectorScore + 0.3 * textScore`,
+        then weighted by importance.
+
+        Reference: ADR-013, Layer 3 (Semantic Memory)
+      operationId: postMemorySearch
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemorySearchRequest"
+            example:
+              query: "Mark의 TypeScript 선호 스타일"
+              limit: 10
+              hybridSearch: true
+              minImportance: 0.1
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemorySearchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/memory/stats:
+    get:
+      tags: [memory]
+      summary: Memory statistics
+      description: |
+        Returns statistics for all 6 memory layers.
+
+        Reference: ADR-013
+      operationId: getMemoryStats
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Memory statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryStats"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ═══════════════════════════════════════════
+  # SESSION
+  # ═══════════════════════════════════════════
+
+  /api/v1/session:
+    get:
+      tags: [session]
+      summary: Get active session
+      description: |
+        Returns the current active session for the authenticated user,
+        or null if no session is active.
+
+        Reference: ADR-014
+      operationId: getSession
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Active session (or null)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/session/end:
+    post:
+      tags: [session]
+      summary: End the current session
+      description: |
+        Explicitly ends the current session. Triggers:
+        1. Session summary generation (via LLM)
+        2. Working Memory flush to PostgreSQL
+        3. Episodic Memory record creation
+
+        Equivalent to sending "/end" in a chat channel.
+
+        Reference: ADR-014 (Session Timeout Rules)
+      operationId: postSessionEnd
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Session ended with summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionSummary"
+        "404":
+          description: No active session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/session/history:
+    get:
+      tags: [session]
+      summary: Get session history
+      description: |
+        Returns recent session summaries for the authenticated user.
+        Sessions are sorted by startedAt descending.
+      operationId: getSessionHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of sessions to return
+        - name: before
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Return sessions started before this timestamp
+      responses:
+        "200":
+          description: Session summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessions]
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SessionSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ═══════════════════════════════════════════
+  # TOOLS
+  # ═══════════════════════════════════════════
+
+  /api/v1/tools:
+    get:
+      tags: [tools]
+      summary: List available tools
+      description: |
+        Returns the list of registered tools with their schemas.
+        Tools are organized by category.
+
+        Reference: v2.0 Plan Section 4, Layer 6 (Tool System)
+      operationId: getTools
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Tool list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/tools/execute:
+    post:
+      tags: [tools]
+      summary: Execute a tool manually
+      description: |
+        Execute a specific tool with given arguments.
+
+        Tools with `requiresApproval: true` will return a 202 Accepted
+        with an approval token. The client must confirm execution via
+        a separate approval endpoint.
+
+        Reference: v2.0 Plan Section 4, Layer 6 (Tool System), ADR-010
+      operationId: postToolExecute
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToolExecuteRequest"
+            example:
+              name: read_file
+              args:
+                path: "/home/mark/projects/axel/README.md"
+                encoding: utf-8
+      responses:
+        "200":
+          description: Tool executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolExecuteResponse"
+        "202":
+          description: Tool requires approval
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolApprovalRequired"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Tool not in allowlist or approval denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/tools/approve:
+    post:
+      tags: [tools]
+      summary: Approve a pending tool execution
+      description: |
+        Confirm or deny a tool execution that requires approval.
+        The approvalToken is returned from the 202 response of `/api/v1/tools/execute`.
+      operationId: postToolApprove
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approvalToken, approved]
+              properties:
+                approvalToken:
+                  type: string
+                  description: Token from 202 response
+                approved:
+                  type: boolean
+                  description: true to approve, false to deny
+      responses:
+        "200":
+          description: Tool executed after approval
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolExecuteResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Approval token expired or not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "410":
+          description: Approval already processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ═══════════════════════════════════════════
+  # WEBHOOKS
+  # ═══════════════════════════════════════════
+
+  /webhooks/telegram:
+    post:
+      tags: [webhooks]
+      summary: Telegram Bot API webhook
+      description: |
+        Receives updates from Telegram Bot API.
+        Verified via Telegram's secret_token header.
+
+        This endpoint does NOT use Bearer JWT auth — it uses
+        Telegram's `X-Telegram-Bot-Api-Secret-Token` header.
+      operationId: postWebhookTelegram
+      security: []
+      parameters:
+        - name: X-Telegram-Bot-Api-Secret-Token
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Telegram webhook secret token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Telegram Update object (see Telegram Bot API docs)
+      responses:
+        "200":
+          description: Update processed
+        "401":
+          description: Invalid secret token
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /webhooks/discord:
+    post:
+      tags: [webhooks]
+      summary: Discord interactions webhook
+      description: |
+        Receives interaction events from Discord.
+        Verified via Discord's Ed25519 signature verification.
+
+        This endpoint does NOT use Bearer JWT auth — it uses
+        Discord's `X-Signature-Ed25519` and `X-Signature-Timestamp` headers.
+      operationId: postWebhookDiscord
+      security: []
+      parameters:
+        - name: X-Signature-Ed25519
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Signature-Timestamp
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Discord Interaction object (see Discord API docs)
+      responses:
+        "200":
+          description: Interaction response
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Discord Interaction Response
+        "401":
+          description: Invalid signature
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+# ═══════════════════════════════════════════
+# COMPONENTS
+# ═══════════════════════════════════════════
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token for authentication.
+        Phase 0: Single-user, static token from config.
+        Phase 4: Multi-user with proper JWT issuance.
+
+  schemas:
+    # ─── Health ───
+
+    HealthBasic:
+      type: object
+      required: [status, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        timestamp:
+          type: string
+          format: date-time
+
+    HealthDetailed:
+      type: object
+      required: [status, timestamp, subsystems]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        subsystems:
+          type: object
+          required: [postgresql, redis, llm]
+          properties:
+            postgresql:
+              $ref: "#/components/schemas/SubsystemHealth"
+            redis:
+              $ref: "#/components/schemas/SubsystemHealth"
+            llm:
+              type: object
+              required: [anthropic, google]
+              properties:
+                anthropic:
+                  $ref: "#/components/schemas/SubsystemHealth"
+                google:
+                  $ref: "#/components/schemas/SubsystemHealth"
+                ollama:
+                  $ref: "#/components/schemas/SubsystemHealth"
+        uptime:
+          type: integer
+          description: Server uptime in seconds
+
+    SubsystemHealth:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, unhealthy]
+        latencyMs:
+          type: integer
+          description: Last health check latency in ms
+        error:
+          type: string
+          description: Error message (only in development env)
+
+    # ─── Chat ───
+
+    ChatRequest:
+      type: object
+      required: [content, channelId]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 32000
+          description: User message content
+        channelId:
+          type: string
+          description: Channel identifier (e.g. "webchat", "cli")
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/MediaAttachment"
+          default: []
+          description: Optional media attachments
+        replyTo:
+          type: string
+          description: Message ID being replied to (optional)
+        threadId:
+          type: string
+          description: Thread ID for threaded conversations (optional)
+
+    ChatResponse:
+      type: object
+      required: [content, sessionId, requestId, usage]
+      properties:
+        content:
+          type: string
+          description: Axel's response text
+        sessionId:
+          type: string
+          description: Active session ID (ADR-014)
+        requestId:
+          type: string
+          description: Unique request identifier for tracing
+        channelSwitched:
+          type: boolean
+          description: Whether a channel switch was detected
+        toolsUsed:
+          type: array
+          items:
+            type: string
+          description: Names of tools invoked during this response
+        usage:
+          $ref: "#/components/schemas/TokenUsage"
+
+    TokenUsage:
+      type: object
+      required: [tokensIn, tokensOut, model]
+      properties:
+        tokensIn:
+          type: integer
+          description: Input tokens consumed
+        tokensOut:
+          type: integer
+          description: Output tokens generated
+        model:
+          type: string
+          description: Model used for this response
+        thinkingTokens:
+          type: integer
+          description: Extended thinking tokens (if applicable)
+        latencyMs:
+          type: integer
+          description: Total response time in ms
+        ttftMs:
+          type: integer
+          description: Time to first token in ms
+
+    MediaAttachment:
+      type: object
+      required: [type, url]
+      properties:
+        type:
+          type: string
+          enum: [image, file, audio, video]
+        url:
+          type: string
+          format: uri
+          description: URL or data URI of the media
+        mimeType:
+          type: string
+          description: MIME type (e.g. "image/png")
+        filename:
+          type: string
+          description: Original filename
+        sizeBytes:
+          type: integer
+          description: File size in bytes
+
+    # ─── Memory ───
+
+    MemorySearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Search query text
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum results to return
+        hybridSearch:
+          type: boolean
+          default: true
+          description: Enable hybrid search (vector + trigram)
+        minImportance:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.03
+          description: Minimum importance threshold
+        memoryTypes:
+          type: array
+          items:
+            type: string
+            enum: [fact, preference, insight, conversation]
+          description: Filter by memory type (empty = all types)
+        channelFilter:
+          type: string
+          description: Filter by source channel
+
+    MemorySearchResponse:
+      type: object
+      required: [results, totalMatches, query]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoredMemory"
+        totalMatches:
+          type: integer
+          description: Total matches before limit applied
+        query:
+          type: string
+          description: Original query text
+
+    ScoredMemory:
+      type: object
+      required: [uuid, content, memoryType, importance, vectorScore, textScore, finalScore]
+      properties:
+        uuid:
+          type: string
+        content:
+          type: string
+        memoryType:
+          type: string
+          enum: [fact, preference, insight, conversation]
+        importance:
+          type: number
+          description: Current importance (after decay)
+        vectorScore:
+          type: number
+          description: Vector cosine similarity score (0-1)
+        textScore:
+          type: number
+          description: Trigram text similarity score (0-1)
+        finalScore:
+          type: number
+          description: Combined score (0.7*vector + 0.3*text)
+        sourceChannel:
+          type: string
+          nullable: true
+        channelMentions:
+          type: object
+          additionalProperties:
+            type: integer
+          description: "Channel mention counts, e.g. {\"discord\": 3, \"telegram\": 1}"
+        createdAt:
+          type: string
+          format: date-time
+        lastAccessed:
+          type: string
+          format: date-time
+        accessCount:
+          type: integer
+
+    MemoryStats:
+      type: object
+      required: [layers, totals]
+      properties:
+        layers:
+          type: object
+          required: [streamBuffer, workingMemory, episodicMemory, semanticMemory, conceptualMemory, metaMemory]
+          properties:
+            streamBuffer:
+              $ref: "#/components/schemas/LayerStats"
+            workingMemory:
+              $ref: "#/components/schemas/LayerStats"
+            episodicMemory:
+              $ref: "#/components/schemas/LayerStats"
+            semanticMemory:
+              $ref: "#/components/schemas/LayerStats"
+            conceptualMemory:
+              $ref: "#/components/schemas/LayerStats"
+            metaMemory:
+              $ref: "#/components/schemas/LayerStats"
+        totals:
+          type: object
+          required: [totalMemories, totalEntities, totalRelations, totalSessions]
+          properties:
+            totalMemories:
+              type: integer
+            totalEntities:
+              type: integer
+            totalRelations:
+              type: integer
+            totalSessions:
+              type: integer
+
+    LayerStats:
+      type: object
+      required: [itemCount, storage]
+      properties:
+        itemCount:
+          type: integer
+        storage:
+          type: string
+          enum: [redis, postgresql]
+        lastUpdated:
+          type: string
+          format: date-time
+          nullable: true
+        details:
+          type: object
+          additionalProperties: true
+          description: Layer-specific stats (e.g. hotMemoryCount for Meta)
+
+    # ─── Session ───
+
+    SessionResponse:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+          description: Whether an active session exists
+        session:
+          $ref: "#/components/schemas/UnifiedSession"
+          nullable: true
+
+    UnifiedSession:
+      type: object
+      required: [sessionId, userId, activeChannelId, channelHistory, startedAt, lastActivityAt, turnCount]
+      properties:
+        sessionId:
+          type: string
+        userId:
+          type: string
+        activeChannelId:
+          type: string
+        channelHistory:
+          type: array
+          items:
+            type: string
+          description: Channels used in this session (ordered)
+        startedAt:
+          type: string
+          format: date-time
+        lastActivityAt:
+          type: string
+          format: date-time
+        turnCount:
+          type: integer
+
+    SessionSummary:
+      type: object
+      required: [sessionId, summary, keyTopics, channels, turnCount, duration]
+      properties:
+        sessionId:
+          type: string
+        summary:
+          type: string
+          description: LLM-generated session summary
+        keyTopics:
+          type: array
+          items:
+            type: string
+        emotionalTone:
+          type: string
+          description: Dominant emotional tone of the session
+        channels:
+          type: array
+          items:
+            type: string
+          description: Channels used during the session
+        turnCount:
+          type: integer
+        duration:
+          type: integer
+          description: Session duration in seconds
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+
+    # ─── Tools ───
+
+    ToolListResponse:
+      type: object
+      required: [tools]
+      properties:
+        tools:
+          type: array
+          items:
+            $ref: "#/components/schemas/ToolDefinition"
+
+    ToolDefinition:
+      type: object
+      required: [name, description, category, inputSchema, requiresApproval]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [memory, file, iot, research, system, agent]
+        inputSchema:
+          type: object
+          description: JSON Schema for tool input (auto-generated from Zod)
+        requiresApproval:
+          type: boolean
+
+    ToolExecuteRequest:
+      type: object
+      required: [name, args]
+      properties:
+        name:
+          type: string
+          description: Tool name
+        args:
+          type: object
+          additionalProperties: true
+          description: Tool arguments (validated against tool's inputSchema)
+
+    ToolExecuteResponse:
+      type: object
+      required: [name, success, result, executionMs]
+      properties:
+        name:
+          type: string
+        success:
+          type: boolean
+        result:
+          type: object
+          additionalProperties: true
+          description: Tool output
+        error:
+          type: string
+          description: Error message (only if success=false)
+        executionMs:
+          type: integer
+          description: Tool execution time in ms
+
+    ToolApprovalRequired:
+      type: object
+      required: [name, approvalToken, reason, expiresAt]
+      properties:
+        name:
+          type: string
+          description: Tool name requiring approval
+        approvalToken:
+          type: string
+          description: Token to use with /api/v1/tools/approve
+        reason:
+          type: string
+          description: Why this tool requires approval
+        args:
+          type: object
+          additionalProperties: true
+          description: The arguments that would be executed
+        expiresAt:
+          type: string
+          format: date-time
+          description: Approval token expiry (5 minutes)
+
+    # ─── Errors ───
+
+    ErrorResponse:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: string
+          description: Human-readable error message (generic in production)
+        requestId:
+          type: string
+          description: Unique request ID for log correlation
+        detail:
+          type: string
+          description: Detailed error (development only, ADR-011)
+        stack:
+          type: string
+          description: Stack trace (development only)
+
+  responses:
+    BadRequest:
+      description: Invalid request (validation failed)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error: "Validation failed: content must be at least 1 character"
+            requestId: "req_abc123"
+
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error: Unauthorized
+            requestId: "req_abc123"
+
+    RateLimited:
+      description: Rate limit exceeded (30 req/min default)
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until rate limit resets
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Rate limit ceiling
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in window
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error: "Rate limit exceeded"
+            requestId: "req_abc123"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error: "Internal Server Error"
+            requestId: "req_abc123"

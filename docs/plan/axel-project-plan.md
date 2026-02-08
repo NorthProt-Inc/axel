@@ -390,7 +390,7 @@ const LlmConfigSchema = z.object({
   google: z.object({
     apiKey: z.string().min(1),
     flashModel: z.string().default("gemini-3-flash-preview"),
-    embeddingModel: z.string().default("text-embedding-004"),
+    embeddingModel: z.string().default("gemini-embedding-001"),
     embeddingDimension: z.number().int().default(768),
   }),
   fallbackChain: z.array(z.enum(["anthropic", "google", "ollama"])).default(["anthropic", "google"]),
@@ -1722,37 +1722,46 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 | ADR-013 | 6-Layer Memory (Stream Buffer + Meta Memory 추가) | **초안** |
 | ADR-014 | Cross-Channel Session Router (핵심 혁신) | **초안** |
 | ADR-015 | Adaptive Decay v2 (channel diversity boost) | **초안** |
+| ADR-016 | Embedding Model: gemini-embedding-001 (768d) | **초안** |
 
 ---
 
 ## 11. 다음 단계
 
-이 v2.0 문서는 **중간 초안**이다. 코드를 쓰기 전에 추가로 확정해야 할 것:
+이 v2.0 문서는 **중간 초안**이다. 아래는 미결 사항의 해결 현황이다.
 
-### 미결 사항
+### 미결 사항 (모두 해결됨)
 
-1. **임베딩 모델 최종 선택**: Gemini embedding-001 (768d) vs text-embedding-004 (768d/1536d)
-   - 마이그레이션 용이성 vs 품질 트레이드오프
+1. ~~**임베딩 모델 최종 선택**~~: → **gemini-embedding-001 (768d)** — ADR-016
+   - text-embedding-004 deprecated (2026-01-14). Re-embed 필수. MTEB #1.
 
-2. **WebChat 프레임워크**: React vs Svelte vs Solid
-   - OpenClaw은 React (Control UI). 그대로 갈지 경량화할지
+2. ~~**WebChat 프레임워크**~~: → **React (Vite)** — PLAN-001
+   - Chat UI 생태계 + OpenClaw 일관성 + Vercel AI SDK streaming hooks.
 
-3. **CI/CD 파이프라인 상세**: GitHub Actions 워크플로우 정의
-   - lint → typecheck → test → build → deploy
+3. ~~**CI/CD 파이프라인 상세**~~: → **GitHub Actions 3-stage** — PLAN-001
+   - lint/typecheck/test 병렬 → build → deploy (SSH + docker-compose).
 
-4. **배포 전략**: VPS 직접 배포 vs Docker on VPS vs fly.io/railway
-   - 초기에는 Docker Compose on VPS가 가장 실용적
+4. ~~**배포 전략**~~: → **Docker Compose on VPS** — PLAN-001
+   - Hetzner CAX21. Single-user이므로 orchestration 불필요.
 
-5. **모니터링**: Structured logs만으로 충분한가, 아니면 Grafana/Prometheus 필요한가
-   - Phase 0-1에서는 로그만, Phase 2부터 메트릭 수집
+5. ~~**모니터링**~~: → **Phase 0-1: pino + interaction_logs → Phase 2: OpenTelemetry + Grafana Cloud** — PLAN-001
+   - Phase 0에서 OTel instrumentation 설정, export는 Phase 2 활성화.
 
-### v3.0에 포함될 것
+### v3.0 산출물 현황
 
-- **각 ADR의 상세 문서** (대안, 트레이드오프, 벤치마크)
-- **API 스펙** (OpenAPI 3.0)
-- **PostgreSQL 마이그레이션 전략** (up/down SQL 파일)
-- **성능 벤치마크 계획** (latency targets per endpoint)
-- **에이전트 분산 작업 계획** (어떤 에이전트가 어떤 패키지를 구현하는지)
+| 항목 | 상태 | 산출물 |
+|------|------|--------|
+| ADR 상세 문서 | **완료** | ADR-013, 014, 015, 016 |
+| API 스펙 (OpenAPI 3.0) | **완료** | `docs/plan/openapi-v1.yaml`, `websocket-protocol.md` |
+| PostgreSQL 마이그레이션 전략 | **완료** | `docs/plan/migration-strategy.md` |
+| 성능 벤치마크 계획 | **대기** | RES-001 (pgvector IVFFlat vs HNSW) 결과 필요 |
+| 에이전트 분산 작업 계획 | **대기** | Coordinator 할당 필요 |
+
+### 아직 필요한 것
+
+- **Research Division 결과**: RES-001~005 (pgvector 벤치마크, 토크나이저, 프레임워크 비교 등)
+- **Quality Division 검토**: QA-001 (plan 내부 일관성), QA-002 (claude_reports 매핑 완전성)
+- **v3.0 통합 문서**: 모든 하위 문서를 하나의 coherent plan으로 통합
 
 ---
 
