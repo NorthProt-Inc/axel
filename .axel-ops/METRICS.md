@@ -43,7 +43,7 @@
 |-------|--------|-------------|-----------|------------|
 | Plan Closure | **DONE** | 17 | 21 | 100% |
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
-| B: Core Sprint | QUEUED | 25 | 42 | — |
+| B: Core Sprint | **ACTIVE** | 31 | — | 0% (BACKLOG created: CORE-001~006, QA-012) |
 | C: Infra Sprint | QUEUED | 43 | 57 | — |
 | D: Edge Sprint | QUEUED | 58 | 77 | — |
 | E: Integration | QUEUED | 78 | 92 | — |
