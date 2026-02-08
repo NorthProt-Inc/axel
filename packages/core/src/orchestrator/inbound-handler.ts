@@ -4,6 +4,7 @@ import type { PersonaEngine } from '../persona/engine.js';
 import type { InboundMessage, OutboundMessage } from '../types/channel.js';
 import type { Message } from '../types/message.js';
 import type { ReActEvent } from '../types/react.js';
+import type { ToolDefinition } from '../types/tool.js';
 import { reactLoop } from './react-loop.js';
 import type { SessionRouter } from './session-router.js';
 import type { LlmProvider, ReActConfig, ToolExecutor } from './types.js';
@@ -32,6 +33,7 @@ export interface InboundHandlerDeps {
 	readonly llmProvider: LlmProvider;
 	readonly toolExecutor: ToolExecutor;
 	readonly personaEngine: PersonaEngine;
+	readonly toolDefinitions?: readonly ToolDefinition[];
 	readonly config?: ReActConfig;
 	readonly onError?: (info: ErrorInfo) => void;
 }
@@ -62,6 +64,7 @@ export function createInboundHandler(
 		llmProvider,
 		toolExecutor,
 		personaEngine,
+		toolDefinitions = [],
 		config = DEFAULT_REACT_CONFIG,
 		onError,
 	} = deps;
@@ -90,7 +93,7 @@ export function createInboundHandler(
 			const responseText = await consumeReactStream(
 				reactLoop({
 					messages,
-					tools: [],
+					tools: toolDefinitions,
 					llmProvider,
 					toolExecutor,
 					config,
