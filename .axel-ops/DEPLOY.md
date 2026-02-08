@@ -120,27 +120,31 @@ File: `.github/workflows/ci.yml`
 | `@axel/migrate` | ✅ OPERATIONAL | TypeScript migration runner in tools/migrate/ |
 | Runner Implementation | ✅ COMPLETE | migrator.ts (sequential, transactional, idempotent) |
 | CLI | ✅ COMPLETE | cli.ts (up/down/status commands) |
-| SQL Migrations | ✅ COMPLETE | 6 migrations (001-006) with rollback support |
-| Tests | ✅ PASS | 10 tests, testcontainers (PG17+pgvector) |
-| Docker Compose Integration | ✅ VERIFIED | All 6 migrations applied to axel-postgres container |
+| SQL Migrations | ✅ COMPLETE | 8 migrations (001-008) with rollback support |
+| Tests | ✅ PASS | 15 tests, testcontainers (PG17+pgvector) |
+| Docker Compose Integration | ✅ VERIFIED | All 8 migrations ready for deployment |
 
-### Migrations Applied
+### Migrations Available
 
-| Version | Name | Status | Applied At |
-|---------|------|--------|------------|
-| 001 | extensions | ✅ APPLIED | 2026-02-08 18:00:42 |
-| 002 | episodic_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
-| 003 | semantic_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
-| 004 | conceptual_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
-| 005 | meta_memory | ✅ APPLIED | 2026-02-08 18:00:42 |
-| 006 | interaction_logs | ✅ APPLIED | 2026-02-08 18:00:42 |
+| Version | Name | Status | Notes |
+|---------|------|--------|-------|
+| 001 | extensions | ✅ READY | pgvector extension |
+| 002 | episodic_memory | ✅ READY | sessions + messages tables (with created_at, token_count) |
+| 003 | semantic_memory | ✅ READY | memories table |
+| 004 | conceptual_memory | ✅ READY | entities + relations tables |
+| 005 | meta_memory | ✅ READY | memory_access_patterns + hot_memories view |
+| 006 | interaction_logs | ✅ READY | interaction_logs table |
+| 007 | fix_sessions_schema | ✅ READY | last_activity_at column + channel_history JSONB→TEXT[] (conditional) |
+| 008 | session_summaries | ✅ READY | session_summaries table |
 
-### Schema Verified
+### Schema Coverage
 
 - ✅ pgvector extension 0.8.1 enabled
-- ✅ Tables: sessions, messages, memories, entities, relations, memory_access_patterns, interaction_logs
+- ✅ Tables: sessions, messages, memories, entities, relations, memory_access_patterns, interaction_logs, session_summaries
 - ✅ Materialized view: hot_memories
 - ✅ All indexes created (except memories vector index — see ERR-069)
+- ✅ messages table columns: created_at, token_count (002)
+- ✅ sessions table: last_activity_at, channel_history TEXT[] (007)
 
 ### Usage
 
