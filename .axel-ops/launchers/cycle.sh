@@ -38,6 +38,7 @@ run_division() {
     git pull --rebase --quiet 2>/dev/null || true
 
     set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
+    unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
     $CLAUDE -p \
         --model "$model" \
@@ -71,6 +72,7 @@ log "CYCLE $CYCLE_ID START"
 cd "$MAIN_REPO"
 git pull --rebase --quiet 2>/dev/null || true
 set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
+unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
 $CLAUDE -p \
     --model opus \
