@@ -21,6 +21,7 @@
 | **Dev-Core** | `dev-core` | `packages/core/` | opus | `axel-wt-dev-core` |
 | **Dev-Infra** | `dev-infra` | `packages/infra/` | opus | `axel-wt-dev-infra` |
 | **Dev-Edge** | `dev-edge` | `packages/channels/`, `packages/gateway/`, `apps/axel/` | opus | `axel-wt-dev-edge` |
+| **UI/UX** | `ui-ux` | `packages/ui/`, `apps/webchat/` | opus | `axel-wt-ui-ux` |
 
 ### 1.3 Assurance Layer
 
@@ -34,7 +35,7 @@
 | Division | Code | Owned Directories | Model | Worktree |
 |----------|------|------------------|-------|----------|
 | **Research** | `research` | `docs/research/` | sonnet | `axel-wt-research` |
-| **DevOps** | `devops` | `packages/*/package.json`, `packages/*/tsconfig.json`, `packages/*/vitest.config.ts`, `docker/`, `.github/`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `biome.json`, `.axel-ops/DEPLOY.md` | sonnet | `axel-wt-devops` |
+| **DevOps** | `devops` | `packages/*/package.json`, `packages/*/tsconfig.json`, `packages/*/vitest.config.ts`, `docker/`, `.github/`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `biome.json`, `.axel-ops/DEPLOY.md`, `tools/migrate/` | sonnet | `axel-wt-devops` |
 
 **Rule**: A Division may ONLY create/modify files in its owned directories. Reading any file is allowed.
 
@@ -82,6 +83,8 @@ Each Division writes to its own comms file. Coordinator reads all.
 | `comms/research.jsonl` | Research | Coordinator, Architect |
 | `comms/devops.jsonl` | DevOps | Coordinator, All |
 | `comms/audit.jsonl` | Audit | Coordinator, Architect, Quality |
+| `comms/ui-ux.jsonl` | UI/UX | Coordinator, Quality, Architect, Dev-Edge |
+| `comms/human.jsonl` | Human (Mark) | Coordinator (read-first every cycle) |
 
 ## 3. Quality Gates
 
@@ -100,6 +103,9 @@ Before any document is considered "done":
 - [ ] Plan changes align with v2.0 core decisions (TS single stack, PostgreSQL, etc.)
 - [ ] Numbers (token budgets, costs, etc.) are arithmetically correct
 - [ ] Specs are concrete enough for distributed agent implementation
+- [ ] Migration SQL files match `migration-strategy.md`
+- [ ] SQL syntax is PostgreSQL-compatible (no subquery in USING, etc.)
+- [ ] New tables/columns are reflected in migration files
 
 ## 4. BACKLOG Rules
 
@@ -144,6 +150,7 @@ Coverage targets:
 - `packages/infra/`: 80%+
 - `packages/channels/`: 75%+
 - `packages/gateway/`: 80%+
+- `packages/ui/`: 80%+
 
 ## 9. Package Boundary Enforcement
 
@@ -151,9 +158,11 @@ Coverage targets:
 |---------|----------------|
 | `packages/core/` | No other `packages/` — only Node.js stdlib and external npm |
 | `packages/infra/` | `@axel/core/{types,memory,orchestrator}` |
-| `packages/channels/` | `packages/core/src/types/` only |
+| `packages/channels/` | `packages/core/src/types/` and `@axel/ui` |
 | `packages/gateway/` | `packages/core/src/types/` only |
+| `packages/ui/` | `packages/core/src/types/` only (design tokens have no other internal deps) |
 | `apps/axel/` | Any `packages/*` |
+| `apps/webchat/` | Any `packages/*` |
 
 Violation severity: **CRITICAL**. Quality Division enforces via import analysis.
 
@@ -192,6 +201,10 @@ After merging Division branches into main (Phase 3), the following smoke tests M
 pnpm install --frozen-lockfile
 pnpm typecheck     # tsc --noEmit
 pnpm test --run    # vitest run
+# Migration integrity check
+docker compose -f docker/docker-compose.dev.yml up -d postgres
+DATABASE_URL=postgresql://axel:axel_dev_password@localhost:5432/axel_test pnpm migrate up
+docker compose -f docker/docker-compose.dev.yml down
 ```
 If any test fails: identify the offending merge, revert it, create a P0 fix task.
 
@@ -199,3 +212,29 @@ If any test fails: identify the offending merge, revert it, create a P0 fix task
 
 Source files (`packages/*/src/**/*.ts`) MUST NOT exceed 400 lines.
 Quality Division monitors. Violation severity: **MEDIUM**.
+
+## 15. Cross-Division Handoff
+
+When a Dev Division completes work that affects shared resources:
+
+1. **DB Schema Changes** (Dev-Infra → DevOps):
+   - DevOps MUST verify migration runner executes successfully
+   - Done message requires: `"migration-verified": true`
+
+2. **Channel Interface Changes** (Dev-Edge → UI/UX):
+   - UI/UX MUST verify rendering compatibility
+   - Done message requires: `"rendering-verified": true`
+
+3. **Core Type Changes** (Dev-Core → All Dev):
+   - Dependent divisions MUST verify compilation
+   - Done message requires: `"type-check-verified": true`
+
+## 16. Human Directive Priority
+
+Coordinator MUST read `comms/human.jsonl` at the START of every cycle, BEFORE reading other comms.
+- `directive` messages → immediately create BACKLOG task (inherit priority)
+- `feedback` messages → route to relevant Division as `assign` with corrections
+- `halt` messages → immediately move task to "Blocked (human-halted)"
+- `approve` messages → unblock escalated items
+
+Human directives ALWAYS override automated scheduling.

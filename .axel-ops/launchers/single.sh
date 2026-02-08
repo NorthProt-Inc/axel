@@ -36,9 +36,10 @@ case "$DIV" in
     research)    WT="/home/northprot/projects/axel-wt-research" ;;
     devops)      WT="/home/northprot/projects/axel-wt-devops" ;;
     audit)       WT="/home/northprot/projects/axel-wt-audit" ;;
+    ui-ux)       WT="/home/northprot/projects/axel-wt-ui-ux" ;;
     *)
         echo "ERROR: Unknown division '$DIV'"
-        echo "Available: coordinator, arch, dev-core, dev-infra, dev-edge, quality, research, devops, audit"
+        echo "Available: coordinator, arch, dev-core, dev-infra, dev-edge, quality, research, devops, audit, ui-ux"
         exit 1
         ;;
 esac

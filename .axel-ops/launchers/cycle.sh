@@ -40,6 +40,7 @@ get_worktree() {
         research)   echo "/home/northprot/projects/axel-wt-research" ;;
         devops)     echo "/home/northprot/projects/axel-wt-devops" ;;
         audit)      echo "/home/northprot/projects/axel-wt-audit" ;;
+        ui-ux)      echo "/home/northprot/projects/axel-wt-ui-ux" ;;
         *) echo ""; return 1 ;;
     esac
 }

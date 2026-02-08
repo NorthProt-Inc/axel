@@ -1,0 +1,105 @@
+#!/bin/bash
+# tools/axel-ops — Human→Coordinator directive CLI helper
+# Usage:
+#   axel-ops directive "UI/UX Division 만들어라"        # P1 directive
+#   axel-ops directive -p0 "빌드 깨졌다, 즉시 수정"      # P0 urgent
+#   axel-ops feedback "CLI 색상 마음에 안든다"           # feedback
+#   axel-ops status                                    # PROGRESS.md summary
+#   axel-ops backlog                                   # BACKLOG.md output
+#   axel-ops errors                                    # ERRORS.md output
+#   axel-ops halt TASK-ID                              # halt directive
+#   axel-ops approve TASK-ID                           # approve
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+OPS="$REPO_ROOT/.axel-ops"
+COMMS_FILE="$OPS/comms/human.jsonl"
+
+ts() { date +"%m%dT%H%M"; }
+
+append_msg() {
+	local type="$1"
+	local priority="$2"
+	local msg="$3"
+	local extra="$4"
+
+	local json="{\"ts\":\"$(ts)\",\"from\":\"human\",\"type\":\"$type\""
+	if [ -n "$priority" ]; then
+		json="$json,\"priority\":\"$priority\""
+	fi
+	json="$json,\"msg\":\"$msg\""
+	if [ -n "$extra" ]; then
+		json="$json,$extra"
+	fi
+	json="$json}"
+
+	echo "$json" >> "$COMMS_FILE"
+	echo "Recorded: $json"
+}
+
+case "${1:-help}" in
+	directive)
+		shift
+		priority="P1"
+		if [ "${1:-}" = "-p0" ]; then
+			priority="P0"
+			shift
+		elif [ "${1:-}" = "-p2" ]; then
+			priority="P2"
+			shift
+		elif [ "${1:-}" = "-p3" ]; then
+			priority="P3"
+			shift
+		fi
+		msg="${1:?Usage: axel-ops directive [-p0|-p2|-p3] \"message\"}"
+		append_msg "directive" "$priority" "$msg" ""
+		;;
+	feedback)
+		shift
+		msg="${1:?Usage: axel-ops feedback \"message\"}"
+		append_msg "feedback" "" "$msg" ""
+		;;
+	halt)
+		shift
+		task_id="${1:?Usage: axel-ops halt TASK-ID}"
+		append_msg "halt" "P0" "Halt task $task_id" "\"task\":\"$task_id\""
+		;;
+	approve)
+		shift
+		task_id="${1:?Usage: axel-ops approve TASK-ID}"
+		append_msg "approve" "" "Approve $task_id" "\"task\":\"$task_id\""
+		;;
+	status)
+		if [ -f "$OPS/PROGRESS.md" ]; then
+			cat "$OPS/PROGRESS.md"
+		else
+			echo "PROGRESS.md not found"
+		fi
+		;;
+	backlog)
+		if [ -f "$OPS/BACKLOG.md" ]; then
+			cat "$OPS/BACKLOG.md"
+		else
+			echo "BACKLOG.md not found"
+		fi
+		;;
+	errors)
+		if [ -f "$OPS/ERRORS.md" ]; then
+			cat "$OPS/ERRORS.md"
+		else
+			echo "ERRORS.md not found"
+		fi
+		;;
+	help|*)
+		echo "axel-ops — Human→Coordinator directive CLI"
+		echo ""
+		echo "Commands:"
+		echo "  directive [-p0|-p2|-p3] \"msg\"   Send directive (default P1)"
+		echo "  feedback \"msg\"                   Send feedback"
+		echo "  halt TASK-ID                      Halt a task"
+		echo "  approve TASK-ID                   Approve escalated item"
+		echo "  status                            Show PROGRESS.md"
+		echo "  backlog                           Show BACKLOG.md"
+		echo "  errors                            Show ERRORS.md"
+		;;
+esac

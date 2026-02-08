@@ -49,22 +49,32 @@ Milestone: `pnpm install && pnpm typecheck && pnpm test` succeeds (0 tests, 0 er
 ### Step 1: Context Load
 
 Read the following files in order:
-1. `.axel-ops/MISSION.md` — Immutable mission
-2. `.axel-ops/CONSTITUTION.md` — Agent behavior rules
-3. `.axel-ops/PROGRESS.md` — Global state
-4. `.axel-ops/BACKLOG.md` — Work queue
-5. `.axel-ops/ERRORS.md` — Open errors/blockers
-6. `.axel-ops/METRICS.md` — Performance metrics
-7. `.axel-ops/PLAN_SYNC.md` — Plan-Code sync status
-8. `.axel-ops/comms/broadcast.jsonl` — Recent broadcasts (tail 20)
-9. `.axel-ops/comms/arch.jsonl` — Architecture Division log (tail 10)
-10. `.axel-ops/comms/dev-core.jsonl` — Dev-Core log (tail 10)
-11. `.axel-ops/comms/dev-infra.jsonl` — Dev-Infra log (tail 10)
-12. `.axel-ops/comms/dev-edge.jsonl` — Dev-Edge log (tail 10)
-13. `.axel-ops/comms/quality.jsonl` — Quality Division log (tail 10)
-14. `.axel-ops/comms/research.jsonl` — Research Division log (tail 10)
-15. `.axel-ops/comms/devops.jsonl` — DevOps Division log (tail 10)
-16. `.axel-ops/comms/audit.jsonl` — Audit Division log (tail 10)
+1. **`.axel-ops/comms/human.jsonl`** — **HUMAN DIRECTIVES (read FIRST, CONSTITUTION §16)**
+2. `.axel-ops/MISSION.md` — Immutable mission
+3. `.axel-ops/CONSTITUTION.md` — Agent behavior rules
+4. `.axel-ops/PROGRESS.md` — Global state
+5. `.axel-ops/BACKLOG.md` — Work queue
+6. `.axel-ops/ERRORS.md` — Open errors/blockers
+7. `.axel-ops/METRICS.md` — Performance metrics
+8. `.axel-ops/PLAN_SYNC.md` — Plan-Code sync status
+9. `.axel-ops/comms/broadcast.jsonl` — Recent broadcasts (tail 20)
+10. `.axel-ops/comms/arch.jsonl` — Architecture Division log (tail 10)
+11. `.axel-ops/comms/dev-core.jsonl` — Dev-Core log (tail 10)
+12. `.axel-ops/comms/dev-infra.jsonl` — Dev-Infra log (tail 10)
+13. `.axel-ops/comms/dev-edge.jsonl` — Dev-Edge log (tail 10)
+14. `.axel-ops/comms/ui-ux.jsonl` — UI/UX Division log (tail 10)
+15. `.axel-ops/comms/quality.jsonl` — Quality Division log (tail 10)
+16. `.axel-ops/comms/research.jsonl` — Research Division log (tail 10)
+17. `.axel-ops/comms/devops.jsonl` — DevOps Division log (tail 10)
+18. `.axel-ops/comms/audit.jsonl` — Audit Division log (tail 10)
+
+**Human Directive Processing (CONSTITUTION §16)**:
+If `comms/human.jsonl` contains new (unprocessed) messages:
+- `directive` → immediately create BACKLOG task with inherited priority, BEFORE all other work
+- `feedback` → route to relevant Division as `assign` with corrections
+- `halt` → immediately move referenced task to "Blocked (human-halted)"
+- `approve` → unblock escalated items
+- Write acknowledgement to `comms/broadcast.jsonl`: `{"type":"ack","ref":"human-directive","msg":"..."}`
 
 ### Step 2: Drift Detection
 
@@ -111,6 +121,7 @@ Decide which Divisions to activate for the NEXT cycle based on:
 | `research` | Research task assigned OR idle 3+ cycles (proactive mode) |
 | `devops` | Infra task assigned OR deployment milestone approaching |
 | `audit` | Every 10 cycles OR milestone completion |
+| `ui-ux` | BACKLOG has ui-ux tasks AND core types stable |
 
 Write activation message to `comms/broadcast.jsonl`:
 ```jsonl

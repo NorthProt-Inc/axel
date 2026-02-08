@@ -1,0 +1,26 @@
+{
+	"name": "@axel/ui",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./tokens": "./src/tokens/index.ts",
+		"./cli": "./src/cli/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"chalk": "^5.4.1",
+		"marked": "^15.0.7",
+		"marked-terminal": "^7.3.0",
+		"ora": "^8.2.0"
+	},
+	"devDependencies": {
+		"@vitest/coverage-v8": "^3.0.8",
+		"typescript": "^5.7.3",
+		"vitest": "^3.0.8"
+	}
+}
