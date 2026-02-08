@@ -582,6 +582,33 @@ describe('ContextAssembler', () => {
 			expect(result.sections.every((s) => s.tokens > 0)).toBe(true);
 		});
 
+		it('drops section when truncation yields empty string (budget too small)', async () => {
+			const provider = makeEmptyProvider();
+			(provider.getWorkingMemory as ReturnType<typeof vi.fn>).mockResolvedValue([
+				makeTurn('Hello world', 1),
+			]);
+
+			// Counter where even 1 character costs 100 tokens
+			const counter: TokenCounter = {
+				count: async (text) => (text.length === 0 ? 0 : text.length * 100),
+				estimate: (text) => text.length * 100,
+			};
+			const tinyBudget = {
+				...DEFAULT_CONTEXT_BUDGET,
+				workingMemory: 1, // budget too small for anything
+			};
+			const assembler = new ContextAssembler(provider, counter, tinyBudget);
+
+			const result = await assembler.assemble({
+				systemPrompt: '',
+				userId: 'u1',
+				query: 'test',
+			});
+
+			const wmSection = result.sections.find((s) => s.source === 'M1:working');
+			expect(wmSection).toBeUndefined();
+		});
+
 		it('does not include systemPrompt as a section', async () => {
 			const provider = makeEmptyProvider();
 			const counter = makeEstimateCounter();
