@@ -2,20 +2,19 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 13**: QA-009 completed — ALL 5 quality gates PASS. PLAN FINALIZATION APPROVED.
-> No remaining tasks. Planning phase complete.
+> **Cycle 16**: AUDIT-001 assigned to Audit Division. Embedding 768d→3072d factual audit.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| AUDIT-001 | P0 | audit | Plan factual accuracy audit. Key items: (1) Embedding dimension — Mark confirms 3072d (full), not 768d (truncated). Verify all 11 plan references + ADR-016. (2) Cross-check all ADR decisions against plan body. (3) Verify model names, versions, numerical claims against official docs. | — | 0208 |
+| (empty) | | | | | |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| (empty) | | | |
+| AUDIT-001 | audit | 0208T1900 | 1 cycle |
 
 ## Cancelled
 

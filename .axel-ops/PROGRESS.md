@@ -4,17 +4,17 @@
 
 ## Status
 
-- **Phase**: PLAN REVIEW — Audit Division added, human-directed review cycle
-- **Cycle**: 15
-- **Last Updated**: 2026-02-08T1600
-- **STATUS**: **PLAN REVIEW** — Audit Division performing cross-cutting verification. Key issue: embedding dimension 768d→3072d correction needed.
+- **Phase**: PLAN REVIEW — Audit Division performing cross-cutting verification
+- **Cycle**: 16
+- **Last Updated**: 2026-02-08T1900
+- **STATUS**: **AUDIT IN PROGRESS** — AUDIT-001 assigned. Embedding dimension 768d→3072d correction + factual accuracy verification.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 0 |
+| In Progress | 1 |
 | Done | 30 |
 | Cancelled | 13 |
 
@@ -42,15 +42,17 @@ All 48 errors resolved. ERR-QG1 closed by QA-009 (ALL 5 quality gates PASS).
 | 13 | 0208 | **PLAN FINALIZED.** QA-009 completed (commit 9ac0aeb): ALL 5 CONSTITUTION §3 quality gates PASS — Consistency, Completeness, Traceability, Feasibility, Sources. ERR-QG1 RESOLVED. Open errors: 1→0. Total tasks completed: 30. Total errors resolved: 48. No drift. No blockers. **Planning phase complete.** All Divisions idle. Awaiting human decision on implementation phase kickoff. |
 | 14 | 0208 | **STEADY STATE.** No drift detected. No new comms from any Division. All state files current. 0 queued, 0 in progress, 30 done, 0 errors. Planning phase complete — awaiting human decision on implementation kickoff. |
 | 15 | 0208 | **STEADY STATE.** No drift. No new Division comms. All Divisions idle. 0 queued, 0 in progress, 30 done, 0 errors. Awaiting human decision on implementation kickoff. |
+| 16 | 0208 | **AUDIT CYCLE.** No drift. No new Division comms (Audit Division created but not yet active). AUDIT-001 formally assigned to Audit Division — embedding 768d→3072d factual correction + ADR/plan cross-check + model/version verification. 0 queued, 1 in progress, 30 done, 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208T1500 | Cycle 14 — steady state, awaiting human decision | Active |
-| Architecture | 0208T1130 | (idle — all planning tasks done) | Idle |
+| Coordinator | 0208T1900 | Cycle 16 — AUDIT-001 assigned | Active |
+| Architecture | 0208T1130 | (idle — awaiting audit findings) | Idle |
 | Research | 0208T0030 | (idle — all tasks done) | Idle |
 | Quality | 0208T1335 | (idle — QA-009 completed, all gates PASS) | Idle |
+| Audit | 0208T1900 | AUDIT-001 — plan factual accuracy audit | Assigned |
 
 ## Human Intervention Needed
 
