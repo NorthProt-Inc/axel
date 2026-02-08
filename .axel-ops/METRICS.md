@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 63
+## Current Cycle: 64
 
 ## Division Performance (Last 10 Cycles)
 
@@ -48,7 +48,7 @@
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
-| E: Integration | **EFFECTIVELY COMPLETE** | 56 | 63 | 94% (16/17 done. 806 tests, 64 files. 1 error (human-blocked). 2 queued items require human decision.) |
+| E: Integration | **HARDENING** | 56 | — | 94% done + 2 hardening tasks in progress (INTEG-008, FIX-AUDIT-E-004). 806 tests, 64 files. 1 error (human-blocked). |
 
 ## Cycle History (Last 10)
 
@@ -64,3 +64,4 @@
 | 61 | dev-edge, dev-core, quality | 3 (FIX-AUDIT-E-001/002, QA-019) | 0 (4 resolved) | **3 TASKS DONE.** 801 tests. ERR-071~074 resolved. Phase E **73%**. |
 | 62 | coord | 2 (FIX-SCHEMA-001, SYNC-007) | 0 (1 resolved) | **2 TASKS DONE (CTO override).** ERR-070 resolved. Phase E **88%**. |
 | 63 | devops | 1 (FIX-AUDIT-E-003) | 0 (1 resolved: ERR-075) | **PHASE E EFFECTIVELY COMPLETE.** 806 tests, 64 files. 16/17 done. ERR-075 resolved. Open errors 2→1. All Divisions idle. Awaiting human decisions. |
+| 64 | dev-edge, coord | 0 | 0 | **HARDENING CYCLE.** No idle waiting. INTEG-008 (webhook routes) + FIX-AUDIT-E-004 (AUD-086/090) assigned to dev-edge. Phase E active hardening. |

@@ -2,19 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 63**: **PHASE E: EFFECTIVELY COMPLETE.** 16 tasks done, 806 tests, 64 files. FIX-AUDIT-E-003 completed (devops). Remaining: 2 human-blocked + 1 optional P2. Open errors 1 (ERR-069 CRITICAL human decision).
+> **Cycle 64**: **PHASE E: HARDENING.** 16 tasks done + 2 assigned. 806 tests, 64 files. INTEG-008 + FIX-AUDIT-E-004 in progress. 2 human-blocked tasks remain. Open errors 1 (ERR-069 CRITICAL human decision).
 
-## Queued (Human-Blocked / Optional)
+## Queued (Human-Blocked)
 
 | ID | Priority | Division | Task | Depends On | Blocker |
 |----|----------|----------|------|------------|---------|
 | FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). | RES-006 ✓ | **Human decision needed** |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — | **Human approval needed** |
-| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ | None (optional) |
 
 ## In Progress
 
-(none)
+| ID | Priority | Division | Task | Started |
+|----|----------|----------|------|---------|
+| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | 0208C64 |
+| FIX-AUDIT-E-004 | P2 | dev-edge | Fix AUD-086 (security headers: X-Content-Type-Options, X-Frame-Options) + AUD-090 (unsafe cast in handleSessionEnd). TDD mandatory. | 0208C64 |
 
 ## Cancelled
 

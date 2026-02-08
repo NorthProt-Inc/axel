@@ -4,17 +4,17 @@
 
 ## Status
 
-- **Phase**: **E: INTEGRATION — EFFECTIVELY COMPLETE**
-- **Cycle**: 63
-- **Last Updated**: 2026-02-08C63
-- **STATUS**: **1 TASK COMPLETED.** FIX-AUDIT-E-003 (devops: AUD-083 hardcoded DB creds removed, 5 new tests, ERR-075 resolved). Smoke: **806 tests, 64 files**, typecheck clean. **Phase E 94% (16/17).** All executable tasks done. Remaining: 2 human-blocked (FIX-DIMENSION-001 P0, CONST-AMEND-001 P2) + 1 optional P2 (INTEG-008). **Awaiting human decisions to fully close Phase E.**
+- **Phase**: **E: INTEGRATION — HARDENING**
+- **Cycle**: 64
+- **Last Updated**: 2026-02-08C64
+- **STATUS**: **No idle cycles.** INTEG-008 (webhook routes) + FIX-AUDIT-E-004 (gateway security headers + route-handlers unsafe cast) assigned. Phase E **94% → active hardening.** 806 tests, 64 files. Open errors 1 (ERR-069 CRITICAL human-blocked). 2 human-blocked tasks unchanged. Activating dev-edge + dev-edge for executable work.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 3 (2 human-blocked, 1 optional) |
-| In Progress | 0 |
+| Queued | 2 (2 human-blocked) |
+| In Progress | 2 (INTEG-008, FIX-AUDIT-E-004) |
 | Done | 106 |
 | Cancelled | 14 |
 
@@ -53,19 +53,20 @@
 | 61 | 0208 | **3 TASKS COMPLETED.** FIX-AUDIT-E-001 (AUD-079/080/082 gateway fixes, 82 gateway tests), FIX-AUDIT-E-002 (AUD-081 onError callback, 375 core tests), QA-019 (Phase E review PASS, 0C 0H 3M 4L). **4 errors resolved** (ERR-071~074). Smoke: **801 tests, 63 files**, typecheck clean. Arch 3 cycles stalled → CTO override for FIX-SCHEMA-001 + SYNC-007. FIX-AUDIT-E-003 assigned to devops. Open errors 7→3. Phase E **73%** (11/15). |
 | 62 | 0208 | **2 TASKS COMPLETED (CTO override).** FIX-SCHEMA-001 (sessions schema: JSONB→TEXT[], last_activity_at, ERR-070 resolved), SYNC-007 (PLAN_SYNC Phase E: 7 subsections E.1~E.7 mapped). Smoke: **801 tests, 63 files**, typecheck clean. FIX-AUDIT-E-003 in progress (devops). Phase E **88%** (15/17). Open errors 3→2. |
 | 63 | 0208 | **1 TASK COMPLETED.** FIX-AUDIT-E-003 (devops: AUD-083 hardcoded DB creds removed, 806 tests, ERR-075 resolved). **PHASE E EFFECTIVELY COMPLETE** — 16/17 tasks done, 0 in progress, all executable work finished. Remaining: 2 human-blocked (FIX-DIMENSION-001 P0, CONST-AMEND-001 P2) + 1 optional P2 (INTEG-008). Open errors 2→1. **All Divisions idle. Awaiting human decisions.** |
+| 64 | 0208 | **HARDENING CYCLE.** No idle waiting — assigned INTEG-008 (webhook routes, dev-edge) + FIX-AUDIT-E-004 (gateway security: AUD-086 headers + AUD-090 unsafe cast, dev-edge). 2 tasks in progress. Phase E active hardening. Open errors 1 (ERR-069 CRITICAL human-blocked). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C63 | Cycle 63 | Active |
+| Coordinator | 0208C64 | Cycle 64 | Active |
 | Architecture | 0208C58 | — | Idle |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C58 | — | Idle |
-| Dev-Edge | 0208C61 | — | Idle |
+| Dev-Edge | 0208C64 | INTEG-008, FIX-AUDIT-E-004 | Assigned |
 | Research | 0208C58 | — | Idle |
 | Quality | 0208C61 | — | Idle |
-| DevOps | 0208C63 | — | Idle (FIX-AUDIT-E-003 done) |
+| DevOps | 0208C63 | — | Idle |
 | Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed
