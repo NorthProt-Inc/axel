@@ -1,21 +1,24 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08C65 (QA-020 Final Phase E review)
+> Last Updated: 2026-02-08C79 (QA-021 UI/UX scaffold review)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 831 (div/quality worktree: 831/831 pass, 66 test files) |
-| Passing | 831 (QA-020 independently verified) |
+| Total Tests | 880 (div/quality worktree: 880/880 pass, 76 test files) |
+| Passing | 880 (QA-021 independently verified) |
 | Failing | 0 |
+| Skipped | 36 (pre-existing: testcontainers PG/Redis integration) |
 | Coverage (core) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
 | Coverage (infra, reported) | 95%+ stmts (cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42%) |
 | Coverage (channels, reported) | 94%+ stmts (target 75%) |
-| Coverage (gateway, verified) | 95.28% stmts / 82.69% branch / 97.82% funcs / 95.28% lines (111 tests) |
+| Coverage (gateway, verified) | 95.65% stmts / 88.07% branch / 98% funcs (158 tests) |
 | Coverage (apps/axel, reported) | 85%+ stmts (bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48%) |
-| Phase | E: INTEGRATION — FINAL QA COMPLETE (all executable work done) |
+| Coverage (ui, verified) | 94.96% stmts / 86.2% branch / 92.3% funcs (35 tests) |
+| Coverage (webchat) | N/A — no tests (scaffold, UI-003 queued) |
+| Phase | UI/UX Sprint — QA-021 CONDITIONAL PASS |
 
 ## Per-Package Status
 
@@ -24,8 +27,10 @@
 | `packages/core/` | 375 | 375 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
 | `packages/infra/` | 190 | 190 | 0 | 95%+ stmts (reported) | 80% | **PASS** (+36 integration tests) |
 | `packages/channels/` | 73 | 73 | 0 | 94%+ stmts (reported) | 75% | **PASS** |
-| `packages/gateway/` | 111 | 111 | 0 | 95.28% stmts, 82.69% branch | 80% | **PASS** (verified independently by QA-020) |
+| `packages/gateway/` | 158 | 158 | 0 | 95.65% stmts, 88.07% branch | 80% | **PASS** |
+| `packages/ui/` | 35 | 35 | 0 | 94.96% stmts, 86.2% branch | 80% | **CONDITIONAL** (tsc+biome errors) |
 | `apps/axel/` | 60 | 60 | 0 | 85%+ stmts | — | **PASS** |
+| `apps/webchat/` | 0 | — | — | N/A | — | **PENDING** (UI-003) |
 | `tools/migrate/` | 15 | 15 | 0 | — | — | **PASS** |
 
 ### Infra Package Coverage Breakdown (dev-infra reported C44)
@@ -513,3 +518,37 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | **QA-018** | **54** | **Phase D code review batch 2 — EDGE-003 (Discord) + EDGE-004 (Telegram) + EDGE-005 (Gateway) + BOOTSTRAP-001 (DI) (7 src, 7 test files)** | **0H 8M 6L** | **CONDITIONAL PASS** — TDD PASS, §9 PASS, §10 CONDITIONAL (worktree dep sync), §14 PASS. 2 security items (timing-safe length leak, WS token in query param). Coverage: channels 94%>75%, gateway 84%>80%. |
 | **QA-019** | **61** | **Phase E integration review — INTEG-003/004/005/006/007 (gateway→orchestrator, bootstrap, PG+Redis, E2E roundtrip)** | **0H 8M 4L** | **PASS** — TDD PASS, §9 KNOWN ISSUE (CONST-AMEND-001), §10 PASS (774 tests), §14 PASS (max 321). Coverage: all targets exceeded. 3 MEDIUM overlap with ERR-071~075 (in progress). Good integration quality. |
 | **QA-020** | **65** | **Final Phase E review — INTEG-008 (webhook Telegram+Discord) + FIX-AUDIT-E-004 (security headers+unsafe cast)** | **0H 3M 4L** | **PASS** — ALL CONSTITUTION gates PASS. TDD PASS (RED→GREEN verified). §9 PASS. §10 PASS (831 tests). §14 PASS (max 354). Coverage: gateway 95.28%>80%. Phase E executable work verified complete. |
+| **QA-021** | **79** | **UI/UX scaffold review — packages/ui/ (11 src, 6 test) + apps/webchat/ (13 src, 0 test)** | **5H 7M 4L** | **CONDITIONAL PASS** — §9 PASS (no cross-package violations). §14 PASS (max 113 lines). §10 FAIL (1 tsc error: marked-terminal missing types; 3 biome errors: format+lint). Coverage: ui 94.96%>80%. HIGH: auth missing on chat proxy + WS, biome/tsc errors. |
+
+## QA-021: UI/UX Scaffold Review Details (packages/ui/ + apps/webchat/)
+
+### UI Package Coverage Breakdown (QA-021 verified)
+
+| Module | % Stmts | % Branch | % Funcs | Notes |
+|--------|---------|----------|---------|-------|
+| cli/banner.ts | 100 | 90 | 100 | L39: else branch (non-connected status) |
+| cli/format.ts | 100 | 85.71 | 100 | L10: else branch (non-connected status) |
+| cli/renderer.ts | 95.45 | 87.5 | 100 | L39-40: non-string parse return |
+| cli/spinner.ts | 100 | 100 | 100 | |
+| cli/theme.ts | 100 | 100 | 100 | |
+| tokens/colors.ts | 100 | 100 | 100 | |
+| tokens/spacing.ts | 100 | 100 | 100 | |
+| tokens/typography.ts | 100 | 100 | 100 | |
+| **Overall** | **94.96** | **86.2** | **92.3** | index.ts barrel exports excluded per vitest.config.ts |
+
+### CONSTITUTION Compliance (QA-021: UI/UX Scaffold)
+
+| Rule | Check | Result |
+|------|-------|--------|
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **INDETERMINATE** — all files created in single commit `6c499d3`. No separate RED→GREEN commits. |
+| Rule 9 (Package Boundary) | packages/ui imports no other packages; apps/webchat imports only @axel/ui (allowed per §9) | **PASS** — packages/ui: zero @axel/* imports. apps/webchat: @axel/ui only (workspace:*). |
+| Rule 10 (Test Gate) | All tests pass, coverage ≥ 80%, Biome clean, tsc clean | **FAIL** — Tests: 35/35 pass (ui), 0 tests (webchat). Coverage: 94.96% > 80% (ui). Biome: 3 errors (2 format, 1 lint). tsc: 1 error (TS7016 marked-terminal). |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** — max: chat.svelte.ts 113 lines. All files well under 400. |
+
+### QA-021 Issues Summary
+
+| Sev | Count | Key Issues |
+|-----|-------|------------|
+| HIGH | 5 | tsc error (marked-terminal types), biome errors (format x2, lint x1), auth missing (chat proxy, WS connect) |
+| MEDIUM | 7 | theme caching, JSON.parse safety, WS error handler, request validation, DRY violations x3 (color tokens, CSS vars, markdown) |
+| LOW | 4 | module-level mutable state, session switch history, markdown not rendered, no webchat tests |
