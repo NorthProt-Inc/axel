@@ -316,6 +316,171 @@ const memoryEngine = new MemoryEngine(container.memoryRepo, container.embeddingS
 - 수동 주입으로도 충분 (서비스 수 ~20개 내외)
 - OpenClaw도 프레임워크 없이 수동 주입 사용
 
+### 3.5 Core Domain Types (packages/core/src/types/)
+
+구현 전 모든 핵심 타입을 정의한다. 이 타입들은 `packages/core/src/types/`에 위치하며, 다른 패키지에서 import한다. (ERR-035 해소)
+
+```typescript
+// packages/core/src/types/memory.ts
+
+/** 메모리 유형 */
+type MemoryType = "fact" | "preference" | "insight" | "conversation";
+
+/** Semantic Memory 단위 (Layer 3) */
+interface Memory {
+  readonly uuid: string;
+  readonly content: string;
+  readonly memoryType: MemoryType;
+  readonly importance: number;
+  readonly embedding: Float32Array;
+  readonly createdAt: Date;
+  readonly lastAccessed: Date;
+  readonly accessCount: number;
+  readonly sourceChannel: string | null;
+  readonly channelMentions: Record<string, number>;
+  readonly sourceSession: string | null;
+  readonly decayedImportance: number | null;
+  readonly lastDecayedAt: Date | null;
+}
+
+/** 메모리 검색 결과 */
+interface MemorySearchResult {
+  readonly memory: Memory;
+  readonly score: number;         // cosine similarity
+  readonly source: "semantic" | "graph" | "prefetch";
+}
+
+// packages/core/src/types/message.ts
+
+/** 메시지 역할 */
+type MessageRole = "user" | "assistant" | "system" | "tool";
+
+/** 대화 메시지 */
+interface Message {
+  readonly sessionId: string;
+  readonly turnId: number;
+  readonly role: MessageRole;
+  readonly content: string;
+  readonly channelId: string | null;
+  readonly timestamp: Date;
+  readonly emotionalContext: string;
+  readonly metadata: Record<string, unknown>;
+}
+
+// packages/core/src/types/session.ts
+
+/** 세션 상태 머신 (ERR-041 해소) */
+type SessionState =
+  | "initializing"    // 세션 생성 중
+  | "active"          // 대화 진행 중
+  | "thinking"        // LLM 응답 생성 중
+  | "tool_executing"  // 도구 실행 중
+  | "summarizing"     // 세션 요약 생성 중
+  | "ending"          // 정리 중 (메모리 flush, 요약 저장)
+  | "ended";          // 완료
+
+/** 세션 요약 (Episodic Memory 저장용) */
+interface SessionSummary {
+  readonly sessionId: string;
+  readonly summary: string;
+  readonly keyTopics: readonly string[];
+  readonly emotionalTone: string;
+  readonly turnCount: number;
+  readonly channelHistory: readonly string[];
+  readonly startedAt: Date;
+  readonly endedAt: Date;
+}
+
+// packages/core/src/types/react.ts
+
+/** ReAct Loop 이벤트 (스트리밍 출력) */
+type ReActEvent =
+  | { readonly type: "message_delta"; readonly content: string }
+  | { readonly type: "thinking_delta"; readonly content: string }
+  | { readonly type: "tool_call"; readonly tool: ToolCallRequest }
+  | { readonly type: "tool_result"; readonly result: ToolResult }
+  | { readonly type: "error"; readonly error: AxelError }
+  | { readonly type: "done"; readonly usage: TokenUsage };
+
+/** 도구 호출 요청 */
+interface ToolCallRequest {
+  readonly toolName: string;
+  readonly args: unknown;
+  readonly callId: string;
+}
+
+// packages/core/src/types/tool.ts
+
+/** 도구 실행 결과 */
+interface ToolResult {
+  readonly callId: string;
+  readonly success: boolean;
+  readonly content: unknown;
+  readonly error?: string;
+  readonly durationMs: number;
+}
+
+/** 도구 정의 */
+interface ToolDefinition {
+  readonly name: string;
+  readonly description: string;
+  readonly category: "memory" | "file" | "iot" | "research" | "system" | "agent";
+  readonly inputSchema: z.ZodSchema;
+  readonly requiresApproval: boolean;
+  readonly handler: (args: unknown) => Promise<ToolResult>;
+}
+
+// packages/core/src/types/health.ts
+
+/** 시스템 건강 상태 */
+type HealthState = "healthy" | "degraded" | "unhealthy";
+
+interface HealthStatus {
+  readonly state: HealthState;
+  readonly checks: Record<string, ComponentHealth>;
+  readonly timestamp: Date;
+  readonly uptime: number;          // seconds
+}
+
+interface ComponentHealth {
+  readonly state: HealthState;
+  readonly latencyMs: number | null;
+  readonly message: string | null;
+  readonly lastChecked: Date;
+}
+
+// packages/core/src/types/engine.ts
+
+/** Memory Engine 인터페이스 (DI 대상) */
+interface MemoryEngine {
+  store(content: string, memoryType: MemoryType, importance: number, channelId: string | null): Promise<string>;
+  search(query: string, limit: number, channelId?: string): Promise<readonly MemorySearchResult[]>;
+  decay(threshold: number): Promise<number>;    // 삭제된 메모리 수 반환
+  consolidate(): Promise<void>;                 // L2→L3 통합
+  getStats(): Promise<MemoryStats>;
+}
+
+interface MemoryStats {
+  readonly totalMemories: number;
+  readonly byType: Record<MemoryType, number>;
+  readonly avgImportance: number;
+  readonly oldestMemory: Date | null;
+  readonly lastConsolidation: Date | null;
+}
+
+// packages/core/src/types/common.ts
+
+/** 토큰 사용량 */
+interface TokenUsage {
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cacheReadTokens: number;
+  readonly cacheCreationTokens: number;
+}
+```
+
+이 타입 정의는 구현 phase에서 Zod schema와 1:1 매핑된다. 런타임 검증은 Zod, 컴파일 타임 검증은 TypeScript interface로 이중 보장한다.
+
 ---
 
 ## 4. The Turtle Stack: 밑바닥부터 쌓기
@@ -401,6 +566,12 @@ const MemoryConfigSchema = z.object({
     baseRate: z.number().default(0.001),
     minRetention: z.number().min(0).max(1).default(0.3),
     deleteThreshold: z.number().default(0.03),
+    accessStabilityK: z.number().default(0.3),
+    relationResistanceK: z.number().default(0.1),
+    channelDiversityK: z.number().default(0.2),
+    recencyBoost: z.number().default(1.3),
+    recencyAgeThreshold: z.number().default(168),        // hours
+    recencyAccessThreshold: z.number().default(24),      // hours
     typeMultipliers: z.object({
       fact: z.number().default(0.3),
       preference: z.number().default(0.5),
@@ -572,8 +743,8 @@ CREATE TABLE memories (
     last_decayed_at   TIMESTAMPTZ
 );
 
-CREATE INDEX idx_memories_embedding ON memories USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);                        -- 1000개 기억 기준, lists = sqrt(N)*10
+CREATE INDEX idx_memories_embedding ON memories USING hnsw (embedding vector_cosine_ops)
+    WITH (m = 16, ef_construction = 64);       -- HNSW 권장 (RES-001: 7.4x faster queries, better recall)
 CREATE INDEX idx_memories_importance ON memories (importance DESC);
 CREATE INDEX idx_memories_type ON memories (memory_type, importance DESC);
 CREATE INDEX idx_memories_accessed ON memories (last_accessed DESC);
@@ -742,7 +913,7 @@ Layer 3: Semantic Memory        [axnmihn L3 진화]
 │   ├── axnmihn: ChromaDB (별도 프로세스), 768d, Python sync I/O
 │   ├── Axel: pgvector (같은 DB), 768d, async query
 │   └── 차이: 하이브리드 검색 (vector + trigram + metadata), channel_mentions 추적
-└── IVFFlat 인덱스 (lists=100, 1000개 기억 기준)
+└── HNSW 인덱스 (m=16, ef_construction=64) — RES-001 권장
 
 Layer 4: Conceptual Memory      [axnmihn L4 진화]
 ├── 저장소: PostgreSQL (entities, relations)
@@ -848,7 +1019,7 @@ function calculateDecayedImportance(input: DecayInput, config: DecayConfig): num
 
 **axnmihn 문제**: character 기반 예산 (1 char ≈ 0.25 tokens 추정) — 실제 토큰 수와 편차 큼
 
-**Axel 해법**: tiktoken 기반 정확한 토큰 카운팅
+**Axel 해법**: Anthropic SDK countTokens() 기반 정확한 토큰 카운팅 (ADR-012)
 
 ```typescript
 // packages/core/src/context/assembler.ts
@@ -981,7 +1152,7 @@ interface LlmProvider {
   id: string;
   chat(params: ChatParams): AsyncGenerator<ChatChunk>;
   embed(texts: string[]): Promise<Float32Array[]>;
-  countTokens(text: string): number;
+  countTokens(text: string): Promise<number>;  // async API call (ERR-012, ERR-016)
   healthCheck(): Promise<boolean>;
 }
 
@@ -1019,7 +1190,7 @@ interface RetryConfig {
 **Model Router 전략:**
 
 ```
-Input Message → Intent Classifier (Gemini Flash, <50ms)
+Input Message → Intent Classifier (Gemini Flash, ~300-500ms via API)
                      │
          ┌───────────┼───────────┐
          ▼           ▼           ▼
@@ -1049,7 +1220,7 @@ Input Message → Intent Classifier (Gemini Flash, <50ms)
 **Axel 해법: 단일 등록 지점 + 자동 생성**
 
 ```typescript
-// packages/infra/src/mcp/registry.ts
+// packages/core/src/types/tool.ts — 타입 정의는 core에 (ERR-020 해소)
 
 interface ToolDefinition {
   name: string;
@@ -1060,7 +1231,8 @@ interface ToolDefinition {
   handler: (args: unknown) => Promise<ToolResult>;
 }
 
-// 하나의 데코레이터로 등록 + 스키마 + 핸들러를 모두 정의
+// packages/infra/src/mcp/registry.ts — 등록 로직은 infra에
+
 function defineTool<T extends z.ZodSchema>(config: {
   name: string;
   description: string;
@@ -1416,18 +1588,14 @@ Files (40+ research artifacts)  →   R2/S3 + PostgreSQL metadata
 
 ### 5.2 벡터 마이그레이션 (가장 복잡)
 
-**옵션 A: Direct Copy (768d → 768d)**
-- 같은 임베딩 모델(Gemini embedding-001) 사용 시 가능
-- ChromaDB에서 벡터+메타데이터 추출 → pgvector INSERT
-- 빠르지만, 임베딩 모델 변경 시 불가
+**결정: Re-embed (gemini-embedding-001, 768d)**
 
-**옵션 B: Re-embed (768d → 새 차원)**
-- 모든 memory content를 새 임베딩 모델로 재생성
-- 느리지만 (1000개 × ~200ms = ~200초), 모델 업그레이드 가능
-- Gemini embedding-001 → text-embedding-004 (더 높은 품질)
+axnmihn의 text-embedding-004 벡터는 gemini-embedding-001과 embedding space가 다르므로 Direct Copy 불가 (ADR-016, PLAN-001).
 
-**결정: 옵션 A (Direct Copy)로 시작, 나중에 B로 업그레이드 가능**
-- 이유: 즉시 작동해야 함. 임베딩 품질 업그레이드는 Phase 2에서.
+- 모든 1,000+ memory content를 gemini-embedding-001로 re-embed
+- 100 per batch × 10 API calls = ~30초 소요, 비용 < $0.01
+- 768d 차원 유지 → pgvector 컬럼 타입 변경 불필요
+- 향후 3,072d 업그레이드 가능 (Matryoshka 특성)
 
 ### 5.3 마이그레이션 스크립트 (tools/migrate/)
 
@@ -1707,22 +1875,27 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 
 | ADR | 결정 | 상태 |
 |-----|------|------|
-| ADR-001 | TypeScript 단일 스택 (Python 폐기) | **확정** |
-| ADR-002 | PostgreSQL + pgvector (ChromaDB/SQLite 폐기) | **확정** |
-| ADR-003 | Redis for working memory + pub/sub | **확정** |
-| ADR-004 | pnpm monorepo (core/infra/channels/gateway 분리) | **확정** |
-| ADR-005 | Zod for all validation (config, tool schema, API) | **확정** |
-| ADR-006 | Constructor injection (DI 프레임워크 미사용) | **확정** |
-| ADR-007 | Biome (ESLint+Prettier 대체) | **확정** |
-| ADR-008 | vitest + testcontainers (통합 테스트) | **확정** |
-| ADR-009 | Channel adapter interface (OpenClaw 패턴 차용) | **확정** |
-| ADR-010 | Command allowlist + execFile (shell=True 금지) | **확정** |
-| ADR-011 | ENV-aware error handling (info disclosure 방지) | **확정** |
-| ADR-012 | Token-based context budgeting (character 추정 폐기) | **확정** |
-| ADR-013 | 6-Layer Memory (Stream Buffer + Meta Memory 추가) | **초안** |
-| ADR-014 | Cross-Channel Session Router (핵심 혁신) | **초안** |
-| ADR-015 | Adaptive Decay v2 (channel diversity boost) | **초안** |
-| ADR-016 | Embedding Model: gemini-embedding-001 (768d) | **초안** |
+| ADR-001 | TypeScript 단일 스택 (Python 폐기) | **확정** — `docs/adr/001-typescript-single-stack.md` |
+| ADR-002 | PostgreSQL + pgvector (ChromaDB/SQLite 폐기) | **확정** — `docs/adr/002-postgresql-single-db.md` |
+| ADR-003 | Redis for working memory + pub/sub (ephemeral cache) | **확정** — `docs/adr/003-redis-working-memory.md` |
+| ADR-004 | pnpm monorepo (core/infra/channels/gateway 분리) | **확정** — `docs/adr/004-pnpm-monorepo.md` |
+| ADR-005 | Zod for all validation (config, tool schema, API) | **확정** — `docs/adr/005-zod-validation.md` |
+| ADR-006 | Constructor injection (DI 프레임워크 미사용) | **확정** — `docs/adr/006-constructor-injection.md` |
+| ADR-007 | Biome (ESLint+Prettier 대체) | **확정** — `docs/adr/007-biome-linter.md` |
+| ADR-008 | vitest + testcontainers (통합 테스트) | **확정** — `docs/adr/008-vitest-testcontainers.md` |
+| ADR-009 | Channel adapter interface (OpenClaw 패턴 차용) | **확정** — `docs/adr/009-channel-adapter-interface.md` |
+| ADR-010 | Command allowlist + execFile (shell=True 금지) | **확정** — `docs/adr/010-command-allowlist.md` |
+| ADR-011 | ENV-aware error handling (info disclosure 방지) | **확정** — `docs/adr/011-env-aware-error-handling.md` |
+| ADR-012 | Token-based context budgeting (Anthropic SDK countTokens) | **확정** — `docs/adr/012-token-based-context-budgeting.md` |
+| ADR-013 | 6-Layer Memory (Stream Buffer + Meta Memory 추가) | **제안** — `docs/adr/013-six-layer-memory-architecture.md` |
+| ADR-014 | Cross-Channel Session Router (핵심 혁신) | **제안** — `docs/adr/014-cross-channel-session-router.md` |
+| ADR-015 | Adaptive Decay v2 (channel diversity boost) | **제안** — `docs/adr/015-adaptive-decay-v2.md` |
+| ADR-016 | Embedding Model: gemini-embedding-001 (768d) | **제안** — `docs/adr/016-embedding-model-selection.md` |
+| ADR-017 | WebChat SPA: Svelte 5 (PLAN-001 React 번복) | **제안** — `docs/adr/017-webchat-spa-framework.md` |
+| ADR-018 | Token Counting: Anthropic SDK countTokens | **제안** — `docs/adr/018-token-counting-strategy.md` |
+| ADR-019 | Authentication: Static Bearer → JWT | **제안** — `docs/adr/019-auth-strategy.md` |
+| ADR-020 | Error Taxonomy: AxelError 계층 | **제안** — `docs/adr/020-error-taxonomy.md` |
+| ADR-021 | Resilience Patterns: Lifecycle, Shutdown, Consolidation | **제안** — `docs/adr/021-resilience-patterns.md` |
 
 ---
 
@@ -1733,7 +1906,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 ### 미결 사항 (모두 해결됨)
 
 1. ~~**임베딩 모델 최종 선택**~~: → **gemini-embedding-001 (768d)** — ADR-016
-   - text-embedding-004 deprecated (2026-01-14). Re-embed 필수. MTEB #1.
+   - gemini-embedding-001 선택 (ADR-016). MTEB #1. Re-embed 필수.
 
 2. ~~**WebChat 프레임워크**~~: → **React (Vite)** — PLAN-001
    - Chat UI 생태계 + OpenClaw 일관성 + Vercel AI SDK streaming hooks.
@@ -1751,7 +1924,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 
 | 항목 | 상태 | 산출물 |
 |------|------|--------|
-| ADR 상세 문서 | **완료** | ADR-013, 014, 015, 016 |
+| ADR 상세 문서 | **완료** | ADR-001~016 (docs/adr/) |
 | API 스펙 (OpenAPI 3.0) | **완료** | `docs/plan/openapi-v1.yaml`, `websocket-protocol.md` |
 | PostgreSQL 마이그레이션 전략 | **완료** | `docs/plan/migration-strategy.md` |
 | 성능 벤치마크 계획 | **대기** | RES-001 (pgvector IVFFlat vs HNSW) 결과 필요 |
