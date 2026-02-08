@@ -1,32 +1,32 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08C61 (QA-019 Phase E integration review)
+> Last Updated: 2026-02-08C65 (QA-020 Final Phase E review)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 774 (main branch: 774/774 pass, 62 test files) |
-| Passing | 774 (CTO cycle 60 verified) |
+| Total Tests | 831 (div/quality worktree: 831/831 pass, 66 test files) |
+| Passing | 831 (QA-020 independently verified) |
 | Failing | 0 |
 | Coverage (core) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
 | Coverage (infra, reported) | 95%+ stmts (cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42%) |
-| Coverage (channels, reported) | 94.16% stmts / 92.57% branch / 91.66% funcs / 94.16% lines (73 tests) |
-| Coverage (gateway, reported) | 94.53% stmts / 86.33% branch / 96.96% funcs / 94.53% lines (78 tests) |
-| Coverage (apps/axel, reported) | 85.74% stmts (bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48%) |
-| Phase | E: INTEGRATION — ACTIVE (67%, 10/15 tasks done) |
+| Coverage (channels, reported) | 94%+ stmts (target 75%) |
+| Coverage (gateway, verified) | 95.28% stmts / 82.69% branch / 97.82% funcs / 95.28% lines (111 tests) |
+| Coverage (apps/axel, reported) | 85%+ stmts (bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48%) |
+| Phase | E: INTEGRATION — FINAL QA COMPLETE (all executable work done) |
 
 ## Per-Package Status
 
 | Package | Tests | Pass | Fail | Coverage | Target | Gate |
 |---------|-------|------|------|----------|--------|------|
-| `packages/core/` | 366 | 366 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
+| `packages/core/` | 375 | 375 | 0 | 99.69% stmts, 95.2% branch | 90% | **PASS** |
 | `packages/infra/` | 190 | 190 | 0 | 95%+ stmts (reported) | 80% | **PASS** (+36 integration tests) |
-| `packages/channels/` | 73 | 73 | 0 | 94.16% stmts, 92.57% branch | 75% | **PASS** |
-| `packages/gateway/` | 78 | 78 | 0 | 94.53% stmts, 86.33% branch | 80% | **PASS** (+55 tests since Phase D) |
-| `apps/axel/` | 60 | 60 | 0 | 85.74% stmts | — | **PASS** (+27 tests: 16 bootstrap + 8 E2E + 3 existing) |
-| `tools/migrate/` | 7 | 7 | 0 | — | — | **PASS** (testcontainers dep pre-existing) |
+| `packages/channels/` | 73 | 73 | 0 | 94%+ stmts (reported) | 75% | **PASS** |
+| `packages/gateway/` | 111 | 111 | 0 | 95.28% stmts, 82.69% branch | 80% | **PASS** (verified independently by QA-020) |
+| `apps/axel/` | 60 | 60 | 0 | 85%+ stmts | — | **PASS** |
+| `tools/migrate/` | 15 | 15 | 0 | — | — | **PASS** |
 
 ### Infra Package Coverage Breakdown (dev-infra reported C44)
 
@@ -142,10 +142,69 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | Rule 10 (Test Gate) | 330 tests pass, coverage ≥ 90%, Biome clean, tsc clean | **PASS** |
 | Rule 14 (File Size) | No src file > 400 lines | **PASS** (max: 269 lines, react-loop.ts) |
 
+## QA-020 Code Review Findings (Final Phase E: INTEG-008 webhooks + FIX-AUDIT-E-004 security)
+
+### Scope
+- **FIX-AUDIT-E-004**: AUD-086 security headers (X-Content-Type-Options, X-Frame-Options) + AUD-090 unsafe cast fix
+- **INTEG-008**: Webhook routes — POST /webhooks/telegram (secret_token) + POST /webhooks/discord (Ed25519)
+
+### Issues Found: 0 CRITICAL, 0 HIGH, 3 MEDIUM, 4 LOW
+
+| # | Sev | Perspective | Location | Description | Fix |
+|---|-----|-------------|----------|-------------|-----|
+| 1 | MEDIUM | P2: Complexity | webhook-handlers.ts:89-115 | extractTelegramMessage uses 4 levels of nested `as Record<string,unknown>` type assertion chains (update→msg→from→chat). Repetitive narrowing hurts readability. | Define lightweight TelegramUpdate interface and validate with type guard. |
+| 2 | MEDIUM | P2: Complexity | webhook-handlers.ts:222-261 | extractDiscordInteraction similarly uses nested type assertions across 4 helper functions. Each relies on `as Record<string,unknown>` chains. | Define minimal Discord interaction interface and validate at entry point. |
+| 3 | MEDIUM | P1: Design | webhook-handlers.ts:193-213 | handleDiscordCommand awaits handleMessage() before returning DEFERRED response (type=5). Discord expects DEFERRED immediately with follow-up via webhook edit. Current impl blocks response until processing completes, defeating DEFERRED purpose. | Send DEFERRED immediately, fire-and-forget handleMessage, follow-up via PATCH to interaction callback URL. |
+| 4 | LOW | P2: Readability | webhook-handlers.ts:119-125 | Discord interaction type constants use named numbers but only handle PING(1) and APPLICATION_COMMAND(2). Other types (3,4,5) silently get 200 OK. | Add comment noting passthrough behavior. Acceptable for Phase E. |
+| 5 | LOW | P3: Security | webhook-handlers.ts:175-190 | verifyDiscordSignature catch swallows all errors (malformed hex, DER encoding, crypto) without logging. Hinders security debugging. | Log error details in development mode per ADR-011 before returning false. |
+| 6 | LOW | P1: Design | server.ts:316-320 | SSE stream (handleChatStream) uses res.writeHead directly without security headers (X-Content-Type-Options, X-Frame-Options). FIX-AUDIT-E-004 only covers sendJson(). | Add security headers to SSE writeHead. Not a vulnerability but inconsistent with AUD-086 intent. |
+| 7 | LOW | P7: DRY | webhook-handlers.test.ts:52-80 | makeRequest() helper duplicated identically in webhook-handlers.test.ts and security-headers.test.ts. | Extract to shared test helper module. Non-blocking. |
+
+### 7-Perspective Summary
+
+| Perspective | Finding |
+|-------------|---------|
+| 1. Design Quality | **Good.** Clean separation: createWebhookHandlers factory with config+deps DI. Telegram/Discord handlers properly isolated. Route registration in server.ts with requiresAuth:false correctly bypasses Bearer auth. handleDiscordCommand DEFERRED response is semantically incorrect but functionally acceptable for Phase E single-user. |
+| 2. Complexity & Readability | **Good with 2 MEDIUM items.** Telegram/Discord message extraction relies on cascading type assertions — readable but fragile. Well-compensated by helper extraction (6 functions). All files within 400 lines (max: webhook-handlers.ts 263). |
+| 3. Security | **Very Good.** Telegram: timing-safe secret token comparison. Discord: Ed25519 signature verification via crypto.verify. Both bypass Bearer auth (security: [] per OpenAPI). No injection vectors. Silent error swallowing in crypto verification is LOW concern. |
+| 4. Bugs & Reliability | **No bugs found.** Bot message filtering, empty text filtering, missing userId handling all correct. Error paths return appropriate HTTP status codes. handleMessage dependency check prevents 503 when not configured. |
+| 5. Changeability | **Good.** Adding new webhook channels follows established pattern (createXxxHandler). GatewayConfig extensible for new webhook secrets. |
+| 6. Dead Code | **None found.** All exports used. No commented-out code. |
+| 7. DRY | **1 LOW.** Test helper duplication across 2 test files. Source code has no DRY violations. |
+
+### CONSTITUTION Compliance (QA-020: Final Phase E)
+
+| Rule | Check | Result |
+|------|-------|--------|
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** — FIX-AUDIT-E-004: `bbd9880` (RED 11:38:01) → `4141898` (GREEN 11:38:07). INTEG-008: `31e28c6` (RED 11:42:50) → `bb1f3e6` (GREEN 11:42:59). |
+| Rule 9 (Package Boundary) | gateway imports only from core/types | **PASS** — Only `@axel/core/types` (HealthStatus in types.ts). No cross-package violations. |
+| Rule 10 (Test Gate) | All tests pass, coverage targets met, Biome clean, tsc clean | **PASS** — 831 tests all pass (QA independently verified). Gateway 95.28% > 80% target. Biome: 0 errors. tsc: clean. |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** — max: server.ts 354 lines, webhook-handlers.ts 263 lines. All under 400. |
+
+### TDD Compliance (QA-020 new entries)
+
+| Cycle | Task | Division | RED Commit | GREEN Commit | Delta | Compliant |
+|-------|------|----------|------------|--------------|-------|-----------|
+| 65 | FIX-AUDIT-E-004 | dev-edge | `bbd9880` (11:38:01) | `4141898` (11:38:07) | +6s | **YES** |
+| 65 | INTEG-008 | dev-edge | `31e28c6` (11:42:50) | `bb1f3e6` (11:42:59) | +9s | **YES** |
+
+### Gateway Per-File Coverage (QA-020 independently verified)
+
+| File | % Stmts | % Branch | % Funcs | % Lines |
+|------|---------|----------|---------|---------|
+| classify-error.ts | 100 | 77.77 | 100 | 100 |
+| http-utils.ts | 97.67 | 95.45 | 100 | 97.67 |
+| route-handlers.ts | 97.58 | 90.47 | 100 | 97.58 |
+| server.ts | 95.03 | 81.39 | 100 | 95.03 |
+| webhook-handlers.ts | 96.80 | 71.21 | 100 | 96.80 |
+| ws-handler.ts | 92.53 | 93.93 | 100 | 92.53 |
+| **Overall** | **95.28** | **82.69** | **97.82** | **95.28** |
+
 ## Recent Test Runs
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 65 | quality (QA-020) | all | 831 pass, 0 fail | 5.48s | div/quality worktree (post pnpm install). 66 test files. Gateway 111 tests independently verified. Coverage: gateway 95.28% stmt. Biome: 0 errors/118 warn. tsc: clean. |
 | 60 | CTO (C60) | all | 774 pass, 0 fail | — | Main branch verified. 62 test files. INTEG-007 E2E added. |
 | 58 | dev-infra (INTEG-006) | infra | 190 pass, 0 fail | — | +36 PG+Redis integration tests. Testcontainers PG17+Redis7. |
 | 58 | dev-edge (INTEG-003/004) | gateway | 78 pass, 0 fail | — | +46 tests (12 integration + 26 remaining-routes + 8 rework). 94.53% stmt. |
@@ -453,3 +512,4 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | **QA-017** | **50** | **Phase D EDGE code review — EDGE-001 (channel types) + EDGE-002 (CLI channel) (2 src, 2 test files)** | **0H 3M 3L** | **PASS** — TDD, §9, §10, §14 all PASS. Excellent design quality. |
 | **QA-018** | **54** | **Phase D code review batch 2 — EDGE-003 (Discord) + EDGE-004 (Telegram) + EDGE-005 (Gateway) + BOOTSTRAP-001 (DI) (7 src, 7 test files)** | **0H 8M 6L** | **CONDITIONAL PASS** — TDD PASS, §9 PASS, §10 CONDITIONAL (worktree dep sync), §14 PASS. 2 security items (timing-safe length leak, WS token in query param). Coverage: channels 94%>75%, gateway 84%>80%. |
 | **QA-019** | **61** | **Phase E integration review — INTEG-003/004/005/006/007 (gateway→orchestrator, bootstrap, PG+Redis, E2E roundtrip)** | **0H 8M 4L** | **PASS** — TDD PASS, §9 KNOWN ISSUE (CONST-AMEND-001), §10 PASS (774 tests), §14 PASS (max 321). Coverage: all targets exceeded. 3 MEDIUM overlap with ERR-071~075 (in progress). Good integration quality. |
+| **QA-020** | **65** | **Final Phase E review — INTEG-008 (webhook Telegram+Discord) + FIX-AUDIT-E-004 (security headers+unsafe cast)** | **0H 3M 4L** | **PASS** — ALL CONSTITUTION gates PASS. TDD PASS (RED→GREEN verified). §9 PASS. §10 PASS (831 tests). §14 PASS (max 354). Coverage: gateway 95.28%>80%. Phase E executable work verified complete. |
