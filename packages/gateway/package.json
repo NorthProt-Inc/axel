@@ -4,7 +4,10 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./routes": "./src/routes/index.ts",
+		"./middleware": "./src/middleware/index.ts",
+		"./websocket": "./src/websocket/index.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",

@@ -24,8 +24,8 @@
 | `vitest.config.ts` (root) | ✅ CREATED | Test config |
 | `packages/core/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, @vitest/coverage-v8, **subpath exports** (C44) |
 | `packages/infra/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
-| `packages/channels/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
-| `packages/gateway/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
+| `packages/channels/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **subpath exports** (C48) |
+| `packages/gateway/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **subpath exports** (C48) |
 | `apps/axel/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
 
 ## Docker Compose (Dev)
@@ -54,8 +54,8 @@ File: `.github/workflows/ci.yml`
 |---------|----------|------------|--------|
 | `@axel/core` | v8 | 90% (lines/functions/branches/statements) | ✅ CONFIGURED |
 | `@axel/infra` | v8 | 80% (lines/functions/branches/statements) | ✅ CONFIGURED (testcontainers: PG17+pgvector, Redis7) |
-| `@axel/channels` | — | 75% | ⏳ PENDING |
-| `@axel/gateway` | — | 80% | ⏳ PENDING |
+| `@axel/channels` | v8 | 75% (lines/functions/branches/statements) | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/gateway` | v8 | 80% (lines/functions/branches/statements) | ✅ CONFIGURED (C48, DEVOPS-006) |
 
 ## Phase C Dependencies (Infra Sprint)
 
@@ -79,7 +79,9 @@ File: `.github/workflows/ci.yml`
 | `@axel/gateway` | zod@^4.3.6 | ✅ ADDED (C47, DEVOPS-005) |
 | `@axel/gateway` | @types/ws@^8.5.14 (devDep) | ✅ ADDED (C47, DEVOPS-005) |
 
-## Subpath Exports (@axel/core)
+## Subpath Exports
+
+### @axel/core
 
 | Export | Path | Status |
 |--------|------|--------|
@@ -90,7 +92,25 @@ File: `.github/workflows/ci.yml`
 | `@axel/core/persona` | `./src/persona/index.ts` | ✅ CONFIGURED (C44) |
 | `@axel/core/orchestrator` | `./src/orchestrator/index.ts` | ✅ CONFIGURED (C44) |
 
-**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 475 tests pass, typecheck+lint clean.
+### @axel/channels
+
+| Export | Path | Status |
+|--------|------|--------|
+| `@axel/channels` | `./src/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/channels/cli` | `./src/cli/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/channels/discord` | `./src/discord/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/channels/telegram` | `./src/telegram/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+
+### @axel/gateway
+
+| Export | Path | Status |
+|--------|------|--------|
+| `@axel/gateway` | `./src/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/gateway/routes` | `./src/routes/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/gateway/middleware` | `./src/middleware/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+| `@axel/gateway/websocket` | `./src/websocket/index.ts` | ✅ CONFIGURED (C48, DEVOPS-006) |
+
+**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 508 tests pass (C48), typecheck+lint clean.
 
 ## Known Issues (Resolved)
 
