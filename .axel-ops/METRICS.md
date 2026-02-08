@@ -2,14 +2,14 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 75
+## Current Cycle: 76
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
 | coord | — | 66 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 | 4 (all CTO override) | In Progress (FIX-MIGRATION-002, 1 cycle) |
+| arch | 2.5 cycles | 5 | 4 (all CTO override) | In Progress (FIX-MIGRATION-002, 2 cycles) |
 | dev-core | 1 cycle | 8 | 0 | Idle |
 | dev-infra | 1 cycle | 11 (+1: FIX-HARDEN-001) | 0 | Idle |
 | dev-edge | 1 cycle | 21 (+5: HARDEN-003/004/005/006/007) | 0 | Idle (all done) |
@@ -71,3 +71,4 @@
 | 73 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
 | 74 | devops, arch | 0 | 4 (ERR-082~085) | **RUNTIME BOOTSTRAP FIX.** 4 migration errors. FIX-MIGRATION-001 (devops), FIX-MIGRATION-002 (arch) assigned. |
 | 75 | devops, arch | 1 (FIX-MIGRATION-001) | 0 (3 resolved) | **1 TASK DONE.** Migration 002/007/008 repaired. 845 tests. ERR-082/083/084 resolved. Open errors 4→1. |
+| 76 | arch | 0 | 0 | **No completions.** FIX-MIGRATION-002 in progress (2 cycles). Drift CLEAN. |
