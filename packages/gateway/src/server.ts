@@ -53,10 +53,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	];
 
 	async function start(): Promise<http.Server> {
-		httpServer = http.createServer((req, res) => {
-			handleRequest(req, res);
-		});
-
+		httpServer = http.createServer((req, res) => handleRequest(req, res));
 		wss = new WebSocketServer({ noServer: true });
 
 		httpServer.on('upgrade', (req: http.IncomingMessage, socket, head: Buffer) => {
@@ -73,9 +70,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 
 		return new Promise<http.Server>((resolve) => {
-			httpServer?.listen(config.port, config.host, () => {
-				resolve(httpServer as http.Server);
-			});
+			httpServer?.listen(config.port, config.host, () => resolve(httpServer as http.Server));
 		});
 	}
 
@@ -85,34 +80,21 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			ws.close(1001, 'Server shutting down');
 		}
 		connections.clear();
-
 		wss?.close();
 		wss = null;
 
 		return new Promise<void>((resolve, reject) => {
-			if (!httpServer) {
-				resolve();
-				return;
-			}
+			if (!httpServer) return resolve();
 			httpServer.close((err) => {
 				httpServer = null;
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
+				err ? reject(err) : resolve();
 			});
 		});
 	}
 
-	// ─── HTTP Request Handling ───
-
 	function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
 		const requestId = generateRequestId();
-
-		if (handleCors(req, res)) {
-			return;
-		}
+		if (handleCors(req, res)) return;
 
 		let body = '';
 		let bodyBytes = 0;
@@ -131,8 +113,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 
 		req.on('end', () => {
-			if (aborted) return;
-			processRequest(req, res, body, requestId);
+			if (!aborted) processRequest(req, res, body, requestId);
 		});
 	}
 
@@ -143,23 +124,19 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		requestId: string,
 	): void {
 		const method = req.method ?? 'GET';
-		const url = req.url ?? '/';
-		const path = url.split('?')[0] ?? '/';
-
+		const path = (req.url ?? '/').split('?')[0] ?? '/';
 		const route = routes.find((r) => r.method === method && r.path === path);
+
 		if (!route) {
 			sendError(res, 404, 'Not Found', requestId);
 			return;
 		}
-
 		if (route.requiresAuth && !verifyAuth(req)) {
 			sendError(res, 401, 'Unauthorized', requestId);
 			return;
 		}
-
 		if (route.requiresAuth && !checkRateLimit(req)) {
-			const retryAfter = Math.ceil(RATE_LIMIT_WINDOW_MS / 1000);
-			res.setHeader('Retry-After', String(retryAfter));
+			res.setHeader('Retry-After', String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)));
 			sendError(res, 429, 'Rate limit exceeded', requestId);
 			return;
 		}
@@ -175,8 +152,6 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 	}
 
-	// ─── Rate Limiting (AUD-066) ───
-
 	function checkRateLimit(req: http.IncomingMessage): boolean {
 		const clientIp = req.socket.remoteAddress ?? 'unknown';
 		const now = Date.now();
@@ -188,52 +163,38 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			rateLimitBuckets.set(clientIp, timestamps);
 		}
 
-		// Remove expired entries
 		while (timestamps.length > 0 && (timestamps[0] ?? 0) < windowStart) {
 			timestamps.shift();
 		}
 
-		if (timestamps.length >= config.rateLimitPerMinute) {
-			return false;
-		}
-
+		if (timestamps.length >= config.rateLimitPerMinute) return false;
 		timestamps.push(now);
 		return true;
 	}
 
-	// ─── CORS ───
-
 	function handleCors(req: http.IncomingMessage, res: http.ServerResponse): boolean {
 		const origin = req.headers.origin;
-
 		if (origin && config.corsOrigins.includes(origin)) {
 			res.setHeader('Access-Control-Allow-Origin', origin);
 			res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 			res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 			res.setHeader('Access-Control-Max-Age', '86400');
 		}
-
 		if (req.method === 'OPTIONS') {
 			res.writeHead(204);
 			res.end();
 			return true;
 		}
-
 		return false;
 	}
 
-	// ─── Auth ───
-
 	function verifyAuth(req: http.IncomingMessage): boolean {
 		const authHeader = req.headers.authorization;
-		if (!authHeader?.startsWith('Bearer ')) {
-			return false;
-		}
-		const token = authHeader.slice(7);
-		return timingSafeEqual(token, config.authToken);
+		if (!authHeader?.startsWith('Bearer ')) return false;
+		return timingSafeEqual(authHeader.slice(7), config.authToken);
 	}
 
-	// ─── WebSocket (AUD-065: first-message auth per ADR-019) ───
+	// ─── WebSocket (ADR-019 first-message auth) ───
 
 	function handleUpgrade(
 		req: http.IncomingMessage,
@@ -241,35 +202,21 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		head: Buffer,
 	): void {
 		const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-		const path = url.pathname;
-
-		if (path !== '/ws') {
+		if (url.pathname !== '/ws') {
 			socket.destroy();
 			return;
 		}
-
-		// Accept all WS connections; auth happens via first message
-		wss?.handleUpgrade(req, socket, head, (ws) => {
-			wss?.emit('connection', ws, req);
-		});
+		wss?.handleUpgrade(req, socket, head, (ws) => wss?.emit('connection', ws, req));
 	}
 
 	function setupWsAuth(ws: AuthenticatedWebSocket): void {
 		ws.authenticated = false;
-
-		// 5-second auth timeout per ADR-019
 		ws.authTimer = setTimeout(() => {
-			if (!ws.authenticated) {
-				ws.close(4001, 'Auth timeout');
-			}
+			if (!ws.authenticated) ws.close(4001, 'Auth timeout');
 		}, WS_AUTH_TIMEOUT_MS);
 
 		ws.on('message', (data: WebSocket.RawData) => {
-			if (!ws.authenticated) {
-				handleWsAuthMessage(ws, data);
-				return;
-			}
-			handleWsMessage(ws, data);
+			ws.authenticated ? handleWsMessage(ws, data) : handleWsAuthMessage(ws, data);
 		});
 	}
 
@@ -311,8 +258,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			return;
 		}
 
-		const type = parsed.type;
-		if (type === 'session_info_request') {
+		if (parsed.type === 'session_info_request') {
 			ws.send(JSON.stringify({ type: 'session_info', session: null }));
 			return;
 		}
@@ -320,7 +266,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		ws.send(
 			JSON.stringify({
 				type: 'error',
-				error: `Unknown message type: ${String(type)}`,
+				error: `Unknown message type: ${String(parsed.type)}`,
 				requestId: generateRequestId(),
 			}),
 		);
@@ -338,7 +284,6 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	): Promise<void> {
 		const health = await deps.healthCheck();
 		const uptime = Math.floor((Date.now() - startedAt) / 1000);
-
 		sendJson(res, health.state === 'healthy' ? 200 : 503, {
 			status: health.state,
 			timestamp: new Date().toISOString(),
@@ -353,27 +298,14 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		body: string,
 	): Promise<void> {
 		const requestId = generateRequestId();
-		const parsed = parseJsonBody(body);
-		if (!parsed) {
-			sendError(res, 400, 'Invalid JSON body', requestId);
+		const chatInput = parseChatInput(body);
+		if (!chatInput) {
+			sendError(res, 400, 'Invalid request: content and channelId required', requestId);
 			return;
 		}
 
-		const content = parsed.content;
-		const channelId = parsed.channelId;
-
-		if (typeof content !== 'string' || content.length === 0) {
-			sendError(res, 400, 'content is required and must be a non-empty string', requestId);
-			return;
-		}
-		if (typeof channelId !== 'string' || channelId.length === 0) {
-			sendError(res, 400, 'channelId is required and must be a non-empty string', requestId);
-			return;
-		}
-
-		// Stub response — full implementation will integrate with orchestrator
 		sendJson(res, 200, {
-			content: `Echo: ${content}`,
+			content: `Echo: ${chatInput.content}`,
 			sessionId: 'stub-session',
 			requestId,
 			channelSwitched: false,
@@ -388,21 +320,9 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		body: string,
 	): Promise<void> {
 		const requestId = generateRequestId();
-		const parsed = parseJsonBody(body);
-		if (!parsed) {
-			sendError(res, 400, 'Invalid JSON body', requestId);
-			return;
-		}
-
-		const content = parsed.content;
-		const channelId = parsed.channelId;
-
-		if (typeof content !== 'string' || content.length === 0) {
-			sendError(res, 400, 'content is required', requestId);
-			return;
-		}
-		if (typeof channelId !== 'string' || channelId.length === 0) {
-			sendError(res, 400, 'channelId is required', requestId);
+		const chatInput = parseChatInput(body);
+		if (!chatInput) {
+			sendError(res, 400, 'Invalid request: content and channelId required', requestId);
 			return;
 		}
 
@@ -411,9 +331,10 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			'Cache-Control': 'no-cache',
 			Connection: 'keep-alive',
 		});
-
 		res.write(`event: session_info\ndata: ${JSON.stringify({ sessionId: 'stub-session' })}\n\n`);
-		res.write(`event: message_delta\ndata: ${JSON.stringify({ content: `Echo: ${content}` })}\n\n`);
+		res.write(
+			`event: message_delta\ndata: ${JSON.stringify({ content: `Echo: ${chatInput.content}` })}\n\n`,
+		);
 		res.write(
 			`event: done\ndata: ${JSON.stringify({ sessionId: 'stub-session', totalTokens: 0 })}\n\n`,
 		);
@@ -443,6 +364,15 @@ function generateRequestId(): string {
 	return `req_${crypto.randomBytes(8).toString('hex')}`;
 }
 
+function parseChatInput(body: string): { content: string; channelId: string } | null {
+	const parsed = parseJsonBody(body);
+	if (!parsed) return null;
+	const { content, channelId } = parsed;
+	if (typeof content !== 'string' || content.length === 0) return null;
+	if (typeof channelId !== 'string' || channelId.length === 0) return null;
+	return { content, channelId };
+}
+
 function parseJsonBody(body: string): Record<string, unknown> | null {
 	try {
 		const parsed = JSON.parse(body);
@@ -456,8 +386,6 @@ function parseJsonBody(body: string): Record<string, unknown> | null {
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
-	if (a.length !== b.length) {
-		return false;
-	}
+	if (a.length !== b.length) return false;
 	return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
 }
