@@ -2,18 +2,17 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 68**: **1 CRITICAL (ERR-069, human decision pending).** No new errors. HARDEN-003/004/005 completed (no error-related). Open errors unchanged at 1.
+> **Cycle 68 (CTO update)**: **0 CRITICAL. ERR-069 RESOLVED** — Mark(Human) approved 1536d Matryoshka strategy and directly applied FIX-DIMENSION-001 + CONST-AMEND-001 in CTO session (0208C68). 835 tests pass. Open errors: **0**.
 
 ## Open
 
-| ID | Severity | Description | Reported By | Date |
-|----|----------|-------------|-------------|------|
-| ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016). **RES-006 SOLUTION**: Truncate to **1536d** via Matryoshka embeddings (Google official, research-proven, zero infra changes, 50% storage savings). FIX-DIMENSION-001 created for ADR-016 amendment. **Requires human (Mark) decision** to approve 1536d strategy before Architect can execute. | INTEG-001 (devops) | 0208C56 |
+(none)
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-069 | pgvector 2000d limit resolved: **Mark(Human) approved 1536d Matryoshka truncation** and directly applied changes across 16 files (source, tests, ADRs, plan docs, SQL migration). HNSW index now active. 835 tests pass. Commits: `6120a90` (auto CTO cycle) + `228a146` (plan docs). | **Mark (CTO direct)** | 0208C68 |
 | ERR-075 | Hardcoded DB credentials removed from migrate CLI. Env vars enforced (DATABASE_URL or PG*). 5 new tests. 806 tests pass. AUD-083 resolved. | FIX-AUDIT-E-003 (devops) | 0208C63 |
 
 | ID | Resolution | Resolved By | Date |

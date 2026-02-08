@@ -7,18 +7,18 @@
 - **Phase**: **ALL PHASES COMPLETE — POST-RELEASE HARDENING**
 - **Cycle**: 68
 - **Last Updated**: 2026-02-08C68
-- **STATUS**: **HARDEN-003/004/005 complete.** Type guards (Telegram+Discord webhook handlers) + proxy-aware rate limiting done. **835 tests (799 pass, 36 skip), 69 files.** Gateway 95.47% stmt. 2 P3 hardening tasks remain (HARDEN-006/007). 2 human-blocked tasks unchanged. Open errors 1 (ERR-069 CRITICAL human-decision only).
+- **STATUS**: **HARDEN-003/004/005 complete.** Type guards (Telegram+Discord webhook handlers) + proxy-aware rate limiting done. **835 tests (799 pass, 36 skip), 69 files.** Gateway 95.47% stmt. 2 P3 hardening tasks remain (HARDEN-006/007). **FIX-DIMENSION-001 + CONST-AMEND-001: Mark(Human)이 직접 승인 및 적용 완료** (0208C68 CTO session). Open errors: **0**.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 4 (2 human-blocked, 2 hardening P3) |
+| Queued | 2 (HARDEN-006/007, P3) |
 | In Progress | 0 |
-| Done | 114 |
+| Done | 116 (+FIX-DIMENSION-001, CONST-AMEND-001) |
 | Cancelled | 14 |
 
-## Open Errors: 1 (ERR-069 CRITICAL human-decision only)
+## Open Errors: 0
 
 ## Cycle History
 
@@ -75,6 +75,6 @@
 
 ## Human Intervention Needed
 
-- **ERR-069 CRITICAL → FIX-DIMENSION-001**: pgvector 0.8.1 has **2000 dimension hard limit**. RES-006 recommends **1536d Matryoshka truncation** (Google official, 50% storage savings, zero pgvector changes). FIX-DIMENSION-001 ready for Architect execution. **Requires human (Mark) approval** to change embedding dimension strategy from 3072d to 1536d.
-- **CONST-AMEND-001**: CONSTITUTION §9 amendment needed — expand infra allowed imports to include `@axel/core/{types,memory,orchestrator}`. §9 currently says `core/src/types/ only` but PLAN_SYNC B.7 + DEVOPS-004 intentionally export broader subpaths. **Requires human (Mark) approval** per CONSTITUTION immutability rule.
+- ~~**ERR-069 CRITICAL → FIX-DIMENSION-001**~~: **RESOLVED (0208C68)**. Mark(Human) approved 1536d Matryoshka strategy and directly applied changes across 16 files. 835 tests pass. Commits: `6120a90` + `228a146`.
+- ~~**CONST-AMEND-001**~~: **RESOLVED (0208C68)**. Mark(Human) approved §9 amendment and directly applied.
 - **GitHub account suspended**: `git push origin main` fails. Local development continues. Human (Mark) must resolve account status.

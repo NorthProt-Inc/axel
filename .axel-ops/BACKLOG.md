@@ -2,14 +2,11 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 68**: **POST-RELEASE HARDENING.** HARDEN-003/004/005 completed (type guards + proxy rate limiting). 2 queued P3 (HARDEN-006/007). 2 human-blocked tasks unchanged. Open errors 1 (ERR-069 CRITICAL human decision). 835 tests (799 pass, 36 skip), 69 files.
+> **Cycle 68 (CTO update)**: **POST-RELEASE HARDENING.** HARDEN-003/004/005 completed. **FIX-DIMENSION-001 + CONST-AMEND-001 resolved by Mark(Human) directly** — approved and applied in CTO session. 835 tests (799 pass, 36 skip), 69 files. Open errors: **0**.
 
 ## Queued (Human-Blocked)
 
-| ID | Priority | Division | Task | Depends On | Blocker |
-|----|----------|----------|------|------------|---------|
-| FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). | RES-006 ✓ | **Human decision needed** |
-| CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — | **Human approval needed** |
+(none)
 
 ## Queued (Hardening)
 
@@ -156,3 +153,5 @@
 | HARDEN-003 | dev-edge | 0208C68 | QA-020-M1: TelegramUpdate interface + isTelegramUpdate type guard. 16 tests. Eliminates 4-level Record casting chain. TDD RED→GREEN→REFACTOR. |
 | HARDEN-004 | dev-edge | 0208C68 | QA-020-M2: DiscordInteraction interface + isDiscordInteraction type guard. Extracted isValidDiscordData + isValidDiscordMember helpers. 16 tests. TDD RED→GREEN→REFACTOR. |
 | HARDEN-005 | dev-edge | 0208C68 | AUD-087: trustedProxies config + getClientIp X-Forwarded-For parsing. Right-to-left walk, skip trusted IPs. 5 tests. TDD RED→GREEN→REFACTOR. |
+| FIX-DIMENSION-001 | **Mark (Human direct)** | 0208C68 | **Mark(Human) approved and directly applied** 3072d→1536d Matryoshka truncation. 16 files updated (source, tests, ADRs, plan docs, SQL migration). HNSW index activated. 835 tests pass. ERR-069 resolved. Commits: `6120a90` + `228a146`. |
+| CONST-AMEND-001 | **Mark (Human direct)** | 0208C68 | **Mark(Human) approved and directly applied** §9 amendment: infra imports expanded from `core/src/types/` to `@axel/core/{types,memory,orchestrator}`. AUD-046/047 resolved. |
