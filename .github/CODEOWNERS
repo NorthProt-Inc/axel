@@ -1,0 +1,19 @@
+# Project Axel — CODEOWNERS
+# Division ownership for autonomous agent workflow
+
+# Coordinator owns ops infrastructure
+.axel-ops/MISSION.md       @NorthProt-Inc/axel-coord
+.axel-ops/CONSTITUTION.md  @NorthProt-Inc/axel-coord
+.axel-ops/PROGRESS.md      @NorthProt-Inc/axel-coord
+.axel-ops/BACKLOG.md       @NorthProt-Inc/axel-coord
+.axel-ops/ERRORS.md        @NorthProt-Inc/axel-coord
+
+# Architecture owns plan and ADRs
+docs/plan/                 @NorthProt-Inc/axel-arch
+docs/adr/                  @NorthProt-Inc/axel-arch
+
+# Research owns research docs
+docs/research/             @NorthProt-Inc/axel-research
+
+# Human operator owns everything
+*                          @cyanprot
