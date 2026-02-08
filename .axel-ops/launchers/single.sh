@@ -2,8 +2,9 @@
 # .axel-ops/launchers/single.sh <division> [model]
 # Manual test launcher for individual Division
 # Usage: ./single.sh arch opus
+#        ./single.sh dev-core opus
 #        ./single.sh research sonnet
-#        ./single.sh quality opus
+#        ./single.sh devops sonnet
 #        ./single.sh coordinator opus
 set -euo pipefail
 
@@ -12,25 +13,59 @@ OPS="$MAIN_REPO/.axel-ops"
 CLAUDE="/home/northprot/.local/bin/claude"
 
 DIV="${1:?Usage: single.sh <division> [model]}"
-MODEL="${2:-opus}"
 TS=$(date +"%Y-%m-%d_%H-%M-%S")
 
+# Division → default model mapping
+get_default_model() {
+    case "$1" in
+        research|devops) echo "sonnet" ;;
+        *) echo "opus" ;;
+    esac
+}
+
+MODEL="${2:-$(get_default_model "$DIV")}"
+
 # Determine worktree path
-if [ "$DIV" = "coordinator" ]; then
-    WT="$MAIN_REPO"
-else
-    WT="/home/northprot/projects/axel-wt-${DIV}"
-fi
+case "$DIV" in
+    coordinator) WT="$MAIN_REPO" ;;
+    arch)        WT="/home/northprot/projects/axel-wt-arch" ;;
+    dev-core)    WT="/home/northprot/projects/axel-wt-dev-core" ;;
+    dev-infra)   WT="/home/northprot/projects/axel-wt-dev-infra" ;;
+    dev-edge)    WT="/home/northprot/projects/axel-wt-dev-edge" ;;
+    quality)     WT="/home/northprot/projects/axel-wt-quality" ;;
+    research)    WT="/home/northprot/projects/axel-wt-research" ;;
+    devops)      WT="/home/northprot/projects/axel-wt-devops" ;;
+    audit)       WT="/home/northprot/projects/axel-wt-audit" ;;
+    *)
+        echo "ERROR: Unknown division '$DIV'"
+        echo "Available: coordinator, arch, dev-core, dev-infra, dev-edge, quality, research, devops, audit"
+        exit 1
+        ;;
+esac
+
+# Determine prompt file
+case "$DIV" in
+    coordinator) PROMPT="coordinator-session.md" ;;
+    *)           PROMPT="${DIV}-session.md" ;;
+esac
 
 if [ ! -d "$WT" ]; then
     echo "ERROR: Worktree $WT does not exist"
-    echo "Run: git worktree add $WT -b div/$DIV"
+    echo "Run: cd $MAIN_REPO && git worktree add $WT -b div/$DIV"
     exit 1
 fi
+
+if [ ! -f "$OPS/prompts/$PROMPT" ]; then
+    echo "ERROR: Prompt file $OPS/prompts/$PROMPT does not exist"
+    exit 1
+fi
+
+mkdir -p "$OPS/logs"
 
 echo "=== Starting $DIV Division ==="
 echo "  Model:    $MODEL"
 echo "  Worktree: $WT"
+echo "  Prompt:   $OPS/prompts/$PROMPT"
 echo "  Log:      $OPS/logs/${DIV}_${TS}.log"
 echo ""
 
@@ -50,7 +85,7 @@ $CLAUDE -p \
     --permission-mode dontAsk \
     --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash,WebSearch,WebFetch" \
     --no-session-persistence \
-    "$(cat "$OPS/prompts/${DIV}-session.md")" \
+    "$(cat "$OPS/prompts/$PROMPT")" \
     2>&1 | tee "$OPS/logs/${DIV}_${TS}.log"
 
 echo ""

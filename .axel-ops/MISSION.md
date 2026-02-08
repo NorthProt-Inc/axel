@@ -21,7 +21,7 @@ Carbon and Silicon in symbiosis — NorthProt's core project.
 
 ## Prohibitions
 
-1. **No code files** (.ts, .js) before plan finalization
+1. ~~**No code files** (.ts, .js) before plan finalization~~ — **Implementation Phase ACTIVE** (approved cycle 18). Code files permitted under TDD protocol (CONSTITUTION Rule 8).
 2. **No hardcoded secrets** in code or docs
 3. **No unauthorized ADR modification** — confirmed ADRs are append-only (supersede via new ADR)
 4. **No direct push to main** — all changes via Division branch + Coordinator merge

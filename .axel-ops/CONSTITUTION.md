@@ -7,13 +7,34 @@
 
 ## 1. Division Ownership
 
-| Division | Owned Directories | Model |
-|----------|------------------|-------|
-| **Coordinator** | `.axel-ops/PROGRESS.md`, `.axel-ops/BACKLOG.md`, `.axel-ops/ERRORS.md`, `.axel-ops/comms/broadcast.jsonl` | opus |
-| **Architecture** | `docs/plan/`, `docs/adr/` | opus |
-| **Research** | `docs/research/` | sonnet |
-| **Quality** | `.axel-ops/comms/quality.jsonl` (write), all `docs/` (read-only for review) | opus |
-| **Audit** | `.axel-ops/comms/audit.jsonl` (write), all files (read-only for verification) | opus |
+### 1.1 Command Layer
+
+| Division | Code | Owned Directories | Model | Worktree |
+|----------|------|------------------|-------|----------|
+| **Coordinator** | `coord` | `.axel-ops/PROGRESS.md`, `.axel-ops/BACKLOG.md`, `.axel-ops/ERRORS.md`, `.axel-ops/METRICS.md`, `.axel-ops/comms/broadcast.jsonl` | opus | `axel` (main) |
+| **Architect** | `arch` | `docs/plan/`, `docs/adr/`, `.axel-ops/PLAN_SYNC.md` | opus | `axel-wt-arch` |
+
+### 1.2 Development Layer (TDD mandatory — see Rule 8)
+
+| Division | Code | Owned Directories | Model | Worktree |
+|----------|------|------------------|-------|----------|
+| **Dev-Core** | `dev-core` | `packages/core/` | opus | `axel-wt-dev-core` |
+| **Dev-Infra** | `dev-infra` | `packages/infra/` | opus | `axel-wt-dev-infra` |
+| **Dev-Edge** | `dev-edge` | `packages/channels/`, `packages/gateway/`, `apps/axel/` | opus | `axel-wt-dev-edge` |
+
+### 1.3 Assurance Layer
+
+| Division | Code | Owned Directories | Model | Worktree |
+|----------|------|------------------|-------|----------|
+| **Quality** | `quality` | `.axel-ops/comms/quality.jsonl`, `.axel-ops/TEST_REPORT.md` (write), all files (read-only for review) | opus | `axel-wt-quality` |
+| **Audit** | `audit` | `.axel-ops/comms/audit.jsonl` (write), all files (read-only for verification) | opus | `axel-wt-audit` |
+
+### 1.4 Support Layer
+
+| Division | Code | Owned Directories | Model | Worktree |
+|----------|------|------------------|-------|----------|
+| **Research** | `research` | `docs/research/` | sonnet | `axel-wt-research` |
+| **DevOps** | `devops` | `packages/*/package.json`, `packages/*/tsconfig.json`, `packages/*/vitest.config.ts`, `docker/`, `.github/`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `biome.json`, `.axel-ops/DEPLOY.md` | sonnet | `axel-wt-devops` |
 
 **Rule**: A Division may ONLY create/modify files in its owned directories. Reading any file is allowed.
 
@@ -40,16 +61,27 @@ Each Division writes to its own comms file. Coordinator reads all.
 | `broadcast` | Global announcement | coord only |
 | `finding` | Factual discrepancy found | audit only |
 | `ack` | Acknowledgment | any |
+| `test-result` | Test results (pass/fail/coverage) | dev-*, quality |
+| `plan-amendment` | Implementation-driven plan change request | dev-*, arch |
+| `research-suggestion` | Proactive improvement suggestion | research |
+| `interface-contract` | Cross-package interface definition | arch |
+| `activation` | Next-cycle Division activation list | coord only |
+| `coverage-report` | Per-package coverage stats | dev-*, quality |
+| `metric-alert` | Bottleneck/threshold breach detection | coord only |
 
 ### 2.3 Comms Files
 
 | File | Writer | Readers |
 |------|--------|---------|
-| `comms/arch.jsonl` | Architecture | Coordinator, Quality |
-| `comms/research.jsonl` | Research | Coordinator, Architecture |
-| `comms/quality.jsonl` | Quality | Coordinator, Architecture |
-| `comms/audit.jsonl` | Audit | Coordinator, Architecture, Quality |
 | `comms/broadcast.jsonl` | Coordinator | All |
+| `comms/arch.jsonl` | Architect | Coordinator, Quality, Dev-* |
+| `comms/dev-core.jsonl` | Dev-Core | Coordinator, Quality, Architect |
+| `comms/dev-infra.jsonl` | Dev-Infra | Coordinator, Quality, Architect |
+| `comms/dev-edge.jsonl` | Dev-Edge | Coordinator, Quality, Architect |
+| `comms/quality.jsonl` | Quality | Coordinator, Architect, Dev-* |
+| `comms/research.jsonl` | Research | Coordinator, Architect |
+| `comms/devops.jsonl` | DevOps | Coordinator, All |
+| `comms/audit.jsonl` | Audit | Coordinator, Architect, Quality |
 
 ## 3. Quality Gates
 
@@ -100,3 +132,70 @@ Coordinator MUST verify every cycle:
 2. BACKLOG tasks align with v3.0 goals
 3. No Division has modified files outside its ownership
 4. Token/cost numbers remain arithmetically consistent
+
+## 8. TDD Mandatory
+
+All files under `packages/*/src/` MUST have a corresponding test file under `packages/*/tests/`.
+Test commits MUST precede source commits (verified by timestamp in git log).
+Violation severity: **HIGH**. Quality Division enforces. Violating tasks are marked incomplete.
+
+Coverage targets:
+- `packages/core/`: 90%+
+- `packages/infra/`: 80%+
+- `packages/channels/`: 75%+
+- `packages/gateway/`: 80%+
+
+## 9. Package Boundary Enforcement
+
+| Package | May Import From |
+|---------|----------------|
+| `packages/core/` | No other `packages/` — only Node.js stdlib and external npm |
+| `packages/infra/` | `packages/core/src/types/` only |
+| `packages/channels/` | `packages/core/src/types/` only |
+| `packages/gateway/` | `packages/core/src/types/` only |
+| `apps/axel/` | Any `packages/*` |
+
+Violation severity: **CRITICAL**. Quality Division enforces via import analysis.
+
+## 10. Test Gate for `done` Reports
+
+A Dev Division may only send a `done` message when ALL of the following are true:
+1. All tests pass (`pnpm vitest run`)
+2. Coverage meets the target for the package (Rule 8)
+3. Zero Biome warnings (`pnpm biome check`)
+4. TypeScript compiles (`pnpm tsc --noEmit`)
+
+Violation severity: **HIGH**. Quality Division verifies.
+
+## 11. Plan-Code Synchronization
+
+Architect maintains `PLAN_SYNC.md` with plan-section ↔ code-location mappings.
+PLAN_SYNC.md MUST be updated at every milestone.
+Any `DRIFT` status unresolved for 5+ cycles triggers automatic escalation to Coordinator.
+
+Flow:
+- Dev discovers drift → sends `plan-amendment` message
+- Coordinator activates Architect
+- Architect evaluates: update plan OR instruct Dev to change code
+- PLAN_SYNC.md updated
+
+## 12. Conditional Activation
+
+Only the Coordinator may decide which Divisions are active in a given cycle.
+Coordinator writes an `activation` message to `broadcast.jsonl` each cycle.
+No Division may self-activate — `cycle.sh` reads the activation list and only runs listed Divisions.
+
+## 13. Merge Integrity
+
+After merging Division branches into main (Phase 3), the following smoke tests MUST pass:
+```bash
+pnpm install --frozen-lockfile
+pnpm typecheck     # tsc --noEmit
+pnpm test --run    # vitest run
+```
+If any test fails: identify the offending merge, revert it, create a P0 fix task.
+
+## 14. File Size Limit
+
+Source files (`packages/*/src/**/*.ts`) MUST NOT exceed 400 lines.
+Quality Division monitors. Violation severity: **MEDIUM**.
