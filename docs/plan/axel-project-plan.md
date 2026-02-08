@@ -189,12 +189,13 @@ Runtime:                   56 days (2025-12-15 ~ 2026-02-07)
 | 트랜잭션 | SQLite WAL (단일 writer) | PostgreSQL MVCC (동시 read/write) |
 | 백업 | 파일 복사 | `pg_dump` + WAL archiving |
 
-**왜 Redis도 필요한가:**
+**왜 Redis도 필요한가 (ADR-003):**
 - Working Memory (현재 대화): 빈번한 read/write, 낮은 latency 필요
 - Cross-Channel Session Router: pub/sub로 채널 간 이벤트 전파
 - Rate Limiting: Token bucket 상태
 - Intent Classification Cache: 동일 패턴의 반복 분류 결과
 - **PostgreSQL은 "영구 기억", Redis는 "순간 기억"**
+- **핵심 원칙**: Redis는 ephemeral cache — 모든 비즈니스 데이터의 source of truth는 PostgreSQL. Redis 전면 장애 시에도 PG fallback으로 서비스 지속 (latency 증가만 허용). Write는 PG-first, Redis는 read 가속 캐시. (ADR-003 상세 참조)
 
 ### 3.3 프로젝트 구조 결정: Monorepo (pnpm workspace)
 
@@ -631,6 +632,9 @@ export const AxelConfigSchema = z.object({
   }),
   redis: z.object({
     url: z.string().url(),
+    connectTimeoutMs: z.number().int().default(5_000),
+    commandTimeoutMs: z.number().int().default(1_000),
+    maxRetriesPerRequest: z.number().int().default(3),
   }),
   llm: LlmConfigSchema,
   memory: MemoryConfigSchema,
@@ -860,6 +864,8 @@ EXPIRE 300                           # 5분 TTL
 HASH   axel:prefetch:{userId}        # 선제 로딩된 기억 맥락
 EXPIRE 30                            # 30초 TTL
 ```
+
+**Redis 에러 처리**: 모든 Redis 명령은 Circuit Breaker (ADR-021)로 감싸며, 장애 시 PostgreSQL fallback으로 전환한다. Working Memory는 PG-first write 패턴 (Redis 실패 시 데이터 유실 없음). 상세 에러 처리 패턴은 ADR-003 "Redis Critical Function Error Handling" 참조.
 
 ### Layer 3: Memory Engine
 
