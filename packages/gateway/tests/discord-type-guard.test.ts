@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-	isDiscordInteraction,
-	extractDiscordInteraction,
 	type DiscordInteraction,
+	extractDiscordInteraction,
+	isDiscordInteraction,
 } from '../src/webhook-handlers.js';
 
 /**

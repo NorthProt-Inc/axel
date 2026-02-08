@@ -19,7 +19,7 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	let httpServer: http.Server | null = null;
 	let wss: WebSocketServer | null = null;
-	const startedAt = Date.now();
+	let startedAt = 0;
 	const connections = new Set<AuthenticatedWebSocket>();
 	const rateLimitBuckets = new Map<string, number[]>();
 
@@ -89,7 +89,10 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 
 		return new Promise<http.Server>((resolve) => {
-			httpServer?.listen(config.port, config.host, () => resolve(httpServer as http.Server));
+			httpServer?.listen(config.port, config.host, () => {
+				startedAt = Date.now();
+				resolve(httpServer as http.Server);
+			});
 		});
 	}
 
@@ -333,6 +336,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			'Content-Type': 'text/event-stream',
 			'Cache-Control': 'no-cache',
 			Connection: 'keep-alive',
+			'X-Content-Type-Options': 'nosniff',
+			'X-Frame-Options': 'DENY',
 		});
 
 		try {

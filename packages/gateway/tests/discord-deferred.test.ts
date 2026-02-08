@@ -92,6 +92,14 @@ function makeRequest(
 	});
 }
 
+function createDeferred(): { promise: Promise<void>; resolve: () => void } {
+	let resolve: () => void = () => {};
+	const promise = new Promise<void>((r) => {
+		resolve = r;
+	});
+	return { promise, resolve };
+}
+
 describe('HARDEN-006: Discord DEFERRED fire-and-forget', () => {
 	let server: ReturnType<typeof createGatewayServer>;
 	let httpServer: http.Server;
@@ -134,13 +142,10 @@ describe('HARDEN-006: Discord DEFERRED fire-and-forget', () => {
 	}
 
 	it('returns DEFERRED (type=5) immediately without waiting for handleMessage', async () => {
-		// Make handleMessage take a long time
-		let resolveHandler: () => void;
-		const handlerPromise = new Promise<void>((r) => {
-			resolveHandler = r;
-		});
+		// Make handleMessage take a long time using a deferred resolver
+		const deferred = createDeferred();
 		handleMessage.mockImplementation(async () => {
-			await handlerPromise;
+			await deferred.promise;
 			return {
 				content: 'Delayed response',
 				sessionId: 'sess-1',
@@ -169,7 +174,7 @@ describe('HARDEN-006: Discord DEFERRED fire-and-forget', () => {
 		expect(handleMessage).toHaveBeenCalledTimes(1);
 
 		// Resolve the handler to prevent hanging
-		resolveHandler!();
+		deferred.resolve();
 	});
 
 	it('includes interaction token in DiscordInteraction type', async () => {
@@ -190,20 +195,13 @@ describe('HARDEN-006: Discord DEFERRED fire-and-forget', () => {
 	});
 
 	it('calls discordFollowUp callback with result after handleMessage completes', async () => {
-		let resolveHandler: () => void;
-		const handlerPromise = new Promise<void>((r) => {
-			resolveHandler = r;
-		});
+		const deferred = createDeferred();
 		const followUpResult = {
 			content: 'Axel reply',
 			sessionId: 'sess-follow',
 			channelSwitched: false,
 			usage: { inputTokens: 5, outputTokens: 10, cacheReadTokens: 0, cacheCreationTokens: 0 },
 		};
-		handleMessage.mockImplementation(async () => {
-			await handlerPromise;
-			return followUpResult;
-		});
 
 		const discordFollowUp = vi.fn().mockResolvedValue(undefined);
 
@@ -212,7 +210,7 @@ describe('HARDEN-006: Discord DEFERRED fire-and-forget', () => {
 		const deps = createMockDeps();
 		handleMessage = deps.handleMessage as ReturnType<typeof vi.fn>;
 		handleMessage.mockImplementation(async () => {
-			await handlerPromise;
+			await deferred.promise;
 			return followUpResult;
 		});
 		(deps as Record<string, unknown>).discordFollowUp = discordFollowUp;
@@ -234,7 +232,7 @@ describe('HARDEN-006: Discord DEFERRED fire-and-forget', () => {
 		expect(JSON.parse(res.body).type).toBe(5);
 
 		// Resolve the handler
-		resolveHandler!();
+		deferred.resolve();
 		// Wait for the fire-and-forget to complete
 		await vi.waitFor(() => {
 			expect(discordFollowUp).toHaveBeenCalledTimes(1);
