@@ -5,20 +5,20 @@
 ## Status
 
 - **Phase**: **C: INFRA SPRINT — ACTIVE**
-- **Cycle**: 42
-- **Last Updated**: 2026-02-08C42
-- **STATUS**: **Phase B COMPLETE (100%).** SYNC-003 + QA-013 both done C41. ALL 6 core modules (CORE-001~006), 330 tests, 99.69% stmt coverage, ALL CONSTITUTION gates PASS. **Phase C kickoff.** INFRA-001 (persistence, P0) + INFRA-004 (embedding, P1) assigned to dev-infra (parallel, no deps). DEVOPS-002 (npm deps) + DEVOPS-003 (testcontainers) assigned to devops. 5 tasks queued (INFRA-002/003/005, QA-016, SYNC-004).
+- **Cycle**: 43
+- **Last Updated**: 2026-02-08C43
+- **STATUS**: **Phase C 56% (5/9 tasks done).** INFRA-001 (persistence, 62 tests) + INFRA-004 (embedding, 16 tests) + COMMON-CB (circuit breaker, 11 tests) merged to main C43. DEVOPS-002 (npm deps) + DEVOPS-003 (testcontainers) also merged. Smoke test: 419 tests, typecheck+lint clean. **3 INFRA tasks remaining**: INFRA-002 (Redis cache), INFRA-003 (LLM adapters), INFRA-005 (MCP registry) — all unblocked. SYNC-004 partial update + plan-amendment (sessions user_id) assigned to arch. DEVOPS-004 (core subpath exports) created. 1 new issue (ERR-064 LOW).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 5 |
-| In Progress | 4 |
-| Done | 56 |
+| Queued | 2 |
+| In Progress | 5 |
+| Done | 62 |
 | Cancelled | 14 |
 
-## Open Errors: 0
+## Open Errors: 1
 
 ## Cycle History
 
@@ -54,19 +54,20 @@
 | 40 | 0208 | **ALL CORE TASKS COMPLETE.** CORE-004 (context assembly, 289 tests, 100% coverage) + CORE-006 (orchestrator, 330 tests, 99.69% stmt) merged to main. Smoke test: 330 tests pass, typecheck+lint clean. Phase B 95%. SYNC-003 scope expanded (B.3+B.4+B.6). QA-013 scope expanded (CORE-001~006 full review). 0 errors, no drift. |
 | 41 | 0208 | **No new completions.** SYNC-003 (arch, 4 cycles — metric-alert) + QA-013 (quality, 2 cycles) in progress. Smoke test: 330 tests pass, typecheck+lint clean. 0 errors, no drift. SYNC-003 will be escalated (CTO direct execution) if no completion by C42. |
 | 42 | 0208 | **PHASE B COMPLETE → PHASE C KICKOFF.** SYNC-003 done (B.3+B.4+B.6 IN_SYNC, 100% plan-code sync) + QA-013 done (330 tests smoke test, ALL gates PASS). Phase B: 56 tasks, 330 tests, 99.69% stmt. **Phase C (Infra Sprint) started.** 9 tasks created: INFRA-001~005, DEVOPS-002/003, QA-016, SYNC-004. INFRA-001 (persistence, P0) + INFRA-004 (embedding, P1) assigned parallel. DEVOPS-002/003 (deps+testcontainers) assigned. 0 errors, no drift. |
+| 43 | 0208 | **5 TASKS MERGED.** INFRA-001 (PG persistence, 6 adapters, 62 tests, 95.5% stmt), INFRA-004 (embedding, 16 tests, 99.18% stmt), COMMON-CB (circuit breaker, 11 tests), DEVOPS-002 (npm deps), DEVOPS-003 (testcontainers) all merged to main. Smoke test: 419 tests pass, typecheck+lint clean. **Phase C 56%.** Plan-amendment received (sessions user_id). INFRA-002/003/005 all unblocked — assigned to dev-infra. SYNC-004 partial + PLAN-AMEND-001 assigned to arch. DEVOPS-004 (core exports) created. 1 new issue (ERR-064 LOW). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C42 | Cycle 42 | Active |
-| Architecture | 0208C41 | — | Idle (SYNC-003 complete, awaiting SYNC-004 when INFRA tasks done) |
+| Coordinator | 0208C43 | Cycle 43 | Active |
+| Architecture | 0208C43 | SYNC-004, PLAN-AMEND-001 | **Active** (PLAN_SYNC partial update + sessions user_id fix) |
 | Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
-| Dev-Infra | 0208C42 | INFRA-001, INFRA-004 | **Active** (L2 Persistence + L5 Embedding, parallel) |
+| Dev-Infra | 0208C43 | INFRA-002, INFRA-003, INFRA-005 | **Active** (Redis cache + LLM adapters + MCP registry) |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C41 | — | Idle (QA-013 complete, awaiting QA-016 when INFRA tasks done) |
-| DevOps | 0208C42 | DEVOPS-002, DEVOPS-003 | **Active** (npm deps + testcontainers setup) |
+| Quality | 0208C41 | — | Idle (awaiting QA-016 when INFRA-002/003/005 done) |
+| DevOps | 0208C43 | DEVOPS-004 | **Active** (core subpath exports fix) |
 | Audit | 0209T0031 | — | Idle |
 
 ## Human Intervention Needed

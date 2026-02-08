@@ -2,26 +2,23 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 42**: **PHASE B COMPLETE → PHASE C (Infra Sprint) ACTIVE.** Phase B: 56 tasks done, 330 tests, 99.69% stmt coverage. Phase C: 9 tasks created (5 INFRA + 2 SYNC/QA + 2 DEVOPS).
+> **Cycle 43**: **Phase C (Infra Sprint) 56%.** 5/9 tasks done: INFRA-001, INFRA-004, COMMON-CB, DEVOPS-002, DEVOPS-003 merged. 419 tests pass. 3 INFRA tasks + QA-016 + SYNC-004 remaining.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| INFRA-002 | P1 | dev-infra | L2 Redis cache layer: WorkingMemory + StreamBuffer impls, circuit breaker, PG fallback. ADR-003, ADR-021. `packages/infra/src/cache/` | INFRA-001 |
-| INFRA-003 | P1 | dev-infra | L5 LLM adapters: Anthropic + Google providers, circuit breaker, retry, streaming. ADR-020, ADR-021. `packages/infra/src/llm/` | — |
-| INFRA-005 | P1 | dev-infra | L6 MCP tool registry: defineTool(), ToolExecutor impl, command allowlist, path validation. ADR-010. `packages/infra/src/mcp/` | INFRA-001, INFRA-004 |
-| QA-016 | P1 | quality | Phase C code review — all INFRA modules. TDD, §9 boundary, coverage 80%+. | INFRA-001~005 |
-| SYNC-004 | P1 | arch | PLAN_SYNC.md Phase C update — all 5 INFRA modules NOT_STARTED→IN_SYNC. | INFRA-001~005 |
+| QA-016 | P1 | quality | Phase C code review — all INFRA modules. TDD, §9 boundary, coverage 80%+. | INFRA-002, INFRA-003, INFRA-005 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| INFRA-001 | dev-infra | 0208C42 | C44 |
-| INFRA-004 | dev-infra | 0208C42 | C44 |
-| DEVOPS-002 | devops | 0208C42 | C43 |
-| DEVOPS-003 | devops | 0208C42 | C43 |
+| INFRA-002 | dev-infra | 0208C43 | C45 |
+| INFRA-003 | dev-infra | 0208C43 | C45 |
+| INFRA-005 | dev-infra | 0208C43 | C45 |
+| SYNC-004 | arch | 0208C43 | C44 |
+| DEVOPS-004 | devops | 0208C43 | C44 |
 
 ## Cancelled
 
@@ -102,3 +99,8 @@
 | CORE-006 | dev-core | 0208C40 | 4 src + 3 test files (orchestrator). 330 tests, 99.69% stmt. ReAct loop+SessionRouter+tool dispatch. ADR-014/020/021. |
 | SYNC-003 | arch | 0208C41 | PLAN_SYNC.md: B.3+B.4+B.6 IN_SYNC. Phase B plan-code sync 100%. |
 | QA-013 | quality | 0208C41 | Phase B final verification: 330 tests smoke test, ALL CONSTITUTION gates PASS. 0 CRITICAL, 0 HIGH. READY FOR PHASE B CLOSURE. |
+| DEVOPS-002 | devops | 0208C43 | npm deps: pg, ioredis, @anthropic-ai/sdk, @google/generative-ai, @types/pg, testcontainers. pnpm install+typecheck PASS. |
+| DEVOPS-003 | devops | 0208C43 | testcontainers setup: PostgreSQL 17 pgvector + Redis 7. packages/infra/tests/setup.ts lifecycle. |
+| INFRA-001 | dev-infra | 0208C43 | L2 PG persistence: 6 adapters (Episodic, Semantic, Conceptual, Meta, Session, Pool). 62 tests, 95.5% stmt. ADR-002/013/021. |
+| INFRA-004 | dev-infra | 0208C43 | L5 Embedding: GeminiEmbeddingService, 3072d, batch, retry, circuit breaker. 16 tests, 99.18% stmt. ADR-016. |
+| COMMON-CB | dev-infra | 0208C43 | Circuit breaker (ADR-021): closed→open→half_open state machine. 11 tests, 100% stmt. packages/infra/src/common/. |

@@ -2,29 +2,29 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 42
+## Current Cycle: 43
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 40 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-003, resolved C41) | Idle (awaiting SYNC-004) |
+| coord | — | 43 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-003, resolved C41) | **Active** (SYNC-004, PLAN-AMEND-001) |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | Idle — all CORE tasks complete |
-| dev-infra | — | 0 | 0 | **Active** (INFRA-001, INFRA-004) |
+| dev-infra | 1 cycle | 3 (INFRA-001, INFRA-004, COMMON-CB) | 0 | **Active** (INFRA-002, INFRA-003, INFRA-005) |
 | dev-edge | — | 0 | 0 | Pending Phase D |
 | quality | — | 2 (QA-011, QA-013) | 1 (QA-012, cancelled C39) | Idle (awaiting QA-016) |
 | research | — | 0 | 0 | Idle |
-| devops | 2 cycles | 8 (SCAFFOLD-001~007 + FIX) | 0 | **Active** (DEVOPS-002, DEVOPS-003) |
+| devops | 1 cycle | 10 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003) | 0 | **Active** (DEVOPS-004) |
 | audit | 1 cycle | 1 (AUDIT-002) | 0 | Idle |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 0 | 5 | OK |
+| Open Errors | 1 | 5 | OK |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
-| Merge Conflicts (last 10) | 0 | 3 | OK |
+| Merge Conflicts (last 10) | 1 | 3 | OK (pnpm-lock.yaml, resolved) |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
 
@@ -33,7 +33,7 @@
 | Package | Target | Current | Delta |
 |---------|--------|---------|-------|
 | `packages/core/` | 90% | 95.2% (branches), 99.69% (stmts), 100% (funcs/lines) | +5% over target |
-| `packages/infra/` | 80% | — | — |
+| `packages/infra/` | 80% | 96.07% (stmts), 81.25% (branches), 96.25% (funcs) | +16% over target |
 | `packages/channels/` | 75% | — | — |
 | `packages/gateway/` | 80% | — | — |
 
@@ -44,7 +44,7 @@
 | Plan Closure | **DONE** | 17 | 21 | 100% |
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
-| C: Infra Sprint | **ACTIVE (0%)** | 42 | — | 0% (INFRA-001+004 in progress, 5 queued) |
+| C: Infra Sprint | **ACTIVE (56%)** | 42 | — | 56% (5 done: INFRA-001/004/CB + DEVOPS-002/003, 3 INFRA remaining + QA/SYNC) |
 | D: Edge Sprint | QUEUED | — | — | — |
 | E: Integration | QUEUED | — | — | — |
 
@@ -66,3 +66,4 @@
 | 40 | quality, arch | 2 (CORE-004, CORE-006) | 0 | **ALL CORE TASKS COMPLETE.** CORE-004+006 merged. 330 tests, 99.69% stmt. Phase B 95%. SYNC-003+QA-013 remaining. |
 | 41 | quality, arch | 0 | 0 | No completions. SYNC-003 4 cycles (metric-alert). QA-013 2 cycles. 330 tests pass. |
 | 42 | dev-infra, devops | 2 (SYNC-003, QA-013) | 0 | **PHASE B COMPLETE → PHASE C KICKOFF.** SYNC-003+QA-013 done. Phase C: INFRA-001+004 assigned, DEVOPS-002/003 assigned. |
+| 43 | dev-infra, devops, arch | 5 (INFRA-001, INFRA-004, COMMON-CB, DEVOPS-002, DEVOPS-003) | 0 | **5 TASKS MERGED.** 419 tests pass. Phase C 56%. INFRA-002/003/005 assigned. SYNC-004+DEVOPS-004 assigned. 1 merge conflict resolved. |

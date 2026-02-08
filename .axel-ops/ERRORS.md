@@ -2,11 +2,13 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 31**: All issues resolved. 0 open errors.
+> **Cycle 43**: 1 open issue (LOW).
 
 ## Open
 
-(none)
+| ID | Severity | Description | Reported By | Date |
+|----|----------|-------------|-------------|------|
+| ERR-064 | LOW | Dev-infra modified root `package.json` (1 line) + `pnpm-lock.yaml` — outside ownership (devops-owned). Minor, resolved via merge. No functional impact. | coord | 0208C43 |
 
 ## Resolved
 
