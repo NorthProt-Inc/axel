@@ -1,20 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ToolCallRequest } from '../../src/types/react.js';
-import type { ToolResult } from '../../src/types/tool.js';
-import {
-	ProviderError,
-	ToolError,
-	TimeoutError,
-	PermanentError,
-} from '../../src/types/errors.js';
-import type { Message } from '../../src/types/message.js';
+import { reactLoop } from '../../src/orchestrator/react-loop.js';
 import type {
 	LlmChatChunk,
 	LlmProvider,
 	ReActConfig,
 	ToolExecutor,
 } from '../../src/orchestrator/types.js';
-import { reactLoop } from '../../src/orchestrator/react-loop.js';
+import { PermanentError, ProviderError, TimeoutError, ToolError } from '../../src/types/errors.js';
+import type { Message } from '../../src/types/message.js';
+import type { ToolCallRequest } from '../../src/types/react.js';
+import type { ToolResult } from '../../src/types/tool.js';
 
 // ─── Helpers ───
 
@@ -58,18 +53,18 @@ function makeToolExecutor(
 	fn?: (call: ToolCallRequest, timeoutMs: number) => Promise<ToolResult>,
 ): ToolExecutor {
 	return {
-		execute: fn ?? (async (call) => ({
-			callId: call.callId,
-			success: true,
-			content: 'tool result',
-			durationMs: 50,
-		})),
+		execute:
+			fn ??
+			(async (call) => ({
+				callId: call.callId,
+				success: true,
+				content: 'tool result',
+				durationMs: 50,
+			})),
 	};
 }
 
-async function collectEvents(
-	gen: AsyncGenerator<unknown>,
-): Promise<unknown[]> {
+async function collectEvents(gen: AsyncGenerator<unknown>): Promise<unknown[]> {
 	const events = [];
 	for await (const event of gen) {
 		events.push(event);
@@ -82,9 +77,7 @@ async function collectEvents(
 describe('reactLoop', () => {
 	describe('happy path', () => {
 		it('should yield message_delta and done for text-only response', async () => {
-			const provider = makeLlmProvider([
-				[{ type: 'text', content: 'Hello world' }],
-			]);
+			const provider = makeLlmProvider([[{ type: 'text', content: 'Hello world' }]]);
 			const executor = makeToolExecutor();
 
 			const events = await collectEvents(
@@ -205,9 +198,7 @@ describe('reactLoop', () => {
 				}),
 			);
 
-			const toolResults = events.filter(
-				(e) => (e as { type: string }).type === 'tool_result',
-			);
+			const toolResults = events.filter((e) => (e as { type: string }).type === 'tool_result');
 			expect(toolResults).toHaveLength(2);
 		});
 	});
@@ -239,9 +230,9 @@ describe('reactLoop', () => {
 				}),
 			);
 
-			const errorEvent = events.find(
-				(e) => (e as { type: string }).type === 'error',
-			) as { type: string; error: { code: string; isRetryable: boolean } } | undefined;
+			const errorEvent = events.find((e) => (e as { type: string }).type === 'error') as
+				| { type: string; error: { code: string; isRetryable: boolean } }
+				| undefined;
 			expect(errorEvent).toBeDefined();
 			expect(errorEvent?.error.code).toBe('TOOL');
 			expect(errorEvent?.error.isRetryable).toBe(true);
@@ -277,9 +268,9 @@ describe('reactLoop', () => {
 				}),
 			);
 
-			const errorEvent = events.find(
-				(e) => (e as { type: string }).type === 'error',
-			) as { type: string; error: { isRetryable: boolean } } | undefined;
+			const errorEvent = events.find((e) => (e as { type: string }).type === 'error') as
+				| { type: string; error: { isRetryable: boolean } }
+				| undefined;
 			expect(errorEvent).toBeDefined();
 			expect(errorEvent?.error.isRetryable).toBe(false);
 
@@ -321,8 +312,16 @@ describe('reactLoop', () => {
 
 		it('should handle permanent LLM provider error — stop loop with error', async () => {
 			const provider: LlmProvider = {
-				async *chat(_params) {
-					throw new ProviderError('model not found', 'anthropic', false);
+				chat(_params) {
+					return {
+						[Symbol.asyncIterator]() {
+							return {
+								next() {
+									return Promise.reject(new ProviderError('model not found', 'anthropic', false));
+								},
+							};
+						},
+					};
 				},
 			};
 			const executor = makeToolExecutor();
@@ -337,23 +336,29 @@ describe('reactLoop', () => {
 				}),
 			);
 
-			const errorEvent = events.find(
-				(e) => (e as { type: string }).type === 'error',
-			) as { type: string; error: { code: string } } | undefined;
+			const errorEvent = events.find((e) => (e as { type: string }).type === 'error') as
+				| { type: string; error: { code: string } }
+				| undefined;
 			expect(errorEvent).toBeDefined();
 			expect(errorEvent?.error.code).toBe('PROVIDER');
 
 			// No message_delta should appear
-			const messageDelta = events.find(
-				(e) => (e as { type: string }).type === 'message_delta',
-			);
+			const messageDelta = events.find((e) => (e as { type: string }).type === 'message_delta');
 			expect(messageDelta).toBeUndefined();
 		});
 
 		it('should handle unknown errors by wrapping in AxelErrorInfo', async () => {
 			const provider: LlmProvider = {
-				async *chat(_params) {
-					throw new Error('something unexpected');
+				chat(_params) {
+					return {
+						[Symbol.asyncIterator]() {
+							return {
+								next() {
+									return Promise.reject(new Error('something unexpected'));
+								},
+							};
+						},
+					};
 				},
 			};
 			const executor = makeToolExecutor();
@@ -368,9 +373,9 @@ describe('reactLoop', () => {
 				}),
 			);
 
-			const errorEvent = events.find(
-				(e) => (e as { type: string }).type === 'error',
-			) as { type: string; error: { code: string; message: string } } | undefined;
+			const errorEvent = events.find((e) => (e as { type: string }).type === 'error') as
+				| { type: string; error: { code: string; message: string } }
+				| undefined;
 			expect(errorEvent).toBeDefined();
 			expect(errorEvent?.error.code).toBe('PERMANENT');
 			expect(errorEvent?.error.message).toContain('something unexpected');
@@ -388,9 +393,7 @@ describe('reactLoop', () => {
 			};
 			// Always returns a tool call — never a text response
 			const provider = makeLlmProvider(
-				Array.from({ length: 20 }, () => [
-					{ type: 'tool_call' as const, content: toolCall },
-				]),
+				Array.from({ length: 20 }, () => [{ type: 'tool_call' as const, content: toolCall }]),
 			);
 			const executor = makeToolExecutor();
 
@@ -404,9 +407,7 @@ describe('reactLoop', () => {
 				}),
 			);
 
-			const toolResults = events.filter(
-				(e) => (e as { type: string }).type === 'tool_result',
-			);
+			const toolResults = events.filter((e) => (e as { type: string }).type === 'tool_result');
 			expect(toolResults.length).toBeLessThanOrEqual(3);
 
 			// Should yield a max iteration exceeded error
@@ -455,9 +456,7 @@ describe('reactLoop', () => {
 
 	describe('done event', () => {
 		it('should always end with a done event containing token usage', async () => {
-			const provider = makeLlmProvider([
-				[{ type: 'text', content: 'Hi' }],
-			]);
+			const provider = makeLlmProvider([[{ type: 'text', content: 'Hi' }]]);
 			const executor = makeToolExecutor();
 
 			const events = await collectEvents(
@@ -504,9 +503,7 @@ describe('reactLoop', () => {
 		});
 
 		it('should handle messages being empty', async () => {
-			const provider = makeLlmProvider([
-				[{ type: 'text', content: 'No context' }],
-			]);
+			const provider = makeLlmProvider([[{ type: 'text', content: 'No context' }]]);
 			const executor = makeToolExecutor();
 
 			const events = await collectEvents(
@@ -551,9 +548,9 @@ describe('reactLoop', () => {
 			);
 
 			// tool_result should still be yielded (with success=false)
-			const toolResult = events.find(
-				(e) => (e as { type: string }).type === 'tool_result',
-			) as { result: ToolResult } | undefined;
+			const toolResult = events.find((e) => (e as { type: string }).type === 'tool_result') as
+				| { result: ToolResult }
+				| undefined;
 			expect(toolResult).toBeDefined();
 			expect(toolResult?.result.success).toBe(false);
 		});
