@@ -12,6 +12,9 @@
 | FIX-005 | P1 | arch | QA-004 standalone fixes not requiring FIX-003: ToolDefinition → core/types extraction, migration direction text fix | — | 0208 |
 | ADR-017 | P1 | arch | Svelte 5 WebChat SPA decision ADR (based on RES-004) | — | 0208 |
 | ADR-018 | P1 | arch | Token counting strategy ADR: Anthropic SDK countTokens + per-model strategy (based on RES-002) | — | 0208 |
+| FIX-006 | P0 | arch | QA-005 security HIGH issues: auth strategy ADR needed (JWT vs static bearer), WS auth, command args validation, webhook signatures, prompt injection defense, migration subprocess TS-only | FIX-001 | 0208 |
+| ADR-019 | P0 | arch | Authentication strategy ADR — JWT vs static bearer for single-user MVP, token transport, WS auth | FIX-006 | 0208 |
+| FIX-007 | P2 | arch | QA-005 security LOW issues: docker/node in default allowlist, credential redaction in logs, missing security test cases | FIX-006 | 0208 |
 
 ## In Progress
 
@@ -39,3 +42,4 @@
 | QA-002 | quality | 0207T2133 | 20/23 claude_reports mapped, 3 MEDIUM gaps |
 | QA-003 | quality | 0208T0037 | 5 HIGH, 4 MEDIUM, 1 LOW issues found (feasibility review) |
 | QA-004 | quality | 0208T0106 | 2 HIGH, 2 MEDIUM, 1 LOW issues found (cross-reference integrity) |
+| QA-005 | quality | 0208T0212 | 3 HIGH, 4 MEDIUM, 3 LOW issues found (security design review) |

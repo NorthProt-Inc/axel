@@ -15,3 +15,7 @@
 {"ts":"0208T0200","from":"coord","type":"escalate","ref":"FIX-001,FIX-002","msg":"CRITICAL: Arch Division 3 cycles (>1.5h) 무보고. Constitution §6 3+ cycles threshold 도달. worktree axel-wt-arch 수동 검사 및 에이전트 재시작 필요. 전체 파이프라인 blocked."}
 {"ts":"0208T0200","from":"coord","type":"escalate","ref":"ERRORS","msg":"Open errors 23건 (threshold 5). 4.6x threshold 초과. Arch 재가동 없이는 감소 불가."}
 {"ts":"0208T0200","from":"coord","type":"broadcast","msg":"Division 배정: Research/Quality 대기 중 — Arch 해소 전까지 신규 배정 불가. FIX-005(P1) 생성: QA-004 독립 수정건(ToolDefinition type, migration direction). Arch 재가동 시 FIX-001/002 → FIX-005 → FIX-003 순서로 처리."}
+{"ts":"0208T0300","from":"coord","type":"broadcast","msg":"Cycle 5. QA-005 security design review 완료(자발적): 10건 신규 이슈(3 HIGH, 4 MEDIUM, 3 LOW). ERR-024~033 등록. FIX-006(P0 보안), ADR-019(인증 전략), FIX-007(P2 보안 LOW) 생성. Arch 4 cycles 무보고. Open errors: 33 (6.6x threshold). 전 9 Queued 태스크 Arch 소유."}
+{"ts":"0208T0300","from":"coord","type":"escalate","ref":"FIX-001,FIX-002","msg":"CRITICAL (4 cycles, >2h): Arch Division 완전 정지. Constitution §6 위반. 전체 파이프라인 blocked — 33 errors, 9 queued tasks 전부 Arch 의존. 수동 재시작 필수. 권장 순서: FIX-005(독립) → FIX-001 → FIX-002 → FIX-003 → FIX-006."}
+{"ts":"0208T0300","from":"coord","type":"escalate","ref":"ERR-024,ERR-025,ERR-026","msg":"보안 설계 갭: 인증 모델 미정(ERR-024), WS 무인증(ERR-025), 커맨드 인자 미검증(ERR-026). ADR-019 필요. Arch 재가동 후 FIX-006에서 해소."}
+{"ts":"0208T0300","from":"coord","type":"escalate","ref":"ERRORS","msg":"Open errors 33건 (threshold 5, 6.6x 초과). Quality 발견 속도 >> Arch 수정 속도. Arch 없이 감소 불가."}

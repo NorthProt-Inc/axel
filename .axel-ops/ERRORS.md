@@ -29,6 +29,16 @@
 | ERR-021 | **HIGH** | quality | 0208 | Migration direction REVERSED in Section 5.2 line 1427: says 'embedding-001→text-embedding-004' but text-embedding-004 is deprecated. Contradicts Section 11 and ERR-011. | FIX-003 |
 | ERR-022 | MEDIUM | quality | 0208 | EmbeddingService.embed() singular vs LlmProvider.embed() plural signature inconsistency. ContextAssembler usage unclear. | FIX-004 |
 | ERR-023 | MEDIUM | quality | 0208 | Triple Layer numbering confusion: Package L0-L7 labels vs Turtle Stack Layer 0-10 vs Memory Layer 0-5. Package labels don't map to Turtle layers. | FIX-004 |
+| ERR-024 | **HIGH** | quality | 0208 | Gateway auth model underspecified: no JWT details (algorithm, secret mgmt, expiry/refresh, token transport). No ADR for auth strategy. | FIX-006 |
+| ERR-025 | **HIGH** | quality | 0208 | WebSocket endpoint has no authentication/authorization. Unauthenticated WS allows streaming conversation data. | FIX-006 |
+| ERR-026 | **HIGH** | quality | 0208 | executeCommandTool validates command name but NOT args array or cwd path. Allows malicious arguments (e.g., git push --force) and path traversal via cwd. | FIX-006 |
+| ERR-027 | MEDIUM | quality | 0208 | SecurityConfigSchema missing: JWT config, CORS origins, HTTPS enforcement, session timeout, max body size, webhook secrets, per-route rate limiting. | FIX-006 |
+| ERR-028 | MEDIUM | quality | 0208 | Webhook endpoints (Telegram/Discord) lack signature verification — forged messages accepted as legitimate input. Prompt injection vector. | FIX-006 |
+| ERR-029 | MEDIUM | quality | 0208 | Prompt injection defense relies solely on regex blocklist + wrapping. No system prompt instruction spec, no output sanitization, no canary tokens. | FIX-006 |
+| ERR-030 | MEDIUM | quality | 0208 | Migration chromadb-extractor.ts uses Python subprocess — violates ADR-001 TS single stack and reintroduces shell injection risk (claude_reports #01). | FIX-006 |
+| ERR-031 | LOW | quality | 0208 | Default command allowlist includes docker/docker-compose/node — privilege escalation risk. Should follow least-privilege principle. | FIX-007 |
+| ERR-032 | LOW | quality | 0208 | DB/Redis connection URLs contain credentials; no redaction spec for error logs. interaction_logs.error could leak connection strings. | FIX-007 |
+| ERR-033 | LOW | quality | 0208 | Security test cases (Section 6.4) missing: JWT expiry, WS auth, webhook signature, SQL injection, rate limiting, CORS preflight tests. | FIX-007 |
 
 ## Resolved
 
