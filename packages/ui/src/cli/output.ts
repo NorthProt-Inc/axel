@@ -31,10 +31,7 @@ export function renderStreamEnd(): string {
 	return '\n';
 }
 
-export function renderToolCall(
-	toolName: string,
-	input: Record<string, unknown>,
-): string {
+export function renderToolCall(toolName: string, input: Record<string, unknown>): string {
 	const theme = createCliTheme();
 	const inputSummary = Object.entries(input)
 		.map(([k, v]) => `${k}=${JSON.stringify(v)}`)
@@ -42,11 +39,7 @@ export function renderToolCall(
 	return theme.dim(`  ⚙ ${toolName}(${inputSummary})`);
 }
 
-export function renderToolResult(
-	toolName: string,
-	success: boolean,
-	output: string,
-): string {
+export function renderToolResult(toolName: string, success: boolean, output: string): string {
 	const theme = createCliTheme();
 	const indicator = success ? theme.success('✓') : theme.error('✗');
 	const truncated =
