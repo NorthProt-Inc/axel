@@ -169,6 +169,53 @@ describe('Gateway WebSocket — First-Message Auth (ADR-019)', () => {
 		});
 	});
 
+	describe('WS message size limit (AUD-079)', () => {
+		it('closes connection with 1009 when authenticated message exceeds 64KB', async () => {
+			const ws = await connectWs(httpServer);
+
+			// Authenticate first
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+
+			const closePromise = waitForClose(ws);
+
+			// Send a message larger than 64KB
+			const largeContent = 'a'.repeat(70_000);
+			ws.send(JSON.stringify({ type: 'chat', content: largeContent, channelId: 'webchat' }));
+
+			const { code } = await closePromise;
+			expect(code).toBe(1009); // Message Too Big
+		});
+
+		it('accepts messages under 64KB', async () => {
+			const ws = await connectWs(httpServer);
+
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+
+			// Send a message under 64KB
+			const normalContent = 'a'.repeat(1000);
+			ws.send(JSON.stringify({ type: 'chat', content: normalContent, channelId: 'webchat' }));
+			const msg = await waitForMessage(ws);
+
+			// Should get a response (error about missing handler or actual response), not disconnection
+			expect(msg).toBeDefined();
+			ws.close();
+		});
+
+		it('rejects oversized unauthenticated messages with 1009', async () => {
+			const ws = await connectWs(httpServer);
+			const closePromise = waitForClose(ws);
+
+			// Send an oversized auth message before authenticating
+			const largeToken = 'a'.repeat(70_000);
+			ws.send(JSON.stringify({ type: 'auth', token: largeToken }));
+
+			const { code } = await closePromise;
+			expect(code).toBe(1009);
+		});
+	});
+
 	describe('close behavior', () => {
 		it('closes cleanly when server stops', async () => {
 			const ws = await connectWs(httpServer);

@@ -107,7 +107,7 @@ export function createHandleMessage(
 					userId: message.userId,
 					channelId: message.channelId,
 					content: message.content,
-					timestamp: new Date(),
+					timestamp: new Date(message.timestamp),
 				},
 				sendCapture,
 			);

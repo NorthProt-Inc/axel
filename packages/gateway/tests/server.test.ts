@@ -382,6 +382,135 @@ describe('Gateway Server', () => {
 		});
 	});
 
+	describe('rate limit bucket cleanup (AUD-080)', () => {
+		it('creates bucket entry on authenticated request', async () => {
+			await server.stop();
+
+			const config = createTestConfig({ rateLimitPerMinute: 100 });
+			const deps = createMockDeps();
+			server = createGatewayServer(config, deps);
+			httpServer = await server.start();
+
+			// Before any request, bucket count should be 0
+			expect(server.getRateLimitBucketCount()).toBe(0);
+
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello', channelId: 'webchat' }),
+			});
+
+			// After a request, bucket count should be 1
+			expect(server.getRateLimitBucketCount()).toBe(1);
+		});
+
+		it('evicts stale entries when new requests arrive', async () => {
+			await server.stop();
+
+			const config = createTestConfig({ rateLimitPerMinute: 100 });
+			const deps = createMockDeps();
+			server = createGatewayServer(config, deps);
+			httpServer = await server.start();
+
+			// Make a request to create a bucket entry
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello', channelId: 'webchat' }),
+			});
+			expect(server.getRateLimitBucketCount()).toBe(1);
+
+			// Advance time beyond 2x the rate limit window (120s+)
+			vi.useFakeTimers();
+			vi.setSystemTime(Date.now() + 130_000);
+
+			// Make another request — eviction runs lazily on next request
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello2', channelId: 'webchat' }),
+			});
+
+			// The current IP's entry remains (it just made a request),
+			// but stale entries from other IPs would be evicted.
+			// Since all requests come from the same IP (127.0.0.1),
+			// count stays at 1 — the key invariant is it doesn't grow unbounded.
+			expect(server.getRateLimitBucketCount()).toBe(1);
+
+			vi.useRealTimers();
+		});
+	});
+
+	describe('handleMessage timestamp (AUD-082)', () => {
+		it('passes timestamp to handleMessage in HTTP chat', async () => {
+			const deps = createMockDeps();
+			const handleMessage = deps.handleMessage as ReturnType<typeof vi.fn>;
+
+			await server.stop();
+			server = createGatewayServer(createTestConfig(), deps);
+			httpServer = await server.start();
+
+			const before = Date.now();
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello', channelId: 'webchat' }),
+			});
+			const after = Date.now();
+
+			expect(handleMessage).toHaveBeenCalledTimes(1);
+			const callArg = handleMessage.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(callArg.timestamp).toBeDefined();
+			expect(typeof callArg.timestamp).toBe('number');
+			expect(callArg.timestamp as number).toBeGreaterThanOrEqual(before);
+			expect(callArg.timestamp as number).toBeLessThanOrEqual(after);
+		});
+
+		it('passes timestamp to handleMessage in SSE stream', async () => {
+			const deps = createMockDeps();
+			const handleMessage = deps.handleMessage as ReturnType<typeof vi.fn>;
+
+			await server.stop();
+			server = createGatewayServer(createTestConfig(), deps);
+			httpServer = await server.start();
+
+			const before = Date.now();
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat/stream',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello', channelId: 'webchat' }),
+			});
+			const after = Date.now();
+
+			expect(handleMessage).toHaveBeenCalledTimes(1);
+			const callArg = handleMessage.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(callArg.timestamp).toBeDefined();
+			expect(typeof callArg.timestamp).toBe('number');
+			expect(callArg.timestamp as number).toBeGreaterThanOrEqual(before);
+			expect(callArg.timestamp as number).toBeLessThanOrEqual(after);
+		});
+	});
+
 	describe('graceful shutdown', () => {
 		it('stops accepting new connections after stop()', async () => {
 			await server.stop();

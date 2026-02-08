@@ -373,5 +373,29 @@ describe('INTEG-003: Gateway → Orchestrator Integration', () => {
 			expect(msg.type).toBe('error');
 			ws.close();
 		});
+
+		it('passes timestamp to handleMessage in WS chat (AUD-082)', async () => {
+			const ws = await connectAndAuth(httpServer);
+
+			const before = Date.now();
+			ws.send(JSON.stringify({ type: 'chat', content: 'Hello', channelId: 'webchat' }));
+
+			// Wait for done message
+			const msg = await waitForMessage(ws);
+			const after = Date.now();
+
+			expect(['message_delta', 'done', 'session_info']).toContain(msg.type);
+
+			// Verify handleMessage was called with timestamp
+			expect(handleMessage).toHaveBeenCalled();
+			const lastCall = handleMessage.mock.calls[handleMessage.mock.calls.length - 1];
+			const callArg = lastCall?.[0] as Record<string, unknown>;
+			expect(callArg.timestamp).toBeDefined();
+			expect(typeof callArg.timestamp).toBe('number');
+			expect(callArg.timestamp as number).toBeGreaterThanOrEqual(before);
+			expect(callArg.timestamp as number).toBeLessThanOrEqual(after);
+
+			ws.close();
+		});
 	});
 });
