@@ -3,7 +3,14 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
-	"exports": {},
+	"exports": {
+		"./types": "./src/types/index.ts",
+		"./memory": "./src/memory/index.ts",
+		"./decay": "./src/decay/index.ts",
+		"./context": "./src/context/index.ts",
+		"./persona": "./src/persona/index.ts",
+		"./orchestrator": "./src/orchestrator/index.ts"
+	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
