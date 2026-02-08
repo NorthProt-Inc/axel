@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 75 (CTO update)**: FIX-MIGRATION-001 done (devops). ERR-082/083/084 resolved. FIX-MIGRATION-002 (arch) in progress (1 cycle).
+> **Cycle 77 (CTO update)**: FIX-MIGRATION-002 done (CTO override, arch 3 cycles stalled). ERR-085 resolved. 0 queued, 0 in progress, 0 open errors.
 
 ## Queued
 
@@ -10,9 +10,7 @@
 
 ## In Progress
 
-| ID | Priority | Division | Task | Started |
-|----|----------|----------|------|---------|
-| FIX-MIGRATION-002 | P2 | arch | migration-strategy.md 업데이트: 007/008 마이그레이션 + messages 컬럼 변경사항 문서화. ERR-085. | 0208C74 |
+(none)
 
 ## Cancelled
 
@@ -153,3 +151,4 @@
 | HARDEN-006 | dev-edge | 0208C70 | QA-020-M3: Discord DEFERRED fire-and-forget pattern. DiscordFollowUp DI callback. discordApplicationId config. 6 tests. TDD RED→GREEN. |
 | HARDEN-007 | dev-edge | 0208C70 | QA-020-L3 + AUD-094: SSE security headers (X-Content-Type-Options, X-Frame-Options) + startedAt moved to start() listen callback. 4 tests. TDD RED→GREEN. |
 | FIX-MIGRATION-001 | devops | 0208C75 | Migration fixes: (1) 002 messages created_at+token_count, (2) 007 ALTER COLUMN conditional DO block, (3) 008 session_summaries table. 845 tests, 15 migrate tests. ERR-082/083/084 resolved. |
+| FIX-MIGRATION-002 | coord (CTO) | 0208C77 | migration-strategy.md 업데이트: (1) 디렉토리 구조 007/008 추가, (2) messages 테이블 created_at+token_count 반영, (3) 007/008 migration 문서화, (4) Execution Order 001-008. CTO override (arch 3 cycles stalled). ERR-085 resolved. |

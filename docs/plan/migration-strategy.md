@@ -21,7 +21,7 @@ This document defines the migration framework and the initial schema migrations.
 ### Directory Structure
 
 ```
-packages/infra/src/db/migrations/
+tools/migrate/migrations/
 ├── 001_extensions.sql
 ├── 001_extensions.down.sql
 ├── 002_episodic_memory.sql
@@ -34,6 +34,10 @@ packages/infra/src/db/migrations/
 ├── 005_meta_memory.down.sql
 ├── 006_interaction_logs.sql
 ├── 006_interaction_logs.down.sql
+├── 007_fix_sessions_schema.sql
+├── 007_fix_sessions_schema.down.sql
+├── 008_session_summaries.sql
+├── 008_session_summaries.down.sql
 └── README.md
 ```
 
@@ -132,6 +136,8 @@ CREATE TABLE messages (
     content           TEXT NOT NULL,
     channel_id        TEXT,
     timestamp         TIMESTAMPTZ NOT NULL,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    token_count       INTEGER NOT NULL DEFAULT 0,
     emotional_context TEXT NOT NULL DEFAULT 'neutral',
     metadata          JSONB NOT NULL DEFAULT '{}'::jsonb,
 
@@ -357,6 +363,108 @@ CREATE INDEX idx_interaction_logs_session ON interaction_logs (session_id, turn_
 DROP TABLE IF EXISTS interaction_logs;
 ```
 
+### 007: Fix Sessions Schema
+
+**`007_fix_sessions_schema.sql` (up)**
+```sql
+-- Migration 007: Fix sessions schema drift
+-- Adds missing last_activity_at column, fixes channel_history type if needed
+-- Applied conditionally: safe to run on fresh or existing databases
+
+-- Add missing column
+ALTER TABLE sessions
+  ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+-- Fix channel_history: JSONB → TEXT[] (only if column type is JSONB)
+-- Uses DO $$ block to conditionally convert, avoiding errors on already-correct schemas
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'sessions'
+      AND column_name = 'channel_history'
+      AND data_type = 'jsonb'
+  ) THEN
+    ALTER TABLE sessions ADD COLUMN channel_history_new TEXT[] NOT NULL DEFAULT '{}'::text[];
+    UPDATE sessions SET channel_history_new = CASE
+      WHEN jsonb_typeof(channel_history) = 'array' THEN
+        ARRAY(SELECT jsonb_array_elements_text(channel_history))
+      ELSE '{}'::text[] END;
+    ALTER TABLE sessions DROP COLUMN channel_history;
+    ALTER TABLE sessions RENAME COLUMN channel_history_new TO channel_history;
+  END IF;
+END $$;
+
+-- Recreate index to include last_activity_at
+DROP INDEX IF EXISTS idx_sessions_user;
+CREATE INDEX idx_sessions_user ON sessions (user_id, ended_at NULLS FIRST, last_activity_at DESC);
+```
+
+**`007_fix_sessions_schema.down.sql`**
+```sql
+-- Rollback 007: Revert sessions schema fix
+DROP INDEX IF EXISTS idx_sessions_user;
+CREATE INDEX idx_sessions_user ON sessions (user_id, ended_at NULLS FIRST, started_at DESC);
+
+-- Revert channel_history: TEXT[] → JSONB (only if column type is ARRAY)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'sessions'
+      AND column_name = 'channel_history'
+      AND data_type = 'ARRAY'
+  ) THEN
+    ALTER TABLE sessions ADD COLUMN channel_history_old JSONB NOT NULL DEFAULT '[]'::jsonb;
+    UPDATE sessions SET channel_history_old = to_jsonb(channel_history);
+    ALTER TABLE sessions DROP COLUMN channel_history;
+    ALTER TABLE sessions RENAME COLUMN channel_history_old TO channel_history;
+  END IF;
+END $$;
+
+ALTER TABLE sessions DROP COLUMN IF EXISTS last_activity_at;
+```
+
+> **Note**: Migration 007 exists because the original 002 migration was initially deployed
+> without `last_activity_at` and with `channel_history JSONB`. FIX-SCHEMA-001 (C62) updated
+> the 002 source to include these columns for fresh installs, but existing databases need
+> 007 to patch the running schema. The DO $$ conditional block ensures idempotency.
+
+### 008: Session Summaries
+
+**`008_session_summaries.sql` (up)**
+```sql
+-- Migration 008: Session Summaries table
+-- Stores AI-generated session summaries for quick context retrieval
+
+CREATE TABLE session_summaries (
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    session_id     TEXT NOT NULL REFERENCES sessions(session_id) ON DELETE CASCADE,
+    summary        TEXT,
+    key_topics     JSONB NOT NULL DEFAULT '[]'::jsonb,
+    emotional_tone TEXT,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (session_id)
+);
+
+CREATE INDEX idx_session_summaries_session ON session_summaries (session_id);
+CREATE INDEX idx_session_summaries_topics ON session_summaries USING gin (key_topics);
+CREATE INDEX idx_session_summaries_created ON session_summaries (created_at DESC);
+```
+
+**`008_session_summaries.down.sql`**
+```sql
+-- Rollback 008: Drop session_summaries table
+DROP TABLE IF EXISTS session_summaries;
+```
+
+> **Note**: Session summaries were previously stored inline in the `sessions` table
+> (summary, key_topics, emotional_tone columns). Migration 008 extracts these into a
+> dedicated table with a 1:1 FK relationship, enabling independent lifecycle management
+> and efficient retrieval without loading full session data.
+
 ---
 
 ## Data Migration: axnmihn → Axel
@@ -367,7 +475,7 @@ See v2.0 Plan Section 5 for full details.
 ### Execution Order
 
 ```
-1. Run schema migrations (001-006)
+1. Run schema migrations (001-008)
 2. Run data migration tool:
    a. SQLite sessions/messages → PostgreSQL sessions, messages
    b. ChromaDB vectors → PostgreSQL memories (re-embed with gemini-embedding-001)

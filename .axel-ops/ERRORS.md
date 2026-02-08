@@ -2,18 +2,17 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 75 (CTO update)**: 1 error open (1 MEDIUM). ERR-082/083/084 resolved by FIX-MIGRATION-001 (devops). ERR-085 pending (FIX-MIGRATION-002, arch).
+> **Cycle 77 (CTO update)**: 0 errors open. ERR-085 resolved by FIX-MIGRATION-002 (CTO override).
 
 ## Open
 
-| ID | Description | Severity | Discovered |
-|----|-------------|----------|------------|
-| ERR-085 | `migration-strategy.md` 미반영: 007/008 마이그레이션, messages 컬럼 변경사항 문서화 안 됨. | MEDIUM | Runtime bootstrap |
+(none)
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-085 | `migration-strategy.md` 업데이트: 디렉토리 구조, messages 컬럼, 007/008 migration, Execution Order 반영. | FIX-MIGRATION-002 (coord CTO override) | 0208C77 |
 | ERR-082 | Migration 002 messages 테이블에 `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` + `token_count INTEGER NOT NULL DEFAULT 0` 컬럼 추가. | FIX-MIGRATION-001 (devops) | 0208C75 |
 | ERR-083 | Migration 007 ALTER COLUMN TYPE USING subquery → `DO $$` conditional block 방식으로 재작성 (PG 호환). | FIX-MIGRATION-001 (devops) | 0208C75 |
 | ERR-084 | 008_session_summaries.sql 신규 migration 생성. session_summaries 테이블 + down migration. | FIX-MIGRATION-001 (devops) | 0208C75 |
