@@ -1,7 +1,10 @@
 /**
  * Chat state store using Svelte 5 runes.
  * Manages messages, WebSocket connection, and session state.
+ * Pure logic delegated to chat-logic.ts for testability.
  */
+
+import { parseWsMessage, applyChunk, applyDone, createUserMessage } from './chat-logic.js';
 
 export interface ChatMessage {
 	readonly id: string;
@@ -36,12 +39,7 @@ export const streaming = {
 };
 
 export function sendMessage(content: string): void {
-	const userMsg: ChatMessage = {
-		id: crypto.randomUUID(),
-		role: 'user',
-		content,
-		timestamp: new Date(),
-	};
+	const userMsg = createUserMessage(content);
 	messageList = [...messageList, userMsg];
 
 	if (wsConnection?.readyState === WebSocket.OPEN) {
@@ -58,31 +56,13 @@ export function connectWebSocket(url: string): void {
 	const ws = new WebSocket(url);
 
 	ws.addEventListener('message', (event) => {
-		const data = JSON.parse(event.data as string) as { type: string; content?: string; sessionId?: string };
-		if (data.type === 'chunk' && data.content) {
-			const last = messageList[messageList.length - 1];
-			if (last?.role === 'assistant' && last.streaming) {
-				messageList = [
-					...messageList.slice(0, -1),
-					{ ...last, content: last.content + data.content },
-				];
-			} else {
-				messageList = [...messageList, {
-					id: crypto.randomUUID(),
-					role: 'assistant',
-					content: data.content,
-					timestamp: new Date(),
-					streaming: true,
-				}];
-			}
-		} else if (data.type === 'done') {
-			const last = messageList[messageList.length - 1];
-			if (last?.role === 'assistant' && last.streaming) {
-				messageList = [
-					...messageList.slice(0, -1),
-					{ ...last, streaming: false },
-				];
-			}
+		const parsed = parseWsMessage(event.data as string);
+		if (!parsed) return;
+
+		if (parsed.type === 'chunk') {
+			messageList = applyChunk(messageList, parsed.content, crypto.randomUUID());
+		} else if (parsed.type === 'done') {
+			messageList = applyDone(messageList);
 			isStreaming = false;
 		}
 	});

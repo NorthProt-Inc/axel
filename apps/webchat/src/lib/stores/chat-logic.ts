@@ -19,10 +19,10 @@ export type WsMessage = WsChunkMessage | WsDoneMessage;
 export function parseWsMessage(raw: string): WsMessage | null {
 	try {
 		const data = JSON.parse(raw) as Record<string, unknown>;
-		if (data['type'] === 'chunk' && typeof data['content'] === 'string') {
-			return { type: 'chunk', content: data['content'] };
+		if (data.type === 'chunk' && typeof data.content === 'string') {
+			return { type: 'chunk', content: data.content };
 		}
-		if (data['type'] === 'done') {
+		if (data.type === 'done') {
 			return { type: 'done' };
 		}
 		return null;
@@ -38,10 +38,7 @@ export function applyChunk(
 ): ChatMessage[] {
 	const last = messages[messages.length - 1];
 	if (last?.role === 'assistant' && last.streaming) {
-		return [
-			...messages.slice(0, -1),
-			{ ...last, content: last.content + content },
-		];
+		return [...messages.slice(0, -1), { ...last, content: last.content + content }];
 	}
 	return [
 		...messages,
@@ -58,10 +55,7 @@ export function applyChunk(
 export function applyDone(messages: readonly ChatMessage[]): ChatMessage[] {
 	const last = messages[messages.length - 1];
 	if (last?.role === 'assistant' && last.streaming) {
-		return [
-			...messages.slice(0, -1),
-			{ ...last, streaming: false },
-		];
+		return [...messages.slice(0, -1), { ...last, streaming: false }];
 	}
 	return [...messages];
 }
