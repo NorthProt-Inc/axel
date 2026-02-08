@@ -2,27 +2,27 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 74
+## Current Cycle: 75
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 65 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 | 4 (all CTO override) | Idle |
+| coord | — | 66 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 | 4 (all CTO override) | In Progress (FIX-MIGRATION-002, 1 cycle) |
 | dev-core | 1 cycle | 8 | 0 | Idle |
 | dev-infra | 1 cycle | 11 (+1: FIX-HARDEN-001) | 0 | Idle |
 | dev-edge | 1 cycle | 21 (+5: HARDEN-003/004/005/006/007) | 0 | Idle (all done) |
 | quality | 1 cycle | 7 (+1: QA-020) | 1 (QA-012, cancelled C39) | Idle |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 16 | 0 | Idle |
+| devops | 1 cycle | 17 (+1: FIX-MIGRATION-001) | 0 | Idle |
 | audit | 1 cycle | 4 | 0 | Idle |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 4 | 5 | WARN |
+| Open Errors | 1 | 5 | OK |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
@@ -70,3 +70,4 @@
 | 72 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
 | 73 | (none) | 0 | 0 | **STEADY STATE.** Drift detection CLEAN. Roadmap exhausted. Awaiting next direction. |
 | 74 | devops, arch | 0 | 4 (ERR-082~085) | **RUNTIME BOOTSTRAP FIX.** 4 migration errors. FIX-MIGRATION-001 (devops), FIX-MIGRATION-002 (arch) assigned. |
+| 75 | devops, arch | 1 (FIX-MIGRATION-001) | 0 (3 resolved) | **1 TASK DONE.** Migration 002/007/008 repaired. 845 tests. ERR-082/083/084 resolved. Open errors 4→1. |

@@ -2,18 +2,21 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 74 (CTO update)**: 4 errors open (3 HIGH, 1 MEDIUM). ERR-082~085 discovered during runtime bootstrap by Mark(Human). Migration files need repair. Fix tasks created: FIX-MIGRATION-001 (devops), FIX-MIGRATION-002 (arch).
+> **Cycle 75 (CTO update)**: 1 error open (1 MEDIUM). ERR-082/083/084 resolved by FIX-MIGRATION-001 (devops). ERR-085 pending (FIX-MIGRATION-002, arch).
 
 ## Open
 
 | ID | Description | Severity | Discovered |
 |----|-------------|----------|------------|
-| ERR-082 | Migration 002 schema drift: `messages` 테이블에 `created_at`, `token_count` 컬럼 정의 없음. `redis-working-memory.ts`는 `created_at` 사용, `pg-episodic-memory.ts`는 `timestamp` 사용 — 컬럼명 불일치. DB에는 docker exec로 둘 다 존재하나 migration 파일 미반영. | HIGH | Runtime bootstrap |
-| ERR-083 | Migration 007 SQL 문법 에러: `ALTER COLUMN TYPE ... USING` 절에 subquery 사용 불가 (PG 제약). docker exec로 우회 적용됨. migration 파일 자체는 깨진 상태. | HIGH | Runtime bootstrap |
-| ERR-084 | `session_summaries` 테이블 migration 파일 부재. docker exec로 생성됨. 008 migration 파일 필요. | HIGH | Runtime bootstrap |
 | ERR-085 | `migration-strategy.md` 미반영: 007/008 마이그레이션, messages 컬럼 변경사항 문서화 안 됨. | MEDIUM | Runtime bootstrap |
 
 ## Resolved
+
+| ID | Resolution | Resolved By | Date |
+|----|------------|-------------|------|
+| ERR-082 | Migration 002 messages 테이블에 `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` + `token_count INTEGER NOT NULL DEFAULT 0` 컬럼 추가. | FIX-MIGRATION-001 (devops) | 0208C75 |
+| ERR-083 | Migration 007 ALTER COLUMN TYPE USING subquery → `DO $$` conditional block 방식으로 재작성 (PG 호환). | FIX-MIGRATION-001 (devops) | 0208C75 |
+| ERR-084 | 008_session_summaries.sql 신규 migration 생성. session_summaries 테이블 + down migration. | FIX-MIGRATION-001 (devops) | 0208C75 |
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|

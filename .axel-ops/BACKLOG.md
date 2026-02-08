@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 74 (CTO update)**: 4 runtime bootstrap errors discovered (ERR-082~085). Migration files need repair. 2 fix tasks created and assigned.
+> **Cycle 75 (CTO update)**: FIX-MIGRATION-001 done (devops). ERR-082/083/084 resolved. FIX-MIGRATION-002 (arch) in progress (1 cycle).
 
 ## Queued
 
@@ -12,7 +12,6 @@
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-MIGRATION-001 | P1 | devops | Fix migration files: (1) 002 messages 테이블에 `created_at TIMESTAMPTZ DEFAULT NOW()`, `token_count INTEGER DEFAULT 0` 컬럼 추가. (2) 007 ALTER COLUMN TYPE USING subquery → PG 호환 방식 재작성. (3) 008 migration 신규: `session_summaries` 테이블. ERR-082/083/084. | 0208C74 |
 | FIX-MIGRATION-002 | P2 | arch | migration-strategy.md 업데이트: 007/008 마이그레이션 + messages 컬럼 변경사항 문서화. ERR-085. | 0208C74 |
 
 ## Cancelled
@@ -153,3 +152,4 @@
 | CONST-AMEND-001 | **Mark (Human direct)** | 0208C68 | **Mark(Human) approved and directly applied** §9 amendment: infra imports expanded from `core/src/types/` to `@axel/core/{types,memory,orchestrator}`. AUD-046/047 resolved. |
 | HARDEN-006 | dev-edge | 0208C70 | QA-020-M3: Discord DEFERRED fire-and-forget pattern. DiscordFollowUp DI callback. discordApplicationId config. 6 tests. TDD RED→GREEN. |
 | HARDEN-007 | dev-edge | 0208C70 | QA-020-L3 + AUD-094: SSE security headers (X-Content-Type-Options, X-Frame-Options) + startedAt moved to start() listen callback. 4 tests. TDD RED→GREEN. |
+| FIX-MIGRATION-001 | devops | 0208C75 | Migration fixes: (1) 002 messages created_at+token_count, (2) 007 ALTER COLUMN conditional DO block, (3) 008 session_summaries table. 845 tests, 15 migrate tests. ERR-082/083/084 resolved. |

@@ -5,20 +5,20 @@
 ## Status
 
 - **Phase**: **POST-RELEASE — RUNTIME BOOTSTRAP FIX**
-- **Cycle**: 74
-- **Last Updated**: 2026-02-08C74
-- **STATUS**: 4 runtime bootstrap errors found (ERR-082~085). Migration files need repair. 2 fix tasks created: FIX-MIGRATION-001 (devops P1), FIX-MIGRATION-002 (arch P2). 835+ tests, 69+ files.
+- **Cycle**: 75
+- **Last Updated**: 2026-02-08C75
+- **STATUS**: FIX-MIGRATION-001 done (devops). ERR-082/083/084 resolved. Migration files repaired. 845 tests (36 skip). FIX-MIGRATION-002 (arch) in progress — migration-strategy.md 문서화.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 2 |
-| Done | 118 (+FIX-DIMENSION-001, CONST-AMEND-001) |
+| In Progress | 1 |
+| Done | 119 (+FIX-MIGRATION-001) |
 | Cancelled | 14 |
 
-## Open Errors: 4 (3 HIGH, 1 MEDIUM)
+## Open Errors: 1 (1 MEDIUM)
 
 ## Cycle History
 
@@ -64,19 +64,20 @@
 | 72 | 0208 | **STEADY STATE.** Drift detection CLEAN. 0 errors, 0 queued, 0 in progress. Roadmap exhausted. Awaiting next direction from Mark. |
 | 73 | 0208 | **STEADY STATE.** Drift detection CLEAN. 0 errors, 0 queued, 0 in progress. Roadmap exhausted. Awaiting next direction from Mark. |
 | 74 | 0208 | **RUNTIME BOOTSTRAP FIX.** 4 new errors (ERR-082~085) from Mark's runtime bootstrap. Migration 002 missing columns, 007 broken SQL, 008 missing table, docs stale. 2 fix tasks created: FIX-MIGRATION-001 (devops P1), FIX-MIGRATION-002 (arch P2). Activated devops + arch. |
+| 75 | 0208 | **1 TASK COMPLETED.** FIX-MIGRATION-001 (devops): migration 002/007/008 repaired. 845 tests (36 skip), 15 migrate tests. ERR-082/083/084 resolved. Open errors 4→1. FIX-MIGRATION-002 (arch) in progress (1 cycle). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C74 | Cycle 74 | Active |
-| Architecture | 0208C74 | FIX-MIGRATION-002 | Assigned |
+| Coordinator | 0208C75 | Cycle 75 | Active |
+| Architecture | 0208C74 | FIX-MIGRATION-002 | In Progress (1 cycle) |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C66 | — | Idle |
 | Dev-Edge | 0208C70 | — | Idle |
 | Research | 0208C58 | — | Idle |
 | Quality | 0208C66 | — | Idle |
-| DevOps | 0208C74 | FIX-MIGRATION-001 | Assigned |
+| DevOps | 0208C75 | — | Idle (FIX-MIGRATION-001 done) |
 | Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed
