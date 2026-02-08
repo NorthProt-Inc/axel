@@ -2,21 +2,18 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 39**: Phase B (Core Sprint) ACTIVE. CORE-004 + SYNC-003 in progress. QA-012 cancelled (5 cycles stalled). QA-013 assigned to quality.
+> **Cycle 40**: Phase B (Core Sprint) — **ALL CORE TASKS COMPLETE**. CORE-004+006 merged to main (330 tests). SYNC-003 (arch) + QA-013 (quality) remaining for Phase B closure.
 
 ## Queued
 
-| ID | Priority | Division | Task | Depends | Created |
-|----|----------|----------|------|---------|---------|
-| CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001 ✅, CORE-003 ✅, CORE-004, CORE-005 ✅ | 0208C31 |
+(none)
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| CORE-004 | dev-core | 0208C36 | C40 |
-| SYNC-003 | arch | 0208C37 | C39 |
-| QA-013 | quality | 0208C39 | C40 |
+| SYNC-003 | arch | 0208C37 | C41 |
+| QA-013 | quality | 0208C39 | C41 |
 
 ## Cancelled
 
@@ -93,3 +90,5 @@
 | DEVOPS-001 | coord | 0208C34 | @vitest/coverage-v8 added. Barrel exports excluded from coverage. 93%+ global coverage. |
 | CORE-003 | dev-core | 0208C36 | 8 src + 7 test files (memory layers M0-M5). 241 tests, 100% stmt, 95% branch. ADR-013 6-layer architecture. |
 | SYNC-002 | arch | 0208C36 | PLAN_SYNC.md: B.1/B.2/B.5 IN_SYNC, A.3 IN_SYNC. No drift detected. |
+| CORE-004 | dev-core | 0208C40 | 3 src + 2 test files (context assembly). 289 tests, 100% stmt+branch+func+lines. Plan §3.3 ContextBudget+Assembler. |
+| CORE-006 | dev-core | 0208C40 | 4 src + 3 test files (orchestrator). 330 tests, 99.69% stmt. ReAct loop+SessionRouter+tool dispatch. ADR-014/020/021. |

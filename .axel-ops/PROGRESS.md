@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **B: CORE SPRINT — ACTIVE**
-- **Cycle**: 39
-- **Last Updated**: 2026-02-08C39
-- **STATUS**: **Phase B 80% complete.** CORE-004 (context assembly) in progress. QA-012 cancelled (5 cycles stalled — absorbed into QA-013). QA-013 assigned to quality (CORE-002+003+005 review). SYNC-003 in progress. Smoke test: 241 tests pass, typecheck+lint clean. Critical path: CORE-004 → CORE-006. 0 errors, no drift.
+- **Phase**: **B: CORE SPRINT — ALL CORE TASKS COMPLETE**
+- **Cycle**: 40
+- **Last Updated**: 2026-02-08C40
+- **STATUS**: **Phase B 95% complete.** ALL 6 core modules done (CORE-001~006). CORE-004 (context, 289 tests) + CORE-006 (orchestrator, 330 tests) merged to main. Smoke test: 330 tests pass, typecheck+lint clean. SYNC-003 (PLAN_SYNC update) + QA-013 (Phase B review, scope expanded to CORE-001~006) remaining. 0 errors, no drift. Phase B closure pending SYNC-003 + QA-013.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 1 |
-| In Progress | 3 |
-| Done | 52 |
+| Queued | 0 |
+| In Progress | 2 |
+| Done | 54 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -51,18 +51,19 @@
 | 37 | 0208 | **No new completions.** CORE-004 (dev-core), QA-012 (quality), SYNC-003 (arch) in progress. SYNC-003 assigned — deps met (CORE-003 ✅). QA-012 at 3 cycles — metric-alert issued, monitoring. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
 | 38 | 0208 | **QA-012 scope reduced (auto-remediation).** 4 cycles stalled — scope narrowed from CORE-001+002+005 to CORE-001 types only. CORE-002+005 review absorbed into QA-013. CORE-004 (dev-core), SYNC-003 (arch) in progress. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
 | 39 | 0208 | **QA-012 cancelled (5 cycles stalled).** CORE-001 types already verified by SYNC-002. Scope absorbed into QA-013 (CORE-002+003+005 review). QA-013 assigned to quality. CORE-004 (dev-core), SYNC-003 (arch) in progress. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
+| 40 | 0208 | **ALL CORE TASKS COMPLETE.** CORE-004 (context assembly, 289 tests, 100% coverage) + CORE-006 (orchestrator, 330 tests, 99.69% stmt) merged to main. Smoke test: 330 tests pass, typecheck+lint clean. Phase B 95%. SYNC-003 scope expanded (B.3+B.4+B.6). QA-013 scope expanded (CORE-001~006 full review). 0 errors, no drift. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C39 | Cycle 39 | Active |
-| Architecture | 0208C37 | SYNC-003 | Active (PLAN_SYNC B.3 update) |
-| Dev-Core | 0208C36 | CORE-004 | Active (context assembly) |
+| Coordinator | 0208C40 | Cycle 40 | Active |
+| Architecture | 0208C37 | SYNC-003 | Active (PLAN_SYNC B.3+B.4+B.6 update) |
+| Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
 | Dev-Infra | — | — | Pending Phase C |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C39 | QA-013 | Active (Phase B review: CORE-002+003+005) |
+| Quality | 0208C39 | QA-013 | Active (Phase B full review: CORE-001~006) |
 | DevOps | 0208C34 | — | Idle |
 | Audit | 0209T0031 | — | Idle |
 
