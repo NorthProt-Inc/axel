@@ -33,6 +33,8 @@ CREATE TABLE messages (
 	content           TEXT NOT NULL,
 	channel_id        TEXT,
 	timestamp         TIMESTAMPTZ NOT NULL,
+	created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	token_count       INTEGER NOT NULL DEFAULT 0,
 	emotional_context TEXT NOT NULL DEFAULT 'neutral',
 	metadata          JSONB NOT NULL DEFAULT '{}'::jsonb,
 
