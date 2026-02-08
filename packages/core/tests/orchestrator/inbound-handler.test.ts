@@ -582,7 +582,7 @@ describe('createInboundHandler', () => {
 			await handler(makeInboundMessage(), mockSend);
 
 			expect(onError).toHaveBeenCalledTimes(1);
-			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.error).toBeInstanceOf(Error);
 			expect(errorInfo.userId).toBe('user-1');
 			expect(errorInfo.channelId).toBe('discord');
@@ -602,13 +602,10 @@ describe('createInboundHandler', () => {
 			});
 
 			const handler = createInboundHandler(deps);
-			await handler(
-				makeInboundMessage({ userId: 'user-42', channelId: 'telegram' }),
-				mockSend,
-			);
+			await handler(makeInboundMessage({ userId: 'user-42', channelId: 'telegram' }), mockSend);
 
 			expect(onError).toHaveBeenCalledTimes(1);
-			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.error).toBeInstanceOf(Error);
 			expect(errorInfo.errorMessage).toBe('DB down');
 			expect(errorInfo.userId).toBe('user-42');
@@ -633,7 +630,7 @@ describe('createInboundHandler', () => {
 			await handler(makeInboundMessage(), mockSend);
 
 			expect(onError).toHaveBeenCalledTimes(1);
-			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.errorMessage).toBe('Context assembly failed');
 		});
 
@@ -656,7 +653,7 @@ describe('createInboundHandler', () => {
 			await handler(makeInboundMessage(), mockSend);
 
 			expect(onError).toHaveBeenCalledTimes(1);
-			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.errorType).toBe('ProviderError');
 		});
 
@@ -688,9 +685,7 @@ describe('createInboundHandler', () => {
 
 		it('should not throw when onError callback itself throws', async () => {
 			const store = makeSessionStore();
-			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(
-				new Error('Session failure'),
-			);
+			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Session failure'));
 			const mockSend = vi.fn().mockResolvedValue(undefined);
 			const onError = vi.fn().mockImplementation(() => {
 				throw new Error('Logger crashed');
@@ -715,9 +710,7 @@ describe('createInboundHandler', () => {
 
 		it('should work without onError callback (backward compatible)', async () => {
 			const store = makeSessionStore();
-			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(
-				new Error('Session failure'),
-			);
+			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Session failure'));
 			const mockSend = vi.fn().mockResolvedValue(undefined);
 
 			// No onError callback — should not break
@@ -749,7 +742,7 @@ describe('createInboundHandler', () => {
 			const handler = createInboundHandler(deps);
 			await handler(makeInboundMessage(), mockSend);
 
-			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.errorType).toBe('TypeError');
 			expect(errorInfo.errorMessage).toBe('type issue');
 		});
@@ -769,7 +762,7 @@ describe('createInboundHandler', () => {
 			const handler = createInboundHandler(deps);
 			await handler(makeInboundMessage(), mockSend);
 
-			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.errorType).toBe('unknown');
 			expect(errorInfo.errorMessage).toBe('string error');
 		});
