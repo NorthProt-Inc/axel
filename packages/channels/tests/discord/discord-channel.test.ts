@@ -4,6 +4,7 @@ import type {
 	InboundMessage,
 	OutboundMessage,
 } from '@axel/core/types';
+import { Events } from 'discord.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DiscordChannel } from '../../src/discord/discord-channel.js';
 import type { DiscordChannelOptions } from '../../src/discord/discord-channel.js';
@@ -50,8 +51,7 @@ function createMockDiscordMessage(overrides?: {
 	authorBot?: boolean;
 	channelId?: string;
 }) {
-	const sentMessages: Array<{ content: string }> = [];
-	let lastEditContent = '';
+	const sentMessages: Array<{ content: string; edit: ReturnType<typeof vi.fn> }> = [];
 
 	const channel = {
 		id: overrides?.channelId ?? 'channel-123',
@@ -60,13 +60,14 @@ function createMockDiscordMessage(overrides?: {
 			const sent = {
 				content,
 				edit: vi.fn().mockImplementation(async (newContent: string | { content: string }) => {
-					lastEditContent = typeof newContent === 'string' ? newContent : newContent.content;
+					sent.content = typeof newContent === 'string' ? newContent : newContent.content;
 				}),
 			};
 			sentMessages.push(sent);
 			return sent;
 		}),
 		sendTyping: vi.fn().mockResolvedValue(undefined),
+		isThread: vi.fn().mockReturnValue(false),
 	};
 
 	const msg = {
@@ -82,7 +83,7 @@ function createMockDiscordMessage(overrides?: {
 		reply: vi.fn().mockResolvedValue(undefined),
 	};
 
-	return { msg, channel, sentMessages, getLastEdit: () => lastEditContent };
+	return { msg, channel, sentMessages };
 }
 
 describe('DiscordChannel', () => {
@@ -99,6 +100,13 @@ describe('DiscordChannel', () => {
 		};
 		channel = new DiscordChannel(options);
 		return channel;
+	}
+
+	/** Helper: start the channel with mock client ready emission */
+	async function startChannel(): Promise<void> {
+		const loginPromise = channel.start();
+		mockClient.emit(Events.ClientReady);
+		await loginPromise;
 	}
 
 	beforeEach(() => {
@@ -147,27 +155,20 @@ describe('DiscordChannel', () => {
 
 	describe('lifecycle', () => {
 		it('starts and transitions to healthy', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
-
+			await startChannel();
 			const health = await channel.healthCheck();
+
 			expect(health.state).toBe('healthy');
 		});
 
 		it('calls client.login with token on start', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			expect(mockClient.client.login).toHaveBeenCalledWith('test-token');
 		});
 
 		it('stops and transitions to unhealthy', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
-
+			await startChannel();
 			await channel.stop();
 			const health = await channel.healthCheck();
 
@@ -181,10 +182,7 @@ describe('DiscordChannel', () => {
 		});
 
 		it('throws when starting twice', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
-
+			await startChannel();
 			await expect(channel.start()).rejects.toThrow('Discord channel already started');
 		});
 
@@ -193,9 +191,7 @@ describe('DiscordChannel', () => {
 		});
 
 		it('healthCheck returns uptime and ws ping', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			await new Promise((r) => setTimeout(r, 10));
 			const health = await channel.healthCheck();
@@ -208,9 +204,7 @@ describe('DiscordChannel', () => {
 
 	describe('inbound messages', () => {
 		it('calls handler with normalized InboundMessage', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const received: InboundMessage[] = [];
 			channel.onMessage(async (msg) => {
@@ -218,7 +212,7 @@ describe('DiscordChannel', () => {
 			});
 
 			const { msg } = createMockDiscordMessage({ content: 'Hello Axel' });
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 
 			await new Promise((r) => setTimeout(r, 10));
 
@@ -231,9 +225,7 @@ describe('DiscordChannel', () => {
 		});
 
 		it('ignores bot messages', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const received: InboundMessage[] = [];
 			channel.onMessage(async (msg) => {
@@ -241,7 +233,7 @@ describe('DiscordChannel', () => {
 			});
 
 			const { msg } = createMockDiscordMessage({ authorBot: true });
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 
 			await new Promise((r) => setTimeout(r, 10));
 
@@ -249,9 +241,7 @@ describe('DiscordChannel', () => {
 		});
 
 		it('ignores empty messages', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const received: InboundMessage[] = [];
 			channel.onMessage(async (msg) => {
@@ -259,9 +249,9 @@ describe('DiscordChannel', () => {
 			});
 
 			const { msg } = createMockDiscordMessage({ content: '' });
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 			const { msg: msg2 } = createMockDiscordMessage({ content: '   ' });
-			mockClient.emit('messageCreate', msg2);
+			mockClient.emit(Events.MessageCreate, msg2);
 
 			await new Promise((r) => setTimeout(r, 10));
 
@@ -269,9 +259,7 @@ describe('DiscordChannel', () => {
 		});
 
 		it('supports multiple handlers', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const received1: string[] = [];
 			const received2: string[] = [];
@@ -284,7 +272,7 @@ describe('DiscordChannel', () => {
 			});
 
 			const { msg } = createMockDiscordMessage({ content: 'test' });
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 
 			await new Promise((r) => setTimeout(r, 10));
 
@@ -295,12 +283,11 @@ describe('DiscordChannel', () => {
 
 	describe('outbound messages', () => {
 		it('send() sends message to Discord channel', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
+			// Trigger inbound to cache the channel
 			const { msg } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 			await new Promise((r) => setTimeout(r, 10));
 
 			await channel.send('channel-123', { content: 'Hello from Axel!' });
@@ -315,12 +302,10 @@ describe('DiscordChannel', () => {
 		});
 
 		it('send() splits messages exceeding 2000 characters', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const { msg } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 			await new Promise((r) => setTimeout(r, 10));
 
 			const longContent = 'A'.repeat(3500);
@@ -330,12 +315,10 @@ describe('DiscordChannel', () => {
 		});
 
 		it('sendStreaming() uses message.edit() for updates', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const { msg, sentMessages } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 			await new Promise((r) => setTimeout(r, 10));
 
 			const chunks = ['Hello ', 'World', '!'];
@@ -347,11 +330,9 @@ describe('DiscordChannel', () => {
 
 			await channel.sendStreaming?.('channel-123', testStream());
 
-			// Should have sent initial message and edited it
+			// Should have sent at least one message
 			expect(msg.channel.send).toHaveBeenCalled();
-			// The final edit should contain all chunks concatenated
-			const lastSent = sentMessages[sentMessages.length - 1];
-			expect(lastSent).toBeDefined();
+			expect(sentMessages.length).toBeGreaterThanOrEqual(1);
 		});
 
 		it('sendStreaming() throws when not started', async () => {
@@ -365,16 +346,13 @@ describe('DiscordChannel', () => {
 		});
 
 		it('sendStreaming() handles content exceeding 2000 chars during stream', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			const { msg, sentMessages } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 			await new Promise((r) => setTimeout(r, 10));
 
 			async function* longStream(): AsyncIterable<string> {
-				// Yield enough chunks to exceed 2000 chars
 				for (let i = 0; i < 25; i++) {
 					yield 'A'.repeat(100);
 				}
@@ -382,24 +360,8 @@ describe('DiscordChannel', () => {
 
 			await channel.sendStreaming?.('channel-123', longStream());
 
-			// Should have created multiple messages for overflow
+			// Should have created at least one message
 			expect(sentMessages.length).toBeGreaterThanOrEqual(1);
-		});
-	});
-
-	describe('typing indicator', () => {
-		it('sends typing indicator to channel', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
-
-			const { msg } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
-			await new Promise((r) => setTimeout(r, 10));
-
-			// Channel should have sendTyping available via registered channels
-			const health = await channel.healthCheck();
-			expect(health.state).toBe('healthy');
 		});
 	});
 
@@ -410,13 +372,12 @@ describe('DiscordChannel', () => {
 				disconnectReasons.push(reason);
 			});
 
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			mockClient.emit('disconnect', { code: 1006, reason: 'Connection lost' });
 
-			expect(disconnectReasons.length).toBeGreaterThanOrEqual(0);
+			expect(disconnectReasons).toHaveLength(1);
+			expect(disconnectReasons[0]).toBe('Connection lost');
 		});
 
 		it('handles reconnect event', async () => {
@@ -425,37 +386,39 @@ describe('DiscordChannel', () => {
 				reconnected = true;
 			});
 
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
-			// Simulate reconnection sequence
-			mockClient.emit('shardReconnecting');
+			mockClient.emit(Events.ShardReconnecting, 0);
 
-			expect(typeof reconnected).toBe('boolean');
+			expect(reconnected).toBe(true);
 		});
 
 		it('reports degraded health during reconnection attempts', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			// Simulate error event that triggers reconnection
-			mockClient.emit('error', new Error('WebSocket closed'));
+			mockClient.emit(Events.Error, new Error('WebSocket closed'));
 
 			const health = await channel.healthCheck();
-			// After error, health may be degraded
-			expect(['healthy', 'degraded', 'unhealthy']).toContain(health.state);
+			expect(health.state).toBe('degraded');
+		});
+
+		it('recovers to healthy after shard ready', async () => {
+			await startChannel();
+
+			mockClient.emit(Events.Error, new Error('WebSocket closed'));
+			let health = await channel.healthCheck();
+			expect(health.state).toBe('degraded');
+
+			mockClient.emit(Events.ShardReady, 0);
+			health = await channel.healthCheck();
+			expect(health.state).toBe('healthy');
 		});
 	});
 
 	describe('addReaction', () => {
-		it('adds reaction to a message', async () => {
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
-
-			// addReaction is optional and implementation depends on message cache
+		it('is available as a function', async () => {
+			await startChannel();
 			expect(channel.addReaction).toBeTypeOf('function');
 		});
 	});
@@ -469,16 +432,14 @@ describe('DiscordChannel', () => {
 				},
 			});
 
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
+			await startChannel();
 
 			channel.onMessage(async () => {
 				throw new Error('handler failed');
 			});
 
 			const { msg } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 
 			await new Promise((r) => setTimeout(r, 10));
 
@@ -494,7 +455,7 @@ describe('DiscordChannel', () => {
 			});
 
 			const loginPromise = channel.start();
-			mockClient.emit('ready');
+			mockClient.emit(Events.ClientReady);
 			await loginPromise;
 
 			channel.onMessage(async () => {
@@ -502,28 +463,18 @@ describe('DiscordChannel', () => {
 			});
 
 			const { msg } = createMockDiscordMessage();
-			mockClient.emit('messageCreate', msg);
+			mockClient.emit(Events.MessageCreate, msg);
 			await new Promise((r) => setTimeout(r, 10));
 
 			// Should not throw — default onError silently ignores
 		});
 
-		it('handles Discord API errors on send gracefully', async () => {
-			const errors: unknown[] = [];
-			createChannel({
-				onError: (err: unknown) => {
-					errors.push(err);
-				},
-			});
+		it('throws on send to unknown channel', async () => {
+			await startChannel();
 
-			const loginPromise = channel.start();
-			mockClient.emit('ready');
-			await loginPromise;
-
-			// send to unknown channel should throw
 			await expect(
 				channel.send('unknown-channel', { content: 'test' }),
-			).rejects.toThrow();
+			).rejects.toThrow('Unknown Discord channel: unknown-channel');
 		});
 	});
 });
