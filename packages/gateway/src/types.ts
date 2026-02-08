@@ -41,9 +41,45 @@ export type HandleMessage = (
 	onEvent?: (event: MessageEvent) => void,
 ) => Promise<MessageResult>;
 
+/** Memory search request parameters */
+export interface MemorySearchParams {
+	readonly query: string;
+	readonly limit?: number;
+	readonly memoryTypes?: readonly string[];
+	readonly channelFilter?: string;
+	readonly minImportance?: number;
+	readonly hybridSearch?: boolean;
+}
+
+/** Memory search result */
+export interface MemorySearchResponse {
+	readonly results: readonly Record<string, unknown>[];
+	readonly totalMatches: number;
+}
+
+/** Tool execution request */
+export interface ToolExecuteParams {
+	readonly name: string;
+	readonly args: Readonly<Record<string, unknown>>;
+}
+
+/** Tool execution result */
+export interface ToolExecuteResult {
+	readonly success: boolean;
+	readonly content: unknown;
+	readonly error?: string;
+	readonly durationMs: number;
+}
+
 export interface GatewayDeps {
 	readonly healthCheck: () => Promise<HealthStatus>;
 	readonly handleMessage?: HandleMessage;
+	readonly searchMemory?: (params: MemorySearchParams) => Promise<MemorySearchResponse>;
+	readonly getMemoryStats?: () => Promise<Record<string, unknown>>;
+	readonly getSession?: (userId: string) => Promise<Record<string, unknown> | null>;
+	readonly endSession?: (sessionId: string) => Promise<Record<string, unknown>>;
+	readonly listTools?: () => readonly Record<string, unknown>[];
+	readonly executeTool?: (params: ToolExecuteParams) => Promise<ToolExecuteResult>;
 }
 
 export type RouteHandler = (

@@ -6,8 +6,12 @@ export type {
 	GatewayConfig,
 	GatewayDeps,
 	HandleMessage,
+	MemorySearchParams,
+	MemorySearchResponse,
 	MessageEvent,
 	MessageResult,
 	Route,
 	RouteHandler,
+	ToolExecuteParams,
+	ToolExecuteResult,
 } from './types.js';
