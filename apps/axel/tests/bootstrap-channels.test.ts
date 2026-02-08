@@ -1,11 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createChannels, createHandleMessage, wireChannels } from '../src/bootstrap-channels.js';
 import type { AxelConfig } from '../src/config.js';
 import type { Container, ContainerDeps } from '../src/container.js';
-import {
-	createChannels,
-	createHandleMessage,
-	wireChannels,
-} from '../src/bootstrap-channels.js';
 
 // ─── Mock Factories ───
 
@@ -310,8 +306,9 @@ describe('bootstrap-channels', () => {
 				yield { type: 'message_complete' as const, content: '' };
 			})();
 
-			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat =
-				vi.fn().mockReturnValue(mockStream);
+			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
+				.fn()
+				.mockReturnValue(mockStream);
 
 			const handleMessage = createHandleMessage(container, personaEngine);
 			const result = await handleMessage({
@@ -334,12 +331,9 @@ describe('bootstrap-channels', () => {
 			const handleMessage = createHandleMessage(container, personaEngine);
 			const events: unknown[] = [];
 
-			await handleMessage(
-				{ userId: 'user-1', channelId: 'gateway', content: 'Hello' },
-				(event) => {
-					events.push(event);
-				},
-			);
+			await handleMessage({ userId: 'user-1', channelId: 'gateway', content: 'Hello' }, (event) => {
+				events.push(event);
+			});
 
 			// Should have emitted at least one event
 			expect(events.length).toBeGreaterThanOrEqual(0);
@@ -350,9 +344,9 @@ describe('bootstrap-channels', () => {
 			const personaEngine = createMockPersonaEngine();
 
 			// Force sessionRouter to throw
-			(
-				container.sessionRouter as { resolveSession: ReturnType<typeof vi.fn> }
-			).resolveSession = vi.fn().mockRejectedValue(new Error('session error'));
+			(container.sessionRouter as { resolveSession: ReturnType<typeof vi.fn> }).resolveSession = vi
+				.fn()
+				.mockRejectedValue(new Error('session error'));
 
 			const handleMessage = createHandleMessage(container, personaEngine);
 			const result = await handleMessage({
