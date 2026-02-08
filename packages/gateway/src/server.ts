@@ -4,11 +4,11 @@ import { classifyError } from './classify-error.js';
 import {
 	generateRequestId,
 	parseChatInput,
-	parseJsonBody,
 	sendError,
 	sendJson,
 	timingSafeEqual,
 } from './http-utils.js';
+import { createResourceHandlers } from './route-handlers.js';
 import type { GatewayConfig, GatewayDeps, Route } from './types.js';
 import { type AuthenticatedWebSocket, setupWsAuth } from './ws-handler.js';
 
@@ -22,6 +22,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	const connections = new Set<AuthenticatedWebSocket>();
 	const rateLimitBuckets = new Map<string, number[]>();
 
+	const rh = createResourceHandlers(deps);
+
 	const routes: Route[] = [
 		{ method: 'GET', path: '/health', requiresAuth: false, handler: handleHealth },
 		{ method: 'GET', path: '/health/detailed', requiresAuth: true, handler: handleHealthDetailed },
@@ -31,17 +33,27 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			method: 'POST',
 			path: '/api/v1/memory/search',
 			requiresAuth: true,
-			handler: handleMemorySearch,
+			handler: rh.handleMemorySearch,
 		},
-		{ method: 'GET', path: '/api/v1/memory/stats', requiresAuth: true, handler: handleMemoryStats },
-		{ method: 'GET', path: '/api/v1/session', requiresAuth: true, handler: handleSession },
-		{ method: 'POST', path: '/api/v1/session/end', requiresAuth: true, handler: handleSessionEnd },
-		{ method: 'GET', path: '/api/v1/tools', requiresAuth: true, handler: handleTools },
+		{
+			method: 'GET',
+			path: '/api/v1/memory/stats',
+			requiresAuth: true,
+			handler: rh.handleMemoryStats,
+		},
+		{ method: 'GET', path: '/api/v1/session', requiresAuth: true, handler: rh.handleSession },
+		{
+			method: 'POST',
+			path: '/api/v1/session/end',
+			requiresAuth: true,
+			handler: rh.handleSessionEnd,
+		},
+		{ method: 'GET', path: '/api/v1/tools', requiresAuth: true, handler: rh.handleTools },
 		{
 			method: 'POST',
 			path: '/api/v1/tools/execute',
 			requiresAuth: true,
-			handler: handleToolExecute,
+			handler: rh.handleToolExecute,
 		},
 	];
 
@@ -303,126 +315,6 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			);
 		}
 		res.end();
-	}
-
-	// ─── Memory Routes ───
-
-	async function handleMemorySearch(
-		_req: http.IncomingMessage,
-		res: http.ServerResponse,
-		body: string,
-	): Promise<void> {
-		const requestId = generateRequestId();
-		if (!deps.searchMemory) {
-			sendError(res, 503, 'Memory search not configured', requestId);
-			return;
-		}
-		const parsed = parseJsonBody(body);
-		if (!parsed || typeof parsed.query !== 'string' || parsed.query.length === 0) {
-			sendError(res, 400, 'Invalid request: query required', requestId);
-			return;
-		}
-		const result = await deps.searchMemory({
-			query: parsed.query,
-			limit: typeof parsed.limit === 'number' ? parsed.limit : undefined,
-			memoryTypes: Array.isArray(parsed.memoryTypes) ? (parsed.memoryTypes as string[]) : undefined,
-			channelFilter: typeof parsed.channelFilter === 'string' ? parsed.channelFilter : undefined,
-			minImportance: typeof parsed.minImportance === 'number' ? parsed.minImportance : undefined,
-			hybridSearch: typeof parsed.hybridSearch === 'boolean' ? parsed.hybridSearch : undefined,
-		});
-		sendJson(res, 200, { results: result.results, totalMatches: result.totalMatches, requestId });
-	}
-
-	async function handleMemoryStats(
-		_req: http.IncomingMessage,
-		res: http.ServerResponse,
-	): Promise<void> {
-		const requestId = generateRequestId();
-		if (!deps.getMemoryStats) {
-			sendError(res, 503, 'Memory stats not configured', requestId);
-			return;
-		}
-		const stats = await deps.getMemoryStats();
-		sendJson(res, 200, { ...stats, requestId });
-	}
-
-	// ─── Session Routes ───
-
-	async function handleSession(
-		_req: http.IncomingMessage,
-		res: http.ServerResponse,
-	): Promise<void> {
-		const requestId = generateRequestId();
-		if (!deps.getSession) {
-			sendError(res, 503, 'Session service not configured', requestId);
-			return;
-		}
-		const session = await deps.getSession('gateway-user');
-		sendJson(res, 200, { active: session !== null, session, requestId });
-	}
-
-	async function handleSessionEnd(
-		_req: http.IncomingMessage,
-		res: http.ServerResponse,
-	): Promise<void> {
-		const requestId = generateRequestId();
-		if (!deps.getSession || !deps.endSession) {
-			sendError(res, 503, 'Session service not configured', requestId);
-			return;
-		}
-		const session = await deps.getSession('gateway-user');
-		if (!session) {
-			sendError(res, 404, 'No active session', requestId);
-			return;
-		}
-		const sessionId = (session as Record<string, unknown>).sessionId as string;
-		const summary = await deps.endSession(sessionId);
-		sendJson(res, 200, { ...summary, requestId });
-	}
-
-	// ─── Tool Routes ───
-
-	async function handleTools(_req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-		const requestId = generateRequestId();
-		if (!deps.listTools) {
-			sendError(res, 503, 'Tool registry not configured', requestId);
-			return;
-		}
-		const tools = deps.listTools();
-		sendJson(res, 200, { tools, requestId });
-	}
-
-	async function handleToolExecute(
-		_req: http.IncomingMessage,
-		res: http.ServerResponse,
-		body: string,
-	): Promise<void> {
-		const requestId = generateRequestId();
-		if (!deps.executeTool) {
-			sendError(res, 503, 'Tool executor not configured', requestId);
-			return;
-		}
-		const parsed = parseJsonBody(body);
-		if (!parsed || typeof parsed.name !== 'string' || parsed.name.length === 0) {
-			sendError(res, 400, 'Invalid request: name required', requestId);
-			return;
-		}
-		if (!parsed.args || typeof parsed.args !== 'object' || Array.isArray(parsed.args)) {
-			sendError(res, 400, 'Invalid request: args required', requestId);
-			return;
-		}
-		const result = await deps.executeTool({
-			name: parsed.name,
-			args: parsed.args as Record<string, unknown>,
-		});
-		sendJson(res, 200, {
-			name: parsed.name,
-			success: result.success,
-			result: result.content,
-			error: result.error,
-			executionMs: result.durationMs,
-			requestId,
-		});
 	}
 
 	return { start, stop };
