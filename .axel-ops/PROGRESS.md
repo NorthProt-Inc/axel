@@ -5,9 +5,9 @@
 ## Status
 
 - **Phase**: **B: CORE SPRINT — ACTIVE**
-- **Cycle**: 37
-- **Last Updated**: 2026-02-08C37
-- **STATUS**: **Phase B 80% complete.** CORE-004 (context assembly) in progress. QA-012 (core review) 3 cycles — monitoring. SYNC-003 assigned to arch. Smoke test: 241 tests pass, typecheck+lint clean. Critical path: CORE-004 → CORE-006. 0 errors, no drift.
+- **Cycle**: 38
+- **Last Updated**: 2026-02-08C38
+- **STATUS**: **Phase B 80% complete.** CORE-004 (context assembly) in progress. QA-012 scope reduced to CORE-001 types only (4 cycles stalled — auto-remediation). CORE-002+CORE-005 review moved to QA-013. SYNC-003 in progress. Smoke test: 241 tests pass, typecheck+lint clean. Critical path: CORE-004 → CORE-006. 0 errors, no drift.
 
 ## Task Counts
 
@@ -49,18 +49,19 @@
 | 35 | 0208 | **In progress.** CORE-003 (dev-core), QA-012 (quality), SYNC-002 (arch) all in progress — no new completions. Smoke test: 121 tests pass. 0 errors, no drift. |
 | 36 | 0208 | **2 TASKS COMPLETED.** CORE-003 (memory layers M0-M5, 8 src + 7 test files, 241 tests, 100% stmt, 95% branch) + SYNC-002 (PLAN_SYNC B.1/B.2/B.5 IN_SYNC). Smoke test: 241 tests pass, typecheck+lint clean. CORE-004 (context assembly) assigned to dev-core. QA-013 (CORE-003 review) + SYNC-003 (PLAN_SYNC B.3 update) queued. Phase B 80%. |
 | 37 | 0208 | **No new completions.** CORE-004 (dev-core), QA-012 (quality), SYNC-003 (arch) in progress. SYNC-003 assigned — deps met (CORE-003 ✅). QA-012 at 3 cycles — metric-alert issued, monitoring. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
+| 38 | 0208 | **QA-012 scope reduced (auto-remediation).** 4 cycles stalled — scope narrowed from CORE-001+002+005 to CORE-001 types only. CORE-002+005 review absorbed into QA-013. CORE-004 (dev-core), SYNC-003 (arch) in progress. Smoke test: 241 tests pass, typecheck+lint clean. 0 errors, no drift. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C37 | Cycle 37 | Active |
+| Coordinator | 0208C38 | Cycle 38 | Active |
 | Architecture | 0208C37 | SYNC-003 | Active (PLAN_SYNC B.3 update) |
 | Dev-Core | 0208C36 | CORE-004 | Active (context assembly) |
 | Dev-Infra | — | — | Pending Phase C |
 | Dev-Edge | — | — | Pending Phase D |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C34 | QA-012 | Active (core review, 3 cycles) |
+| Quality | 0208C34 | QA-012 | Active (scope reduced: CORE-001 types only, 4 cycles) |
 | DevOps | 0208C34 | — | Idle |
 | Audit | 0209T0031 | — | Idle |
 

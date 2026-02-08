@@ -2,22 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 37**: Phase B (Core Sprint) ACTIVE. CORE-004 + QA-012 in progress. SYNC-003 assigned to arch.
+> **Cycle 38**: Phase B (Core Sprint) ACTIVE. CORE-004 + QA-012 (scope reduced) + SYNC-003 in progress. QA-013 scope expanded.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
 | CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001 ✅, CORE-003 ✅, CORE-004, CORE-005 ✅ | 0208C31 |
-| QA-013 | P1 | quality | Phase B review — memory layers (CORE-003). Verify: (1) ADR-013 M0-M5 interface compliance, (2) TDD protocol, (3) Package boundary §9, (4) No >400 line files, (5) Coverage targets. | QA-012 | 0208C36 |
+| QA-013 | P1 | quality | Phase B review — memory layers (CORE-003) + decay (CORE-002) + persona (CORE-005). Verify: (1) ADR-013 M0-M5 interface compliance, (2) ADR-015 formula correctness, (3) TDD protocol, (4) Package boundary §9, (5) No >400 line files, (6) Coverage targets. | QA-012 | 0208C36 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| QA-012 | quality | 0208C34 | C37 |
-| CORE-004 | dev-core | 0208C36 | C38 |
-| SYNC-003 | arch | 0208C37 | C37 |
+| QA-012 | quality | 0208C34 | C38 (scope reduced: CORE-001 types only) |
+| CORE-004 | dev-core | 0208C36 | C39 |
+| SYNC-003 | arch | 0208C37 | C38 |
 
 ## Cancelled
 
