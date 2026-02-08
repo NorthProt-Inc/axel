@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 78
+## Current Cycle: 79
 
 ## Division Performance (Last 10 Cycles)
 
@@ -16,6 +16,7 @@
 | quality | 1 cycle | 7 (+1: QA-020) | 1 (QA-012, cancelled C39) | Idle |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
 | devops | 1 cycle | 17 (+1: FIX-MIGRATION-001) | 0 | Idle |
+| **ui-ux** | — | 0 (new Division) | 0 | **Activated (C79)** |
 | audit | 1 cycle | 4 | 0 | Idle |
 
 ## Bottleneck Indicators
@@ -37,6 +38,8 @@
 | `packages/channels/` | 75% | CLI 95.95%, Discord 90.27%, Telegram 93.18% | +15% over target |
 | `packages/gateway/` | 80% | 95.65% stmt, 88.07% branch (post HARDEN-006/007) | +15% over target |
 | `apps/axel/` | — | bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48% | — |
+| `packages/ui/` | 80% | 35 tests (6 test files: tokens, cli-theme, cli-banner, cli-renderer, cli-format, cli-spinner) | Scaffold only — awaiting coverage report |
+| `apps/webchat/` | — | 0 tests (scaffold, no test files yet) | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 
 ## Sprint Progress
@@ -50,6 +53,7 @@
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
 | E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
+| UI/UX Sprint | **ACTIVE** | 79 | — | 0% (0/8 tasks). Scaffold complete. 880 tests (+35 from ui package). |
 
 ## Cycle History (Last 10)
 
@@ -74,3 +78,4 @@
 | 76 | arch | 0 | 0 | **No completions.** FIX-MIGRATION-002 in progress (2 cycles). Drift CLEAN. |
 | 77 | coord | 1 (FIX-MIGRATION-002) | 0 (1 resolved) | **1 TASK DONE (CTO override).** migration-strategy.md updated. ERR-085 resolved. 0 errors. STEADY STATE restored. |
 | 78 | (none) | 0 | 0 | **STEADY STATE.** Drift CLEAN. 0 errors, 0 queued. Roadmap exhausted. Awaiting next direction. |
+| 79 | ui-ux, quality | 0 | 0 | **UI/UX SPRINT KICKOFF.** Human directive P0. 8 tasks created. 880 tests (+35). packages/ui/ + apps/webchat/ scaffold confirmed. |

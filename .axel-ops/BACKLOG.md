@@ -2,11 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 77 (CTO update)**: FIX-MIGRATION-002 done (CTO override, arch 3 cycles stalled). ERR-085 resolved. 0 queued, 0 in progress, 0 open errors.
+> **Cycle 79 (CTO update)**: Human directive P0 — UI/UX Division activated. packages/ui/ + apps/webchat/ scaffold confirmed (880 tests, +35 new). 8 UI/UX tasks created.
 
 ## Queued
 
-(none)
+| ID | Priority | Division | Task | Dependencies |
+|----|----------|----------|------|-------------|
+| UI-001 | P1 | ui-ux | CLI 렌더러에 CliChannel 통합 — @axel/ui/cli 렌더링을 packages/channels/src/cli/ CliChannel에 연결 | — |
+| UI-002 | P1 | ui-ux | CLI 스트리밍 출력 개선 — 토큰별 렌더링, spinner 통합, markdown 실시간 렌더링 | UI-001 |
+| UI-003 | P1 | ui-ux | WebChat 컴포넌트 테스트 — MessageList, MessageInput, ChatSidebar, StreamingIndicator 단위 테스트 | — |
+| UI-004 | P1 | ui-ux | WebChat WS 인증 — ADR-019 first-message auth 패턴 적용 (connectWebSocket에 auth token 전송) | — |
+| UI-005 | P2 | ui-ux | WebChat markdown 렌더링 — shiki 코드 하이라이트, marked 통합, XSS 방지 sanitize | UI-003 |
+| UI-006 | P2 | ui-ux | WebChat 세션 관리 — gateway API 연동 (session/end, 이력 로드), 사이드바 기능 구현 | UI-004 |
+| UI-007 | P2 | ui-ux | Design tokens webchat 적용 — colors/typography/spacing tokens를 Tailwind CSS config에 연동 | — |
+| QA-021 | P1 | quality | UI/UX scaffold 코드 리뷰 — packages/ui/ + apps/webchat/ CONSTITUTION §9/§14/§15 검증 | — |
 
 ## In Progress
 
