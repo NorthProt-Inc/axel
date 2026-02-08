@@ -136,7 +136,10 @@ class GeminiEmbeddingService {
 		}
 		const arr = new Float32Array(dim);
 		for (let i = 0; i < dim; i++) {
-			arr[i] = values[i]!;
+			const val = values[i];
+			if (val !== undefined) {
+				arr[i] = val;
+			}
 		}
 		return arr;
 	}
