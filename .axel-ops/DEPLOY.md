@@ -22,7 +22,7 @@
 | `biome.json` | ✅ CREATED | Linter + formatter config |
 | `package.json` (root) | ✅ CREATED | Workspace scripts |
 | `vitest.config.ts` (root) | ✅ CREATED | Test config |
-| `packages/core/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts, @vitest/coverage-v8 |
+| `packages/core/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, @vitest/coverage-v8, **subpath exports** (C44) |
 | `packages/infra/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
 | `packages/channels/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
 | `packages/gateway/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
@@ -65,6 +65,19 @@ File: `.github/workflows/ci.yml`
 | `@axel/infra` | @anthropic-ai/sdk@^0.74.0 | ✅ ADDED (C42) |
 | `@axel/infra` | @google/generative-ai@^0.24.1 | ✅ ADDED (C42) |
 | `@axel/infra` | @types/pg@^8.16.0, testcontainers@^11.11.0 | ✅ ADDED (C42, devDeps) |
+
+## Subpath Exports (@axel/core)
+
+| Export | Path | Status |
+|--------|------|--------|
+| `@axel/core/types` | `./src/types/index.ts` | ✅ CONFIGURED (C44) |
+| `@axel/core/memory` | `./src/memory/index.ts` | ✅ CONFIGURED (C44) |
+| `@axel/core/decay` | `./src/decay/index.ts` | ✅ CONFIGURED (C44) |
+| `@axel/core/context` | `./src/context/index.ts` | ✅ CONFIGURED (C44) |
+| `@axel/core/persona` | `./src/persona/index.ts` | ✅ CONFIGURED (C44) |
+| `@axel/core/orchestrator` | `./src/orchestrator/index.ts` | ✅ CONFIGURED (C44) |
+
+**Enables clean cross-package imports per CONSTITUTION §9.** Verified: 419 tests pass, typecheck+lint clean.
 
 ## Release History
 
