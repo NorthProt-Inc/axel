@@ -2,32 +2,30 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 57**: **PHASE E: IN PROGRESS.** 3 tasks done (INTEG-001, INTEG-002, FIX-MEDIUM-001). 686 tests, 58 files. ERR-069 CRITICAL: pgvector 2000d limit. RES-006 assigned for research.
+> **Cycle 58**: **PHASE E: IN PROGRESS.** 7 tasks done (INTEG-001~004, INTEG-006, FIX-MEDIUM-001, RES-006). 760 tests, 61 files. ERR-069 CRITICAL resolved by RES-006: 1536d Matryoshka recommended. FIX-DIMENSION-001 + FIX-SCHEMA-001 created. Human decision needed on dimension strategy.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| ~~INTEG-003~~ | ~~P0~~ | ~~dev-edge~~ | ~~Gateway route integration~~ | ~~INTEG-002~~ |
-| ~~INTEG-004~~ | ~~P1~~ | ~~dev-edge~~ | ~~Remaining gateway routes~~ | ~~INTEG-001~~ |
-| INTEG-005 | P1 | dev-edge | Channel bootstrap wiring: update main.ts to create+start channels, pass to gracefulShutdown (AUD-074). Wire InboundHandler to each channel. | INTEG-002 ✓, INTEG-003 |
-| ~~INTEG-006~~ | ~~P1~~ | ~~dev-infra~~ | ~~Integration test: PG + Redis~~ | ~~INTEG-001~~ |
-| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-002 ✓, INTEG-005 |
-| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 |
-| SYNC-007 | P1 | arch | PLAN_SYNC.md Phase E update: map integration code to plan sections. | INTEG-002 ✓, INTEG-003 |
-| QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. | INTEG-006, INTEG-007 |
-| AUDIT-005 | P1 | audit | Phase E audit: integration security (SQL injection in migration, auth flow E2E, error propagation). | INTEG-003, INTEG-006 |
+| ~~INTEG-005~~ | ~~P1~~ | ~~dev-edge~~ | ~~Channel bootstrap wiring~~ | ~~INTEG-003 ✓~~ |
+| INTEG-007 | P1 | dev-edge | E2E integration test: CLI channel → InboundHandler → mock LLM → memory store → response. Full message roundtrip without real API keys. | INTEG-005 |
+| INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ |
+| ~~SYNC-007~~ | ~~P1~~ | ~~arch~~ | ~~PLAN_SYNC Phase E update~~ | ~~INTEG-003 ✓~~ |
+| QA-019 | P1 | quality | Phase E integration review: verify E2E flow, DB schema match, all CONSTITUTION gates. 760 tests. | INTEG-005, INTEG-007 |
+| ~~AUDIT-005~~ | ~~P1~~ | ~~audit~~ | ~~Phase E integration security audit~~ | ~~INTEG-003 ✓, INTEG-006 ✓~~ |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
-| RES-006 | P0 | research | Research pgvector dimension limits: (1) pgvector 0.8.x 2000d hard limit confirmation, (2) pgvector 0.9+ roadmap/release timeline, (3) alternative: quantized embeddings ≤2000d with minimal quality loss (Matryoshka, binary quantization), (4) alternative: separate vector index (pg_embedding, Qdrant sidecar) with PG as source of truth. Source URLs required. | — |
+| FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). **Human decision needed before execution.** | RES-006 ✓ |
+| ~~FIX-SCHEMA-001~~ | ~~P1~~ | ~~arch~~ | ~~Sessions schema drift reconciliation~~ | ~~INTEG-006 ✓~~ |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| INTEG-003 | dev-edge | 0208C57 | C58 |
-| INTEG-004 | dev-edge | 0208C57 | C58 |
-| INTEG-006 | dev-infra | 0208C57 | C58 |
-| RES-006 | research | 0208C57 | C58 |
+| INTEG-005 | dev-edge | 0208C58 | C59 |
+| FIX-SCHEMA-001 | arch | 0208C58 | C59 |
+| SYNC-007 | arch | 0208C58 | C59 |
+| AUDIT-005 | audit | 0208C58 | C59 |
 
 ## Cancelled
 
@@ -142,3 +140,7 @@
 | INTEG-001 | devops | 0208C57 | tools/migrate/ — DB migration runner, 6 SQL migrations, 10 tests. pgvector extension enabled. ERR-069 discovered (2000d limit). |
 | INTEG-002 | dev-core | 0208C57 | packages/core/src/orchestrator/inbound-handler.ts — InboundHandler factory, resolveSession→assemble→reactLoop→send pipeline. 12 tests, 366 total. |
 | FIX-MEDIUM-001 | dev-edge | 0208C57 | 8 MEDIUM fixes: splitMessage DRY, classifyError ADR-011, lifecycle startTime, HealthCheckTarget DRY, Telegram guards, container types, CORS Vary. 18 new tests, 664→686 total. |
+| INTEG-003 | dev-edge | 0208C58 | Gateway→orchestrator integration via HandleMessage DI. /chat, /chat/stream (SSE), /ws routed to InboundHandler. Extracted types.ts, http-utils.ts, ws-handler.ts. 78 gateway tests. |
+| INTEG-004 | dev-edge | 0208C58 | 6 remaining gateway routes: memory/search, memory/stats, session, session/end, tools, tools/execute. route-handlers.ts factory. 78 gateway tests total. |
+| INTEG-006 | dev-infra | 0208C58 | PG+Redis integration test: 36 tests across 7 layers. Testcontainers PG17+Redis7. Full memory pipeline verified. Schema drift noted (plan-amendment sent). |
+| RES-006 | research | 0208C58 | pgvector dimension limits research. PRIMARY: 1536d Matryoshka truncation (Google official, research-proven). 25 sources. docs/research/RES-006-pgvector-dimension-limits.md. |

@@ -2,13 +2,14 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 57**: **1 CRITICAL OPEN.** ERR-069 pgvector 2000d limit. RES-006 assigned for research. Human decision pending.
+> **Cycle 58**: **1 CRITICAL (ERR-069) — SOLUTION FOUND (RES-006).** 1536d Matryoshka truncation recommended. Human decision pending. 1 NEW MEDIUM (ERR-070 schema drift).
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
-| ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016, RES-003). This is a **FUNDAMENTAL INCOMPATIBILITY**. Options: (1) Amend ADR-016 to ≤2000d (e.g., 1536d or 2000d), (2) Wait for pgvector 0.9+ with higher dimension support, (3) Use unindexed vector search (sequential scan — unacceptable for production), (4) Use alternative vector DB (Qdrant, Weaviate, etc. — violates ADR-002 single PG DB). TEMPORARY SOLUTION: memories table created WITHOUT vector index (migration 003). Vector search will perform sequential scans. **BLOCKS production deployment.** Requires immediate Coordinator escalation + human (Mark) decision. | INTEG-001 (devops) | 0208C56 |
+| ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016). **RES-006 SOLUTION**: Truncate to **1536d** via Matryoshka embeddings (Google official, research-proven, zero infra changes, 50% storage savings). FIX-DIMENSION-001 created for ADR-016 amendment. **Requires human (Mark) decision** to approve 1536d strategy before Architect can execute. | INTEG-001 (devops) | 0208C56 |
+| ERR-070 | **MEDIUM** | Sessions table schema drift: PgSessionStore uses TEXT[] for channel_history and expects last_activity_at column. Migration 002 defines channel_history as JSONB and lacks last_activity_at. Integration test (INTEG-006) used TEXT[] + last_activity_at to match adapter code. FIX-SCHEMA-001 created. | INTEG-006 (dev-infra) | 0208C58 |
 
 ## Resolved
 
