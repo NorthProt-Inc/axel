@@ -144,18 +144,33 @@ File: `.github/workflows/ci.yml`
 
 ### Usage
 
+**IMPORTANT**: Never use hardcoded credentials. Always use environment variables.
+
 ```bash
-# Apply all pending migrations
-DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
-  node tools/migrate/dist/cli.js up
+# Option 1: Using DATABASE_URL (recommended)
+export DATABASE_URL="postgresql://user:password@host:port/database"
+node tools/migrate/dist/cli.js up
+
+# Option 2: Using individual PG environment variables
+export PGHOST="localhost"
+export PGPORT="5432"
+export PGDATABASE="axel"
+export PGUSER="axel"
+export PGPASSWORD="your_secure_password"
+node tools/migrate/dist/cli.js up
 
 # Rollback specific migration
-DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
-  node tools/migrate/dist/cli.js down 6
+node tools/migrate/dist/cli.js down 6
 
 # Show migration status
-DATABASE_URL="postgresql://axel:axel_dev_password@localhost:5432/axel" \
-  node tools/migrate/dist/cli.js status
+node tools/migrate/dist/cli.js status
+```
+
+**Development Environment** (Docker Compose):
+```bash
+# Load credentials from .env file (not committed to git)
+export $(grep -v '^#' .env | xargs)
+node tools/migrate/dist/cli.js up
 ```
 
 ## Known Issues

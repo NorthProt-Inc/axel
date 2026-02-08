@@ -4,14 +4,43 @@ import { fileURLToPath } from 'node:url';
 import { Client } from 'pg';
 import { Migrator } from './migrator.js';
 
+/**
+ * Validates that required database connection environment variables are set.
+ * @throws {Error} If neither DATABASE_URL nor all individual PG* variables are provided.
+ */
+export function validateEnvironment(): void {
+	const hasConnectionString = Boolean(process.env.DATABASE_URL);
+	const hasIndividualVars =
+		Boolean(process.env.PGHOST) &&
+		Boolean(process.env.PGPORT) &&
+		Boolean(process.env.PGDATABASE) &&
+		Boolean(process.env.PGUSER) &&
+		Boolean(process.env.PGPASSWORD);
+
+	if (!hasConnectionString && !hasIndividualVars) {
+		throw new Error(
+			'DATABASE_URL or individual PG* environment variables (PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD) must be set',
+		);
+	}
+}
+
 async function main() {
 	const command = process.argv[2];
 	const arg = process.argv[3];
 
-	const connectionString =
-		process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/axel_dev';
+	// Validate environment before attempting connection
+	validateEnvironment();
 
-	const client = new Client({ connectionString });
+	const client = process.env.DATABASE_URL
+		? new Client({ connectionString: process.env.DATABASE_URL })
+		: new Client({
+				host: process.env.PGHOST,
+				port: Number.parseInt(process.env.PGPORT ?? '5432', 10),
+				database: process.env.PGDATABASE,
+				user: process.env.PGUSER,
+				password: process.env.PGPASSWORD,
+			});
+
 	await client.connect();
 
 	// Resolve migrations directory relative to this file
@@ -71,7 +100,10 @@ async function main() {
 	}
 }
 
-main().catch((error) => {
-	console.error('Migration error:', error);
-	process.exit(1);
-});
+// Only execute main() if this file is the entry point (not imported in tests)
+if (import.meta.url === `file://${process.argv[1]}`) {
+	main().catch((error) => {
+		console.error('Migration error:', error);
+		process.exit(1);
+	});
+}
