@@ -472,9 +472,9 @@ describe('DiscordChannel', () => {
 		it('throws on send to unknown channel', async () => {
 			await startChannel();
 
-			await expect(
-				channel.send('unknown-channel', { content: 'test' }),
-			).rejects.toThrow('Unknown Discord channel: unknown-channel');
+			await expect(channel.send('unknown-channel', { content: 'test' })).rejects.toThrow(
+				'Unknown Discord channel: unknown-channel',
+			);
 		});
 	});
 });

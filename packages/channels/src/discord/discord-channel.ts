@@ -7,7 +7,14 @@ import type {
 	OutboundMessage,
 } from '@axel/core/types';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import type { Message, TextBasedChannel } from 'discord.js';
+import type { Message } from 'discord.js';
+
+/** Sendable channel subset — excludes PartialGroupDMChannel (no send method) */
+interface SendableChannel {
+	readonly id: string;
+	send(options: { content: string }): Promise<Message>;
+	sendTyping(): Promise<void>;
+}
 
 const DISCORD_CHANNEL_ID = 'discord';
 const DISCORD_MAX_MESSAGE_LENGTH = 2000;
@@ -40,7 +47,7 @@ export class DiscordChannel implements AxelChannel {
 	private readonly handlers: InboundHandler[] = [];
 	private readonly disconnectHandlers: Array<(reason: string) => void> = [];
 	private readonly reconnectHandlers: Array<() => void> = [];
-	private readonly channelCache = new Map<string, TextBasedChannel>();
+	private readonly channelCache = new Map<string, SendableChannel>();
 
 	private readonly token: string;
 	private readonly createClientFn: () => Client;
@@ -100,11 +107,7 @@ export class DiscordChannel implements AxelChannel {
 		const uptime =
 			this.started && this.startedAt ? (now.getTime() - this.startedAt.getTime()) / 1000 : 0;
 
-		const state = this.started
-			? this.reconnecting
-				? 'degraded'
-				: 'healthy'
-			: 'unhealthy';
+		const state = this.started ? (this.reconnecting ? 'degraded' : 'healthy') : 'unhealthy';
 
 		return {
 			state,
@@ -154,43 +157,50 @@ export class DiscordChannel implements AxelChannel {
 			throw new Error(`Unknown Discord channel: ${target}`);
 		}
 
-		let accumulated = '';
-		let sentMessage: Message | null = null;
-		let lastEditTime = 0;
+		const state = createStreamingState();
 
 		for await (const chunk of stream) {
-			accumulated += chunk;
-
-			if (accumulated.length > DISCORD_MAX_MESSAGE_LENGTH) {
-				// Finalize current message and start new one
-				if (sentMessage) {
-					const finalContent = accumulated.slice(0, DISCORD_MAX_MESSAGE_LENGTH);
-					await sentMessage.edit({ content: finalContent });
-					accumulated = accumulated.slice(DISCORD_MAX_MESSAGE_LENGTH);
-					sentMessage = null;
-				}
-			}
-
-			const now = Date.now();
-			if (now - lastEditTime >= STREAMING_EDIT_INTERVAL_MS) {
-				const displayContent = accumulated.slice(0, DISCORD_MAX_MESSAGE_LENGTH);
-				if (sentMessage) {
-					await sentMessage.edit({ content: displayContent });
-				} else {
-					sentMessage = await discordChannel.send({ content: displayContent }) as Message;
-				}
-				lastEditTime = now;
-			}
+			state.accumulated += chunk;
+			await this.handleOverflow(state);
+			await this.throttledEdit(state, discordChannel);
 		}
 
-		// Final edit with complete content
-		if (accumulated.length > 0) {
-			const displayContent = accumulated.slice(0, DISCORD_MAX_MESSAGE_LENGTH);
-			if (sentMessage) {
-				await sentMessage.edit({ content: displayContent });
-			} else {
-				await discordChannel.send({ content: displayContent });
-			}
+		await this.finalizeStream(state, discordChannel);
+	}
+
+	private async handleOverflow(state: StreamingState): Promise<void> {
+		if (state.accumulated.length <= DISCORD_MAX_MESSAGE_LENGTH || !state.sentMessage) {
+			return;
+		}
+		const finalContent = state.accumulated.slice(0, DISCORD_MAX_MESSAGE_LENGTH);
+		await state.sentMessage.edit({ content: finalContent });
+		state.accumulated = state.accumulated.slice(DISCORD_MAX_MESSAGE_LENGTH);
+		state.sentMessage = null;
+	}
+
+	private async throttledEdit(state: StreamingState, ch: SendableChannel): Promise<void> {
+		const now = Date.now();
+		if (now - state.lastEditTime < STREAMING_EDIT_INTERVAL_MS) {
+			return;
+		}
+		const displayContent = state.accumulated.slice(0, DISCORD_MAX_MESSAGE_LENGTH);
+		if (state.sentMessage) {
+			await state.sentMessage.edit({ content: displayContent });
+		} else {
+			state.sentMessage = (await ch.send({ content: displayContent })) as Message;
+		}
+		state.lastEditTime = now;
+	}
+
+	private async finalizeStream(state: StreamingState, ch: SendableChannel): Promise<void> {
+		if (state.accumulated.length === 0) {
+			return;
+		}
+		const displayContent = state.accumulated.slice(0, DISCORD_MAX_MESSAGE_LENGTH);
+		if (state.sentMessage) {
+			await state.sentMessage.edit({ content: displayContent });
+		} else {
+			await ch.send({ content: displayContent });
 		}
 	}
 
@@ -216,9 +226,10 @@ export class DiscordChannel implements AxelChannel {
 
 		client.on('disconnect' as string, (event: unknown) => {
 			this.reconnecting = true;
-			const reason = typeof event === 'object' && event !== null && 'reason' in event
-				? String((event as { reason: unknown }).reason)
-				: 'Unknown disconnect reason';
+			const reason =
+				typeof event === 'object' && event !== null && 'reason' in event
+					? String((event as { reason: unknown }).reason)
+					: 'Unknown disconnect reason';
 			for (const handler of this.disconnectHandlers) {
 				handler(reason);
 			}
@@ -247,7 +258,7 @@ export class DiscordChannel implements AxelChannel {
 		}
 
 		// Cache the channel for outbound messages
-		this.channelCache.set(message.channelId, message.channel as TextBasedChannel);
+		this.channelCache.set(message.channelId, message.channel as SendableChannel);
 
 		const inbound: InboundMessage = {
 			userId: message.author.id,
@@ -264,6 +275,16 @@ export class DiscordChannel implements AxelChannel {
 			});
 		}
 	}
+}
+
+interface StreamingState {
+	accumulated: string;
+	sentMessage: Message | null;
+	lastEditTime: number;
+}
+
+function createStreamingState(): StreamingState {
+	return { accumulated: '', sentMessage: null, lastEditTime: 0 };
 }
 
 function splitMessage(content: string, maxLength: number): string[] {
