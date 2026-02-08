@@ -1,5 +1,6 @@
 export { classifyError } from './classify-error.js';
 export type { ClassifiedError } from './classify-error.js';
+export { generateRequestId, parseJsonBody, sendError, sendJson } from './http-utils.js';
 export { createGatewayServer } from './server.js';
 export type {
 	GatewayConfig,
@@ -7,4 +8,6 @@ export type {
 	HandleMessage,
 	MessageEvent,
 	MessageResult,
-} from './server.js';
+	Route,
+	RouteHandler,
+} from './types.js';

@@ -1,75 +1,18 @@
-import * as crypto from 'node:crypto';
 import * as http from 'node:http';
-import type { HealthStatus } from '@axel/core/types';
-import { type WebSocket, WebSocketServer } from 'ws';
+import { WebSocketServer } from 'ws';
 import { classifyError } from './classify-error.js';
+import {
+	generateRequestId,
+	parseChatInput,
+	sendError,
+	sendJson,
+	timingSafeEqual,
+} from './http-utils.js';
+import type { GatewayConfig, GatewayDeps, Route } from './types.js';
+import { type AuthenticatedWebSocket, setupWsAuth } from './ws-handler.js';
 
 const MAX_BODY_BYTES = 32_768; // 32KB
-const WS_AUTH_TIMEOUT_MS = 5_000;
 const RATE_LIMIT_WINDOW_MS = 60_000;
-
-export interface GatewayConfig {
-	readonly port: number;
-	readonly host: string;
-	readonly authToken: string;
-	readonly env: 'development' | 'production' | 'test';
-	readonly corsOrigins: readonly string[];
-	readonly rateLimitPerMinute: number;
-}
-
-/** Event emitted during streaming message processing */
-export interface MessageEvent {
-	readonly type: string;
-	readonly [key: string]: unknown;
-}
-
-/** Result from the message handler */
-export interface MessageResult {
-	readonly content: string;
-	readonly sessionId: string;
-	readonly channelSwitched: boolean;
-	readonly usage: {
-		readonly inputTokens: number;
-		readonly outputTokens: number;
-		readonly cacheReadTokens: number;
-		readonly cacheCreationTokens: number;
-	};
-}
-
-/**
- * Message handler function injected via DI.
- *
- * Maps to InboundHandler in the composition root (apps/axel/).
- * The optional onEvent callback enables streaming: each ReActEvent
- * is forwarded to the caller for SSE/WS streaming.
- */
-export type HandleMessage = (
-	message: { readonly userId: string; readonly channelId: string; readonly content: string },
-	onEvent?: (event: MessageEvent) => void,
-) => Promise<MessageResult>;
-
-export interface GatewayDeps {
-	readonly healthCheck: () => Promise<HealthStatus>;
-	readonly handleMessage?: HandleMessage;
-}
-
-type RouteHandler = (
-	req: http.IncomingMessage,
-	res: http.ServerResponse,
-	body: string,
-) => Promise<void>;
-
-interface Route {
-	readonly method: string;
-	readonly path: string;
-	readonly requiresAuth: boolean;
-	readonly handler: RouteHandler;
-}
-
-interface AuthenticatedWebSocket extends WebSocket {
-	authenticated?: boolean;
-	authTimer?: ReturnType<typeof setTimeout>;
-}
 
 export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	let httpServer: http.Server | null = null;
@@ -99,7 +42,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 				if (ws.authTimer) clearTimeout(ws.authTimer);
 				connections.delete(ws);
 			});
-			setupWsAuth(ws);
+			setupWsAuth(ws, config, deps);
 		});
 
 		return new Promise<http.Server>((resolve) => {
@@ -124,6 +67,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			});
 		});
 	}
+
+	// ─── HTTP Request Pipeline ───
 
 	function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
 		const requestId = generateRequestId();
@@ -238,118 +183,6 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		wss?.handleUpgrade(req, socket, head, (ws) => wss?.emit('connection', ws, req));
 	}
 
-	function setupWsAuth(ws: AuthenticatedWebSocket): void {
-		ws.authenticated = false;
-		ws.authTimer = setTimeout(() => {
-			if (!ws.authenticated) ws.close(4001, 'Auth timeout');
-		}, WS_AUTH_TIMEOUT_MS);
-
-		ws.on('message', (data: WebSocket.RawData) => {
-			ws.authenticated ? handleWsMessage(ws, data) : handleWsAuthMessage(ws, data);
-		});
-	}
-
-	function handleWsAuthMessage(ws: AuthenticatedWebSocket, data: WebSocket.RawData): void {
-		let parsed: Record<string, unknown>;
-		try {
-			parsed = JSON.parse(data.toString()) as Record<string, unknown>;
-		} catch {
-			ws.close(4001, 'Unauthorized');
-			return;
-		}
-
-		if (parsed.type !== 'auth' || typeof parsed.token !== 'string') {
-			ws.close(4001, 'Unauthorized');
-			return;
-		}
-
-		if (!timingSafeEqual(parsed.token, config.authToken)) {
-			ws.close(4001, 'Unauthorized');
-			return;
-		}
-
-		ws.authenticated = true;
-		if (ws.authTimer) {
-			clearTimeout(ws.authTimer);
-			ws.authTimer = undefined;
-		}
-		ws.send(JSON.stringify({ type: 'auth_ok' }));
-	}
-
-	function handleWsMessage(ws: WebSocket, data: WebSocket.RawData): void {
-		let parsed: Record<string, unknown>;
-		try {
-			parsed = JSON.parse(data.toString()) as Record<string, unknown>;
-		} catch {
-			ws.send(
-				JSON.stringify({ type: 'error', error: 'Invalid JSON', requestId: generateRequestId() }),
-			);
-			return;
-		}
-
-		if (parsed.type === 'session_info_request') {
-			ws.send(JSON.stringify({ type: 'session_info', session: null }));
-			return;
-		}
-
-		if (parsed.type === 'chat') {
-			handleWsChatMessage(ws, parsed);
-			return;
-		}
-
-		ws.send(
-			JSON.stringify({
-				type: 'error',
-				error: `Unknown message type: ${String(parsed.type)}`,
-				requestId: generateRequestId(),
-			}),
-		);
-	}
-
-	function handleWsChatMessage(ws: WebSocket, parsed: Record<string, unknown>): void {
-		const requestId = generateRequestId();
-		const content = parsed.content;
-		const channelId = parsed.channelId;
-
-		if (typeof content !== 'string' || content.length === 0) {
-			ws.send(JSON.stringify({ type: 'error', error: 'Missing content', requestId }));
-			return;
-		}
-		if (typeof channelId !== 'string' || channelId.length === 0) {
-			ws.send(JSON.stringify({ type: 'error', error: 'Missing channelId', requestId }));
-			return;
-		}
-
-		if (!deps.handleMessage) {
-			ws.send(JSON.stringify({ type: 'error', error: 'Chat handler not configured', requestId }));
-			return;
-		}
-
-		deps
-			.handleMessage({ userId: 'gateway-user', channelId, content }, (event) => {
-				if (ws.readyState === ws.OPEN) {
-					ws.send(JSON.stringify(event));
-				}
-			})
-			.then((result) => {
-				if (ws.readyState === ws.OPEN) {
-					ws.send(
-						JSON.stringify({
-							type: 'done',
-							sessionId: result.sessionId,
-							usage: result.usage,
-						}),
-					);
-				}
-			})
-			.catch((err: unknown) => {
-				if (ws.readyState === ws.OPEN) {
-					const classified = classifyError(err, config.env);
-					ws.send(JSON.stringify({ type: 'error', error: classified.message, requestId }));
-				}
-			});
-	}
-
 	// ─── Route Handlers ───
 
 	async function handleHealth(_req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -456,50 +289,4 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	}
 
 	return { start, stop };
-}
-
-// ─── Utilities ───
-
-function sendJson(res: http.ServerResponse, status: number, body: unknown): void {
-	res.writeHead(status, { 'Content-Type': 'application/json' });
-	res.end(JSON.stringify(body));
-}
-
-function sendError(
-	res: http.ServerResponse,
-	status: number,
-	message: string,
-	requestId: string,
-): void {
-	sendJson(res, status, { error: message, requestId });
-}
-
-function generateRequestId(): string {
-	return `req_${crypto.randomBytes(8).toString('hex')}`;
-}
-
-function parseChatInput(body: string): { content: string; channelId: string } | null {
-	const parsed = parseJsonBody(body);
-	if (!parsed) return null;
-	const { content, channelId } = parsed;
-	if (typeof content !== 'string' || content.length === 0) return null;
-	if (typeof channelId !== 'string' || channelId.length === 0) return null;
-	return { content, channelId };
-}
-
-function parseJsonBody(body: string): Record<string, unknown> | null {
-	try {
-		const parsed = JSON.parse(body);
-		if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-			return parsed as Record<string, unknown>;
-		}
-		return null;
-	} catch {
-		return null;
-	}
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-	if (a.length !== b.length) return false;
-	return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
 }
