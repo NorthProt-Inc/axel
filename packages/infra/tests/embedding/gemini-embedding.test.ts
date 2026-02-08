@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentHealth } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Types for the Embedding Service (will be implemented in src) ───
 

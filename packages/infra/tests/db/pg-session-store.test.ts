@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
 	ResolvedSession,
 	SessionStats,
@@ -6,6 +5,7 @@ import type {
 	UnifiedSession,
 } from '@axel/core/orchestrator';
 import type { SessionSummary } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock PG Pool ───
 

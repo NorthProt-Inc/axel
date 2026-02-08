@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentHealth } from '@axel/core/types';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Types for the PG Pool wrapper (will be implemented in src) ───
 

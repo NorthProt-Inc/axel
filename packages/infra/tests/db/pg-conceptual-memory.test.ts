@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
 	ConceptualMemory,
 	Entity,
@@ -6,6 +5,7 @@ import type {
 	NewEntity,
 	NewRelation,
 } from '@axel/core/memory';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock PG Pool ───
 

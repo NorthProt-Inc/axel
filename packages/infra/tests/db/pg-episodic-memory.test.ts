@@ -1,10 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type {
-	CreateSessionParams,
-	EpisodicMemory,
-	MessageRecord,
-} from '@axel/core/memory';
+import type { CreateSessionParams, EpisodicMemory, MessageRecord } from '@axel/core/memory';
 import type { SessionSummary } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock PG Pool ───
 

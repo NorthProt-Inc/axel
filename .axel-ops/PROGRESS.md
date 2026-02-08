@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **D: EDGE SPRINT — IN PROGRESS**
-- **Cycle**: 48
-- **Last Updated**: 2026-02-08C48
-- **STATUS**: **4 tasks completed.** EDGE-001 (channel types, 24 tests), FIX-INFRA-002 (bare catches fixed), FIX-INFRA-003 (mutable state + symlink + JSON.parse), DEVOPS-005 (channel/gateway deps). Biome format error fixed by CTO. Smoke test: **508 tests, 42 files**, typecheck+lint clean. **EDGE-002 (P0, CLI channel) assigned + unblocked.** DEVOPS-006, PLAN-AMEND-001, FIX-INFRA-004 assigned parallel. 0 open errors. Phase D 27% (4/15 tasks done).
+- **Cycle**: 49
+- **Last Updated**: 2026-02-08C49
+- **STATUS**: **3 tasks completed.** EDGE-002 (CLI channel, 21 tests, 95.95% stmt), FIX-INFRA-004 (relative→subpath imports, 24 files), DEVOPS-006 (subpath exports + vitest setup). Biome import/format fix (CTO). Smoke: **529 tests, 43 files**, typecheck+lint clean. PLAN-AMEND-001 in progress (arch, 1 cycle). **QA-017 unblocked** (dep: EDGE-002). BOOTSTRAP-001 + EDGE-003/004 unblocked. Phase D **47%** (7/15 done). 0 errors.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 7 |
-| In Progress | 4 |
-| Done | 74 |
+| Queued | 4 |
+| In Progress | 1 |
+| Done | 77 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -38,19 +38,20 @@
 | 42–46 | 0208 | **PHASE C: INFRA SPRINT.** INFRA-001~005 + COMMON-CB (475 tests). QA-016, AUDIT-003 done. |
 | 47 | 0208 | **PHASE D KICKOFF.** FIX-INFRA-001 done. 15 Phase D tasks created. EDGE-001 + FIX-INFRA-002/003 + DEVOPS-005 assigned. |
 | 48 | 0208 | **4 TASKS COMPLETED.** EDGE-001 (AxelChannel interface, 24 tests), FIX-INFRA-002 (bare catches→typed, PG fallbacks), FIX-INFRA-003 (mutable→per-instance, symlink, JSON.parse), DEVOPS-005 (channel/gateway deps). Biome format fix (CTO). Smoke: **508 tests, 42 files**, typecheck+lint clean. EDGE-002 (P0) + DEVOPS-006 + PLAN-AMEND-001 + FIX-INFRA-004 assigned. Phase D 27%. 0 errors. |
+| 49 | 0208 | **3 TASKS COMPLETED.** EDGE-002 (CLI Channel, 21 tests, 95.95% stmt), FIX-INFRA-004 (relative→@axel/core/* subpath imports, 24 files), DEVOPS-006 (subpath exports + vitest setup). Biome import/format fix (CTO). Smoke: **529 tests, 43 files**, typecheck+lint clean. PLAN-AMEND-001 in progress (arch, 1 cycle). QA-017 + BOOTSTRAP-001 + EDGE-003/004 unblocked. Phase D **47%**. 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C48 | Cycle 48 | Active |
-| Architecture | 0208C48 | PLAN-AMEND-001 | **Active** — ADR-002 PG 16→17, migration-strategy user_id |
+| Coordinator | 0208C49 | Cycle 49 | Active |
+| Architecture | 0208C48 | PLAN-AMEND-001 | **Active** — ADR-002 PG 16→17, migration-strategy user_id (1 cycle) |
 | Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
-| Dev-Infra | 0208C48 | FIX-INFRA-004 | **Active** — relative imports → @axel/core/* subpath exports |
-| Dev-Edge | 0208C48 | EDGE-002 | **Active** — CLI Channel implementation (P0) |
+| Dev-Infra | 0208C49 | — | **Idle** — FIX-INFRA-004 done. No infra tasks queued. |
+| Dev-Edge | 0208C49 | EDGE-003 | **Active** — Discord Channel (P1, assigned C49) |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C46 | — | Idle (QA-017 queued, activated when EDGE-002 done) |
-| DevOps | 0208C48 | DEVOPS-006 | **Active** — channels/gateway subpath exports + vitest config |
+| Quality | 0208C49 | QA-017 | **Active** — Phase D code review (P1, EDGE-002 dep met) |
+| DevOps | 0208C49 | — | **Idle** — DEVOPS-006 done. No devops tasks queued. |
 | Audit | 0208C46 | — | Idle (next audit at Phase D milestone) |
 
 ## Human Intervention Needed

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessPattern, HotMemory, MetaMemory } from '@axel/core/memory';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock PG Pool ───
 

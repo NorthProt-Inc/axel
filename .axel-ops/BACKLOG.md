@@ -2,28 +2,25 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 48**: Phase D Edge Sprint. EDGE-001 + FIX-INFRA-002/003 + DEVOPS-005 completed. 508 tests, 42 files pass. EDGE-002 (P0, CLI channel) unblocked and assigned. DEVOPS-006, PLAN-AMEND-001, FIX-INFRA-004 assigned parallel.
+> **Cycle 49**: Phase D Edge Sprint 47%. EDGE-002 + FIX-INFRA-004 + DEVOPS-006 completed (529 tests, 43 files). QA-017 unblocked. EDGE-003 assigned to dev-edge. QA-017 assigned to quality. PLAN-AMEND-001 (arch) still in progress.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
 | BOOTSTRAP-001 | P1 | dev-edge | Implement bootstrap + DI container in apps/axel/src/. main.ts (container assembly), config.ts (Zod AxelConfigSchema + .env loading), lifecycle.ts (startup/shutdown per ADR-021). ~20 injectable services. Per plan lines 308-338, 579-680. TDD mandatory. | EDGE-001, EDGE-002 |
-| EDGE-003 | P1 | dev-edge | Implement Discord Channel in packages/channels/src/discord/. discord.js. AxelChannel impl. Streaming (message edit), 2000 char limit, reconnection (exponential backoff + circuit breaker per ADR-021). Per plan L8 + ADR-009. TDD mandatory. | EDGE-001, DEVOPS-005 |
 | EDGE-004 | P1 | dev-edge | Implement Telegram Channel in packages/channels/src/telegram/. grammy. AxelChannel impl. Polling mode (Phase D). 4096 char limit. typingIndicator via sendChatAction. Per plan L8 + ADR-009. TDD mandatory. | EDGE-001, DEVOPS-005 |
 | EDGE-005 | P1 | dev-edge | Implement Gateway HTTP + WebSocket in packages/gateway/src/. Routes per openapi-v1.yaml: /health, /api/v1/chat, /api/v1/memory/search, /api/v1/session, /ws. WebSocket protocol per websocket-protocol.md. Security middleware: CORS, JWT auth, rate limiting, input validation (Zod), error redaction (ADR-011). Per plan L9 (lines 1564-1629). TDD mandatory. | EDGE-001, BOOTSTRAP-001 |
-| SYNC-005 | P1 | arch | PLAN_SYNC.md Phase D update. Map all EDGE-001~005 + BOOTSTRAP-001 code to plan sections. Verify interfaces match plan specs. | EDGE-002 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
-| QA-017 | P1 | quality | Phase D code review — all channels + gateway + bootstrap. Verify: TDD, CONSTITUTION §9, coverage targets (channels 75%, gateway 80%), Biome+tsc clean, ADR compliance (009/011/014/019/020/021). | EDGE-002 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| EDGE-002 | dev-edge | 0208C48 | C48–C49 |
-| DEVOPS-006 | devops | 0208C48 | C48 |
-| PLAN-AMEND-001 | arch | 0208C48 | C48 |
-| FIX-INFRA-004 | dev-infra | 0208C48 | C48–C49 |
+| PLAN-AMEND-001 | arch | 0208C48 | C49–C50 |
+| EDGE-003 | dev-edge | 0208C49 | C49–C50 |
+| QA-017 | quality | 0208C49 | C50–C51 |
+| SYNC-005 | arch | 0208C49 | C50 (after PLAN-AMEND-001) |
 
 ## Cancelled
 
@@ -121,3 +118,6 @@
 | FIX-INFRA-002 | dev-infra | 0208C48 | 8 bare catch → typed catch, getSummary PG fallback, compress PG fallback. 154 infra tests pass, cache 94.6% stmt. |
 | FIX-INFRA-003 | dev-infra | 0208C48 | Global mutable → per-instance, JSON.parse → throws ProviderError, validatePath async symlink. llm 97.32%, mcp 91.42%. |
 | DEVOPS-005 | devops | 0208C48 | discord.js + grammy (channels), pino + ws + zod (gateway). 508 tests pass, typecheck+lint clean. |
+| EDGE-002 | dev-edge | 0208C49 | CLI Channel AxelChannel impl. readline, streaming, start/stop lifecycle. 21 tests, 95.95% stmt. 529 tests total. |
+| FIX-INFRA-004 | dev-infra | 0208C49 | Migrated 24 files relative→@axel/core/* subpath imports. 154 infra tests pass. |
+| DEVOPS-006 | devops | 0208C49 | Subpath exports @axel/channels + @axel/gateway. Vitest setup files + coverage config. 508→529 tests. |

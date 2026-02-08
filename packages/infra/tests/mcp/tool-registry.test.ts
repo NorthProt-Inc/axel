@@ -1,6 +1,6 @@
+import type { ToolResult } from '@axel/core/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import type { ToolResult } from '@axel/core/types';
 
 const importModule = async () => import('../../src/mcp/tool-registry.js');
 

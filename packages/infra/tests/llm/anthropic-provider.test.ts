@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LlmChatChunk, LlmChatParams } from '@axel/core/orchestrator';
 import type { ToolDefinition } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock Anthropic SDK Client ───
 

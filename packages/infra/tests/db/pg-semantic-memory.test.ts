@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
 	DecayResult,
 	NewMemory,
@@ -7,6 +6,7 @@ import type {
 	SemanticQuery,
 } from '@axel/core/memory';
 import type { Memory, MemoryType } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock PG Pool ───
 

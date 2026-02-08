@@ -1,8 +1,4 @@
-import type {
-	CreateSessionParams,
-	EpisodicMemory,
-	MessageRecord,
-} from '@axel/core/memory';
+import type { CreateSessionParams, EpisodicMemory, MessageRecord } from '@axel/core/memory';
 import type { ComponentHealth, SessionSummary } from '@axel/core/types';
 import type { PgPoolDriver } from './pg-pool.js';
 

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LlmChatChunk } from '@axel/core/orchestrator';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock Google Generative AI Client ───
 

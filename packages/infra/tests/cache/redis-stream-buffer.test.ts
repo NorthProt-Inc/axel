@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StreamEventType } from '@axel/core/memory';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mock Types ───
 
