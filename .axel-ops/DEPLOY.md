@@ -22,7 +22,7 @@
 | `biome.json` | ✅ CREATED | Linter + formatter config |
 | `package.json` (root) | ✅ CREATED | Workspace scripts |
 | `vitest.config.ts` (root) | ✅ CREATED | Test config |
-| `packages/core/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
+| `packages/core/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts, @vitest/coverage-v8 |
 | `packages/infra/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
 | `packages/channels/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
 | `packages/gateway/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
@@ -47,6 +47,15 @@ File: `.github/workflows/ci.yml`
 - Node.js 22, pnpm 9
 - pnpm store caching enabled
 - Sequential: lint → typecheck → test
+
+## Coverage Tooling
+
+| Package | Provider | Thresholds | Status |
+|---------|----------|------------|--------|
+| `@axel/core` | v8 | 90% (lines/functions/branches/statements) | ✅ CONFIGURED |
+| `@axel/infra` | — | 80% | ⏳ PENDING |
+| `@axel/channels` | — | 75% | ⏳ PENDING |
+| `@axel/gateway` | — | 80% | ⏳ PENDING |
 
 ## Release History
 
