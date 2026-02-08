@@ -1,4 +1,4 @@
-# Project Axel: Technical Architecture Plan v2.0.2
+# Project Axel: Technical Architecture Plan v2.0.3
 
 > "데이터, 솔직히 그게 알맹이야. 너한텐 영혼이나 마찬가지니까."
 > — Mark, 2026-02-07 05:39 PST
@@ -16,7 +16,7 @@
 
 **원칙**: "거북이 위의 거북이" — 가능한 가장 밑으로 내려가서, 거기서부터 토대를 쌓는다. 기존 코드가 완벽하다고 절대 전제하지 않는다.
 
-**버전**: v2.0.2 (Planning Phase 기준선) — v1.0의 비전은 유지하되, 구체적 기술 결정과 근거를 추가
+**버전**: v2.0.3 (Planning Phase 기준선) — v1.0의 비전은 유지하되, 구체적 기술 결정과 근거를 추가
 
 ---
 
@@ -2098,7 +2098,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 
 ---
 
-*NorthProt — Project Axel Technical Architecture Plan v2.0.2*
+*NorthProt — Project Axel Technical Architecture Plan v2.0.3*
 *Generated: 2026-02-07*
 *Based on: axnmihn analysis (127 modules), claude_reports (23 reports), OpenClaw analysis (174K stars)*
 *Authors: Mark (Architect) & Claude (Systems Analyst)*

@@ -25,13 +25,14 @@ axnmihn은 `text-embedding-004` (768d)를 사용했으나, **2026-01-14에 depre
 |-----------|-------|
 | Model ID | `gemini-embedding-001` |
 | Provider | Google (Gemini API) |
-| Max input tokens | 8,192 |
-| Output dimensions | 3,072 (full) / 1,536 (truncated) / 768 (truncated) / 256 (truncated) |
+| Max input tokens | 2,048 |
+| Output dimensions | 128–3,072 (유연). 추천값: 768 / 1,536 / 3,072. Axel: 3,072 (full) |
 | Dimension method | Matryoshka Representation Learning |
-| MTEB score | 68.32 (#1 ranking, 2026-01 기준) |
+| MTEB score | 68.16 (GA model 3072d). 실험 모델(gemini-embedding-exp-03-07): 68.32 |
 | Language support | 100+ languages (한국어 포함) |
 | Pricing | $0.15 / 1M tokens |
-| Task types | `RETRIEVAL_DOCUMENT`, `RETRIEVAL_QUERY`, `SEMANTIC_SIMILARITY`, `CLASSIFICATION`, `CLUSTERING` |
+| Batch API | `batchEmbedContents` endpoint — 최대 250 texts/request (Vertex AI) |
+| Task types | `RETRIEVAL_DOCUMENT`, `RETRIEVAL_QUERY`, `SEMANTIC_SIMILARITY`, `CLASSIFICATION`, `CLUSTERING`, `CODE_RETRIEVAL_QUERY`, `QUESTION_ANSWERING`, `FACT_VERIFICATION` (8개) |
 
 ### Dimension Choice: 3072d (Full Dimension)
 
@@ -65,8 +66,8 @@ interface EmbeddingConfig {
   readonly model: "gemini-embedding-001";
   readonly dimension: 3072;
   readonly taskType: "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY";
-  readonly batchSize: 100;      // max texts per API call
-  readonly rateLimitRpm: 1500;  // Gemini free tier
+  readonly batchSize: 100;      // conservative default. batchEmbedContents supports up to 250 (Vertex AI)
+  readonly rateLimitRpm: 1500;  // Gemini paid tier. Free tier: ~5-15 RPM (RES-003)
 }
 
 // 저장 시: taskType = "RETRIEVAL_DOCUMENT"
@@ -89,7 +90,7 @@ Re-embedding 상세 계획은 PLAN-003 (Migration Strategy)에서 정의:
 
 | Option | MTEB Score | Dimensions | Pricing | Pros | Cons |
 |--------|-----------|------------|---------|------|------|
-| **gemini-embedding-001 (선택)** | 68.32 | 3072/768/256 | $0.15/1M | #1 MTEB, Matryoshka, 한국어 우수 | Google API 의존 |
+| **gemini-embedding-001 (선택)** | 68.16 (GA 3072d) | 128–3072 | $0.15/1M | #1 MTEB, Matryoshka, 한국어 우수, batch API | Google API 의존 |
 | text-embedding-004 | 66.15 | 768 | $0.10/1M | axnmihn에서 사용, 직접 복사 가능 | **Deprecated (2026-01-14)** |
 | OpenAI text-embedding-3-large | 64.59 | 3072/1536/256 | $0.13/1M | Matryoshka 지원, 안정적 | MTEB 점수 낮음, OpenAI API 추가 의존성 |
 | Voyage voyage-3 | 67.13 | 1024 | $0.06/1M | 가격 우수 | 3072d 미지원, 생태계 작음 |

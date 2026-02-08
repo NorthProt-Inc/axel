@@ -37,11 +37,13 @@ Mark가 2026-02-08에 768d truncation 대신 3072d full dimension을 직접 지�
 
 ---
 
-## 2. WebChat Framework: React
+## 2. WebChat Framework: ~~React~~ → Svelte 5
 
-### Decision
+> **SUPERSEDED**: ADR-017에 의해 Svelte 5 (SvelteKit)로 변경됨 (2026-02-08). 아래 원래 React 결정은 역사적 기록으로 보존.
 
-**React** (Vite + React) 사용.
+### Decision (Original — Superseded by ADR-017)
+
+~~**React** (Vite + React) 사용.~~ → **Svelte 5 (SvelteKit)** — ADR-017.
 
 ### Rationale
 
@@ -174,7 +176,7 @@ Phase 2+:  pino → OpenTelemetry Collector → Grafana Cloud
 | # | Item | Decision | ADR |
 |---|------|----------|-----|
 | 1 | Embedding model | gemini-embedding-001 (3072d) | ADR-016 (신규) |
-| 2 | WebChat framework | React (Vite) | — (plan 확정) |
+| 2 | WebChat framework | ~~React (Vite)~~ → Svelte 5 (SvelteKit) | ADR-017 (superseded) |
 | 3 | CI/CD | GitHub Actions (3-stage) | — (plan 확정) |
 | 4 | Deployment | Docker Compose on VPS | — (plan 확정) |
 | 5 | Monitoring | Structured logs → Phase 2 Grafana | — (plan 확정) |
