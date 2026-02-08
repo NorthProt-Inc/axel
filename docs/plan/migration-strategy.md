@@ -177,14 +177,14 @@ CREATE TABLE memories (
     last_decayed_at     TIMESTAMPTZ
 );
 
--- IVFFlat index for ~1,000 vectors. lists = ceil(sqrt(1000)) * ~3 ≈ 100.
--- Review: switch to HNSW when vector count exceeds 10,000 (see ADR-013 notes).
--- NOTE: IVFFlat requires training data. Index must be created AFTER initial data load.
--- For empty table, create index after migration data import (see migration-data-import.md).
--- On empty tables, the index will work but with suboptimal recall.
+-- HNSW index for vector search (consistent with plan body Section 4 Layer 3).
+-- RES-001: HNSW recommended (7.4x faster queries, better recall than IVFFlat).
+-- m=16, ef_construction=64 suitable for 3072d vectors at 1K-10K scale.
+-- Memory: (3072 × 4) + (16 × 2 × 4) = 12,416 bytes/vector. 1K vectors ≈ 12MB, 10K ≈ 118MB.
+-- Phase 0 VPS (8GB RAM) can accommodate this comfortably.
 CREATE INDEX idx_memories_embedding ON memories
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);
+    USING hnsw (embedding vector_cosine_ops)
+    WITH (m = 16, ef_construction = 64);
 
 CREATE INDEX idx_memories_importance ON memories (importance DESC);
 CREATE INDEX idx_memories_type ON memories (memory_type, importance DESC);
