@@ -1,0 +1,2 @@
+{"ts":"0207T2136","from":"research","type":"claim","task":"RES-001","note":"Starting pgvector index comparison research"}
+{"ts":"0207T2138","from":"research","type":"done","task":"RES-001","out":"docs/research/RES-001-pgvector-index-comparison.md","note":"HNSW recommended: 15.6x faster queries, handles dynamic updates better, 73MB @ 100K vectors acceptable"}
