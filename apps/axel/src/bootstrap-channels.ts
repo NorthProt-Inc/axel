@@ -48,6 +48,7 @@ function buildHandler(container: Container, personaEngine: PersonaEngine) {
 		llmProvider: container.anthropicProvider,
 		toolExecutor: container.toolExecutor,
 		personaEngine,
+		toolDefinitions: container.toolRegistry.listAll(),
 	});
 }
 
