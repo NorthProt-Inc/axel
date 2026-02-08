@@ -1,11 +1,11 @@
 import type { ComponentHealth } from '../types/health.js';
 import type {
 	ConceptualMemory,
-	NewEntity,
 	Entity,
+	GraphNode,
+	NewEntity,
 	NewRelation,
 	Relation,
-	GraphNode,
 } from './types.js';
 
 /** In-memory stub for M4 Conceptual Memory (ADR-013). Production uses PostgreSQL. */
@@ -40,37 +40,37 @@ export class InMemoryConceptualMemory implements ConceptualMemory {
 		});
 	}
 
-	async traverse(
-		entityId: string,
-		maxDepth: number,
-	): Promise<readonly GraphNode[]> {
+	async traverse(entityId: string, maxDepth: number): Promise<readonly GraphNode[]> {
 		const visited = new Set<string>([entityId]);
 		const result: GraphNode[] = [];
 		let frontier = [entityId];
 
 		for (let depth = 1; depth <= maxDepth; depth++) {
-			const nextFrontier: string[] = [];
-			for (const sourceId of frontier) {
-				for (const rel of this.relations) {
-					if (rel.sourceId === sourceId && !visited.has(rel.targetId)) {
-						visited.add(rel.targetId);
-						const entity = this.entities.get(rel.targetId);
-						if (entity) {
-							result.push({
-								entity,
-								relationType: rel.relationType,
-								weight: rel.weight,
-								depth,
-							});
-							nextFrontier.push(rel.targetId);
-						}
-					}
-				}
-			}
+			const nextFrontier = this.expandFrontier(frontier, visited, result, depth);
 			frontier = nextFrontier;
 		}
 
 		return result;
+	}
+
+	private expandFrontier(
+		frontier: readonly string[],
+		visited: Set<string>,
+		result: GraphNode[],
+		depth: number,
+	): string[] {
+		const nextFrontier: string[] = [];
+		for (const sourceId of frontier) {
+			for (const rel of this.relations) {
+				if (rel.sourceId !== sourceId || visited.has(rel.targetId)) continue;
+				visited.add(rel.targetId);
+				const entity = this.entities.get(rel.targetId);
+				if (!entity) continue;
+				result.push({ entity, relationType: rel.relationType, weight: rel.weight, depth });
+				nextFrontier.push(rel.targetId);
+			}
+		}
+		return nextFrontier;
 	}
 
 	async findEntity(name: string): Promise<Entity | null> {
@@ -82,10 +82,7 @@ export class InMemoryConceptualMemory implements ConceptualMemory {
 		return null;
 	}
 
-	async getRelated(
-		entityId: string,
-		relationType?: string,
-	): Promise<readonly Entity[]> {
+	async getRelated(entityId: string, relationType?: string): Promise<readonly Entity[]> {
 		const related: Entity[] = [];
 		for (const rel of this.relations) {
 			if (rel.sourceId !== entityId) continue;

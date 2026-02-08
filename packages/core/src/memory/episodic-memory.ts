@@ -1,10 +1,6 @@
 import type { ComponentHealth } from '../types/health.js';
 import type { SessionSummary } from '../types/session.js';
-import type {
-	EpisodicMemory,
-	CreateSessionParams,
-	MessageRecord,
-} from './types.js';
+import type { CreateSessionParams, EpisodicMemory, MessageRecord } from './types.js';
 
 interface StoredSession {
 	readonly sessionId: string;
@@ -56,40 +52,29 @@ export class InMemoryEpisodicMemory implements EpisodicMemory {
 		session.messages.push(message);
 	}
 
-	async getRecentSessions(
-		userId: string,
-		limit: number,
-	): Promise<readonly SessionSummary[]> {
+	async getRecentSessions(userId: string, limit: number): Promise<readonly SessionSummary[]> {
 		const completed = [...this.sessions.values()]
 			.filter((s) => s.userId === userId && s.endedAt !== null)
-			.sort((a, b) => b.endedAt!.getTime() - a.endedAt!.getTime())
+			.sort((a, b) => (b.endedAt?.getTime() ?? 0) - (a.endedAt?.getTime() ?? 0))
 			.slice(0, limit);
 
 		return completed.map((s) => this.toSessionSummary(s));
 	}
 
-	async searchByTopic(
-		topic: string,
-		limit: number,
-	): Promise<readonly SessionSummary[]> {
+	async searchByTopic(topic: string, limit: number): Promise<readonly SessionSummary[]> {
 		const lowerTopic = topic.toLowerCase();
 		return [...this.sessions.values()]
 			.filter(
 				(s) =>
 					s.endedAt !== null &&
 					(s.summary?.toLowerCase().includes(lowerTopic) ||
-						s.messages.some((m) =>
-							m.content.toLowerCase().includes(lowerTopic),
-						)),
+						s.messages.some((m) => m.content.toLowerCase().includes(lowerTopic))),
 			)
 			.slice(0, limit)
 			.map((s) => this.toSessionSummary(s));
 	}
 
-	async searchByContent(
-		query: string,
-		limit: number,
-	): Promise<readonly MessageRecord[]> {
+	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {
 		const lowerQuery = query.toLowerCase();
 		const results: MessageRecord[] = [];
 		for (const session of this.sessions.values()) {
@@ -115,9 +100,7 @@ export class InMemoryEpisodicMemory implements EpisodicMemory {
 	}
 
 	private toSessionSummary(session: StoredSession): SessionSummary {
-		const channels = [
-			...new Set(session.messages.map((m) => m.channelId)),
-		];
+		const channels = [...new Set(session.messages.map((m) => m.channelId))];
 		return {
 			sessionId: session.sessionId,
 			summary: session.summary ?? '',

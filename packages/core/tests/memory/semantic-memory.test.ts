@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { InMemorySemanticMemory } from '../../src/memory/semantic-memory.js';
-import type { NewMemory, SemanticQuery, ScoredMemory } from '../../src/memory/types.js';
+import type { NewMemory, ScoredMemory, SemanticQuery } from '../../src/memory/types.js';
 import type { Memory } from '../../src/types/memory.js';
 
 describe('InMemorySemanticMemory', () => {
@@ -114,7 +114,7 @@ describe('InMemorySemanticMemory', () => {
 
 			const results = await semantic.search(query);
 			if (results.length > 0) {
-				const result = results[0]!;
+				const result = results[0];
 				expect(typeof result.vectorScore).toBe('number');
 				expect(typeof result.textScore).toBe('number');
 				expect(typeof result.finalScore).toBe('number');
@@ -127,8 +127,8 @@ describe('InMemorySemanticMemory', () => {
 			const uuid = await semantic.store(makeNewMemory({ content: 'Specific memory' }));
 			const memory = await semantic.getByUuid(uuid);
 			expect(memory).not.toBeNull();
-			expect(memory!.content).toBe('Specific memory');
-			expect(memory!.uuid).toBe(uuid);
+			expect(memory?.content).toBe('Specific memory');
+			expect(memory?.uuid).toBe(uuid);
 		});
 
 		it('should return null for non-existent uuid', async () => {
@@ -141,15 +141,13 @@ describe('InMemorySemanticMemory', () => {
 		it('should increment accessCount and update lastAccessed', async () => {
 			const uuid = await semantic.store(makeNewMemory());
 			const before = await semantic.getByUuid(uuid);
-			expect(before!.accessCount).toBe(0);
+			expect(before?.accessCount).toBe(0);
 
 			await semantic.updateAccess(uuid);
 
 			const after = await semantic.getByUuid(uuid);
-			expect(after!.accessCount).toBe(1);
-			expect(after!.lastAccessed.getTime()).toBeGreaterThanOrEqual(
-				before!.lastAccessed.getTime(),
-			);
+			expect(after?.accessCount).toBe(1);
+			expect(after?.lastAccessed.getTime()).toBeGreaterThanOrEqual(before?.lastAccessed.getTime());
 		});
 	});
 

@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeEach } from 'vitest';
-import { InMemoryWorkingMemory } from '../../src/memory/working-memory.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { Turn } from '../../src/memory/types.js';
+import { InMemoryWorkingMemory } from '../../src/memory/working-memory.js';
 
 describe('InMemoryWorkingMemory', () => {
 	let wm: InMemoryWorkingMemory;
@@ -29,7 +29,7 @@ describe('InMemoryWorkingMemory', () => {
 
 			const turns = await wm.getTurns('user-1', 10);
 			expect(turns).toHaveLength(1);
-			expect(turns[0]!.content).toBe('Hello!');
+			expect(turns[0]?.content).toBe('Hello!');
 		});
 
 		it('should return turns in chronological order', async () => {
@@ -46,8 +46,8 @@ describe('InMemoryWorkingMemory', () => {
 
 			const turns = await wm.getTurns('user-1', 10);
 			expect(turns).toHaveLength(3);
-			expect(turns[0]!.turnId).toBe(0);
-			expect(turns[2]!.turnId).toBe(2);
+			expect(turns[0]?.turnId).toBe(0);
+			expect(turns[2]?.turnId).toBe(2);
 		});
 
 		it('should limit returned turns', async () => {
@@ -65,8 +65,8 @@ describe('InMemoryWorkingMemory', () => {
 			const turns = await wm.getTurns('user-1', 3);
 			expect(turns).toHaveLength(3);
 			// Should return the most recent 3 turns
-			expect(turns[0]!.turnId).toBe(7);
-			expect(turns[2]!.turnId).toBe(9);
+			expect(turns[0]?.turnId).toBe(7);
+			expect(turns[2]?.turnId).toBe(9);
 		});
 
 		it('should keep only 20 turns max (plan spec)', async () => {
@@ -108,8 +108,8 @@ describe('InMemoryWorkingMemory', () => {
 			const turns2 = await wm.getTurns('user-2', 10);
 			expect(turns1).toHaveLength(1);
 			expect(turns2).toHaveLength(1);
-			expect(turns1[0]!.content).toBe('From user 1');
-			expect(turns2[0]!.content).toBe('From user 2');
+			expect(turns1[0]?.content).toBe('From user 1');
+			expect(turns2[0]?.content).toBe('From user 2');
 		});
 
 		it('should support cross-channel turns in same user working memory', async () => {
@@ -132,8 +132,8 @@ describe('InMemoryWorkingMemory', () => {
 
 			const turns = await wm.getTurns('user-1', 10);
 			expect(turns).toHaveLength(2);
-			expect(turns[0]!.channelId).toBe('discord');
-			expect(turns[1]!.channelId).toBe('telegram');
+			expect(turns[0]?.channelId).toBe('discord');
+			expect(turns[1]?.channelId).toBe('telegram');
 		});
 	});
 

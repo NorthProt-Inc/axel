@@ -1,12 +1,12 @@
 import type { ComponentHealth } from '../types/health.js';
 import type { Memory } from '../types/memory.js';
 import type {
-	SemanticMemory,
-	NewMemory,
-	SemanticQuery,
-	ScoredMemory,
 	DecayResult,
 	DecayRunConfig,
+	NewMemory,
+	ScoredMemory,
+	SemanticMemory,
+	SemanticQuery,
 } from './types.js';
 
 /** In-memory stub for M3 Semantic Memory (ADR-013, ADR-016). Production uses pgvector. */
@@ -41,7 +41,8 @@ export class InMemorySemanticMemory implements SemanticMemory {
 		let results = [...this.memories.values()];
 
 		if (query.minImportance !== undefined) {
-			results = results.filter((m) => m.importance >= query.minImportance!);
+			const min = query.minImportance;
+			results = results.filter((m) => m.importance >= min);
 		}
 
 		if (query.memoryTypes && query.memoryTypes.length > 0) {
@@ -50,9 +51,7 @@ export class InMemorySemanticMemory implements SemanticMemory {
 		}
 
 		if (query.channelFilter) {
-			results = results.filter(
-				(m) => m.sourceChannel === query.channelFilter,
-			);
+			results = results.filter((m) => m.sourceChannel === query.channelFilter);
 		}
 
 		return results.slice(0, query.limit).map((memory) => {
@@ -136,9 +135,11 @@ export class InMemorySemanticMemory implements SemanticMemory {
 		let normA = 0;
 		let normB = 0;
 		for (let i = 0; i < a.length; i++) {
-			dot += a[i]! * b[i]!;
-			normA += a[i]! * a[i]!;
-			normB += b[i]! * b[i]!;
+			const ai = a[i] ?? 0;
+			const bi = b[i] ?? 0;
+			dot += ai * bi;
+			normA += ai * ai;
+			normB += bi * bi;
 		}
 		const denom = Math.sqrt(normA) * Math.sqrt(normB);
 		return denom > 0 ? dot / denom : 0;

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryMetaMemory } from '../../src/memory/meta-memory.js';
 
 describe('InMemoryMetaMemory', () => {
@@ -45,7 +45,7 @@ describe('InMemoryMetaMemory', () => {
 			// Memory 42 should be hot (accessed 5 times)
 			const mem42 = hot.find((h) => h.memoryId === 42);
 			expect(mem42).toBeDefined();
-			expect(mem42!.accessCount).toBe(5);
+			expect(mem42?.accessCount).toBe(5);
 		});
 
 		it('should respect limit', async () => {
@@ -91,7 +91,7 @@ describe('InMemoryMetaMemory', () => {
 			const hot = await meta.getHotMemories(10);
 			const mem42 = hot.find((h) => h.memoryId === 42);
 			expect(mem42).toBeDefined();
-			expect(mem42!.channelDiversity).toBe(3);
+			expect(mem42?.channelDiversity).toBe(3);
 		});
 	});
 

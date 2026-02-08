@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryEpisodicMemory } from '../../src/memory/episodic-memory.js';
 
 describe('InMemoryEpisodicMemory', () => {
@@ -36,9 +36,7 @@ describe('InMemoryEpisodicMemory', () => {
 		});
 
 		it('should throw when ending non-existent session', async () => {
-			await expect(
-				episodic.endSession('nonexistent', 'summary'),
-			).rejects.toThrow();
+			await expect(episodic.endSession('nonexistent', 'summary')).rejects.toThrow();
 		});
 	});
 
@@ -92,7 +90,7 @@ describe('InMemoryEpisodicMemory', () => {
 
 			const sessions = await episodic.getRecentSessions('user-1', 10);
 			expect(sessions).toHaveLength(1);
-			expect(sessions[0]!.summary).toBe('Greeted the assistant');
+			expect(sessions[0]?.summary).toBe('Greeted the assistant');
 		});
 
 		it('should return empty array for user with no sessions', async () => {
@@ -173,7 +171,7 @@ describe('InMemoryEpisodicMemory', () => {
 
 			const results = await episodic.searchByContent('jazz', 10);
 			expect(results.length).toBeGreaterThanOrEqual(1);
-			expect(results[0]!.content).toContain('jazz');
+			expect(results[0]?.content).toContain('jazz');
 		});
 
 		it('should return empty for no matches', async () => {

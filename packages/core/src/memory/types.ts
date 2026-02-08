@@ -17,11 +17,7 @@ export type MemoryLayerName =
 // ─── M0: Stream Buffer Types ───
 
 /** Stream event type classification */
-export type StreamEventType =
-	| 'typing_start'
-	| 'channel_switch'
-	| 'iot_trigger'
-	| 'presence_change';
+export type StreamEventType = 'typing_start' | 'channel_switch' | 'iot_trigger' | 'presence_change';
 
 /** Real-time event in the stream buffer (M0) */
 export interface StreamEvent {

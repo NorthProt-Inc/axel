@@ -1,26 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import type {
+	AccessPattern,
+	CreateSessionParams,
+	DecayResult,
+	Entity,
+	GraphNode,
+	HotMemory,
+	MessageRecord,
+	NewEntity,
+	NewMemory,
+	NewRelation,
+	Relation,
+	ScoredMemory,
+	SemanticQuery,
 	StreamEvent,
 	StreamEventType,
 	Turn,
-	CreateSessionParams,
-	MessageRecord,
-	SemanticQuery,
-	ScoredMemory,
-	DecayResult,
-	NewEntity,
-	Entity,
-	NewRelation,
-	Relation,
-	GraphNode,
-	AccessPattern,
-	HotMemory,
-	NewMemory,
 } from '../../src/memory/types.js';
 import type { ComponentHealth } from '../../src/types/health.js';
-import type { Memory, MemoryType, MemorySearchResult } from '../../src/types/memory.js';
-import type { SessionSummary } from '../../src/types/session.js';
+import type { Memory, MemorySearchResult, MemoryType } from '../../src/types/memory.js';
 import type { MessageRole } from '../../src/types/message.js';
+import type { SessionSummary } from '../../src/types/session.js';
 
 describe('Memory Layer Types', () => {
 	describe('StreamEvent', () => {

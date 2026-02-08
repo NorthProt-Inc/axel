@@ -1,5 +1,5 @@
 import type { ComponentHealth } from '../types/health.js';
-import type { WorkingMemory, Turn } from './types.js';
+import type { Turn, WorkingMemory } from './types.js';
 
 const MAX_TURNS = 20;
 

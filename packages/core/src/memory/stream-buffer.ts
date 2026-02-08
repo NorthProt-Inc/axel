@@ -16,7 +16,8 @@ export class InMemoryStreamBuffer implements StreamBuffer {
 	async *consume(count: number): AsyncGenerator<StreamEvent> {
 		const toConsume = Math.min(count, this.events.length);
 		for (let i = 0; i < toConsume; i++) {
-			yield this.events[i]!;
+			const event = this.events[i];
+			if (event) yield event;
 		}
 	}
 

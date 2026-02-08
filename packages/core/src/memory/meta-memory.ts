@@ -1,5 +1,5 @@
 import type { ComponentHealth } from '../types/health.js';
-import type { MetaMemory, AccessPattern, HotMemory } from './types.js';
+import type { AccessPattern, HotMemory, MetaMemory } from './types.js';
 
 interface MemoryAccessStats {
 	accessCount: number;
@@ -42,10 +42,7 @@ export class InMemoryMetaMemory implements MetaMemory {
 		}));
 	}
 
-	async getPrefetchCandidates(
-		_userId: string,
-		_channelId: string,
-	): Promise<readonly string[]> {
+	async getPrefetchCandidates(_userId: string, _channelId: string): Promise<readonly string[]> {
 		// In-memory stub: return memory UUIDs from recent patterns
 		if (this.patterns.length === 0) return [];
 		const recentIds = new Set<string>();

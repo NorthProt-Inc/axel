@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryConceptualMemory } from '../../src/memory/conceptual-memory.js';
 
 describe('InMemoryConceptualMemory', () => {
@@ -32,8 +32,8 @@ describe('InMemoryConceptualMemory', () => {
 
 			const entity = await conceptual.findEntity('TypeScript');
 			expect(entity).not.toBeNull();
-			expect(entity!.name).toBe('TypeScript');
-			expect(entity!.entityType).toBe('technology');
+			expect(entity?.name).toBe('TypeScript');
+			expect(entity?.entityType).toBe('technology');
 		});
 
 		it('should return null for non-existent entity', async () => {
@@ -49,7 +49,7 @@ describe('InMemoryConceptualMemory', () => {
 			});
 
 			const entity = await conceptual.findEntity('Mark');
-			expect(entity!.metadata).toEqual({ role: 'operator' });
+			expect(entity?.metadata).toEqual({ role: 'operator' });
 		});
 	});
 
@@ -73,7 +73,7 @@ describe('InMemoryConceptualMemory', () => {
 
 			const related = await conceptual.getRelated(id1);
 			expect(related).toHaveLength(1);
-			expect(related[0]!.name).toBe('Node.js');
+			expect(related[0]?.name).toBe('Node.js');
 		});
 
 		it('should filter by relation type', async () => {
@@ -105,7 +105,7 @@ describe('InMemoryConceptualMemory', () => {
 
 			const runsOn = await conceptual.getRelated(id1, 'runs_on');
 			expect(runsOn).toHaveLength(1);
-			expect(runsOn[0]!.name).toBe('Node.js');
+			expect(runsOn[0]?.name).toBe('Node.js');
 		});
 	});
 
@@ -131,8 +131,8 @@ describe('InMemoryConceptualMemory', () => {
 			// Depth 1: only B
 			const depth1 = await conceptual.traverse(idA, 1);
 			expect(depth1).toHaveLength(1);
-			expect(depth1[0]!.entity.name).toBe('B');
-			expect(depth1[0]!.depth).toBe(1);
+			expect(depth1[0]?.entity.name).toBe('B');
+			expect(depth1[0]?.depth).toBe(1);
 
 			// Depth 2: B and C
 			const depth2 = await conceptual.traverse(idA, 2);
@@ -184,7 +184,7 @@ describe('InMemoryConceptualMemory', () => {
 			await conceptual.incrementMentions(id);
 
 			const entity = await conceptual.findEntity('TypeScript');
-			expect(entity!.mentionCount).toBe(2);
+			expect(entity?.mentionCount).toBe(2);
 		});
 	});
 

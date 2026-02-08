@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryStreamBuffer } from '../../src/memory/stream-buffer.js';
 import type { StreamEvent, StreamEventType } from '../../src/memory/types.js';
 
@@ -42,7 +42,7 @@ describe('InMemoryStreamBuffer', () => {
 				events.push(event);
 			}
 			expect(events).toHaveLength(1);
-			expect(events[0]!.type).toBe('typing_start');
+			expect(events[0]?.type).toBe('typing_start');
 		});
 
 		it('should support all event types', async () => {
@@ -113,9 +113,9 @@ describe('InMemoryStreamBuffer', () => {
 			for await (const event of buffer.consume(3)) {
 				events.push(event);
 			}
-			expect(events[0]!.userId).toBe('user-0');
-			expect(events[1]!.userId).toBe('user-1');
-			expect(events[2]!.userId).toBe('user-2');
+			expect(events[0]?.userId).toBe('user-0');
+			expect(events[1]?.userId).toBe('user-1');
+			expect(events[2]?.userId).toBe('user-2');
 		});
 	});
 
@@ -175,8 +175,8 @@ describe('InMemoryStreamBuffer', () => {
 			}
 			expect(events).toHaveLength(2);
 			// Should keep the most recent (user-3, user-4)
-			expect(events[0]!.userId).toBe('user-3');
-			expect(events[1]!.userId).toBe('user-4');
+			expect(events[0]?.userId).toBe('user-3');
+			expect(events[1]?.userId).toBe('user-4');
 		});
 	});
 
