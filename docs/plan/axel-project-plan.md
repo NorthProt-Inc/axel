@@ -95,7 +95,7 @@ Sync I/O in async:  4곳+     →  0곳
 ### 1.4 axnmihn이 남긴 "영혼" 데이터
 
 ```
-ChromaDB vectors:          1,000+ (768d, cosine metric) → Axel: 3072d re-embed
+ChromaDB vectors:          1,000+ (768d, cosine metric) → Axel: 1536d re-embed
 SQLite conversation pairs: 1,600+
 Knowledge Graph entities:  1,396 (935KB JSON)
 Knowledge Graph relations: 1,945
@@ -298,7 +298,7 @@ interface MemoryRepository {
 interface EmbeddingService {
   embed(text: string): Promise<Float32Array>;          // 단건 embedding
   embedBatch(texts: readonly string[]): Promise<Float32Array[]>; // 배치 embedding
-  readonly dimension: number;                           // e.g., 3072
+  readonly dimension: number;                           // e.g., 1536
 }
 
 // 구현 (infra 패키지 — I/O 실행)
@@ -591,7 +591,7 @@ const LlmConfigSchema = z.object({
     apiKey: z.string().min(1),
     flashModel: z.string().default("gemini-3-flash-preview"),
     embeddingModel: z.string().default("gemini-embedding-001"),
-    embeddingDimension: z.number().int().default(3072),
+    embeddingDimension: z.number().int().default(1536),
   }),
   fallbackChain: z.array(z.enum(["anthropic", "google", "ollama"])).default(["anthropic", "google"]),
 });
@@ -767,7 +767,7 @@ CREATE TABLE memories (
     content         TEXT NOT NULL,
     memory_type     TEXT NOT NULL CHECK (memory_type IN ('fact', 'preference', 'insight', 'conversation')),
     importance      REAL NOT NULL DEFAULT 0.5,
-    embedding       vector(3072) NOT NULL,      -- pgvector: 3072d (Gemini embedding-001, full dimension)
+    embedding       vector(1536) NOT NULL,      -- pgvector: 1536d (Gemini embedding-001, Matryoshka truncation)
 
     -- Decay 메타데이터
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -980,7 +980,7 @@ Layer 3: Semantic Memory        [axnmihn L3 진화]
 ├── 용도: 벡터 유사도 검색, 장기 기억
 ├── 개선점:
 │   ├── axnmihn: ChromaDB (별도 프로세스), 768d, Python sync I/O
-│   ├── Axel: pgvector (같은 DB), 3072d, async query
+│   ├── Axel: pgvector (같은 DB), 1536d, async query
 │   └── 차이: 하이브리드 검색 (vector + trigram + metadata), channel_mentions 추적
 └── HNSW 인덱스 (m=16, ef_construction=64) — RES-001 권장
 
@@ -1706,7 +1706,7 @@ ${content}
 ```
 axnmihn (source)                    Axel (target)
 ────────────────                    ──────────────
-ChromaDB (1000+ vectors, 768d)  →   pgvector (re-embed to 3072d)
+ChromaDB (1000+ vectors, 768d)  →   pgvector (re-embed to 1536d)
 SQLite (1600+ conversations)    →   PostgreSQL (sessions + messages)
 JSON (956KB knowledge graph)    →   PostgreSQL (entities + relations)
 JSON (working memory, 248 turns)→   Redis + PostgreSQL
@@ -1716,14 +1716,14 @@ Files (40+ research artifacts)  →   R2/S3 + PostgreSQL metadata
 
 ### 5.2 벡터 마이그레이션 (가장 복잡)
 
-**결정: Re-embed (gemini-embedding-001, 3072d full dimension)**
+**결정: Re-embed (gemini-embedding-001, 1536d Matryoshka truncation)**
 
-axnmihn의 text-embedding-004 벡터는 gemini-embedding-001과 embedding space가 다르므로 Direct Copy 불가 (ADR-016, PLAN-001). 또한 차원이 768d→3072d로 변경됨.
+axnmihn의 text-embedding-004 벡터는 gemini-embedding-001과 embedding space가 다르므로 Direct Copy 불가 (ADR-016, PLAN-001). 또한 차원이 768d→1536d로 변경됨.
 
-- 모든 1,000+ memory content를 gemini-embedding-001 (3072d)로 re-embed
+- 모든 1,000+ memory content를 gemini-embedding-001 (1536d)로 re-embed
 - 100 per batch × 10 API calls = ~30초 소요, 비용 < $0.01
-- pgvector 컬럼: `vector(3072)` (axnmihn의 768d에서 변경)
-- 3072d full dimension으로 최고 검색 품질 확보 (Mark directive)
+- pgvector 컬럼: `vector(1536)` (axnmihn의 768d에서 변경)
+- 1536d Matryoshka truncation으로 검색 품질과 성능 균형 확보 (ERR-069 resolution)
 
 ### 5.3 마이그레이션 스크립트 (tools/migrate/)
 
@@ -2024,7 +2024,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 | ADR-013 | 6-Layer Memory (Stream Buffer + Meta Memory 추가) | **제안** — `docs/adr/013-six-layer-memory-architecture.md` |
 | ADR-014 | Cross-Channel Session Router (핵심 혁신) | **제안** — `docs/adr/014-cross-channel-session-router.md` |
 | ADR-015 | Adaptive Decay v2 (channel diversity boost) | **제안** — `docs/adr/015-adaptive-decay-v2.md` |
-| ADR-016 | Embedding Model: gemini-embedding-001 (3072d) | **제안** — `docs/adr/016-embedding-model-selection.md` |
+| ADR-016 | Embedding Model: gemini-embedding-001 (1536d, Matryoshka) | **제안** — `docs/adr/016-embedding-model-selection.md` |
 | ADR-017 | WebChat SPA: Svelte 5 (PLAN-001 React 번복) | **제안** — `docs/adr/017-webchat-spa-framework.md` |
 | ADR-018 | Token Counting: Anthropic SDK countTokens | **제안** — `docs/adr/018-token-counting-strategy.md` |
 | ADR-019 | Authentication: Static Bearer → JWT | **제안** — `docs/adr/019-auth-strategy.md` |
@@ -2039,8 +2039,8 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 
 ### 미결 사항 (모두 해결됨)
 
-1. ~~**임베딩 모델 최종 선택**~~: → **gemini-embedding-001 (3072d)** — ADR-016
-   - gemini-embedding-001 선택, 3072d full dimension (ADR-016). MTEB #1. Re-embed 필수.
+1. ~~**임베딩 모델 최종 선택**~~: → **gemini-embedding-001 (1536d)** — ADR-016
+   - gemini-embedding-001 선택, 1536d Matryoshka truncation (ADR-016). MTEB #1. Re-embed 필수.
 
 2. ~~**WebChat 프레임워크**~~: → **Svelte 5 (SvelteKit)** — ADR-017 (PLAN-001 React 결정 번복)
    - SvelteKit + svelte-chatui. 번들 크기 최소, Vite 네이티브, 1인 프로젝트에 최적.

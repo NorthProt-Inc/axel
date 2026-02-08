@@ -8,32 +8,32 @@ v2.0 plan Section 11에 나열된 5개 미결 사항에 대한 결정.
 
 ---
 
-## 1. Embedding Model: gemini-embedding-001 (3072d)
+## 1. Embedding Model: gemini-embedding-001 (1536d)
 
 ### Decision
 
-**gemini-embedding-001** (3072d, full dimension) 사용.
+**gemini-embedding-001** (1536d, Matryoshka truncation) 사용.
 
 ### Rationale
 
 - **text-embedding-004는 2026-01-14 deprecated됨** — 선택지에서 제거
 - gemini-embedding-001은 MTEB 68.32 (#1 ranking), 100+ 언어 지원
-- 3072d full dimension으로 최고 검색 품질 확보 (Mark directive — 2026-02-08)
-- Matryoshka Representation Learning 지원: 필요 시 768d/256d로 축소 가능 (역방향 유연성)
+- 1536d Matryoshka truncation으로 검색 품질과 메모리/성능 균형 확보 (ERR-069 resolution)
+- Matryoshka Representation Learning: 3072d → 1536d 축소로 메모리 절약하면서 검색 품질 유지
 - embedding space가 다르므로 re-embed 필요 (Direct Copy 불가)
 - Cost: $0.15/1M tokens (text-embedding-004 대비 소폭 상승, 허용 범위)
 
 ### v2.0 Plan Impact
 
-- Section 5.2: "옵션 A: Direct Copy" → **불가**. gemini-embedding-001 (3072d)로 re-embed 필수
-- Section 4 Layer 3: embedding 모델명 `embedding-001` → `gemini-embedding-001`로 변경, 차원 3072d
-- config schema: `embeddingModel` default를 `"gemini-embedding-001"`, `embeddingDimension` default를 `3072`로 변경
-- pgvector 컬럼: `vector(768)` → `vector(3072)` 변경
+- Section 5.2: "옵션 A: Direct Copy" → **불가**. gemini-embedding-001 (1536d)로 re-embed 필수
+- Section 4 Layer 3: embedding 모델명 `embedding-001` → `gemini-embedding-001`로 변경, 차원 1536d
+- config schema: `embeddingModel` default를 `"gemini-embedding-001"`, `embeddingDimension` default를 `1536`로 변경
+- pgvector 컬럼: `vector(768)` → `vector(1536)` 변경
 - 마이그레이션 시간 추정: 1000개 × ~200ms = ~200초 (re-embed)
 
-### Dimension Override Note
+### Dimension Decision Note
 
-Mark가 2026-02-08에 768d truncation 대신 3072d full dimension을 직접 지정. ADR-016의 원래 768d 결정을 override함.
+ERR-069 resolution (2026-02-08): 1536d Matryoshka truncation 선택. 검색 품질과 메모리/성능 균형을 고려한 결정.
 
 ---
 
@@ -175,7 +175,7 @@ Phase 2+:  pino → OpenTelemetry Collector → Grafana Cloud
 
 | # | Item | Decision | ADR |
 |---|------|----------|-----|
-| 1 | Embedding model | gemini-embedding-001 (3072d) | ADR-016 (신규) |
+| 1 | Embedding model | gemini-embedding-001 (1536d) | ADR-016 (신규) |
 | 2 | WebChat framework | ~~React (Vite)~~ → Svelte 5 (SvelteKit) | ADR-017 (superseded) |
 | 3 | CI/CD | GitHub Actions (3-stage) | — (plan 확정) |
 | 4 | Deployment | Docker Compose on VPS | — (plan 확정) |
