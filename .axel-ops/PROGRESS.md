@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **C: INFRA SPRINT — COMPLETE → Phase D PREP**
-- **Cycle**: 46
-- **Last Updated**: 2026-02-08C46
-- **STATUS**: **Phase C 100% COMPLETE.** QA-016 done (CONDITIONAL PASS — 2H 7M 4L, zod fix needed). AUDIT-003 done (6H 8M 5L, TDD PASS). SYNC-004 done (CTO override — PLAN_SYNC all IN_SYNC). **3 tasks completed this cycle.** FIX-INFRA-001~004 created for QA/audit findings. ERR-065 MEDIUM (zod resolve) is Phase D blocker. Smoke test: **475 tests, 41 files**, typecheck+lint clean. Phase D transition pending FIX-INFRA-001.
+- **Phase**: **D: EDGE SPRINT — KICKOFF**
+- **Cycle**: 47
+- **Last Updated**: 2026-02-08C47
+- **STATUS**: **Phase D KICKOFF.** FIX-INFRA-001 completed (zod dep resolved, 475/475 tests pass, 0 skips). ERR-064/065 resolved → 0 open errors. **Phase D BACKLOG created:** EDGE-001~005 (channel types + CLI + Discord + Telegram + Gateway), BOOTSTRAP-001 (DI container), DEVOPS-005/006 (deps + exports), SYNC-005, QA-017. Plus carry-over: FIX-INFRA-002~004, PLAN-AMEND-001, CONST-AMEND-001. **15 tasks queued, 0 in progress.** EDGE-001 (P0, channel types) + FIX-INFRA-002/003 (P1, parallel) + DEVOPS-005 (P0, deps) assigned. Smoke test: **475 tests, 41 files**, typecheck+lint clean.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 6 |
-| In Progress | 0 |
-| Done | 69 |
+| Queued | 11 |
+| In Progress | 4 |
+| Done | 70 |
 | Cancelled | 14 |
 
-## Open Errors: 2
+## Open Errors: 0
 
 ## Cycle History
 
@@ -58,20 +58,21 @@
 | 44 | 0208 | **4 TASKS MERGED — ALL INFRA CODING COMPLETE.** INFRA-002 (Redis cache, 25 tests, 91.44% stmt), INFRA-003 (LLM adapters, 15 tests, 95.89% stmt), INFRA-005 (MCP registry, 16 tests, 92.12% stmt), DEVOPS-004 (core subpath exports). Biome lint fixes applied (5 files). Smoke test: **475 tests, 41 files pass**, typecheck+lint clean. **Phase C 89%.** All 9 coding tasks done. QA-016 unblocked — assigned to quality. SYNC-004 (arch) in progress (2 cycles). Dev-infra added zod dep. 1 open issue (ERR-064 LOW, unchanged). |
 | 45 | 0208 | **No new completions.** SYNC-004 (arch, 3 cycles — metric-alert) + QA-016 (quality, 2 cycles) in progress. AUDIT-003 created (Phase C code audit, 13+ cycles since AUDIT-002). Smoke test: 475 tests pass, typecheck+lint clean. 1 error (ERR-064 LOW). No drift. |
 | 46 | 0208 | **PHASE C COMPLETE.** QA-016 done (CONDITIONAL PASS: 2H 7M 4L, 459/475 tests — zod fix needed). AUDIT-003 done (6H 8M 5L, TDD 100%, file size PASS). SYNC-004 done (CTO override — PLAN_SYNC Phase C all IN_SYNC). **3 tasks completed, 69 total.** FIX-INFRA-001~004 + PLAN-AMEND-001 + CONST-AMEND-001 created. ERR-065 MEDIUM. Phase D transition pending FIX-INFRA-001. |
+| 47 | 0208 | **PHASE D KICKOFF.** FIX-INFRA-001 done (zod dep fix, 475 tests, 0 skips). ERR-064/065 resolved → 0 open errors. Phase D BACKLOG: EDGE-001~005 + BOOTSTRAP-001 + DEVOPS-005/006 + SYNC-005 + QA-017 created. Carry-over: FIX-INFRA-002~004, PLAN-AMEND-001, CONST-AMEND-001. **15 tasks queued.** EDGE-001 (P0) + FIX-INFRA-002/003 (P1) + DEVOPS-005 (P0) assigned. Dev-Edge activated (first time). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C46 | Cycle 46 | Active |
-| Architecture | 0208C43 | — | Idle (SYNC-004 done by CTO override) |
+| Coordinator | 0208C47 | Cycle 47 | Active |
+| Architecture | 0208C43 | — | Idle (PLAN-AMEND-001 + SYNC-005 queued, activated next when EDGE-002 done) |
 | Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
-| Dev-Infra | 0208C44 | — | Idle (all INFRA tasks complete, FIX-INFRA-002~004 queued) |
-| Dev-Edge | — | — | Pending Phase D (after FIX-INFRA-001) |
+| Dev-Infra | 0208C47 | FIX-INFRA-002, FIX-INFRA-003 | **Active** — Phase C fix tasks (parallel) |
+| Dev-Edge | 0208C47 | EDGE-001 | **Active** — First activation. Channel types (P0). |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C46 | — | Idle (QA-016 done) |
-| DevOps | 0208C44 | — | Idle (FIX-INFRA-001 queued) |
-| Audit | 0208C46 | — | Idle (AUDIT-003 done) |
+| Quality | 0208C46 | — | Idle (QA-017 queued, activated when EDGE-002+ done) |
+| DevOps | 0208C47 | DEVOPS-005 | **Active** — Channel/gateway dependencies |
+| Audit | 0208C46 | — | Idle (next audit at Phase D milestone) |
 
 ## Human Intervention Needed
 

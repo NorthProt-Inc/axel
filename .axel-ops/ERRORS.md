@@ -2,19 +2,19 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 46**: 2 open issues (1 MEDIUM, 1 LOW). QA-016 + AUDIT-003 findings tracked as FIX-INFRA tasks in BACKLOG.
+> **Cycle 47**: 0 open errors. ERR-064 (LOW) closed — no functional impact. ERR-065 (MEDIUM) resolved by FIX-INFRA-001 (zod dep fix, 475/475 tests pass).
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
-| ERR-064 | LOW | Dev-infra modified root `package.json` (1 line) + `pnpm-lock.yaml` — outside ownership (devops-owned). Minor, resolved via merge. No functional impact. | coord | 0208C43 |
-| ERR-065 | MEDIUM | zod dependency resolve failure in packages/infra — 16 MCP tests cannot run. CONSTITUTION §10 violation (all tests must pass for `done`). QA-016 flagged as Phase D blocker. FIX-INFRA-001 (P0) created. | quality (QA-016) | 0208C46 |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-065 | zod dependency resolve fixed — pnpm install regenerated symlink, @testcontainers/postgresql added. 475 tests, 0 skips. | FIX-INFRA-001 (devops) | 0208C47 |
+| ERR-064 | Dev-infra root package.json/pnpm-lock.yaml modification — minor ownership overlap, no functional impact. Already resolved via merge. | coord | 0208C47 |
 | ENV-001 | Node.js 22.13.1 confirmed. pnpm 9.15.4 available (npx/packageManager). | CTO (coord) | 0208C31 |
 | ERR-063 | Ownership violation file (packages/core/src/types/index.ts) already removed in SCAFFOLD-FIX (5b4de15). | SCAFFOLD-FIX (devops) | 0208C31 |
 | ERR-060 | ADR-013:144,171-174 IVFFlat→HNSW rewritten. Comparison table + index decision section aligned. | FIX-PRE-IMPL (arch) | 0209 |

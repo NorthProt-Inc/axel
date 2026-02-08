@@ -2,23 +2,32 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 46**: **Phase C COMPLETE (100%).** All coding + QA + audit + PLAN_SYNC done. 475 tests pass. FIX-INFRA-001 (P0 zod) created as Phase D prerequisite. Phase D prep started.
+> **Cycle 47**: **Phase D: EDGE SPRINT KICKOFF.** FIX-INFRA-001 resolved (zod dep). 475 tests pass. Phase C carry-over: FIX-INFRA-002~004 + PLAN-AMEND-001 + CONST-AMEND-001. Phase D new: EDGE-001~005 (channel types, CLI, Discord, Telegram, Gateway) + BOOTSTRAP-001 + DEVOPS-005~006 + SYNC-005 + QA-017.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| FIX-INFRA-001 | P0 | devops | Fix zod dependency resolve failure in packages/infra — 16 MCP tests cannot run (QA-016 HIGH, CONSTITUTION §10 violation). Ensure `pnpm test --run` runs all 475+ tests with 0 skips. | — |
-| FIX-INFRA-002 | P1 | dev-infra | Fix 8 bare catch blocks in redis-working-memory.ts (QA-016 HIGH). Add logger.warn per ADR-003 pattern. Fix getSummary PG fallback (AUD-059). Fix compress empty catch (AUD-062). | FIX-INFRA-001 |
-| FIX-INFRA-003 | P1 | dev-infra | Fix validatePath symlink traversal (AUD-054/QA-016 MEDIUM — security). Use fs.realpathSync() after path.resolve(). Fix silent JSON.parse in anthropic-provider (AUD-056). Fix global mutable toolCallCounter in google-provider (AUD-048). | FIX-INFRA-001 |
-| FIX-INFRA-004 | P2 | dev-infra | Fix relative import paths → @axel/core/* subpath exports (AUD-060/QA-016 LOW). All infra src files. | FIX-INFRA-001 |
+| EDGE-002 | P0 | dev-edge | Implement CLI Channel in packages/channels/src/cli/. Node.js readline. AxelChannel impl. Streaming output. Fixed userId "cli-user". Per plan L8 + ADR-009. TDD mandatory. | EDGE-001 |
+| BOOTSTRAP-001 | P1 | dev-edge | Implement bootstrap + DI container in apps/axel/src/. main.ts (container assembly), config.ts (Zod AxelConfigSchema + .env loading), lifecycle.ts (startup/shutdown per ADR-021). ~20 injectable services. Per plan lines 308-338, 579-680. TDD mandatory. | EDGE-001, EDGE-002 |
+| EDGE-003 | P1 | dev-edge | Implement Discord Channel in packages/channels/src/discord/. discord.js. AxelChannel impl. Streaming (message edit), 2000 char limit, reconnection (exponential backoff + circuit breaker per ADR-021). Per plan L8 + ADR-009. TDD mandatory. | EDGE-001, DEVOPS-005 |
+| EDGE-004 | P1 | dev-edge | Implement Telegram Channel in packages/channels/src/telegram/. grammy. AxelChannel impl. Polling mode (Phase D). 4096 char limit. typingIndicator via sendChatAction. Per plan L8 + ADR-009. TDD mandatory. | EDGE-001, DEVOPS-005 |
+| EDGE-005 | P1 | dev-edge | Implement Gateway HTTP + WebSocket in packages/gateway/src/. Routes per openapi-v1.yaml: /health, /api/v1/chat, /api/v1/memory/search, /api/v1/session, /ws. WebSocket protocol per websocket-protocol.md. Security middleware: CORS, JWT auth, rate limiting, input validation (Zod), error redaction (ADR-011). Per plan L9 (lines 1564-1629). TDD mandatory. | EDGE-001, BOOTSTRAP-001 |
+| DEVOPS-006 | P1 | devops | Add subpath exports to packages/channels/package.json and packages/gateway/package.json. Configure vitest for channels + gateway packages if needed. | DEVOPS-005 |
+| SYNC-005 | P1 | arch | PLAN_SYNC.md Phase D update. Map all EDGE-001~005 + BOOTSTRAP-001 code to plan sections. Verify interfaces match plan specs. | EDGE-002 |
+| FIX-INFRA-004 | P2 | dev-infra | Fix relative import paths → @axel/core/* subpath exports (AUD-060/QA-016 LOW). All infra src files. | — |
 | PLAN-AMEND-001 | P2 | arch | Update migration-strategy.md: add user_id to sessions table (dev-infra plan-amendment). Update ADR-002 PG 16→17 (AUD-058). | — |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
+| QA-017 | P1 | quality | Phase D code review — all channels + gateway + bootstrap. Verify: TDD, CONSTITUTION §9, coverage targets (channels 75%, gateway 80%), Biome+tsc clean, ADR compliance (009/011/014/019/020/021). | EDGE-002 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
+| EDGE-001 | dev-edge | 0208C47 | C47–C48 |
+| FIX-INFRA-002 | dev-infra | 0208C47 | C47–C48 |
+| FIX-INFRA-003 | dev-infra | 0208C47 | C47–C48 |
+| DEVOPS-005 | devops | 0208C47 | C47 |
 
 ## Cancelled
 
@@ -111,3 +120,4 @@
 | SYNC-004 | coord (CTO) | 0208C46 | PLAN_SYNC.md Phase C: ALL 6 subsections NOT_STARTED→IN_SYNC. 9 interface mappings + known issues table. CTO override (arch 3 cycles stalled). |
 | QA-016 | quality | 0208C46 | Phase C code review: 2 HIGH, 7 MEDIUM, 4 LOW. CONDITIONAL PASS (459/475 tests, zod fix needed). TDD PASS. File size PASS. |
 | AUDIT-003 | audit | 0208C46 | Phase C code audit: 6 HIGH, 8 MEDIUM, 5 LOW. TDD PASS (100%). File size PASS. No circular deps. No dead code. |
+| FIX-INFRA-001 | devops | 0208C47 | zod dependency resolve fix. pnpm install + @testcontainers/postgresql. 475 tests, 0 skips. CONSTITUTION §10 restored. |

@@ -2,28 +2,28 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 46
+## Current Cycle: 47
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 45 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-004, overridden C46 by CTO) | Idle — SYNC-004 done by CTO override |
+| coord | — | 46 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-004, overridden C46 by CTO) | Idle — PLAN-AMEND-001 + SYNC-005 queued |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | Idle — all CORE tasks complete |
-| dev-infra | 1 cycle | 6 (INFRA-001~005, COMMON-CB) | 0 | Idle — all INFRA tasks complete |
-| dev-edge | — | 0 | 0 | Pending Phase D (after FIX-INFRA-001) |
-| quality | 2 cycles | 3 (QA-011, QA-013, QA-016) | 1 (QA-012, cancelled C39) | Idle — QA-016 done |
+| dev-infra | 1 cycle | 6 (INFRA-001~005, COMMON-CB) | 0 | **Active** — FIX-INFRA-002/003 assigned |
+| dev-edge | — | 0 | 0 | **Active** — First activation. EDGE-001 assigned |
+| quality | 2 cycles | 3 (QA-011, QA-013, QA-016) | 1 (QA-012, cancelled C39) | Idle — QA-017 queued |
 | research | — | 0 | 0 | Idle |
-| devops | 1 cycle | 11 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004) | 0 | Idle — DEVOPS-004 complete |
-| audit | 1 cycle | 2 (AUDIT-002, AUDIT-003) | 0 | Idle — AUDIT-003 done |
+| devops | 1 cycle | 12 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004 + FIX-INFRA-001) | 0 | **Active** — DEVOPS-005 assigned |
+| audit | 1 cycle | 2 (AUDIT-002, AUDIT-003) | 0 | Idle — next at Phase D milestone |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 2 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK (SYNC-004 resolved by CTO override) |
+| Open Errors | 0 | 5 | OK |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 1 | 3 | OK (pnpm-lock.yaml, resolved) |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -45,7 +45,7 @@
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
 | C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests. FIX-INFRA tasks carry to Phase D) |
-| D: Edge Sprint | QUEUED | — | — | — |
+| D: Edge Sprint | **ACTIVE** | 47 | — | 0% (15 tasks queued, 4 assigned) |
 | E: Integration | QUEUED | — | — | — |
 
 ## Cycle History (Last 10)
@@ -70,3 +70,4 @@
 | 44 | coord, quality, arch | 4 (INFRA-002, INFRA-003, INFRA-005, DEVOPS-004) | 0 | **ALL INFRA CODING COMPLETE.** 475 tests pass. Phase C 89%. Biome lint fixes applied. QA-016 assigned (unblocked). SYNC-004 2 cycles. |
 | 45 | quality, arch, audit | 0 | 0 | No completions. SYNC-004 3 cycles (metric-alert). QA-016 2 cycles. AUDIT-003 created+assigned. 475 tests pass. |
 | 46 | coord | 3 (QA-016, AUDIT-003, SYNC-004) | 1 new (ERR-065 MEDIUM) | **PHASE C COMPLETE.** QA-016: CONDITIONAL PASS (7H 7M 4L, zod fix needed). AUDIT-003: 6H 8M 5L, TDD PASS. SYNC-004: CTO override (PLAN_SYNC all IN_SYNC). FIX-INFRA-001~004 created. Phase D prep. |
+| 47 | dev-edge, dev-infra, devops | 1 (FIX-INFRA-001) | 0 new, 2 resolved | **PHASE D KICKOFF.** FIX-INFRA-001 done (zod fix). ERR-064/065 resolved → 0 open. Phase D: 15 tasks created. EDGE-001+FIX-INFRA-002/003+DEVOPS-005 assigned. Dev-Edge first activation. |
