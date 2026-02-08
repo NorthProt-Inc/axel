@@ -2,21 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 34**: Phase B (Core Sprint) ACTIVE. CORE-002+CORE-005+DEVOPS-001 done. CORE-003 + QA-012 assigned.
+> **Cycle 36**: Phase B (Core Sprint) ACTIVE. CORE-003+SYNC-002 done. CORE-004 assigned. QA-012 in progress. CORE-003 review (QA-013) queued.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| CORE-004 | P1 | dev-core | Context Assembly: context window builder, token budget allocation (plan §4.4). TDD. | CORE-001 ✅, CORE-003 | 0208C31 |
-| CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001 ✅, CORE-003, CORE-004, CORE-005 ✅ | 0208C31 |
+| CORE-006 | P2 | dev-core | Orchestrator: ReAct loop, tool dispatch, session lifecycle (plan §4.6). TDD. | CORE-001 ✅, CORE-003 ✅, CORE-004, CORE-005 ✅ | 0208C31 |
+| QA-013 | P1 | quality | Phase B review — memory layers (CORE-003). Verify: (1) ADR-013 M0-M5 interface compliance, (2) TDD protocol, (3) Package boundary §9, (4) No >400 line files, (5) Coverage targets. | QA-012 | 0208C36 |
+| SYNC-003 | P1 | arch | PLAN_SYNC.md update — B.3 Memory Layers NOT_STARTED→IN_SYNC for CORE-003. | CORE-003 ✅ | 0208C36 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| CORE-003 | dev-core | 0208C34 | C35 |
-| QA-012 | quality | 0208C34 | C35 |
+| QA-012 | quality | 0208C34 | C36 |
+| CORE-004 | dev-core | 0208C36 | C37 |
 
 ## Cancelled
 
@@ -90,3 +91,5 @@
 | CORE-002 | dev-core | 0208C34 | 4 src + 3 test files (decay module). 34 tests, 100% stmt coverage. ADR-015 8-step formula. |
 | CORE-005 | dev-core | 0208C34 | 4 src + 3 test files (persona module). 32 tests, 100% stmt coverage. PersonaEngine interface + buildSystemPrompt. |
 | DEVOPS-001 | coord | 0208C34 | @vitest/coverage-v8 added. Barrel exports excluded from coverage. 93%+ global coverage. |
+| CORE-003 | dev-core | 0208C36 | 8 src + 7 test files (memory layers M0-M5). 241 tests, 100% stmt, 95% branch. ADR-013 6-layer architecture. |
+| SYNC-002 | arch | 0208C36 | PLAN_SYNC.md: B.1/B.2/B.5 IN_SYNC, A.3 IN_SYNC. No drift detected. |

@@ -2,20 +2,20 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 35
+## Current Cycle: 36
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 35 cycles | 0 | Active |
-| arch | 1 cycle | 3 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001) | 0 | Active (SYNC-002) |
-| dev-core | 1 cycle | 3 (CORE-001, CORE-002, CORE-005) | 0 | Active (CORE-003) |
+| coord | — | 36 cycles | 0 | Active |
+| arch | 1 cycle | 4 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002) | 0 | Idle (SYNC-003 queued) |
+| dev-core | 1 cycle | 4 (CORE-001, CORE-002, CORE-005, CORE-003) | 0 | Active (CORE-004) |
 | dev-infra | — | 0 | 0 | Pending Phase C |
 | dev-edge | — | 0 | 0 | Pending Phase D |
 | quality | 1 cycle | 1 (QA-011) | 0 | Active (QA-012) |
 | research | — | 0 | 0 | Idle |
-| devops | 2 cycles | 8 (SCAFFOLD-001~007 + FIX) | 0 | Idle (DEVOPS-001 done by CTO) |
+| devops | 2 cycles | 8 (SCAFFOLD-001~007 + FIX) | 0 | Idle |
 | audit | 1 cycle | 1 (AUDIT-002) | 0 | Idle |
 
 ## Bottleneck Indicators
@@ -32,7 +32,7 @@
 
 | Package | Target | Current | Delta |
 |---------|--------|---------|-------|
-| `packages/core/` | 90% | 93.33% (branches), 100% (stmts/funcs/lines) | +3.33% over target |
+| `packages/core/` | 90% | 95% (branches), 100% (stmts/funcs/lines) | +5% over target |
 | `packages/infra/` | 80% | — | — |
 | `packages/channels/` | 75% | — | — |
 | `packages/gateway/` | 80% | — | — |
@@ -43,7 +43,7 @@
 |-------|--------|-------------|-----------|------------|
 | Plan Closure | **DONE** | 17 | 21 | 100% |
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
-| B: Core Sprint | **ACTIVE** | 32 | — | 60% (CORE-001~002+005+SYNC-001+SCAFFOLD-007+DEVOPS-001 done. CORE-003/004/006+QA-012 remaining.) |
+| B: Core Sprint | **ACTIVE** | 32 | — | 80% (CORE-001~003+005+SYNC-001~002+SCAFFOLD-007+DEVOPS-001 done. CORE-004/006+QA-012/013 remaining.) |
 | C: Infra Sprint | QUEUED | — | — | — |
 | D: Edge Sprint | QUEUED | — | — | — |
 | E: Integration | QUEUED | — | — | — |
@@ -60,3 +60,4 @@
 | 33 | coord | 3 (SYNC-001, CORE-001, SCAFFOLD-007) | 0 | **3 TASKS DONE.** Merge reverts resolved. 55 tests pass. CORE-002+CORE-005 assigned. |
 | 34 | coord, dev-core, quality, arch | 3 (CORE-002, CORE-005, DEVOPS-001) | 0 | **3 TASKS DONE + MERGE.** 121 tests. Coverage 93%+. CORE-003+QA-012 assigned. |
 | 35 | dev-core, quality, arch | 0 (3 in progress) | 0 | In progress. CORE-003, QA-012, SYNC-002 ongoing. 121 tests pass. |
+| 36 | dev-core, quality, arch | 2 (CORE-003, SYNC-002) | 0 | **2 TASKS DONE.** 241 tests. Memory layers M0-M5 merged. CORE-004 assigned. Phase B 80%. |
