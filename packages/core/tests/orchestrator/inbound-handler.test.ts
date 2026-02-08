@@ -6,6 +6,7 @@ import type {
 	TokenCounter,
 } from '../../src/context/types.js';
 import {
+	type ErrorInfo,
 	type InboundHandlerDeps,
 	createInboundHandler,
 } from '../../src/orchestrator/inbound-handler.js';
@@ -21,6 +22,7 @@ import type {
 } from '../../src/orchestrator/types.js';
 import type { PersonaEngine } from '../../src/persona/engine.js';
 import type { InboundHandler, InboundMessage, OutboundMessage } from '../../src/types/channel.js';
+import { ProviderError } from '../../src/types/errors.js';
 import type { ReActEvent } from '../../src/types/react.js';
 import type { SessionSummary } from '../../src/types/session.js';
 import type { ToolDefinition, ToolResult } from '../../src/types/tool.js';
@@ -559,6 +561,280 @@ describe('createInboundHandler', () => {
 			expect(target).toBe('u42');
 			expect(msg.content).toBe('Reply');
 			expect(msg.format).toBe('markdown');
+		});
+	});
+
+	describe('error logging (AUD-081)', () => {
+		it('should call onError callback with error details when LLM fails', async () => {
+			const store = makeSessionStore();
+			const llmProvider: LlmProvider = {
+				// biome-ignore lint/correctness/useYield: intentionally throwing to test error path
+				async *chat() {
+					throw new Error('LLM unavailable');
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			expect(onError).toHaveBeenCalledTimes(1);
+			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			expect(errorInfo.error).toBeInstanceOf(Error);
+			expect(errorInfo.userId).toBe('user-1');
+			expect(errorInfo.channelId).toBe('discord');
+			expect(errorInfo.errorMessage).toBe('LLM unavailable');
+		});
+
+		it('should call onError callback with error details when session resolution fails', async () => {
+			const store = makeSessionStore();
+			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('DB down'));
+
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			expect(onError).toHaveBeenCalledTimes(1);
+			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			expect(errorInfo.error).toBeInstanceOf(Error);
+			expect(errorInfo.errorMessage).toBe('DB down');
+			expect(errorInfo.userId).toBe('user-1');
+			expect(errorInfo.channelId).toBe('discord');
+		});
+
+		it('should call onError callback when context assembly fails', async () => {
+			const store = makeSessionStore();
+			const mockAssembler = {
+				assemble: vi.fn().mockRejectedValue(new Error('Context assembly failed')),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			expect(onError).toHaveBeenCalledTimes(1);
+			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			expect(errorInfo.errorMessage).toBe('Context assembly failed');
+		});
+
+		it('should include error type name for AxelError subclasses', async () => {
+			const store = makeSessionStore();
+			const llmProvider: LlmProvider = {
+				// biome-ignore lint/correctness/useYield: intentionally throwing to test error path
+				async *chat() {
+					throw new ProviderError('Anthropic API error', 'anthropic', false);
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				onError,
+				config: {
+					maxIterations: 1,
+					toolTimeoutMs: 1000,
+					totalTimeoutMs: 1000,
+					streamingEnabled: true,
+				},
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			expect(onError).toHaveBeenCalledTimes(1);
+			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			expect(errorInfo.errorType).toBe('ProviderError');
+		});
+
+		it('should still send fallback message when onError is provided', async () => {
+			const store = makeSessionStore();
+			const llmProvider: LlmProvider = {
+				// biome-ignore lint/correctness/useYield: intentionally throwing to test error path
+				async *chat() {
+					throw new Error('LLM down');
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			// Error callback called
+			expect(onError).toHaveBeenCalledTimes(1);
+			// Fallback message still sent
+			expect(mockSend).toHaveBeenCalledWith(
+				'user-1',
+				expect.objectContaining({ content: expect.stringContaining('오류') }),
+			);
+		});
+
+		it('should not throw when onError callback itself throws', async () => {
+			const store = makeSessionStore();
+			const llmProvider: LlmProvider = {
+				// biome-ignore lint/correctness/useYield: intentionally throwing to test error path
+				async *chat() {
+					throw new Error('LLM failure');
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn().mockImplementation(() => {
+				throw new Error('Logger crashed');
+			});
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			// Should not propagate onError's exception
+			await expect(handler(makeInboundMessage(), mockSend)).resolves.not.toThrow();
+			// Fallback message still sent
+			expect(mockSend).toHaveBeenCalledWith(
+				'user-1',
+				expect.objectContaining({ content: expect.stringContaining('오류') }),
+			);
+		});
+
+		it('should work without onError callback (backward compatible)', async () => {
+			const store = makeSessionStore();
+			const llmProvider: LlmProvider = {
+				// biome-ignore lint/correctness/useYield: intentionally throwing to test error path
+				async *chat() {
+					throw new Error('LLM failure');
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			// No onError callback — should not break
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+			});
+
+			const handler = createInboundHandler(deps);
+			await expect(handler(makeInboundMessage(), mockSend)).resolves.not.toThrow();
+			// Still sends fallback
+			expect(mockSend).toHaveBeenCalledWith(
+				'user-1',
+				expect.objectContaining({ content: expect.stringContaining('오류') }),
+			);
+		});
+
+		it('should include errorType as "Error" for generic Error instances', async () => {
+			const store = makeSessionStore();
+			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(new TypeError('type issue'));
+
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			expect(errorInfo.errorType).toBe('TypeError');
+			expect(errorInfo.errorMessage).toBe('type issue');
+		});
+
+		it('should handle non-Error thrown values gracefully', async () => {
+			const store = makeSessionStore();
+			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue('string error');
+
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+			const onError = vi.fn();
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				onError,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			const errorInfo = onError.mock.calls[0]![0] as ErrorInfo;
+			expect(errorInfo.errorType).toBe('unknown');
+			expect(errorInfo.errorMessage).toBe('string error');
 		});
 	});
 });
