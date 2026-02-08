@@ -2,22 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 52**: Phase D Edge Sprint **80%**. BOOTSTRAP-001 completed (dev-edge, 33 tests, 591 total). EDGE-004 + EDGE-005 assigned parallel. QA-018 + SYNC-006 queued.
+> **Cycle 53**: Phase D Edge Sprint **93%** (14/15 done). EDGE-004 (Telegram, 23 tests) + EDGE-005 (Gateway, 23 tests) completed. **637 tests, 50 files** pass. QA-018 expanded + SYNC-006 expanded + AUDIT-004 created.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| QA-018 | P1 | quality | Phase D code review batch 2: EDGE-003 (Discord) + BOOTSTRAP-001 (DI container + lifecycle). Verify TDD, §9, §10, §14, coverage targets (channels 75%+), ADR compliance (009/011/021). 591 tests. | EDGE-003, BOOTSTRAP-001 |
-| SYNC-006 | P1 | arch | PLAN_SYNC.md Phase D update: D.6 Bootstrap NOT_STARTED→IN_SYNC (map apps/axel/src/ config/container/lifecycle/main to plan lines 308-338, 579-680). | BOOTSTRAP-001 |
+| QA-018 | P1 | quality | Phase D code review batch 2: EDGE-003 (Discord) + EDGE-004 (Telegram) + EDGE-005 (Gateway) + BOOTSTRAP-001 (DI). Verify TDD, §9, §10, §14, coverage targets (channels 75%+, gateway 80%+), ADR compliance (009/011/021). 637 tests. | EDGE-003, EDGE-004, EDGE-005, BOOTSTRAP-001 |
+| SYNC-006 | P1 | arch | PLAN_SYNC.md Phase D update: D.4 Telegram NOT_STARTED→IN_SYNC, D.5 Gateway NOT_STARTED→IN_SYNC, D.6 Bootstrap NOT_STARTED→IN_SYNC (map all to plan sections). | EDGE-004, EDGE-005, BOOTSTRAP-001 |
+| AUDIT-004 | P1 | audit | Phase D code audit: EDGE-003/004/005 + BOOTSTRAP-001. TDD, §9, §14, security (gateway auth, CORS, error redaction), package boundary. 637 tests. | EDGE-004, EDGE-005 |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| EDGE-004 | dev-edge | 0208C52 | C53–C54 |
-| EDGE-005 | dev-edge | 0208C52 | C54–C55 |
 
 ## Cancelled
 
@@ -123,3 +122,5 @@
 | PLAN-AMEND-001 | coord (CTO) | 0208C51 | ADR-002 PG 16→17, migration-strategy PG 16→17 + sessions user_id + channel_history + idx. AUD-050/058 resolved. CTO override (arch 3 cycles stalled). |
 | SYNC-005 | coord (CTO) | 0208C51 | PLAN_SYNC.md Phase D: D.1-D.3 NOT_STARTED→IN_SYNC, D.4-D.6 NOT_STARTED, D.7 AMENDED. CTO override. |
 | BOOTSTRAP-001 | dev-edge | 0208C52 | DI container + lifecycle in apps/axel/src/. config.ts (Zod AxelConfigSchema), container.ts (~20 services), lifecycle.ts (4-phase shutdown), main.ts. 33 tests, 591 total. |
+| EDGE-004 | dev-edge | 0208C53 | Telegram Channel AxelChannel impl. grammy Bot API, polling, 4096 char splitting, typing indicator, streaming editMessageText. 23 tests, 97.66% stmt. 637 tests total. |
+| EDGE-005 | dev-edge | 0208C53 | Gateway HTTP+WS server. Node.js http + ws. /health, /api/v1/chat, /api/v1/chat/stream (SSE), /ws. Security: timing-safe Bearer, CORS, error redaction. 23 tests, 84.34% stmt. 637 tests total. |
