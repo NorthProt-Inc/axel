@@ -173,6 +173,45 @@ describe('InMemoryConceptualMemory', () => {
 		});
 	});
 
+	describe('traverse - edge cases', () => {
+		it('should handle relation to non-existent entity', async () => {
+			const idA = await conceptual.addEntity({ name: 'A', entityType: 'test' });
+			// Add relation to non-existent target
+			await conceptual.addRelation({
+				sourceId: idA,
+				targetId: 'nonexistent',
+				relationType: 'links_to',
+				weight: 0.5,
+			});
+
+			const nodes = await conceptual.traverse(idA, 1);
+			expect(nodes).toHaveLength(0);
+		});
+	});
+
+	describe('getRelated - edge cases', () => {
+		it('should return empty for entity with no outgoing relations', async () => {
+			const id = await conceptual.addEntity({ name: 'Lonely', entityType: 'test' });
+			const related = await conceptual.getRelated(id);
+			expect(related).toHaveLength(0);
+		});
+
+		it('should not return relations where entity is target only', async () => {
+			const id1 = await conceptual.addEntity({ name: 'Source', entityType: 'test' });
+			const id2 = await conceptual.addEntity({ name: 'Target', entityType: 'test' });
+			await conceptual.addRelation({
+				sourceId: id1,
+				targetId: id2,
+				relationType: 'links_to',
+				weight: 0.8,
+			});
+
+			// id2 is only a target, not a source
+			const related = await conceptual.getRelated(id2);
+			expect(related).toHaveLength(0);
+		});
+	});
+
 	describe('incrementMentions', () => {
 		it('should increment mention count', async () => {
 			const id = await conceptual.addEntity({
@@ -185,6 +224,10 @@ describe('InMemoryConceptualMemory', () => {
 
 			const entity = await conceptual.findEntity('TypeScript');
 			expect(entity?.mentionCount).toBe(2);
+		});
+
+		it('should no-op for non-existent entity', async () => {
+			await expect(conceptual.incrementMentions('nonexistent')).resolves.not.toThrow();
 		});
 	});
 

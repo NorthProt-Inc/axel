@@ -160,6 +160,26 @@ describe('InMemoryWorkingMemory', () => {
 			expect(summary).not.toBeNull();
 			expect(typeof summary).toBe('string');
 		});
+
+		it('should no-op compress for user with no turns', async () => {
+			await wm.compress('nonexistent');
+			const summary = await wm.getSummary('nonexistent');
+			expect(summary).toBeNull();
+		});
+
+		it('should no-op compress for empty turn list', async () => {
+			await wm.clear('user-1');
+			await wm.compress('user-1');
+			const summary = await wm.getSummary('user-1');
+			expect(summary).toBeNull();
+		});
+	});
+
+	describe('getTurns - edge cases', () => {
+		it('should return empty array for unknown user', async () => {
+			const turns = await wm.getTurns('unknown-user', 10);
+			expect(turns).toHaveLength(0);
+		});
 	});
 
 	describe('flush', () => {

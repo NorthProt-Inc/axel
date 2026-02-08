@@ -161,6 +161,110 @@ describe('InMemorySemanticMemory', () => {
 		});
 	});
 
+	describe('search - additional branch coverage', () => {
+		it('should filter by channelFilter', async () => {
+			await semantic.store(makeNewMemory({ sourceChannel: 'discord', content: 'Discord msg' }));
+			await semantic.store(makeNewMemory({ sourceChannel: 'telegram', content: 'Telegram msg' }));
+
+			const query: SemanticQuery = {
+				text: 'msg',
+				embedding: makeEmbedding(0.9),
+				limit: 10,
+				channelFilter: 'telegram',
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(1);
+			expect(results[0]?.memory.sourceChannel).toBe('telegram');
+		});
+
+		it('should not filter when channelFilter is undefined', async () => {
+			await semantic.store(makeNewMemory({ sourceChannel: 'discord', content: 'A' }));
+			await semantic.store(makeNewMemory({ sourceChannel: 'telegram', content: 'B' }));
+
+			const query: SemanticQuery = {
+				text: 'something',
+				embedding: makeEmbedding(0.9),
+				limit: 10,
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(2);
+		});
+
+		it('should handle empty memoryTypes array as no filter', async () => {
+			await semantic.store(makeNewMemory({ memoryType: 'fact' }));
+			await semantic.store(makeNewMemory({ memoryType: 'preference' }));
+
+			const query: SemanticQuery = {
+				text: 'something',
+				embedding: makeEmbedding(0.9),
+				limit: 10,
+				memoryTypes: [],
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(2);
+		});
+
+		it('should compute cosine similarity with zero-norm embedding', async () => {
+			await semantic.store(makeNewMemory({ content: 'Test' }));
+
+			const zeroEmbed = new Float32Array(3072);
+			const query: SemanticQuery = {
+				text: 'test',
+				embedding: zeroEmbed,
+				limit: 10,
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(1);
+			expect(results[0]?.vectorScore).toBe(0);
+		});
+
+		it('should handle mismatched embedding lengths', async () => {
+			await semantic.store(makeNewMemory({ content: 'Test' }));
+
+			const shortEmbed = new Float32Array(10);
+			const query: SemanticQuery = {
+				text: 'test',
+				embedding: shortEmbed,
+				limit: 10,
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(1);
+			expect(results[0]?.vectorScore).toBe(0);
+		});
+
+		it('should handle text similarity with no word matches', async () => {
+			await semantic.store(makeNewMemory({ content: 'TypeScript programming' }));
+
+			const query: SemanticQuery = {
+				text: 'jazz music',
+				embedding: makeEmbedding(0.9),
+				limit: 10,
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(1);
+			expect(results[0]?.textScore).toBe(0);
+		});
+
+		it('should handle text similarity with empty query', async () => {
+			await semantic.store(makeNewMemory({ content: 'Some content' }));
+
+			const query: SemanticQuery = {
+				text: '',
+				embedding: makeEmbedding(0.9),
+				limit: 10,
+			};
+
+			const results = await semantic.search(query);
+			expect(results).toHaveLength(1);
+		});
+	});
+
 	describe('decay', () => {
 		it('should return decay result', async () => {
 			await semantic.store(makeNewMemory({ importance: 0.1 }));
@@ -172,6 +276,30 @@ describe('InMemorySemanticMemory', () => {
 			expect(typeof result.minImportance).toBe('number');
 			expect(typeof result.maxImportance).toBe('number');
 			expect(typeof result.avgImportance).toBe('number');
+		});
+
+		it('should delete memories below threshold', async () => {
+			await semantic.store(makeNewMemory({ importance: 0.01 }));
+			await semantic.store(makeNewMemory({ importance: 0.5 }));
+
+			const result = await semantic.decay({ threshold: 0.05 });
+			expect(result.deleted).toBe(1);
+			expect(result.processed).toBe(2);
+		});
+
+		it('should return zeroes for empty memory store', async () => {
+			const result = await semantic.decay({ threshold: 0.03 });
+			expect(result.processed).toBe(0);
+			expect(result.deleted).toBe(0);
+			expect(result.minImportance).toBe(0);
+			expect(result.maxImportance).toBe(0);
+			expect(result.avgImportance).toBe(0);
+		});
+	});
+
+	describe('updateAccess', () => {
+		it('should no-op for non-existent uuid', async () => {
+			await expect(semantic.updateAccess('nonexistent')).resolves.not.toThrow();
 		});
 	});
 
