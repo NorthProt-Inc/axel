@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import type { MemoryEngine, MemoryStats } from "../../src/types/engine.js";
+import { describe, expect, it } from 'vitest';
+import type { MemoryEngine, MemoryStats } from '../../src/types/engine.js';
 
-describe("Engine types", () => {
-	describe("MemoryStats", () => {
-		it("represents memory system statistics", () => {
+describe('Engine types', () => {
+	describe('MemoryStats', () => {
+		it('represents memory system statistics', () => {
 			const stats: MemoryStats = {
 				totalMemories: 1500,
 				byType: {
@@ -13,8 +13,8 @@ describe("Engine types", () => {
 					conversation: 600,
 				},
 				avgImportance: 0.65,
-				oldestMemory: new Date("2024-01-01"),
-				lastConsolidation: new Date("2025-06-01"),
+				oldestMemory: new Date('2024-01-01'),
+				lastConsolidation: new Date('2025-06-01'),
 			};
 
 			expect(stats.totalMemories).toBe(1500);
@@ -22,7 +22,7 @@ describe("Engine types", () => {
 			expect(stats.avgImportance).toBe(0.65);
 		});
 
-		it("handles empty memory store", () => {
+		it('handles empty memory store', () => {
 			const stats: MemoryStats = {
 				totalMemories: 0,
 				byType: {
@@ -42,16 +42,16 @@ describe("Engine types", () => {
 		});
 	});
 
-	describe("MemoryEngine interface", () => {
-		it("defines the contract for memory operations", () => {
+	describe('MemoryEngine interface', () => {
+		it('defines the contract for memory operations', () => {
 			// Verify the interface can be implemented as a mock
 			const mockEngine: MemoryEngine = {
 				store: async (
 					_content: string,
-					_memoryType: "fact" | "preference" | "insight" | "conversation",
+					_memoryType: 'fact' | 'preference' | 'insight' | 'conversation',
 					_importance: number,
 					_channelId: string | null,
-				) => "uuid-123",
+				) => 'uuid-123',
 
 				search: async (_query: string, _limit: number) => [],
 
@@ -75,19 +75,19 @@ describe("Engine types", () => {
 			expect(mockEngine.getStats).toBeDefined();
 		});
 
-		it("store returns a uuid string", async () => {
-			const mockStore: MemoryEngine["store"] = async () => "new-uuid";
-			const result = await mockStore("test", "fact", 0.5, null);
-			expect(result).toBe("new-uuid");
+		it('store returns a uuid string', async () => {
+			const mockStore: MemoryEngine['store'] = async () => 'new-uuid';
+			const result = await mockStore('test', 'fact', 0.5, null);
+			expect(result).toBe('new-uuid');
 		});
 
-		it("search returns scored results", async () => {
-			const mockSearch: MemoryEngine["search"] = async () => [
+		it('search returns scored results', async () => {
+			const mockSearch: MemoryEngine['search'] = async () => [
 				{
 					memory: {
-						uuid: "uuid-1",
-						content: "test memory",
-						memoryType: "fact",
+						uuid: 'uuid-1',
+						content: 'test memory',
+						memoryType: 'fact',
 						importance: 0.8,
 						embedding: new Float32Array(0),
 						createdAt: new Date(),
@@ -100,17 +100,17 @@ describe("Engine types", () => {
 						lastDecayedAt: null,
 					},
 					score: 0.92,
-					source: "semantic",
+					source: 'semantic',
 				},
 			];
 
-			const results = await mockSearch("query", 10);
+			const results = await mockSearch('query', 10);
 			expect(results).toHaveLength(1);
 			expect(results[0]?.score).toBe(0.92);
 		});
 
-		it("decay returns count of deleted memories", async () => {
-			const mockDecay: MemoryEngine["decay"] = async () => 5;
+		it('decay returns count of deleted memories', async () => {
+			const mockDecay: MemoryEngine['decay'] = async () => 5;
 			const deleted = await mockDecay(0.03);
 			expect(deleted).toBe(5);
 		});

@@ -1,15 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-describe("types barrel export", () => {
-	it("re-exports all type modules", async () => {
+describe('types barrel export', () => {
+	it('re-exports all type modules', async () => {
 		// Verify the barrel export can be imported without errors
-		const types = await import("../../src/types/index.js");
+		const types = await import('../../src/types/index.js');
 		expect(types).toBeDefined();
 	});
 
-	it("exports error classes (runtime values)", async () => {
-		const { AxelError, TransientError, PermanentError, ValidationError } =
-			await import("../../src/types/index.js");
+	it('exports error classes (runtime values)', async () => {
+		const { AxelError, TransientError, PermanentError, ValidationError } = await import(
+			'../../src/types/index.js'
+		);
 		expect(AxelError).toBeDefined();
 		expect(TransientError).toBeDefined();
 		expect(PermanentError).toBeDefined();

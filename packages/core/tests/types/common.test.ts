@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import type { TokenUsage } from "../../src/types/common.js";
+import { describe, expect, it } from 'vitest';
+import type { TokenUsage } from '../../src/types/common.js';
 
-describe("Common types", () => {
-	describe("TokenUsage", () => {
-		it("represents full token usage with cache", () => {
+describe('Common types', () => {
+	describe('TokenUsage', () => {
+		it('represents full token usage with cache', () => {
 			const usage: TokenUsage = {
 				inputTokens: 2000,
 				outputTokens: 800,
@@ -17,7 +17,7 @@ describe("Common types", () => {
 			expect(usage.cacheCreationTokens).toBe(100);
 		});
 
-		it("represents usage with no caching", () => {
+		it('represents usage with no caching', () => {
 			const usage: TokenUsage = {
 				inputTokens: 1000,
 				outputTokens: 300,
@@ -29,7 +29,7 @@ describe("Common types", () => {
 			expect(usage.cacheCreationTokens).toBe(0);
 		});
 
-		it("calculates total tokens correctly", () => {
+		it('calculates total tokens correctly', () => {
 			const usage: TokenUsage = {
 				inputTokens: 1500,
 				outputTokens: 500,
