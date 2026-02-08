@@ -67,9 +67,6 @@ importers:
       vitest:
         specifier: ^3.0.8
         version: 3.2.4(@types/node@22.19.10)
-      zod:
-        specifier: ^4.3.6
-        version: 4.3.6
 
   packages/gateway:
     dependencies:
@@ -699,9 +696,6 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
-
 snapshots:
 
   '@biomejs/biome@1.9.4':
@@ -1179,5 +1173,3 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
-
-  zod@4.3.6: {}
