@@ -12,6 +12,15 @@ import { DEFAULT_REACT_CONFIG } from './types.js';
 /** Send callback — channel adapters provide this to deliver responses */
 export type SendCallback = (target: string, msg: OutboundMessage) => Promise<void>;
 
+/** Error context passed to onError callback (AUD-081) */
+export interface ErrorInfo {
+	readonly error: unknown;
+	readonly errorType: string;
+	readonly errorMessage: string;
+	readonly userId: string;
+	readonly channelId: string;
+}
+
 /**
  * Dependencies for InboundHandler (DI, ADR-006).
  *
@@ -24,6 +33,7 @@ export interface InboundHandlerDeps {
 	readonly toolExecutor: ToolExecutor;
 	readonly personaEngine: PersonaEngine;
 	readonly config?: ReActConfig;
+	readonly onError?: (info: ErrorInfo) => void;
 }
 
 /** Fallback error message when processing fails */
@@ -53,6 +63,7 @@ export function createInboundHandler(
 		toolExecutor,
 		personaEngine,
 		config = DEFAULT_REACT_CONFIG,
+		onError,
 	} = deps;
 
 	return async (message: InboundMessage, send: SendCallback): Promise<void> => {
@@ -94,7 +105,16 @@ export function createInboundHandler(
 
 			// 7. Update session activity
 			await sessionRouter.updateActivity(resolved.session.sessionId);
-		} catch (_err: unknown) {
+		} catch (err: unknown) {
+			// AUD-081: Report error details for observability
+			if (onError) {
+				try {
+					onError(buildErrorInfo(err, userId, channelId));
+				} catch {
+					// onError itself failed — do not propagate
+				}
+			}
+
 			await send(userId, {
 				content: ERROR_MESSAGE,
 				format: 'markdown',
@@ -104,6 +124,26 @@ export function createInboundHandler(
 }
 
 // ─── Internal Helpers ───
+
+/** Extract structured error info from an unknown thrown value */
+function buildErrorInfo(err: unknown, userId: string, channelId: string): ErrorInfo {
+	if (err instanceof Error) {
+		return {
+			error: err,
+			errorType: err.constructor.name,
+			errorMessage: err.message,
+			userId,
+			channelId,
+		};
+	}
+	return {
+		error: err,
+		errorType: 'unknown',
+		errorMessage: String(err),
+		userId,
+		channelId,
+	};
+}
 
 /**
  * Build Message array for reactLoop from assembled context and inbound message.
