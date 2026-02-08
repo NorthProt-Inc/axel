@@ -9,10 +9,6 @@ CLAUDE="/home/northprot/.local/bin/claude"
 CYCLE_ID=$(date +"%Y%m%d_%H%M")
 LOCKFILE="/tmp/axel-cycle.lock"
 
-# Budget per agent (USD)
-COORD_BUDGET="${COORD_BUDGET:-3.00}"
-DIV_BUDGET="${DIV_BUDGET:-5.00}"
-
 # Duplicate execution guard
 if [ -f "$LOCKFILE" ]; then
     pid=$(cat "$LOCKFILE")
@@ -32,7 +28,6 @@ run_division() {
     local div="$1"
     local model="$2"
     local worktree="$3"
-    local budget="$4"
     local ts
     ts=$(date +"%Y-%m-%d_%H-%M-%S")
     local logfile="$OPS/logs/${div}_${ts}.log"
@@ -49,7 +44,6 @@ run_division() {
         --add-dir "$MAIN_REPO" \
         --permission-mode dontAsk \
         --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash,WebSearch,WebFetch" \
-        --max-budget-usd "$budget" \
         --no-session-persistence \
         "$(cat "$OPS/prompts/${div}-session.md")" \
         >> "$logfile" 2>&1 || {
@@ -83,7 +77,6 @@ $CLAUDE -p \
     --add-dir "$MAIN_REPO" \
     --permission-mode dontAsk \
     --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash" \
-    --max-budget-usd "$COORD_BUDGET" \
     --no-session-persistence \
     "$(cat "$OPS/prompts/coordinator-session.md")" \
     >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || log "coordinator FAILED"
@@ -107,11 +100,11 @@ for br in div/arch div/research div/quality; do
 done
 
 # ── Phase 2: 3 Divisions in parallel ──
-run_division "arch"     "opus"   "/home/northprot/projects/axel-wt-arch"     "$DIV_BUDGET" &
+run_division "arch"     "opus"   "/home/northprot/projects/axel-wt-arch"     &
 PID_ARCH=$!
-run_division "research" "sonnet" "/home/northprot/projects/axel-wt-research" "$DIV_BUDGET" &
+run_division "research" "sonnet" "/home/northprot/projects/axel-wt-research" &
 PID_RES=$!
-run_division "quality"  "opus"   "/home/northprot/projects/axel-wt-quality"  "$DIV_BUDGET" &
+run_division "quality"  "opus"   "/home/northprot/projects/axel-wt-quality"  &
 PID_QA=$!
 
 # Wait for all 3 to complete
