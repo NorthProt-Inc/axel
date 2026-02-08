@@ -2,7 +2,11 @@ import * as crypto from 'node:crypto';
 import type * as http from 'node:http';
 
 export function sendJson(res: http.ServerResponse, status: number, body: unknown): void {
-	res.writeHead(status, { 'Content-Type': 'application/json' });
+	res.writeHead(status, {
+		'Content-Type': 'application/json',
+		'X-Content-Type-Options': 'nosniff',
+		'X-Frame-Options': 'DENY',
+	});
 	res.end(JSON.stringify(body));
 }
 

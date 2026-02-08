@@ -85,8 +85,15 @@ describe('INTEG-004: POST /api/v1/memory/search', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
-			handleMessage: vi.fn().mockResolvedValue({ content: '', sessionId: '', channelSwitched: false, usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 } }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			handleMessage: vi.fn().mockResolvedValue({
+				content: '',
+				sessionId: '',
+				channelSwitched: false,
+				usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 },
+			}),
 			searchMemory,
 		};
 		server = createGatewayServer(config, deps);
@@ -157,7 +164,9 @@ describe('INTEG-004: POST /api/v1/memory/search', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 		};
 		server = createGatewayServer(config, deps);
 		httpServer = await server.start();
@@ -189,7 +198,9 @@ describe('INTEG-004: GET /api/v1/memory/stats', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 			getMemoryStats,
 		};
 		server = createGatewayServer(config, deps);
@@ -225,7 +236,9 @@ describe('INTEG-004: GET /api/v1/memory/stats', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 		};
 		server = createGatewayServer(config, deps);
 		httpServer = await server.start();
@@ -259,7 +272,9 @@ describe('INTEG-004: GET /api/v1/session', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 			getSession,
 		};
 		server = createGatewayServer(config, deps);
@@ -309,7 +324,9 @@ describe('INTEG-004: GET /api/v1/session', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 		};
 		server = createGatewayServer(config, deps);
 		httpServer = await server.start();
@@ -355,7 +372,9 @@ describe('INTEG-004: POST /api/v1/session/end', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 			getSession,
 			endSession,
 		};
@@ -441,7 +460,9 @@ describe('INTEG-004: GET /api/v1/tools', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 			listTools,
 		};
 		server = createGatewayServer(config, deps);
@@ -478,7 +499,9 @@ describe('INTEG-004: GET /api/v1/tools', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 		};
 		server = createGatewayServer(config, deps);
 		httpServer = await server.start();
@@ -508,7 +531,9 @@ describe('INTEG-004: POST /api/v1/tools/execute', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 			executeTool,
 		};
 		server = createGatewayServer(config, deps);
@@ -589,7 +614,9 @@ describe('INTEG-004: POST /api/v1/tools/execute', () => {
 
 		const config = createTestConfig();
 		const deps: GatewayDeps = {
-			healthCheck: vi.fn().mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
+			healthCheck: vi
+				.fn()
+				.mockResolvedValue({ state: 'healthy', checks: {}, timestamp: new Date(), uptime: 100 }),
 		};
 		server = createGatewayServer(config, deps);
 		httpServer = await server.start();

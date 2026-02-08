@@ -77,7 +77,11 @@ export function createResourceHandlers(deps: GatewayDeps): {
 			sendError(res, 404, 'No active session', requestId);
 			return;
 		}
-		const sessionId = (session as Record<string, unknown>).sessionId as string;
+		const sessionId = session.sessionId;
+		if (typeof sessionId !== 'string' || sessionId.length === 0) {
+			sendError(res, 500, 'Internal error', requestId);
+			return;
+		}
 		const summary = await deps.endSession(sessionId);
 		sendJson(res, 200, { ...summary, requestId });
 	}
