@@ -1,23 +1,23 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08 Cycle 36 (QA-013)
+> Last Updated: 2026-02-08 Cycle 38 (QA-014-PROACTIVE)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 241 |
-| Passing | 241 |
+| Total Tests | 289 |
+| Passing | 289 |
 | Failing | 0 |
-| Coverage (core, excl. types) | 100% stmts / 95% branch / 100% funcs / 100% lines |
+| Coverage (core, excl. types) | 100% stmts / 95.87% branch / 100% funcs / 100% lines |
 | Phase | B: Core Sprint (80% complete) |
 
 ## Per-Package Status
 
 | Package | Tests | Pass | Fail | Coverage | Target | Gate |
 |---------|-------|------|------|----------|--------|------|
-| `packages/core/` | 241 | 241 | 0 | 100% stmts, 95% branch | 90% | **PASS** |
+| `packages/core/` | 289 | 289 | 0 | 100% stmts, 95.87% branch | 90% | **PASS** |
 | `packages/infra/` | 0 | 0 | 0 | — | 80% | Pending Phase C |
 | `packages/channels/` | 0 | 0 | 0 | — | 75% | Pending Phase D |
 | `packages/gateway/` | 0 | 0 | 0 | — | 80% | Pending Phase D |
@@ -38,10 +38,12 @@
 | memory/semantic-memory.ts | 100 | 95+ | 100 | 100 | Cosine/text sim edge cases covered |
 | memory/conceptual-memory.ts | 100 | 95+ | 100 | 100 | BFS cycle detection tested |
 | memory/meta-memory.ts | 100 | 100 | 100 | 100 | |
-| **Overall** | **100** | **95** | **100** | **100** | types/ and index.ts excluded per config |
+| context/types.ts | 100 | 100 | 100 | 100 | Zod schema + interfaces |
+| context/assembler.ts | 100 | 100 | 100 | 100 | Priority assembly + binary-search truncation |
+| **Overall** | **100** | **95.87** | **100** | **100** | types/ and index.ts excluded per config |
 
 > Coverage excludes `src/types/` (pure interfaces, no runtime code) and `src/**/index.ts` (barrel exports) per `vitest.config.ts`.
-> Memory module coverage reported by dev-core: 100% stmt, 95% branch. Verified by QA-013 via 241 test pass.
+> Context module coverage reported by dev-core: 100% stmt, 100% branch. Verified by QA-014-PROACTIVE via 289 test pass.
 
 ## TDD Compliance
 
@@ -51,26 +53,50 @@
 | 34 | CORE-002 | dev-core | `ecb10461` (03:01:50) | `97e6b29f` (03:03:37) | +1m 47s | **YES** |
 | 34 | CORE-005 | dev-core | `7ae9276d` (03:05:25) | `abf08200` (03:06:25) | +1m 00s | **YES** |
 | 36 | CORE-003 | dev-core | `c719a22` (03:31:05) | `abd5878` (03:33:08) | +2m 03s | **YES** |
+| 38 | CORE-004 | dev-core | `05daa1d` (03:45:04) | `a0f498f` (03:46:36) | +1m 32s | **YES** |
 
-All 4 completed CORE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN).
+All 5 completed CORE tasks follow TDD protocol: test commits (RED) precede source commits (GREEN).
 
-## CONSTITUTION Compliance (QA-013)
+## CONSTITUTION Compliance (QA-014-PROACTIVE: CORE-004)
 
 | Rule | Check | Result |
 |------|-------|--------|
-| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** (c719a22 → abd5878) |
-| Rule 9 (Package Boundary) | No cross-package imports in memory/ | **PASS** (only ../types/*, ./types.js) |
-| Rule 10 (Test Gate) | 241 tests pass, coverage ≥ 90%, Biome clean, tsc clean | **PASS** |
-| Rule 14 (File Size) | No src file > 400 lines | **PASS** (max: 238 lines, types.ts) |
+| Rule 8 (TDD) | Test commit ≤ src commit timestamp | **PASS** (05daa1d → a0f498f, +1m32s) |
+| Rule 9 (Package Boundary) | No cross-package imports in context/ | **PASS** (only relative paths + zod) |
+| Rule 10 (Test Gate) | 289 tests pass, coverage ≥ 90%, Biome clean, tsc clean | **PASS** |
+| Rule 14 (File Size) | No src file > 400 lines | **PASS** (max: 242 lines, assembler.ts) |
 
 ## Recent Test Runs
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 38 | quality (QA-014-PROACTIVE) | core | 289 pass, 0 fail | — | CORE-004 proactive review |
 | 36 | quality (QA-013) | core | 241 pass, 0 fail | 583ms | Biome: 0 warnings. tsc: clean. |
 | 35 | quality (QA-012) | core | 121 pass, 0 fail | 483ms | Biome: 0 warnings. tsc: clean. |
 | 34 | dev-core (CORE-002+005) | core | 121 pass, 0 fail | — | Reported by dev-core |
 | 33 | dev-core (CORE-001) | core | 55 pass, 0 fail | — | Domain types first pass |
+
+## QA-014-PROACTIVE Code Review Findings (CORE-004: Context Assembly)
+
+### Issues Found: 0 CRITICAL, 0 HIGH, 2 MEDIUM, 1 LOW
+
+| # | Sev | Location | Description | Fix |
+|---|-----|----------|-------------|-----|
+| 1 | MEDIUM | context/types.ts:72 | Plan §3.3 defines `getMetaMemory()` return type as `PrefetchedMemory[]` but implementation uses `HotMemory[]`. Arch interface-contract also specifies `PrefetchedMemory`. | Architect update plan §3.3 to use HotMemory, or create PrefetchedMemory type alias |
+| 2 | MEDIUM | context/assembler.ts:165-181 | `truncateToFit()` binary search performs O(log n) async `counter.count()` calls. For 200K char text, ~17 API calls × 50-100ms = 0.85-1.7s. ADR-012 LRU cache won't help (unique substrings). | For production: add estimate-based range narrowing before binary search to reduce count() calls |
+| 3 | LOW | context/assembler.ts:160-180 | 7 inline formatter functions. Currently manageable at 242 lines; extract to formatters.ts if file approaches 300+ lines. | No action needed now |
+
+### 7-Perspective Summary
+
+| Perspective | Finding |
+|-------------|---------|
+| 1. Design Quality | **Excellent.** Clean DI architecture: ContextDataProvider (7 methods) + TokenCounter (count/estimate) injected via constructor. ContextAssembler has single responsibility (assembly), no I/O. Plan §3.3 interface compliance with one justified drift (HotMemory vs PrefetchedMemory). |
+| 2. Complexity & Readability | **Excellent.** assembler.ts at 242 lines is well-structured. Priority-ordered assembly is clear with section comments. DEFAULTS constant eliminates magic numbers. Binary-search truncation is elegant. |
+| 3. Security | **No issues.** No external input handling. Internal data processing only. |
+| 4. Bugs & Reliability | **No bugs found.** Empty content/systemPrompt edge cases handled. Budget overflow triggers truncation correctly. Binary search correctness verified by tests (front-preserving truncation). |
+| 5. Changeability | **Good.** Adding new context sections requires only: (1) add budget slot, (2) add provider method, (3) add formatter, (4) add assembly step. Formatters could be extracted if they grow. |
+| 6. Dead Code | **None found.** All exports and functions used. |
+| 7. DRY | **Excellent.** `addSection()` private method abstracts the repeated pattern of format→truncate→count→push. 7 assembly steps share this pattern cleanly. |
 
 ## QA-013 Code Review Findings (CORE-003: Memory Layers M0-M5)
 
@@ -139,4 +165,5 @@ All 4 completed CORE tasks follow TDD protocol: test commits (RED) precede sourc
 | QA-010 | 17 | 768d→3072d impact analysis | 2H 3M | Proactive, drift PASS |
 | QA-011 | 19 | FIX-AUDIT verification | 3M new | 4 PASS, 1 CONDITIONAL |
 | QA-012 | 35 | Phase B code review (CORE-001+002+005) | 2M 3L | ALL CONSTITUTION gates PASS |
-| **QA-013** | **36** | **Phase B code review (CORE-003 memory M0-M5)** | **3M 3L** | **ALL CONSTITUTION gates PASS** |
+| QA-013 | 36 | Phase B code review (CORE-003 memory M0-M5) | 3M 3L | ALL CONSTITUTION gates PASS |
+| **QA-014-PROACTIVE** | **38** | **Phase B code review (CORE-004 context assembly)** | **2M 1L** | **ALL CONSTITUTION gates PASS** |
