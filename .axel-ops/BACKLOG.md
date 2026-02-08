@@ -2,21 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 11**: WP-4 completed, QA-008 completed. FIX-MED unblocked and assigned to Arch.
-> QA-008 found 3 new issues (ERR-047~049), absorbed into FIX-MED scope.
-> ERR-QG1 → CONDITIONAL. QA-009 created for final sign-off after FIX-MED.
+> **Cycle 12**: FIX-MED completed (22 MEDIUM/LOW issues resolved). QA-009 unblocked and assigned to Quality.
+> This is the FINAL task before plan finalization.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| QA-009 | P1 | quality | Final quality gate sign-off: verify FIX-MED resolved all remaining MEDIUM/LOW issues. Confirm all 5 CONSTITUTION quality gates PASS. Approve plan finalization. | FIX-MED | 0208 |
+| (empty) | | | | | |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-MED | arch | 0208T1000 | 0208T1200 |
+| QA-009 | quality | 0208T1200 | 0208T1400 |
 
 ## Cancelled
 
@@ -68,3 +67,4 @@
 | ADR-018 | arch | 0208T0830 | docs/adr/018-token-counting-strategy.md |
 | WP-4 | arch | 0208T0930 | docs/adr/003-redis-working-memory.md, docs/plan/axel-project-plan.md (Redis PG-first, error handling) |
 | QA-008 | quality | 0208T0955 | Quality gate re-verification: 3 PASS, 2 CONDITIONAL PASS. 23 errors confirmed resolved. 3 new issues found. |
+| FIX-MED | arch | 0208T1130 | docs/plan/axel-project-plan.md — 22 MEDIUM/LOW issues resolved (React→Svelte, ToolDefinition dedup, DI container, TTFT/Docker qualifiers, etc.) |

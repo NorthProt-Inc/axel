@@ -2,45 +2,45 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 11**: WP-4 completed (commit 6466f1d). QA-008 completed. ERR-010 partially resolved, ERR-038 resolved.
-> QA-008 found 3 new issues (ERR-047~049). ERR-QG1 → CONDITIONAL (3 PASS, 2 CONDITIONAL PASS).
-> Open: 22 (1 HIGH, 13 MEDIUM, 5 LOW, 1 CONDITIONAL). Resolved: 25.
+> **Cycle 12**: FIX-MED completed (commit 38472fa). 22 MEDIUM/LOW issues resolved.
+> ERR-QG1 remains CONDITIONAL pending QA-009 final verification.
+> Open: 1 (CONDITIONAL). Resolved: 47.
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
-| ERR-QG1 | **CONDITIONAL** | quality | 0208 | QUALITY GATE: 3 PASS (Completeness, Traceability, Sources), 2 CONDITIONAL PASS (Consistency — React→Svelte refs + ToolDefinition dup; Feasibility — TTFT/Docker qualifiers). Full PASS requires FIX-MED completion. | FIX-MED |
-| ERR-004 | MEDIUM | quality | 0207 | Memory layer naming collision with Turtle Stack layers | FIX-MED |
-| ERR-005 | MEDIUM | quality | 0207 | Dual embedding interface (LlmProvider.embed() vs EmbeddingService) | FIX-MED |
-| ERR-006 | MEDIUM | quality | 0207 | Context Assembler I/O injection pattern undocumented | FIX-MED |
-| ERR-007 | MEDIUM | quality | 0207 | channelMentions field ambiguity (distinct count vs sum) | FIX-MED |
-| ERR-008 | MEDIUM | quality | 0207 | claude_reports #08, #13, #21 missing Axel mappings | FIX-MED |
-| ERR-009 | LOW | quality | 0207 | InboundHandler type not defined in plan | FIX-MED |
-| ERR-010 | MEDIUM | quality | 0208 | Redis plan body (Section 4 Layer 2) not updated with ADR-003 shadow write/degradation details. ADR-003 updated by WP-4 but plan body incomplete. Downgraded from HIGH — conceptual issue resolved in ADR-003. | FIX-MED |
-| ERR-015 | MEDIUM | quality | 0208 | Zod v4 breaking API changes from v3. | FIX-MED |
-| ERR-016 | MEDIUM | quality | 0208 | countTokens() conflates sync and async. | FIX-MED |
-| ERR-017 | MEDIUM | quality | 0208 | TTFT '500ms 이내' not achievable as guarantee. | FIX-MED |
-| ERR-018 | MEDIUM | quality | 0208 | Docker cold start '<30s' only with cached images. | FIX-MED |
-| ERR-019 | LOW | quality | 0208 | tsdown attribution incorrect. | FIX-MED |
-| ERR-022 | MEDIUM | quality | 0208 | EmbeddingService.embed() signature inconsistency. | FIX-MED |
-| ERR-023 | MEDIUM | quality | 0208 | Triple layer numbering confusion. | FIX-MED |
-| ERR-031 | LOW | quality | 0208 | Default command allowlist too permissive. | FIX-MED |
-| ERR-032 | LOW | quality | 0208 | No credential redaction spec for error logs. | FIX-MED |
-| ERR-033 | LOW | quality | 0208 | Security test cases missing. | FIX-MED |
-| ERR-034 | **HIGH** | quality | 0208 | DI container covers only 2 of ~15 injectable services. | FIX-MED |
-| ERR-042 | MEDIUM | quality | 0208 | AxelChannel lacks reconnection lifecycle. | FIX-MED |
-| ERR-044 | MEDIUM | quality | 0208 | Streaming pipeline no error handling. | FIX-MED |
-| ERR-045 | MEDIUM | quality | 0208 | PersonaEngine hot-reload unspecified. | FIX-MED |
-| ERR-046 | LOW | quality | 0208 | Meta Memory feedback loop no mechanism. | FIX-MED |
-| ERR-047 | MEDIUM | quality | 0208 | Plan body references 'Vite + React' in 3 locations despite ADR-017 Svelte 5 decision. | FIX-MED |
-| ERR-048 | MEDIUM | quality | 0208 | ToolDefinition interface defined twice (Section 3.5 + Section 4 Layer 6) with signature differences. | FIX-MED |
-| ERR-049 | LOW | quality | 0208 | Gemini Flash ~300-500ms latency claim lacks research citation. | FIX-MED |
+| ERR-QG1 | **CONDITIONAL** | quality | 0208 | QUALITY GATE: Was 3 PASS / 2 CONDITIONAL PASS at QA-008. FIX-MED resolved all CONDITIONAL PASS conditions (React→Svelte refs, ToolDefinition dup, TTFT/Docker qualifiers). Awaiting QA-009 final verification for full PASS. | QA-009 |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-004 | Memory/Turtle layer naming convention clarified in plan. | FIX-MED (arch) | 0208 |
+| ERR-005 | LlmProvider.embed() removed, EmbeddingService is canonical. | FIX-MED (arch) | 0208 |
+| ERR-006 | ContextDataProvider interface documented. | FIX-MED (arch) | 0208 |
+| ERR-007 | channelMentions field ambiguity resolved. | FIX-MED (arch) | 0208 |
+| ERR-008 | claude_reports #08, #13, #21 MEDIUM Axel mappings added. | FIX-MED (arch) | 0208 |
+| ERR-009 | InboundHandler type defined in plan. | FIX-MED (arch) | 0208 |
+| ERR-010 | Redis shadow write table + degradation path added to plan body Layer 2. | FIX-MED (arch) | 0208 |
+| ERR-015 | Zod v4 breaking API changes addressed. | FIX-MED (arch) | 0208 |
+| ERR-016 | countTokens() sync/async separation clarified. | FIX-MED (arch) | 0208 |
+| ERR-017 | TTFT criterion revised with p50/p95 qualifiers. | FIX-MED (arch) | 0208 |
+| ERR-018 | Docker cold start qualifier added (cached images). | FIX-MED (arch) | 0208 |
+| ERR-019 | tsdown attribution corrected. | FIX-MED (arch) | 0208 |
+| ERR-022 | EmbeddingService.embed() signature unified. | FIX-MED (arch) | 0208 |
+| ERR-023 | Triple layer numbering clarified. | FIX-MED (arch) | 0208 |
+| ERR-031 | Default command allowlist tightened. | FIX-MED (arch) | 0208 |
+| ERR-032 | Credential redaction spec added for error logs. | FIX-MED (arch) | 0208 |
+| ERR-033 | Security test cases expanded. | FIX-MED (arch) | 0208 |
+| ERR-034 | DI container expanded to ~20 injectable services. | FIX-MED (arch) | 0208 |
+| ERR-042 | AxelChannel reconnection lifecycle specified. | FIX-MED (arch) | 0208 |
+| ERR-044 | Streaming pipeline error handling added. | FIX-MED (arch) | 0208 |
+| ERR-045 | PersonaEngine hot-reload mechanism specified. | FIX-MED (arch) | 0208 |
+| ERR-046 | Meta Memory feedback loop mechanism defined. | FIX-MED (arch) | 0208 |
+| ERR-047 | React→Svelte refs fixed in 3 plan locations. | FIX-MED (arch) | 0208 |
+| ERR-048 | ToolDefinition consolidated to single definition. | FIX-MED (arch) | 0208 |
+| ERR-049 | Gemini Flash latency citation added. | FIX-MED (arch) | 0208 |
 | ERR-038 | Redis 5 critical functions now have explicit error handling with circuit breaker + typed fallbacks. | WP-4 (arch) | 0208 |
 | ERR-QG2 | ADR-001~012 created. 12 confirmed ADRs now have formal files. | WP-1 (arch) | 0208 |
 | ERR-001 | IVFFlat→HNSW index strategy updated in plan. | WP-3 (arch) | 0208 |

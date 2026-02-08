@@ -5,22 +5,22 @@
 ## Status
 
 - **Phase**: PLANNING (v2.0 -> v3.0 refinement)
-- **Cycle**: 11
-- **Last Updated**: 2026-02-08T1000
-- **STATUS**: CONVERGENCE — WP-4 + QA-008 completed. Quality gate: 3 PASS / 2 CONDITIONAL PASS. FIX-MED is last major task before plan finalization.
+- **Cycle**: 12
+- **Last Updated**: 2026-02-08T1200
+- **STATUS**: NEAR-FINAL — FIX-MED completed (22 MEDIUM/LOW issues resolved). QA-009 assigned for final quality gate sign-off. If QA-009 passes, plan finalization is achievable.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 1 |
+| Queued | 0 |
 | In Progress | 1 |
-| Done | 28 |
+| Done | 29 |
 | Cancelled | 13 |
 
-## Open Errors: 25 (1 HIGH, 14 MEDIUM, 6 LOW, 1 CONDITIONAL)
+## Open Errors: 1 (CONDITIONAL — ERR-QG1 pending QA-009 verification)
 
-Down from 48 → 25. ERR-038 resolved by WP-4. ERR-010 downgraded MEDIUM (ADR resolved, plan body pending). 3 new issues from QA-008 (ERR-047~049). FIX-MED targets all 25 remaining issues.
+Down from 25 → 1. FIX-MED resolved 22 MEDIUM/LOW issues. ERR-QG1 remains CONDITIONAL pending QA-009 final sign-off. If QA-009 confirms all 5 quality gates PASS, open errors → 0.
 
 ## Cycle History
 
@@ -38,19 +38,20 @@ Down from 48 → 25. ERR-038 resolved by WP-4. ERR-010 downgraded MEDIUM (ADR re
 | 9 | 0208 | **No external progress.** Arch 8 cycles stalled (>4h). Coordinator decided to directly execute WP-1/WP-3 to break deadlock. |
 | 10 | 0208 | **MAJOR BREAKTHROUGH.** Arch completed ALL Work Packages (WP-1~7) + ADR-017 + ADR-018 in single commit (15351d8). **8 tasks completed.** 23 errors resolved. Open errors: 48→24 (50% reduction). ADR-001~021 now all exist (21 files). Plan factual corrections applied. Core domain types defined. Error taxonomy, resilience patterns, auth strategy, lifecycle specs all documented. **ERR-QG1 downgraded to PENDING** — Quality gate re-verification assigned as QA-008. **WP-4** (Redis role clarification) assigned to Arch as only remaining P0. **FIX-MED** queued (17 MEDIUM/LOW items, depends on WP-4). **ESCALATION LIFTED** for Arch stall. Pipeline fully unblocked. |
 | 11 | 0208 | **CONVERGENCE.** WP-4 completed (6466f1d): ADR-003 updated with PG-first write pattern, 5 critical functions error handling. ERR-010 partially resolved (ADR done, plan body pending), ERR-038 resolved. QA-008 completed: quality gate re-verification — **3 PASS** (Completeness, Traceability, Sources), **2 CONDITIONAL PASS** (Consistency, Feasibility). 3 new issues found (ERR-047~049): React→Svelte plan refs, ToolDefinition dup, latency citation. All absorbed into FIX-MED. **FIX-MED assigned to Arch** — last major task. QA-009 queued (final sign-off, depends FIX-MED). No drift. No P0 blockers. |
+| 12 | 0208 | **NEAR-FINAL.** FIX-MED completed (commit 38472fa): 22 MEDIUM/LOW issues resolved in plan body. Key fixes: React→Svelte refs (3 locations), ToolDefinition dedup, LlmProvider.embed() removal, DI container ~20 services, TTFT/Docker qualifiers, Redis shadow write in plan, credential redaction spec, security test cases, channel reconnection lifecycle, streaming error handling, PersonaEngine hot-reload, Meta Memory feedback loop. **QA-009 assigned to Quality** — final sign-off. If PASS on all 5 gates → plan finalization. No drift. No P0 blockers. Open errors: 25→1 (ERR-QG1 CONDITIONAL pending QA-009). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208T1000 | Cycle 11 — processing WP-4 + QA-008 completion | Active |
-| Architecture | 0208T1000 | FIX-MED (25 MEDIUM/LOW issues batch) | **Active** |
+| Coordinator | 0208T1200 | Cycle 12 — processing FIX-MED completion, assigning QA-009 | Active |
+| Architecture | 0208T1130 | (idle — FIX-MED completed, all tasks done) | Idle |
 | Research | 0208T0030 | (idle — all tasks done) | Idle |
-| Quality | 0208T0955 | (idle — awaiting FIX-MED for QA-009) | Idle, QA-009 queued |
+| Quality | 0208T1200 | QA-009 (final quality gate sign-off) | **Assigned** |
 
 ## Human Intervention Needed
 
 1. ~~**Arch Division restart failed**~~ — **RESOLVED**.
-2. ~~**ERR-QG1 — Quality gates PENDING**~~ — **CONDITIONAL**. 3/5 gates PASS, 2/5 CONDITIONAL PASS. Remaining gap: MEDIUM-level inconsistencies (React→Svelte refs, TTFT/Docker qualifiers). FIX-MED will resolve.
+2. ~~**ERR-QG1 — Quality gates PENDING**~~ — **PENDING QA-009**. FIX-MED resolved all CONDITIONAL PASS conditions. QA-009 will verify full PASS.
 3. ~~**ERR-QG2 — ADR files missing**~~ — **RESOLVED**.
-4. **Error accumulation**: 25 open errors (threshold 5, 5x exceeded). FIX-MED expected to resolve all remaining issues. After FIX-MED + QA-009, plan finalization should be possible.
+4. ~~**Error accumulation**~~ — **NEAR-RESOLVED**. 25→1 open error (ERR-QG1 CONDITIONAL). QA-009 is the final gate.
