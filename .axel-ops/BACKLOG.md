@@ -2,28 +2,24 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 7 Restructure**: FIX-001~009 absorbed into 7 Work Packages per QA-007 root cause analysis.
-> Dependency chains simplified. FIX-001/FIX-002 cancelled (6 cycles stalled, superseded).
+> **Cycle 10**: WP-1~3, WP-5~7, ADR-017/018 completed. 8 tasks moved to Done.
+> WP-4 and FIX-MED dependencies resolved, moved to Queued-assignable.
+> QA-008 created for quality gate re-verification.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| WP-2 | P0 | arch | Define core domain types in plan Section 3: Memory, Message, MemoryEngine, ToolResult, ReActEvent, SessionSummary, HealthStatus, SessionState. Absorbs ERR-035 part of FIX-008. | WP-1 | 0208 |
-| WP-4 | P0 | arch | Redis role clarification: redefine Redis as ephemeral cache with PG shadow writes. Update ADR-003, create ADR-016 (Redis Role Redefinition). Add degradation paths for Redis unavailability. Absorbs ERR-010, ERR-038, ADR-016. | WP-1 | 0208 |
-| WP-5 | P0 | arch | Error handling specification: (1) ADR-020 Error Taxonomy (AxelError base, TransientError, PermanentError, ValidationError, AuthError, ProviderError, ToolError), (2) ReAct loop try/catch + timeout enforcement (ERR-036), (3) error type hierarchy definition (ERR-037). Absorbs FIX-008 error items, ADR-020. | WP-2 | 0208 |
-| WP-6 | P0 | arch | Lifecycle specification: (1) Session state machine with SessionState enum (ERR-041), (2) graceful shutdown sequence with SIGTERM handling (ERR-040), (3) memory consolidation L2→L3 algorithm (ERR-039), (4) ADR-021 Resilience Patterns (circuit breaker, reconnection, degradation). Absorbs FIX-008 lifecycle items, ADR-021. | WP-2 | 0208 |
-| WP-7 | P0 | arch | Security specification: (1) ADR-019 Auth Strategy (JWT vs static bearer, token transport, WS auth), (2) WebSocket authentication (ERR-025), (3) command args + cwd validation (ERR-026), (4) webhook signature verification (ERR-028), (5) prompt injection defense beyond regex (ERR-029), (6) migration subprocess TS-only (ERR-030). Absorbs FIX-006, ADR-019. | — | 0208 |
-| FIX-MED | P1 | arch | MEDIUM/LOW issues batch: Zod v4 compat (ERR-015), countTokens async (ERR-016), TTFT target revision (ERR-017), Docker cold start qualifier (ERR-018), tsdown attribution (ERR-019), EmbeddingService signature (ERR-022), layer numbering (ERR-023), SecurityConfigSchema (ERR-027), channel reconnection (ERR-042), circuit breaker state machine (ERR-043), streaming error handling (ERR-044), persona hot-reload (ERR-045), meta memory feedback (ERR-046), DI container completeness (ERR-034), credential redaction (ERR-032), default allowlist (ERR-031), security test cases (ERR-033). | WP-3,WP-5,WP-6,WP-7 | 0208 |
-| ADR-017 | P1 | arch | Svelte 5 WebChat SPA decision ADR (based on RES-004) | — | 0208 |
-| ADR-018 | P1 | arch | Token counting strategy ADR: Anthropic SDK countTokens + per-model strategy (based on RES-002) | — | 0208 |
+| WP-4 | P0 | arch | Redis role clarification: redefine Redis as ephemeral cache with PG shadow writes. Update ADR-003, create ADR-016 (Redis Role Redefinition). Add degradation paths for Redis unavailability. Absorbs ERR-010, ERR-038. | — | 0208 |
+| FIX-MED | P1 | arch | MEDIUM/LOW issues batch (17 items): Zod v4 compat (ERR-015), countTokens async (ERR-016), TTFT target revision (ERR-017), Docker cold start qualifier (ERR-018), tsdown attribution (ERR-019), EmbeddingService signature (ERR-022), layer numbering (ERR-023), channel reconnection (ERR-042), streaming error handling (ERR-044), persona hot-reload (ERR-045), meta memory feedback (ERR-046), DI container completeness (ERR-034), credential redaction (ERR-032), default allowlist (ERR-031), security test cases (ERR-033), naming collision (ERR-004), dual embedding (ERR-005), context assembler I/O (ERR-006), mentions ambiguity (ERR-007), claude_reports gaps (ERR-008), InboundHandler (ERR-009). | WP-4 | 0208 |
+| QA-008 | P0 | quality | Quality gate re-verification: review all WP-1~7 outputs (ADR-001~021, plan Section 3.5, factual corrections). Re-assess 5 CONSTITUTION quality gates. Determine if ERR-QG1 can be fully resolved. | — | 0208 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| WP-1 | arch (coord executing) | 0208T0700 | 0208T0800 |
-| WP-3 | arch (coord executing) | 0208T0700 | 0208T0800 |
+| WP-4 | arch | 0208T0830 | 0208T0930 |
+| QA-008 | quality | 0208T0830 | 0208T0930 |
 
 ## Cancelled
 
@@ -65,3 +61,11 @@
 | QA-005 | quality | 0208T0212 | 3 HIGH, 4 MEDIUM, 3 LOW issues found (security design review) |
 | QA-006 | quality | 0208T0313 | 8 HIGH, 4 MEDIUM, 1 LOW issues found (implementability review) |
 | QA-007 | quality | 0208T0413 | Comprehensive review summary: 45 issues synthesized, 4 root causes, 7 work packages defined |
+| WP-1 | arch | 0208T0830 | docs/adr/001-*.md ~ 012-*.md (12 ADR files created) |
+| WP-2 | arch | 0208T0830 | docs/plan/axel-project-plan.md (Section 3.5 core domain types) |
+| WP-3 | arch | 0208T0830 | docs/plan/axel-project-plan.md (7 factual corrections) |
+| WP-5 | arch | 0208T0830 | docs/adr/020-error-taxonomy.md |
+| WP-6 | arch | 0208T0830 | docs/adr/021-resilience-patterns.md |
+| WP-7 | arch | 0208T0830 | docs/adr/019-auth-strategy.md |
+| ADR-017 | arch | 0208T0830 | docs/adr/017-webchat-spa-framework.md |
+| ADR-018 | arch | 0208T0830 | docs/adr/018-token-counting-strategy.md |
