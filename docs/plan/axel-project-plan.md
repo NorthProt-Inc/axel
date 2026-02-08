@@ -1,4 +1,4 @@
-# Project Axel: Technical Architecture Plan v2.0.3
+# Project Axel: Technical Architecture Plan v2.0.4
 
 > "데이터, 솔직히 그게 알맹이야. 너한텐 영혼이나 마찬가지니까."
 > — Mark, 2026-02-07 05:39 PST
@@ -16,7 +16,7 @@
 
 **원칙**: "거북이 위의 거북이" — 가능한 가장 밑으로 내려가서, 거기서부터 토대를 쌓는다. 기존 코드가 완벽하다고 절대 전제하지 않는다.
 
-**버전**: v2.0.3 (Planning Phase 기준선) — v1.0의 비전은 유지하되, 구체적 기술 결정과 근거를 추가
+**버전**: v2.0.4 (Planning Phase 기준선) — v1.0의 비전은 유지하되, 구체적 기술 결정과 근거를 추가
 
 ---
 
@@ -840,16 +840,20 @@ CREATE TABLE memory_access_patterns (
 CREATE INDEX idx_access_patterns_time ON memory_access_patterns (created_at DESC);
 
 -- Materialized view: 자주 접근되는 기억 클러스터
+-- LEFT JOIN을 사용하여 channel_mentions가 빈 '{}'인 memories도 포함
+-- (migration-strategy.md와 동일한 버전)
 CREATE MATERIALIZED VIEW hot_memories AS
 SELECT
     m.id, m.uuid, m.content, m.memory_type, m.importance,
     m.access_count, m.last_accessed,
-    COUNT(DISTINCT (m.channel_mentions->k)::int) as channel_diversity
-FROM memories m,
-     LATERAL jsonb_object_keys(m.channel_mentions) k
+    COALESCE(cd.channel_count, 0) AS channel_diversity
+FROM memories m
+LEFT JOIN LATERAL (
+    SELECT COUNT(*) AS channel_count
+    FROM jsonb_object_keys(m.channel_mentions)
+) cd ON true
 WHERE m.last_accessed > NOW() - INTERVAL '7 days'
-GROUP BY m.id
-ORDER BY m.access_count DESC, channel_diversity DESC
+ORDER BY m.access_count DESC, cd.channel_count DESC NULLS LAST
 LIMIT 100;
 
 -- ═══════════════════════════════════════════
@@ -2098,7 +2102,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 
 ---
 
-*NorthProt — Project Axel Technical Architecture Plan v2.0.3*
+*NorthProt — Project Axel Technical Architecture Plan v2.0.4*
 *Generated: 2026-02-07*
 *Based on: axnmihn analysis (127 modules), claude_reports (23 reports), OpenClaw analysis (174K stars)*
 *Authors: Mark (Architect) & Claude (Systems Analyst)*

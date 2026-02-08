@@ -141,7 +141,7 @@ interface EpisodicMemory {
 |--------|---------|------|
 | Storage | ChromaDB (별도 프로세스) | pgvector (같은 DB) |
 | Embedding model | Gemini embedding-001 (768d) | **gemini-embedding-001 (3072d)** (ADR-016) |
-| Index | ChromaDB default | IVFFlat (lists=100, 1K vectors 기준) |
+| Index | ChromaDB default | HNSW (m=16, ef_construction=64) — RES-001, ADR-002 |
 | Search | Vector only | **Hybrid** — vector + trigram + metadata |
 | Decay | Python batch (C++ SIMD) | TypeScript 순수 함수 (ADR-015) |
 | Cross-channel | 없음 | channel_mentions JSONB 추적 |
@@ -168,10 +168,11 @@ LIMIT 20;
 -- Re-rank by importance * final_score
 ```
 
-**IVFFlat vs HNSW 결정:**
-- 현재 1,000개 기억 기준: IVFFlat이 더 적합 (빌드 빠름, 메모리 적음)
-- 10,000개 이상으로 성장 시: HNSW로 전환 검토 (ADR-015 또는 별도 ADR)
-- RES-001 (research division) 결과 대기 중이나, 1K 규모에서는 IVFFlat이 합리적
+**인덱스 결정: HNSW (확정)**
+- RES-001 결과: HNSW가 7.4x 빠른 쿼리, 더 높은 recall 제공
+- 3072d 벡터 기준 메모리: (3072 × 4) + (16 × 2 × 4) = 12,416 bytes/vector. 1K vectors ≈ 12MB
+- Phase 0 VPS (8GB RAM)에서 충분히 수용 가능
+- Plan body, ADR-002, migration-strategy 모두 HNSW(m=16, ef_construction=64)로 통일됨
 
 **TypeScript Interface:**
 ```typescript

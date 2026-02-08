@@ -56,4 +56,6 @@
 
 | Cycle | Section | Direction | Resolution | Resolved By |
 |-------|---------|-----------|------------|-------------|
-| — | — | — | — | — |
+| 20 | ADR-013:144,171-174 | plan→plan | IVFFlat→HNSW aligned with plan body, ADR-002, migration-strategy | FIX-PRE-IMPL |
+| 20 | migration-strategy:372,377-393 | plan→plan | IVFFlat text/SQL→HNSW, note rewritten for HNSW characteristics | FIX-PRE-IMPL |
+| 20 | plan:843-853 | plan→plan | hot_memories MV SQL: INNER JOIN→LEFT JOIN, aligned with migration-strategy:285-302 | FIX-PRE-IMPL |

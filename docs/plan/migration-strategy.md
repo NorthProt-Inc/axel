@@ -369,31 +369,33 @@ See v2.0 Plan Section 5 for full details.
    b. ChromaDB vectors → PostgreSQL memories (re-embed with gemini-embedding-001)
    c. knowledge_graph.json → PostgreSQL entities, relations
    d. dynamic_persona.json → file copy (no DB)
-3. Rebuild IVFFlat index (REINDEX) after bulk data load
+3. Rebuild HNSW index (REINDEX) after bulk data load
 4. REFRESH MATERIALIZED VIEW hot_memories
 5. Run validation checks (see below)
 ```
 
-### IVFFlat Index Note
+### HNSW Index Note
 
-IVFFlat builds its clusters from existing data at index creation time.
-If the index is created on an empty table (migration 003), the clusters will be suboptimal.
+HNSW indexes are built incrementally and do not depend on existing data distribution
+(unlike IVFFlat which builds clusters at creation time). This means HNSW works
+correctly even when created on an empty table.
 
-**Recommended approach for initial setup:**
+**However**, for large bulk imports, it is more efficient to:
 ```sql
--- 1. Create table WITHOUT IVFFlat index
+-- 1. Create table WITHOUT HNSW index (faster bulk INSERT)
 -- 2. Bulk insert migrated vectors
 -- 3. Then create the index:
 CREATE INDEX idx_memories_embedding ON memories
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);
+    USING hnsw (embedding vector_cosine_ops)
+    WITH (m = 16, ef_construction = 64);
 
 -- Or if index already exists from migration:
 REINDEX INDEX idx_memories_embedding;
 ```
 
-The migration file includes the index for simplicity (works for new installs).
-The data migration tool should REINDEX after bulk import.
+The migration file (003) includes the HNSW index for simplicity (works for new installs).
+For data migration from axnmihn, the data migration tool should drop the index before
+bulk import, then recreate it afterward for optimal build performance.
 
 ### Validation Checks
 
