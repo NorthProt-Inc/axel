@@ -457,7 +457,7 @@ describe('ContextAssembler', () => {
 
 		it('preserves front of content on truncation (plan: 앞부분 유지, 뒷부분 절삭)', async () => {
 			const provider = makeEmptyProvider();
-			const content = 'ABCDEFGHIJ';
+			const content = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			(provider.getWorkingMemory as ReturnType<typeof vi.fn>).mockResolvedValue([
 				makeTurn(content, 1),
 			]);
@@ -468,7 +468,7 @@ describe('ContextAssembler', () => {
 			};
 			const tinyBudget = {
 				...DEFAULT_CONTEXT_BUDGET,
-				workingMemory: 5,
+				workingMemory: 10,
 			};
 			const assembler = new ContextAssembler(provider, counter, tinyBudget);
 
@@ -480,7 +480,12 @@ describe('ContextAssembler', () => {
 
 			const wmSection = result.sections.find((s) => s.source === 'M1:working');
 			expect(wmSection).toBeDefined();
-			expect(wmSection!.content.startsWith('user: A')).toBe(true);
+			// Formatted: "user: ABCDEFGHIJKLMNOPQRSTUVWXYZ" (31 chars)
+			// Truncated to 10 chars → should start with "user: ABCD"
+			expect(wmSection!.content.startsWith('user: ')).toBe(true);
+			expect(wmSection!.content.length).toBeLessThanOrEqual(10);
+			// Should NOT contain the full original content
+			expect(wmSection!.content).not.toContain('Z');
 		});
 
 		it('totalTokens equals sum of systemPrompt tokens + all section tokens', async () => {
