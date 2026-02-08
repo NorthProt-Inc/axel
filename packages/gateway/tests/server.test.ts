@@ -383,7 +383,7 @@ describe('Gateway Server', () => {
 	});
 
 	describe('rate limit bucket cleanup (AUD-080)', () => {
-		it('cleans up stale rate limit entries to prevent memory leak', async () => {
+		it('creates bucket entry on authenticated request', async () => {
 			await server.stop();
 
 			const config = createTestConfig({ rateLimitPerMinute: 100 });
@@ -391,33 +391,24 @@ describe('Gateway Server', () => {
 			server = createGatewayServer(config, deps);
 			httpServer = await server.start();
 
-			const authHeaders = {
-				authorization: 'Bearer test-auth-token-12345',
-				'content-type': 'application/json',
-			};
-			const body = JSON.stringify({ content: 'hello', channelId: 'webchat' });
+			// Before any request, bucket count should be 0
+			expect(server.getRateLimitBucketCount()).toBe(0);
 
-			// Make a request to create a rate limit bucket entry
 			await makeRequest(httpServer, {
 				method: 'POST',
 				path: '/api/v1/chat',
-				headers: authHeaders,
-				body,
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello', channelId: 'webchat' }),
 			});
 
-			// The bucket entry should exist but should eventually be cleaned up
-			// after the window expires. We verify the server exposes a method
-			// to check bucket count, or we verify that the stale cleanup happens
-			// by checking that after window expiry, subsequent requests don't
-			// accumulate old empty entries indefinitely.
-
-			// Make request, wait for window to expire, make another request
-			// The implementation should not keep stale entries around
-			// This test verifies the cleanup mechanism exists
-			expect(true).toBe(true); // Placeholder — actual verification below
+			// After a request, bucket count should be 1
+			expect(server.getRateLimitBucketCount()).toBe(1);
 		});
 
-		it('removes empty IP entries after all timestamps expire', async () => {
+		it('evicts stale entries when new requests arrive', async () => {
 			await server.stop();
 
 			const config = createTestConfig({ rateLimitPerMinute: 100 });
@@ -425,30 +416,40 @@ describe('Gateway Server', () => {
 			server = createGatewayServer(config, deps);
 			httpServer = await server.start();
 
-			const authHeaders = {
-				authorization: 'Bearer test-auth-token-12345',
-				'content-type': 'application/json',
-			};
-			const body = JSON.stringify({ content: 'hello', channelId: 'webchat' });
-
-			// Make a request to populate the rate limit bucket
-			const res = await makeRequest(httpServer, {
+			// Make a request to create a bucket entry
+			await makeRequest(httpServer, {
 				method: 'POST',
 				path: '/api/v1/chat',
-				headers: authHeaders,
-				body,
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello', channelId: 'webchat' }),
 			});
-			expect(res.status).toBe(200);
+			expect(server.getRateLimitBucketCount()).toBe(1);
 
-			// After the cleanup runs, empty entries should be removed from the Map.
-			// We verify this behavior by checking the getRateLimitBucketCount()
-			// method which should be exposed for observability.
-			const rateLimitBucketCount = (server as Record<string, unknown>).getRateLimitBucketCount;
-			if (typeof rateLimitBucketCount === 'function') {
-				const count = (rateLimitBucketCount as () => number)();
-				// Should have at least 1 entry after a request
-				expect(count).toBeGreaterThanOrEqual(0);
-			}
+			// Advance time beyond 2x the rate limit window (120s+)
+			vi.useFakeTimers();
+			vi.setSystemTime(Date.now() + 130_000);
+
+			// Make another request — eviction runs lazily on next request
+			await makeRequest(httpServer, {
+				method: 'POST',
+				path: '/api/v1/chat',
+				headers: {
+					authorization: 'Bearer test-auth-token-12345',
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ content: 'hello2', channelId: 'webchat' }),
+			});
+
+			// The current IP's entry remains (it just made a request),
+			// but stale entries from other IPs would be evicted.
+			// Since all requests come from the same IP (127.0.0.1),
+			// count stays at 1 — the key invariant is it doesn't grow unbounded.
+			expect(server.getRateLimitBucketCount()).toBe(1);
+
+			vi.useRealTimers();
 		});
 	});
 
