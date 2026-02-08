@@ -9,9 +9,7 @@
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| WP-1 | P0 | arch | Batch-create ADR-001~012 files in docs/adr/. Each needs: title, status(confirmed), context, decision, consequences, alternatives. ADR-003 (Redis) needs clarification per ERR-010. Absorbs FIX-002, ERR-003. | — | 0208 |
 | WP-2 | P0 | arch | Define core domain types in plan Section 3: Memory, Message, MemoryEngine, ToolResult, ReActEvent, SessionSummary, HealthStatus, SessionState. Absorbs ERR-035 part of FIX-008. | WP-1 | 0208 |
-| WP-3 | P0 | arch | Factual corrections: (1) text-embedding-004→gemini-embedding-001 in 3 locations (ERR-011,021), (2) tiktoken→Anthropic SDK countTokens (ERR-012), (3) Gemini Flash latency '<50ms'→realistic target (ERR-014), (4) IVFFlat formula removal (ERR-013), (5) ToolDefinition type ownership (ERR-020), (6) migration direction text fix (ERR-021). Absorbs FIX-003 HIGH + FIX-005. | — | 0208 |
 | WP-4 | P0 | arch | Redis role clarification: redefine Redis as ephemeral cache with PG shadow writes. Update ADR-003, create ADR-016 (Redis Role Redefinition). Add degradation paths for Redis unavailability. Absorbs ERR-010, ERR-038, ADR-016. | WP-1 | 0208 |
 | WP-5 | P0 | arch | Error handling specification: (1) ADR-020 Error Taxonomy (AxelError base, TransientError, PermanentError, ValidationError, AuthError, ProviderError, ToolError), (2) ReAct loop try/catch + timeout enforcement (ERR-036), (3) error type hierarchy definition (ERR-037). Absorbs FIX-008 error items, ADR-020. | WP-2 | 0208 |
 | WP-6 | P0 | arch | Lifecycle specification: (1) Session state machine with SessionState enum (ERR-041), (2) graceful shutdown sequence with SIGTERM handling (ERR-040), (3) memory consolidation L2→L3 algorithm (ERR-039), (4) ADR-021 Resilience Patterns (circuit breaker, reconnection, degradation). Absorbs FIX-008 lifecycle items, ADR-021. | WP-2 | 0208 |
@@ -24,7 +22,8 @@
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| (none) | — | — | — |
+| WP-1 | arch (coord executing) | 0208T0700 | 0208T0800 |
+| WP-3 | arch (coord executing) | 0208T0700 | 0208T0800 |
 
 ## Cancelled
 
