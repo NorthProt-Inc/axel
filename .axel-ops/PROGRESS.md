@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **C: INFRA SPRINT — ACTIVE**
-- **Cycle**: 45
-- **Last Updated**: 2026-02-08C45
-- **STATUS**: **Phase C 89% (9/9 coding tasks done).** No new completions this cycle. SYNC-004 (arch, 3 cycles — metric-alert) + QA-016 (quality, 2 cycles) in progress. AUDIT-003 created (Phase C audit, 10+ cycles since last audit). Smoke test: **475 tests, 41 files**, typecheck+lint clean. 1 open issue (ERR-064 LOW).
+- **Phase**: **C: INFRA SPRINT — COMPLETE → Phase D PREP**
+- **Cycle**: 46
+- **Last Updated**: 2026-02-08C46
+- **STATUS**: **Phase C 100% COMPLETE.** QA-016 done (CONDITIONAL PASS — 2H 7M 4L, zod fix needed). AUDIT-003 done (6H 8M 5L, TDD PASS). SYNC-004 done (CTO override — PLAN_SYNC all IN_SYNC). **3 tasks completed this cycle.** FIX-INFRA-001~004 created for QA/audit findings. ERR-065 MEDIUM (zod resolve) is Phase D blocker. Smoke test: **475 tests, 41 files**, typecheck+lint clean. Phase D transition pending FIX-INFRA-001.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 1 |
-| In Progress | 2 |
-| Done | 66 |
+| Queued | 6 |
+| In Progress | 0 |
+| Done | 69 |
 | Cancelled | 14 |
 
-## Open Errors: 1
+## Open Errors: 2
 
 ## Cycle History
 
@@ -57,21 +57,22 @@
 | 43 | 0208 | **5 TASKS MERGED.** INFRA-001 (PG persistence, 6 adapters, 62 tests, 95.5% stmt), INFRA-004 (embedding, 16 tests, 99.18% stmt), COMMON-CB (circuit breaker, 11 tests), DEVOPS-002 (npm deps), DEVOPS-003 (testcontainers) all merged to main. Smoke test: 419 tests pass, typecheck+lint clean. **Phase C 56%.** Plan-amendment received (sessions user_id). INFRA-002/003/005 all unblocked — assigned to dev-infra. SYNC-004 partial + PLAN-AMEND-001 assigned to arch. DEVOPS-004 (core exports) created. 1 new issue (ERR-064 LOW). |
 | 44 | 0208 | **4 TASKS MERGED — ALL INFRA CODING COMPLETE.** INFRA-002 (Redis cache, 25 tests, 91.44% stmt), INFRA-003 (LLM adapters, 15 tests, 95.89% stmt), INFRA-005 (MCP registry, 16 tests, 92.12% stmt), DEVOPS-004 (core subpath exports). Biome lint fixes applied (5 files). Smoke test: **475 tests, 41 files pass**, typecheck+lint clean. **Phase C 89%.** All 9 coding tasks done. QA-016 unblocked — assigned to quality. SYNC-004 (arch) in progress (2 cycles). Dev-infra added zod dep. 1 open issue (ERR-064 LOW, unchanged). |
 | 45 | 0208 | **No new completions.** SYNC-004 (arch, 3 cycles — metric-alert) + QA-016 (quality, 2 cycles) in progress. AUDIT-003 created (Phase C code audit, 13+ cycles since AUDIT-002). Smoke test: 475 tests pass, typecheck+lint clean. 1 error (ERR-064 LOW). No drift. |
+| 46 | 0208 | **PHASE C COMPLETE.** QA-016 done (CONDITIONAL PASS: 2H 7M 4L, 459/475 tests — zod fix needed). AUDIT-003 done (6H 8M 5L, TDD 100%, file size PASS). SYNC-004 done (CTO override — PLAN_SYNC Phase C all IN_SYNC). **3 tasks completed, 69 total.** FIX-INFRA-001~004 + PLAN-AMEND-001 + CONST-AMEND-001 created. ERR-065 MEDIUM. Phase D transition pending FIX-INFRA-001. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C45 | Cycle 45 | Active |
-| Architecture | 0208C43 | SYNC-004, PLAN-AMEND-001 | **Active** (PLAN_SYNC Phase C update — 3 cycles, metric-alert) |
+| Coordinator | 0208C46 | Cycle 46 | Active |
+| Architecture | 0208C43 | — | Idle (SYNC-004 done by CTO override) |
 | Dev-Core | 0208C40 | — | Idle (all CORE tasks complete) |
-| Dev-Infra | 0208C44 | — | Idle (all INFRA tasks complete: INFRA-001~005 + COMMON-CB) |
-| Dev-Edge | — | — | Pending Phase D |
+| Dev-Infra | 0208C44 | — | Idle (all INFRA tasks complete, FIX-INFRA-002~004 queued) |
+| Dev-Edge | — | — | Pending Phase D (after FIX-INFRA-001) |
 | Research | 0208T0030 | — | Idle |
-| Quality | 0208C44 | QA-016 | **Active** (Phase C code review — 2 cycles) |
-| DevOps | 0208C44 | — | Idle (DEVOPS-004 complete) |
-| Audit | 0208C45 | AUDIT-003 | **Active** (Phase C code audit — assigned C45) |
+| Quality | 0208C46 | — | Idle (QA-016 done) |
+| DevOps | 0208C44 | — | Idle (FIX-INFRA-001 queued) |
+| Audit | 0208C46 | — | Idle (AUDIT-003 done) |
 
 ## Human Intervention Needed
 
-(none)
+- **CONST-AMEND-001**: CONSTITUTION §9 amendment needed — expand infra allowed imports to include `@axel/core/{types,memory,orchestrator}`. §9 currently says `core/src/types/ only` but PLAN_SYNC B.7 + DEVOPS-004 intentionally export broader subpaths. **Requires human (Mark) approval** per CONSTITUTION immutability rule.

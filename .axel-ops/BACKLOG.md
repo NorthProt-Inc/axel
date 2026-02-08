@@ -2,20 +2,23 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 45**: **Phase C (Infra Sprint) 89%.** 9/9 coding tasks done. 475 tests pass. Lint 0 errors. QA-016 + SYNC-004 + AUDIT-003 remaining.
+> **Cycle 46**: **Phase C COMPLETE (100%).** All coding + QA + audit + PLAN_SYNC done. 475 tests pass. FIX-INFRA-001 (P0 zod) created as Phase D prerequisite. Phase D prep started.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends On |
 |----|----------|----------|------|------------|
-| AUDIT-003 | P2 | audit | Phase C code audit — INFRA-001~005, COMMON-CB. TDD, §9, file size, ADR compliance. 10+ cycles since last audit. | — |
+| FIX-INFRA-001 | P0 | devops | Fix zod dependency resolve failure in packages/infra — 16 MCP tests cannot run (QA-016 HIGH, CONSTITUTION §10 violation). Ensure `pnpm test --run` runs all 475+ tests with 0 skips. | — |
+| FIX-INFRA-002 | P1 | dev-infra | Fix 8 bare catch blocks in redis-working-memory.ts (QA-016 HIGH). Add logger.warn per ADR-003 pattern. Fix getSummary PG fallback (AUD-059). Fix compress empty catch (AUD-062). | FIX-INFRA-001 |
+| FIX-INFRA-003 | P1 | dev-infra | Fix validatePath symlink traversal (AUD-054/QA-016 MEDIUM — security). Use fs.realpathSync() after path.resolve(). Fix silent JSON.parse in anthropic-provider (AUD-056). Fix global mutable toolCallCounter in google-provider (AUD-048). | FIX-INFRA-001 |
+| FIX-INFRA-004 | P2 | dev-infra | Fix relative import paths → @axel/core/* subpath exports (AUD-060/QA-016 LOW). All infra src files. | FIX-INFRA-001 |
+| PLAN-AMEND-001 | P2 | arch | Update migration-strategy.md: add user_id to sessions table (dev-infra plan-amendment). Update ADR-002 PG 16→17 (AUD-058). | — |
+| CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| QA-016 | quality | 0208C44 | C46 |
-| SYNC-004 | arch | 0208C43 | C46 |
 
 ## Cancelled
 
@@ -105,3 +108,6 @@
 | INFRA-003 | dev-infra | 0208C44 | L5 LLM adapters: AnthropicLlmProvider + GoogleLlmProvider. Streaming, tool calling, circuit breaker. 15 tests, 95.89% stmt. ADR-020/021. |
 | INFRA-005 | dev-infra | 0208C44 | L6 MCP registry: defineTool(), ToolRegistry, McpToolExecutor, validatePath. 16 tests, 92.12% stmt. ADR-010. |
 | DEVOPS-004 | devops | 0208C44 | Core subpath exports: @axel/core/{types,memory,decay,context,persona,orchestrator}. 475 tests pass. |
+| SYNC-004 | coord (CTO) | 0208C46 | PLAN_SYNC.md Phase C: ALL 6 subsections NOT_STARTED→IN_SYNC. 9 interface mappings + known issues table. CTO override (arch 3 cycles stalled). |
+| QA-016 | quality | 0208C46 | Phase C code review: 2 HIGH, 7 MEDIUM, 4 LOW. CONDITIONAL PASS (459/475 tests, zod fix needed). TDD PASS. File size PASS. |
+| AUDIT-003 | audit | 0208C46 | Phase C code audit: 6 HIGH, 8 MEDIUM, 5 LOW. TDD PASS (100%). File size PASS. No circular deps. No dead code. |

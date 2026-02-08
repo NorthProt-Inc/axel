@@ -2,13 +2,14 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 43**: 1 open issue (LOW).
+> **Cycle 46**: 2 open issues (1 MEDIUM, 1 LOW). QA-016 + AUDIT-003 findings tracked as FIX-INFRA tasks in BACKLOG.
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
 | ERR-064 | LOW | Dev-infra modified root `package.json` (1 line) + `pnpm-lock.yaml` — outside ownership (devops-owned). Minor, resolved via merge. No functional impact. | coord | 0208C43 |
+| ERR-065 | MEDIUM | zod dependency resolve failure in packages/infra — 16 MCP tests cannot run. CONSTITUTION §10 violation (all tests must pass for `done`). QA-016 flagged as Phase D blocker. FIX-INFRA-001 (P0) created. | quality (QA-016) | 0208C46 |
 
 ## Resolved
 

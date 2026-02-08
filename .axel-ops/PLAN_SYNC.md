@@ -175,13 +175,90 @@ These interfaces in `packages/core/src/types/` are consumed by other packages (C
 
 ## Phase C: Infra Sprint
 
-| Plan Section | Layer | Code Location | Status | Last Synced | Notes |
+### C.1 L2 Persistence (INFRA-001)
+
+Source: plan §3.1 L2 / ADR-002 / ADR-013 / migration-strategy.md
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| L2 Persistence | TL2 | `packages/infra/src/db/` | NOT_STARTED | — | ADR-002. PostgreSQL 17 + pgvector. Connection pool + prepared statements. |
-| L2 Cache | TL2 | `packages/infra/src/cache/` | NOT_STARTED | — | ADR-003. Redis 7. Working memory + stream buffer + prefetch cache. |
-| L5 LLM Adapter | TL2 | `packages/infra/src/llm/` | NOT_STARTED | — | Provider adapters (Anthropic, Google, Ollama). Circuit breaker + retry. `LlmProvider` interface. |
-| L5 Embedding | TL2 | `packages/infra/src/embedding/` | NOT_STARTED | — | ADR-016. gemini-embedding-001. 3072d. batchEmbedContents. |
-| L6 MCP Registry | TL2 | `packages/infra/src/mcp/` | NOT_STARTED | — | `defineTool()` pattern. Auto-registration. Command allowlist (ADR-010). |
+| L2 PG Pool | `packages/infra/src/db/pg-pool.ts` | `PgPool`, `PgPoolConfig` | IN_SYNC | C46 | ADR-002. Connection pool wrapper with healthCheck(). 107 lines. |
+| L2 Episodic | `packages/infra/src/db/pg-episodic-memory.ts` | `PgEpisodicMemory` | IN_SYNC | C46 | Implements EpisodicMemory (core). createSession/endSession/addMessage/getRecentSessions/searchByTopic/searchByContent. 166 lines. 62 tests total (db module). **Note**: searchByTopic uses ILIKE (AUD-053 MEDIUM — trigram index concern). addMessage non-atomic INSERT+UPDATE (AUD-063 LOW). |
+| L2 Semantic | `packages/infra/src/db/pg-semantic-memory.ts` | `PgSemanticMemory` | IN_SYNC | C46 | Implements SemanticMemory (core). store/search/decay + HNSW pgvector index (3072d). Hybrid scoring 0.7v+0.3t. 234 lines. **Note**: decay() only does threshold DELETE, not ADR-015 8-step formula (AUD-057 MEDIUM — orchestration layer needed). |
+| L2 Conceptual | `packages/infra/src/db/pg-conceptual-memory.ts` | `PgConceptualMemory` | IN_SYNC | C46 | Implements ConceptualMemory (core). Entity/relation CRUD + BFS traversal via recursive CTE. 167 lines. |
+| L2 Meta | `packages/infra/src/db/pg-meta-memory.ts` | `PgMetaMemory` | IN_SYNC | C46 | Implements MetaMemory (core). Access pattern tracking + hot memories materialized view. 105 lines. |
+| L2 Session | `packages/infra/src/db/pg-session-store.ts` | `PgSessionStore` | IN_SYNC | C46 | Implements SessionStore (core/orchestrator). resolve/update/end/getStats. 214 lines. **Note**: sessions table includes user_id added by dev-infra (plan-amendment PLAN-AMEND-001 pending arch). |
+| L2 Index | `packages/infra/src/db/index.ts` | (barrel export) | IN_SYNC | C46 | Re-exports all PG adapters. |
+
+### C.2 L2 Cache (INFRA-002)
+
+Source: plan §3.1 L2 / ADR-003
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L2 Redis Working | `packages/infra/src/cache/redis-working-memory.ts` | `RedisWorkingMemory` | IN_SYNC | C46 | ADR-003. PG-first write, Redis cache-aside read, PG fallback on Redis failure. TTL 3600s. MAX_TURNS=20. 240 lines. **Note**: 8 bare catch blocks (QA-016 HIGH), getSummary no PG fallback (AUD-059 MEDIUM), compress empty catch (AUD-062 LOW). |
+| L2 Redis Stream | `packages/infra/src/cache/redis-stream-buffer.ts` | `RedisStreamBuffer` | IN_SYNC | C46 | Redis Streams (XADD/XRANGE/XTRIM) for M0 real-time events. 98 lines. |
+| L2 Cache Index | `packages/infra/src/cache/index.ts` | (barrel export) | IN_SYNC | C46 | Re-exports cache adapters. |
+
+### C.3 L5 LLM Adapters (INFRA-003)
+
+Source: plan L5 / ADR-020 / ADR-021
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L5 Anthropic | `packages/infra/src/llm/anthropic-provider.ts` | `AnthropicLlmProvider` | IN_SYNC | C46 | Messages API streaming, tool calling, thinking chunks. ProviderError with retryable classification. 202 lines. **Note**: silent JSON.parse failure on tool args (AUD-056 MEDIUM). |
+| L5 Google | `packages/infra/src/llm/google-provider.ts` | `GoogleLlmProvider` | IN_SYNC | C46 | generateContentStream, function calling, retryable 429/503. 159 lines. **Note**: global mutable toolCallCounter (AUD-048 HIGH). |
+| L5 LLM Index | `packages/infra/src/llm/index.ts` | (barrel export) | IN_SYNC | C46 | Re-exports LLM providers. |
+
+### C.4 L5 Embedding (INFRA-004)
+
+Source: plan L5 / ADR-016
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L5 Embedding | `packages/infra/src/embedding/index.ts` | `GeminiEmbeddingService` | IN_SYNC | C46 | gemini-embedding-001, 3072d, batchEmbedContents (max 100). Task types: RETRIEVAL_DOCUMENT/RETRIEVAL_QUERY. Retry 3x exponential backoff. Circuit breaker. 182 lines. 16 tests, 99.18% stmt. |
+
+### C.5 L6 MCP Registry (INFRA-005)
+
+Source: plan L6 / ADR-010
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L6 Tool Registry | `packages/infra/src/mcp/tool-registry.ts` | `defineTool`, `ToolRegistry`, `McpToolExecutor`, `validatePath` | IN_SYNC | C46 | defineTool() (Zod→JSON Schema), ToolRegistry (register/get/listAll/listByCategory), McpToolExecutor (ToolExecutor impl — Zod validation, timeout, command allowlist per ADR-010), validatePath (directory traversal prevention). 256 lines. 16 tests, 92.12% stmt. **Note**: validatePath no symlink resolution (AUD-054/QA-016 MEDIUM — security), __handler/__schema leaked (AUD-061 LOW), zodToJsonSchema simplified (QA-016 LOW). |
+| L6 MCP Index | `packages/infra/src/mcp/index.ts` | (barrel export) | IN_SYNC | C46 | Re-exports MCP registry. |
+
+### C.6 Common Utilities (COMMON-CB)
+
+Source: ADR-021
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| ADR-021 CB | `packages/infra/src/common/circuit-breaker.ts` | `CircuitBreaker`, `CircuitOpenError`, `CircuitBreakerConfig` | IN_SYNC | C46 | State machine: closed→open→half_open. Configurable failureThreshold/cooldownMs/halfOpenMaxProbes. 93 lines. 11 tests, 100% stmt. **Note**: halfOpenMaxProbes declared but not enforced (AUD-064 LOW). |
+
+### C.7 Cross-Package Interface Summary (Infra → Core)
+
+| Core Interface | Infra Implementation | Notes |
+|---|---|---|
+| `EpisodicMemory` (core/memory) | `PgEpisodicMemory` (infra/db) | Full impl |
+| `SemanticMemory` (core/memory) | `PgSemanticMemory` (infra/db) | Full impl (decay simplified) |
+| `ConceptualMemory` (core/memory) | `PgConceptualMemory` (infra/db) | Full impl |
+| `MetaMemory` (core/memory) | `PgMetaMemory` (infra/db) | Full impl |
+| `WorkingMemory` (core/memory) | `RedisWorkingMemory` (infra/cache) | PG-first + Redis cache |
+| `StreamBuffer` (core/memory) | `RedisStreamBuffer` (infra/cache) | Redis Streams |
+| `SessionStore` (core/orchestrator) | `PgSessionStore` (infra/db) | Full impl |
+| `LlmProvider` (core/orchestrator) | `AnthropicLlmProvider`, `GoogleLlmProvider` (infra/llm) | Streaming + tool calling |
+| `ToolExecutor` (core/orchestrator) | `McpToolExecutor` (infra/mcp) | Zod validation + allowlist |
+
+### C.8 Known Issues from QA-016 + AUDIT-003
+
+| ID | Severity | Location | Issue | Phase D Blocker? |
+|---|---|---|---|---|
+| AUD-046/047 | HIGH | all infra src | §9 text says `core/src/types/` only — actual imports from `core/memory`, `core/orchestrator` | No (text vs intent gap — §9 amendment needed) |
+| AUD-048 | HIGH | google-provider.ts | Global mutable `toolCallCounter` | No (test-only concern) |
+| AUD-049 | HIGH | redis-working-memory.ts | ADR-003 circuit breaker spec: ad-hoc boolean vs CircuitBreaker class | No (functional, design debt) |
+| AUD-050 | HIGH | pg-session-store.ts | sessions user_id/channel_history plan-code schema gap | No (PLAN-AMEND-001 pending) |
+| AUD-051 | HIGH | redis-working-memory.ts | userId as session_id (FK violation risk) | No (functional, naming concern) |
+| QA-016-H2 | HIGH | redis-working-memory.ts | 8 bare catch blocks (silent error swallowing) | No (functional, ADR-003 violation) |
+| QA-016-H1 | HIGH | mcp/tool-registry | zod dep resolve failure (16 tests cant run) | Yes (§10 violation) |
 
 ## Phase D: Edge Sprint
 
@@ -210,3 +287,11 @@ These interfaces in `packages/core/src/types/` are consumed by other packages (C
 | 41 | B.4 Context Assembly | NOT_STARTED→IN_SYNC | 3 src + 2 test files. 289 tests, 100% coverage. ContextBudget 8 slots 76K, 8-stage assembly order, binary-search truncation all match plan §3.3. TokenCounter added per ADR-018. CORE-004 done C37/merged C40. | SYNC-003 |
 | 41 | B.6 Orchestrator | NOT_STARTED→IN_SYNC | 4 src + 3 test files. 330 tests, 99.69% stmt. ReActConfig defaults match plan:1396-1401. 4 error recovery paths per ADR-020. SessionRouter delegation per ADR-014. LlmProvider moved to core (plan had infra-internal). CORE-006 done C38/merged C40. | SYNC-003 |
 | 41 | B.7 Interface Summary | updated | LlmProvider, ToolExecutor, SessionStore, ChannelContext, SessionStats added to cross-package summary. LlmProvider moved from "infra-internal" to core DI contract. | SYNC-003 |
+| 46 | C.1 L2 Persistence | NOT_STARTED→IN_SYNC | INFRA-001 (6 adapters, 62 tests, 95.5% stmt). PgPool, PgEpisodicMemory, PgSemanticMemory, PgConceptualMemory, PgMetaMemory, PgSessionStore. ADR-002/013/021. CTO override (SYNC-004 3 cycles stalled). | coord (CTO override) |
+| 46 | C.2 L2 Cache | NOT_STARTED→IN_SYNC | INFRA-002 (25 tests, 91.44% stmt). RedisWorkingMemory (PG-first + cache-aside), RedisStreamBuffer (Redis Streams). ADR-003. | coord (CTO override) |
+| 46 | C.3 L5 LLM Adapters | NOT_STARTED→IN_SYNC | INFRA-003 (15 tests, 95.89% stmt). AnthropicLlmProvider, GoogleLlmProvider. ADR-020/021. | coord (CTO override) |
+| 46 | C.4 L5 Embedding | NOT_STARTED→IN_SYNC | INFRA-004 (16 tests, 99.18% stmt). GeminiEmbeddingService 3072d. ADR-016. | coord (CTO override) |
+| 46 | C.5 L6 MCP Registry | NOT_STARTED→IN_SYNC | INFRA-005 (16 tests, 92.12% stmt). defineTool + ToolRegistry + McpToolExecutor + validatePath. ADR-010. | coord (CTO override) |
+| 46 | C.6 Common CB | NOT_STARTED→IN_SYNC | COMMON-CB (11 tests, 100% stmt). CircuitBreaker state machine per ADR-021. | coord (CTO override) |
+| 46 | C.7 Interface Summary | created | 9 core→infra interface implementations mapped. All core memory/orchestrator DI contracts have concrete infra implementations. | coord (CTO override) |
+| 46 | C.8 Known Issues | created | 7 HIGH + 8 MEDIUM + 5 LOW from QA-016 + AUDIT-003. 1 Phase D blocker (zod dep resolve). | coord (CTO override) |

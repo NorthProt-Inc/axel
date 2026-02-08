@@ -2,28 +2,28 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 45
+## Current Cycle: 46
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 44 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-003, resolved C41) | **Active** (SYNC-004 — 3 cycles, metric-alert) |
+| coord | — | 45 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 (FIX-AUDIT, FIX-PRE-IMPL, SYNC-001, SYNC-002, SYNC-003) | 1 (SYNC-004, overridden C46 by CTO) | Idle — SYNC-004 done by CTO override |
 | dev-core | 1.5 cycles | 6 (CORE-001~006) | 0 | Idle — all CORE tasks complete |
 | dev-infra | 1 cycle | 6 (INFRA-001~005, COMMON-CB) | 0 | Idle — all INFRA tasks complete |
-| dev-edge | — | 0 | 0 | Pending Phase D |
-| quality | — | 2 (QA-011, QA-013) | 1 (QA-012, cancelled C39) | **Active** (QA-016) |
+| dev-edge | — | 0 | 0 | Pending Phase D (after FIX-INFRA-001) |
+| quality | 2 cycles | 3 (QA-011, QA-013, QA-016) | 1 (QA-012, cancelled C39) | Idle — QA-016 done |
 | research | — | 0 | 0 | Idle |
 | devops | 1 cycle | 11 (SCAFFOLD-001~007 + FIX + DEVOPS-002/003/004) | 0 | Idle — DEVOPS-004 complete |
-| audit | 1 cycle | 1 (AUDIT-002) | 0 | **Active** (AUDIT-003 assigned C45) |
+| audit | 1 cycle | 2 (AUDIT-002, AUDIT-003) | 0 | Idle — AUDIT-003 done |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 1 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
+| Open Errors | 2 | 5 | OK |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK (SYNC-004 resolved by CTO override) |
 | Merge Conflicts (last 10) | 1 | 3 | OK (pnpm-lock.yaml, resolved) |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -44,7 +44,7 @@
 | Plan Closure | **DONE** | 17 | 21 | 100% |
 | A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
 | B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
-| C: Infra Sprint | **ACTIVE (89%)** | 42 | — | 89% (9/9 coding done. 475 tests. QA-016 + SYNC-004 remaining) |
+| C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests. FIX-INFRA tasks carry to Phase D) |
 | D: Edge Sprint | QUEUED | — | — | — |
 | E: Integration | QUEUED | — | — | — |
 
@@ -69,3 +69,4 @@
 | 43 | dev-infra, devops, arch | 5 (INFRA-001, INFRA-004, COMMON-CB, DEVOPS-002, DEVOPS-003) | 0 | **5 TASKS MERGED.** 419 tests pass. Phase C 56%. INFRA-002/003/005 assigned. SYNC-004+DEVOPS-004 assigned. 1 merge conflict resolved. |
 | 44 | coord, quality, arch | 4 (INFRA-002, INFRA-003, INFRA-005, DEVOPS-004) | 0 | **ALL INFRA CODING COMPLETE.** 475 tests pass. Phase C 89%. Biome lint fixes applied. QA-016 assigned (unblocked). SYNC-004 2 cycles. |
 | 45 | quality, arch, audit | 0 | 0 | No completions. SYNC-004 3 cycles (metric-alert). QA-016 2 cycles. AUDIT-003 created+assigned. 475 tests pass. |
+| 46 | coord | 3 (QA-016, AUDIT-003, SYNC-004) | 1 new (ERR-065 MEDIUM) | **PHASE C COMPLETE.** QA-016: CONDITIONAL PASS (7H 7M 4L, zod fix needed). AUDIT-003: 6H 8M 5L, TDD PASS. SYNC-004: CTO override (PLAN_SYNC all IN_SYNC). FIX-INFRA-001~004 created. Phase D prep. |
