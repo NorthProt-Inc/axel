@@ -100,23 +100,21 @@ Source: plan Layer 3 §3.1 (lines 933-1008), ADR-013
 
 | Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
 |---|---|---|---|---|---|
-| §3.1 M0 Stream | `packages/core/src/memory/stream-buffer.ts` | `StreamBuffer`, `StreamEvent` | NOT_STARTED | — | ADR-013. Redis Streams. TTL: session. Max 1,000 entries. Speculative Prefetch trigger. |
-| §3.1 M1 Working | `packages/core/src/memory/working-memory.ts` | `WorkingMemory`, `Turn` | NOT_STARTED | — | ADR-013, ADR-003. Redis Hash+List. TTL: 1h inactive. 20-turn window. Cross-channel unified. |
-| §3.1 M2 Episodic | `packages/core/src/memory/episodic-memory.ts` | `EpisodicMemory` | NOT_STARTED | — | ADR-013. PostgreSQL. TTL: 30d. Session summaries + emotion tags. |
-| §3.1 M3 Semantic | `packages/core/src/memory/semantic-memory.ts` | `SemanticMemory` | NOT_STARTED | — | ADR-013, ADR-016. pgvector 3072d. HNSW(m=16, ef=64). Hybrid search (vector+trigram+metadata). |
-| §3.1 M4 Conceptual | `packages/core/src/memory/conceptual-memory.ts` | `ConceptualMemory`, `Entity`, `Relation` | NOT_STARTED | — | ADR-013. PostgreSQL tables. SQL-based graph traversal (replaces Python BFS). |
-| §3.1 M5 Meta | `packages/core/src/memory/meta-memory.ts` | `MetaMemory`, `PrefetchedMemory` | NOT_STARTED | — | ADR-013. PostgreSQL MV `hot_memories`. Refresh every 6h. Speculative Prefetch source. |
+| §3.1 M0 Stream | `packages/core/src/memory/stream-buffer.ts` | `StreamBuffer`, `StreamEvent`, `StreamEventType` | IN_SYNC | C37 | ADR-013. `InMemoryStreamBuffer` stub. push/consume/trim/healthCheck. 4 event types. 241 tests (memory module total). |
+| §3.1 M1 Working | `packages/core/src/memory/working-memory.ts` | `WorkingMemory`, `Turn` | IN_SYNC | C37 | ADR-013, ADR-003. `InMemoryWorkingMemory` stub. MAX_TURNS=20 (plan:960). pushTurn/getTurns/getSummary/compress/flush/clear/healthCheck. |
+| §3.1 M2 Episodic | `packages/core/src/memory/episodic-memory.ts` | `EpisodicMemory`, `CreateSessionParams`, `MessageRecord` | IN_SYNC | C37 | ADR-013. `InMemoryEpisodicMemory` stub. createSession/endSession/addMessage/getRecentSessions/searchByTopic/searchByContent/healthCheck. |
+| §3.1 M3 Semantic | `packages/core/src/memory/semantic-memory.ts` | `SemanticMemory`, `NewMemory`, `SemanticQuery`, `ScoredMemory`, `DecayResult`, `DecayRunConfig` | IN_SYNC | C37 | ADR-013, ADR-016. `InMemorySemanticMemory` stub. Hybrid scoring 0.7v+0.3t (plan:167). `decay(DecayRunConfig)` — simplified from plan's `DecayConfig`; full decay calc in core/decay/calculator.ts. |
+| §3.1 M4 Conceptual | `packages/core/src/memory/conceptual-memory.ts` | `ConceptualMemory`, `NewEntity`, `Entity`, `NewRelation`, `Relation`, `GraphNode` | IN_SYNC | C37 | ADR-013. `InMemoryConceptualMemory` stub. BFS traversal (in-memory). addEntity/addRelation/traverse/findEntity/getRelated/incrementMentions/healthCheck. |
+| §3.1 M5 Meta | `packages/core/src/memory/meta-memory.ts` | `MetaMemory`, `AccessPattern`, `HotMemory` | IN_SYNC | C37 | ADR-013. `InMemoryMetaMemory` stub. recordAccess/getHotMemories/getPrefetchCandidates/refreshView/pruneOldPatterns/healthCheck. MV refresh is no-op in stub. |
+| §3.1 Types | `packages/core/src/memory/types.ts` | `MemoryLayerName` + all 22 type exports | IN_SYNC | C37 | Central type definitions. `MemoryLayerName` union: 6 literal values. All interfaces define `readonly layerName` + `healthCheck()`. |
+| §3.1 Index | `packages/core/src/memory/index.ts` | (barrel export) | IN_SYNC | C37 | Re-exports 22 types + 6 InMemory* classes. Single import: `@axel/core/memory`. |
 
-**Cross-Layer Interface Contract** — all 6 memory layer interfaces MUST implement:
-```typescript
-interface MemoryLayer<T> {
-  readonly layerName: string;            // "M0:stream" | "M1:working" | ... | "M5:meta"
-  store(data: T): Promise<void>;
-  retrieve(query: unknown): Promise<readonly T[]>;
-  healthCheck(): Promise<ComponentHealth>;
-}
-```
-Note: This is a guideline pattern from ADR-013. Concrete implementations will differ per layer (e.g., M0 uses Redis Streams, M3 uses pgvector). Dev-Core should define the concrete interfaces based on this pattern and plan §3.1 specs.
+**Cross-Layer Interface Contract** — Dev-Core implemented concrete per-layer interfaces instead of generic `MemoryLayer<T>`:
+- All 6 layers implement `readonly layerName: 'M0:stream' | ... | 'M5:meta'` (literal type)
+- All 6 layers implement `healthCheck(): Promise<ComponentHealth>`
+- Per-layer methods match plan §3.1 / ADR-013 TypeScript interfaces exactly
+- No generic `store()/retrieve()` — each layer has domain-specific method names (e.g., M0: push/consume/trim, M3: store/search/decay)
+- This is a reasonable design choice: concrete interfaces over generic abstract. No plan amendment needed.
 
 ### B.4 Context Assembly (CORE-004)
 
@@ -203,3 +201,4 @@ These interfaces in `packages/core/src/types/` are consumed by other packages (C
 | 35 | B.1 Core Domain Types | NOT_STARTED→IN_SYNC | 10 src + 10 test files. 55 tests pass. All plan §3.5 interfaces implemented. errors.ts added (reasonable extension). CORE-001 done C33. | SYNC-002 |
 | 35 | B.2 Adaptive Decay | NOT_STARTED→IN_SYNC | 4 src + 3 test files. 34 tests, 100% stmt coverage. ADR-015 8-step formula verified. CORE-002 done C34. | SYNC-002 |
 | 35 | B.5 Persona Engine | NOT_STARTED→IN_SYNC | 4 src + 3 test files. 32 tests, 100% stmt coverage. PersonaEngine interface + buildSystemPrompt pure fn. CORE-005 done C34. | SYNC-002 |
+| 37 | B.3 Memory Layers M0-M5 | NOT_STARTED→IN_SYNC | 8 src + 7 test files. 241 tests, 100% stmt, 95% branch. All 6 layer interfaces match plan §3.1/ADR-013. 22 types + 6 InMemory* stubs. No drift. CORE-003 done C36. | SYNC-003 |
