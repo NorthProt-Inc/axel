@@ -10,10 +10,7 @@ import type { DecayConfig, DecayInput } from './types.js';
  * @param config - Decay configuration parameters
  * @returns Decayed importance value in [0, input.importance]
  */
-export function calculateDecayedImportance(
-	input: DecayInput,
-	config: DecayConfig,
-): number {
+export function calculateDecayedImportance(input: DecayInput, config: DecayConfig): number {
 	const {
 		importance,
 		memoryType,
@@ -26,27 +23,20 @@ export function calculateDecayedImportance(
 	} = input;
 
 	// Step 1: Type multiplier (lower = slower decay)
-	const typeMultiplier =
-		config.typeMultipliers[memoryType] ?? 1.0;
+	const typeMultiplier = config.typeMultipliers[memoryType] ?? 1.0;
 
 	// Step 2: Access stability (logarithmic stabilization)
-	const stability =
-		1 + config.accessStabilityK * Math.log1p(accessCount);
+	const stability = 1 + config.accessStabilityK * Math.log1p(accessCount);
 
 	// Step 3: Relation resistance (capped at 1.0; at 1.0 memory never decays)
-	const resistance = Math.min(
-		1.0,
-		connectionCount * config.relationResistanceK,
-	);
+	const resistance = Math.min(1.0, connectionCount * config.relationResistanceK);
 
 	// Step 4: Channel diversity (more channels = slower decay)
-	const channelBoost =
-		1.0 / (1 + config.channelDiversityK * channelMentions);
+	const channelBoost = 1.0 / (1 + config.channelDiversityK * channelMentions);
 
 	// Step 5: Effective decay rate
 	const effectiveRate =
-		((config.baseRate * typeMultiplier * channelBoost) / stability) *
-		(1 - resistance);
+		((config.baseRate * typeMultiplier * channelBoost) / stability) * (1 - resistance);
 
 	// Step 6: Exponential decay
 	let decayed = importance * Math.exp(-effectiveRate * hoursElapsed);

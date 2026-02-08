@@ -1,5 +1,5 @@
-import type { DecayConfig, DecayInput } from './types.js';
 import { calculateDecayedImportance } from './calculator.js';
+import type { DecayConfig, DecayInput } from './types.js';
 
 /**
  * Process a batch of memories through the decay calculator.
@@ -11,9 +11,6 @@ import { calculateDecayedImportance } from './calculator.js';
  * @param config - Shared decay configuration
  * @returns Array of decayed importance values, same length as inputs
  */
-export function decayBatch(
-	inputs: readonly DecayInput[],
-	config: DecayConfig,
-): readonly number[] {
+export function decayBatch(inputs: readonly DecayInput[], config: DecayConfig): readonly number[] {
 	return inputs.map((input) => calculateDecayedImportance(input, config));
 }
