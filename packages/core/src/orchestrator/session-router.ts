@@ -27,10 +27,7 @@ export class SessionRouter {
 	}
 
 	/** Resolve session for incoming message (ADR-014 lifecycle) */
-	async resolveSession(
-		userId: string,
-		channelId: string,
-	): Promise<ResolvedSession> {
+	async resolveSession(userId: string, channelId: string): Promise<ResolvedSession> {
 		return this.store.resolve(userId, channelId);
 	}
 

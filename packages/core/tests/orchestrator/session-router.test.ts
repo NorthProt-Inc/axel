@@ -1,12 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { SessionSummary } from '../../src/types/session.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SessionRouter } from '../../src/orchestrator/session-router.js';
 import type {
 	ResolvedSession,
 	SessionStats,
 	SessionStore,
 	UnifiedSession,
 } from '../../src/orchestrator/types.js';
-import { SessionRouter } from '../../src/orchestrator/session-router.js';
+import type { SessionSummary } from '../../src/types/session.js';
 
 // ─── In-Memory Session Store (test double) ───
 

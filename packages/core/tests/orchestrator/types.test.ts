@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 // Will be implemented in packages/core/src/orchestrator/types.ts
 import {
-	DEFAULT_REACT_CONFIG,
 	type ChannelContext,
+	DEFAULT_REACT_CONFIG,
 	type LlmChatChunk,
 	type LlmProvider,
 	type ReActConfig,
@@ -183,10 +183,7 @@ describe('ToolExecutor interface', () => {
 				durationMs: 100,
 			}),
 		};
-		const result = await executor.execute(
-			{ toolName: 'test', args: {}, callId: 'c1' },
-			30_000,
-		);
+		const result = await executor.execute({ toolName: 'test', args: {}, callId: 'c1' }, 30_000);
 		expect(result.callId).toBe('c1');
 		expect(result.success).toBe(true);
 	});
