@@ -2,25 +2,29 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 17**: AUDIT-001 completed (34 findings). EMBED-3072 resolved bulk of HIGH findings.
-> Residual findings → FIX-AUDIT. Open: 7. Resolved: 48.
+> **Cycle 18**: FIX-AUDIT completed (ERR-050~056 + 4 MEDIUM). AUDIT-002 follow-up: 11 new findings.
+> ERR-050~056 resolved by FIX-AUDIT. AUDIT-002 HIGH findings mostly overlap with FIX-AUDIT scope.
+> Remaining: 3 items (MEDIUM/LOW) pending QA-011 verification. Open: 3. Resolved: 55.
 
 ## Open
 
 | ID | Severity | Reporter | Date | Description | Assigned |
 |----|----------|----------|------|-------------|----------|
-| ERR-050 | MEDIUM | audit | 0208 | AUD-027: v2-open-items PLAN-001 still says React, ADR-017 superseded to Svelte 5 | FIX-AUDIT |
-| ERR-051 | MEDIUM | audit | 0208 | AUD-028: ADR-016 max input tokens 8192→2048 per RES-003 | FIX-AUDIT |
-| ERR-052 | MEDIUM | audit | 0208 | AUD-029: plan 1721-1722 migration logic invalidated by 3072d | FIX-AUDIT |
-| ERR-053 | MEDIUM | audit | 0208 | AUD-030: migration-strategy IVFFlat/HNSW params need 3072d recalculation | FIX-AUDIT |
-| ERR-054 | LOW | audit | 0208 | AUD-031: ADR-016:123 axnmihn index reuse claim invalid at 3072d | FIX-AUDIT |
-| ERR-055 | LOW | audit | 0208 | AUD-033: ADR-016 rateLimitRpm=1500 may be paid tier, free tier 5-15 RPM | FIX-AUDIT |
-| ERR-056 | MEDIUM | quality | 0208 | QA-010: v2-open-items needs top note about 768d→3072d override | FIX-AUDIT |
+| ERR-057 | MEDIUM | audit | 0209 | AUD-042: ADR-016 dimension options should be 128-3072 flexible range, 256 not in Google recommended list | QA-011 |
+| ERR-058 | MEDIUM | audit | 0209 | AUD-043: ADR-016 MTEB 68.32 is mean(task) score, not 3072d-specific (68.17). Clarification needed | QA-011 |
+| ERR-059 | LOW | audit | 0209 | AUD-037: RES-001 HNSW memory calc uses 1536d (historical). OK as research record, plan refs already 3072d | — |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-050 | v2-open-items React→Svelte superseded notation added. | FIX-AUDIT (arch) | 0209 |
+| ERR-051 | ADR-016 max input tokens corrected 8192→2048. | FIX-AUDIT (arch) | 0209 |
+| ERR-052 | Plan migration logic already updated by EMBED-3072 (3072d). | EMBED-3072 (arch) | 0208 |
+| ERR-053 | migration-strategy HNSW unified + 3072d memory recalculation. | FIX-AUDIT (arch) | 0209 |
+| ERR-054 | ADR-016 index reuse claim already removed by EMBED-3072. | EMBED-3072 (arch) | 0208 |
+| ERR-055 | ADR-016 rateLimitRpm clarified as paid tier, free tier 5-15 RPM noted. | FIX-AUDIT (arch) | 0209 |
+| ERR-056 | v2-open-items 768d→3072d override note added at top. | FIX-AUDIT (arch) | 0209 |
 | ERR-QG1 | ALL 5 quality gates PASS. QA-009 final sign-off confirmed. | QA-009 (quality) | 0208 |
 | ERR-004 | Memory/Turtle layer naming convention clarified in plan. | FIX-MED (arch) | 0208 |
 | ERR-005 | LlmProvider.embed() removed, EmbeddingService is canonical. | FIX-MED (arch) | 0208 |

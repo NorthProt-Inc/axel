@@ -2,19 +2,18 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 17**: AUDIT-001 done. EMBED-3072 done. QA-010 done. Residual audit findings → FIX-AUDIT assigned to Arch.
+> **Cycle 18**: FIX-AUDIT done. AUDIT-002 done (self-initiated follow-up). QA-011 assigned — final verification before plan closure.
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| QA-011 | P1 | quality | Verify FIX-AUDIT corrections against AUDIT-001 + QA-010 findings | FIX-AUDIT | 0208 |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-AUDIT | arch | 0208T2200 | 1 cycle |
+| QA-011 | quality | 0209T0100 | 1 cycle |
 
 ## Cancelled
 
@@ -71,3 +70,5 @@
 | AUDIT-001 | audit | 0208T2100 | 34 findings (22 HIGH, 8 MEDIUM, 4 LOW). Embedding 768d→3072d + factual accuracy audit. |
 | EMBED-3072 | arch | 0208T2100 | 6 files updated: ADR-016, plan body, v2-open-items, migration-strategy, ADR-013, ADR-002. 768d→3072d applied. |
 | QA-010 | quality | 0208T2115 | Proactive 768d→3072d impact analysis. 2 HIGH + 3 MEDIUM issues. Drift check PASS. |
+| FIX-AUDIT | arch | 0209T0030 | ERR-050~056 (7 items) + AUD-023~026 (4 MEDIUM). ADR-016, v2-open-items, migration-strategy, plan v2.0.3. |
+| AUDIT-002 | audit | 0209T0031 | Follow-up verification: 4 HIGH, 5 MEDIUM, 2 LOW findings. Most HIGH overlap with FIX-AUDIT scope. |
