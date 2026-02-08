@@ -62,18 +62,18 @@
 
 #### MEDIUM (코드 위생, 10건)
 
-| # | 문제 | 핵심 |
-|---|------|------|
-| 08 | research_server.py 856줄 Monolith | Browser+Search+Parse+Storage 혼합 |
-| 12 | Memory context 3중 구현 (128줄 dead code) | sync+async+ContextService 불일치 |
-| 13 | IoT device ID 5개 파일에 하드코딩 | 새 디바이스 영구 은닉됨 |
-| 14 | Magic number 20+ 위치 산재 | 3개 config source (config.py, timeouts.py, local) |
-| 15 | schemas.py 350줄 Pydantic 모델 미사용 | 3중 스키마 정의 |
-| 16 | app.py 전역 변수 + lifespan 이중 관리 | stale reference window |
-| 18 | MCPClient dual call path | HTTP fallback이 wrong tool registry 사용 |
-| 20 | Import 중복 (datetime 4x, asyncio 3x) | Linter 미적용 |
-| 21 | XML tag 3중 하드코딩 (22/32만 등록) | 사용자에게 raw XML 노출 |
-| 23 | unified.py dead code + 6-level nesting | `migrate_legacy_data()` 미호출 |
+| # | 문제 | 핵심 | Axel 대응 |
+|---|------|------|-----------|
+| 08 | research_server.py 856줄 Monolith | Browser+Search+Parse+Storage 혼합 | MCP Tool System (Layer 6) — 도구별 단일 책임, `defineTool()` 패턴. Research 기능은 별도 tool로 분리 |
+| 12 | Memory context 3중 구현 (128줄 dead code) | sync+async+ContextService 불일치 | ContextAssembler 단일 구현 (async only, Section 3.3) |
+| 13 | IoT device ID 5개 파일에 하드코딩 | 새 디바이스 영구 은닉됨 | Home Assistant API 통한 동적 디바이스 발견 (Phase 3 IoT Bridge). 하드코딩 제거. |
+| 14 | Magic number 20+ 위치 산재 | 3개 config source (config.py, timeouts.py, local) | Zod config 단일 소스 (Layer 1, ADR-005) |
+| 15 | schemas.py 350줄 Pydantic 모델 미사용 | 3중 스키마 정의 | Zod 단일 스키마 + `defineTool()` 자동 JSON Schema 생성 (Layer 6) |
+| 16 | app.py 전역 변수 + lifespan 이중 관리 | stale reference window | DI container + lifecycle.ts (ADR-006, ADR-021 graceful shutdown) |
+| 18 | MCPClient dual call path | HTTP fallback이 wrong tool registry 사용 | 단일 MCP client, ToolRegistry가 유일한 등록 지점 (Layer 6) |
+| 20 | Import 중복 (datetime 4x, asyncio 3x) | Linter 미적용 | Biome strict (ADR-007) — 중복 import 자동 감지/수정 |
+| 21 | XML tag 3중 하드코딩 (22/32만 등록) | 사용자에게 raw XML 노출 | `defineTool()` 자동 등록 — 미등록 태그 불가. 사용자에게 raw XML 노출 없음. |
+| 23 | unified.py dead code + 6-level nesting | `migrate_legacy_data()` 미호출 | Ground-up 재구현 — dead code 없음. tools/migrate/ 별도 패키지 (Section 5) |
 
 ### 1.3 정량적 기술 부채 요약
 
@@ -256,7 +256,7 @@ axel/
 │   │   │   └── lifecycle.ts        # Startup/shutdown hooks
 │   │   └── package.json
 │   │
-│   └── webchat/                    # WebChat SPA (Vite + React)
+│   └── webchat/                    # WebChat SPA (SvelteKit — ADR-017)
 │       ├── src/
 │       └── package.json
 │
@@ -296,25 +296,52 @@ interface MemoryRepository {
 }
 
 interface EmbeddingService {
-  embed(text: string): Promise<Float32Array>;
-  embedBatch(texts: string[]): Promise<Float32Array[]>;
+  embed(text: string): Promise<Float32Array>;          // 단건 embedding
+  embedBatch(texts: readonly string[]): Promise<Float32Array[]>; // 배치 embedding
+  readonly dimension: number;                           // e.g., 768
 }
 
 // 구현 (infra 패키지 — I/O 실행)
 class PgMemoryRepository implements MemoryRepository { ... }
 class GeminiEmbeddingService implements EmbeddingService { ... }
 
-// 조립 (app 패키지 — bootstrap 시점)
+// 조립 (app 패키지 — bootstrap 시점, apps/axel/src/main.ts)
+// 전체 injectable 서비스 목록 (~20개, ADR-006 참조)
 const container = {
-  memoryRepo: new PgMemoryRepository(pgPool),
-  embeddingService: new GeminiEmbeddingService(apiKey),
+  // Infrastructure (I/O 경계)
+  pgPool:            createPgPool(config.db),
+  redis:             createResilientRedis(config.redis),
+  embeddingService:  new GeminiEmbeddingService(config.llm.google),
+  anthropicProvider: new AnthropicLlmProvider(config.llm.anthropic),
+  googleProvider:    new GoogleLlmProvider(config.llm.google),
+  objectStorage:     new R2StorageClient(config.storage),
+
+  // Repositories (infra — PG/Redis 의존)
+  memoryRepo:        new PgMemoryRepository(pgPool),
+  sessionRepo:       new PgSessionRepository(pgPool),
+  entityRepo:        new PgEntityRepository(pgPool),
+  workingMemory:     new RedisWorkingMemory(redis, pgPool, circuitBreaker),
+  intentCache:       new RedisIntentCache(redis, circuitBreaker),
+  prefetchCache:     new RedisPrefetchCache(redis, circuitBreaker),
+  rateLimiter:       new RedisRateLimiter(redis, circuitBreaker),
+
+  // Core Engines (순수 로직, I/O 없음)
+  decayCalculator:   new DecayCalculator(config.memory.decay),
+  contextAssembler:  new ContextAssembler(config.memory.budgets, tokenCounter),
+  personaEngine:     new PersonaEngine(config.persona),
+  modelRouter:       new ModelRouter(config.llm.fallbackChain),
+
+  // Orchestration
+  sessionRouter:     new SessionRouter(sessionRepo, workingMemory, redis),
+  toolRegistry:      new ToolRegistry(/* tools registered via defineTool() */),
+  reactLoop:         new ReactLoopRunner(reactConfig),
 };
-const memoryEngine = new MemoryEngine(container.memoryRepo, container.embeddingService);
+const memoryEngine = new MemoryEngine(container.memoryRepo, container.embeddingService, container.decayCalculator);
 ```
 
 **왜 DI 프레임워크(tsyringe, inversify)를 쓰지 않는가:**
 - 런타임 decorator/reflect-metadata 의존 → 빌드 복잡도 증가
-- 수동 주입으로도 충분 (서비스 수 ~20개 내외)
+- 수동 주입으로도 충분 (서비스 수 ~20개 내외, 위 목록 참조)
 - OpenClaw도 프레임워크 없이 수동 주입 사용
 
 ### 3.5 Core Domain Types (packages/core/src/types/)
@@ -486,6 +513,12 @@ interface TokenUsage {
 
 ## 4. The Turtle Stack: 밑바닥부터 쌓기
 
+> **명칭 규칙 (ERR-004/ERR-023 해소)**: 이 문서에서 "Layer"는 두 가지 번호 체계를 사용한다:
+> - **Turtle Stack Layer 0~10**: 시스템 아키텍처의 수직 계층 (이 섹션). 패키지 구조와 대응.
+> - **Memory Layer 0~5**: 6-Layer Memory Architecture (Section 4, Turtle Stack Layer 3 내부). Stream Buffer(M0) → Working(M1) → Episodic(M2) → Semantic(M3) → Conceptual(M4) → Meta(M5).
+>
+> 혼동 방지를 위해, Memory layer를 언급할 때는 "Memory Layer" 또는 "M0~M5"로, Turtle Stack layer를 언급할 때는 "Turtle Layer" 또는 "TL0~TL10"으로 구분한다.
+
 ### Layer 0: Runtime & Build System (거북이의 거북이)
 
 ```
@@ -503,7 +536,7 @@ interface TokenUsage {
 |------|------|------|------|
 | **런타임** | Node.js 22 LTS | Bun, Deno | LTS 안정성, OpenClaw 호환, npm 생태계 |
 | **패키지 매니저** | pnpm 9 | npm, yarn | Workspace 지원, 디스크 효율, OpenClaw 동일 |
-| **빌드** | tsdown | tsc, esbuild, swc | OpenClaw 동일, 빠른 빌드, ESM 네이티브 |
+| **빌드** | tsdown | tsc, esbuild, swc | Rolldown 기반 빠른 빌드, ESM 네이티브, 설정 최소화 |
 | **타입 체크** | tsc (noEmit) | — | tsdown은 타입 체크 안 함, tsc를 별도 실행 |
 | **린터** | Biome | ESLint + Prettier | 단일 도구, 빠른 속도, 설정 최소화 |
 | **테스트** | vitest | jest | OpenClaw 동일, ESM 네이티브, 빠른 실행 |
@@ -544,6 +577,7 @@ interface TokenUsage {
 
 ```typescript
 // apps/axel/src/config.ts
+// NOTE: 아래 예시는 Zod v3 API 기반. v4 안정화 후 마이그레이션 예정 (ADR-005 참조).
 import { z } from "zod";
 
 const LlmConfigSchema = z.object({
@@ -612,8 +646,11 @@ const ChannelConfigSchema = z.object({
 const SecurityConfigSchema = z.object({
   iotRequireHttps: z.boolean().default(true),
   commandAllowlist: z.array(z.string()).default([
-    "git", "ls", "cat", "head", "tail", "grep", "find", "wc",
-    "docker", "docker-compose", "pnpm", "npm", "node",
+    // 읽기 전용 명령 (승인 불필요)
+    "ls", "cat", "head", "tail", "grep", "find", "wc", "date", "whoami",
+    // 개발 도구 (requiresApproval: true에서 별도 승인)
+    "git", "pnpm", "node",
+    // docker/npm은 기본 allowlist에서 제외 — 명시적으로 config에 추가해야 사용 가능
   ]),
   maxRequestsPerMinute: z.number().int().default(30),
   toolApprovalRequired: z.array(z.string()).default([
@@ -865,7 +902,29 @@ HASH   axel:prefetch:{userId}        # 선제 로딩된 기억 맥락
 EXPIRE 30                            # 30초 TTL
 ```
 
-**Redis 에러 처리**: 모든 Redis 명령은 Circuit Breaker (ADR-021)로 감싸며, 장애 시 PostgreSQL fallback으로 전환한다. Working Memory는 PG-first write 패턴 (Redis 실패 시 데이터 유실 없음). 상세 에러 처리 패턴은 ADR-003 "Redis Critical Function Error Handling" 참조.
+**Redis 에러 처리 및 Shadow Write (ADR-003)**:
+
+모든 Redis 명령은 Circuit Breaker (ADR-021)로 감싸며, 장애 시 PostgreSQL fallback으로 전환한다.
+
+**Shadow Write 규칙:**
+
+| Redis Key | PostgreSQL Shadow | Write Timing | Fallback on Redis Failure |
+|-----------|-------------------|--------------|--------------------------|
+| `axel:working:*:turns` | `messages` table | 매 턴 PG-first write | PG direct read (최근 20턴 ORDER BY) |
+| `axel:session:*` | `sessions` table | 세션 시작/종료 시 | PG direct read |
+| `axel:rate:*` | 없음 (ephemeral only) | — | in-memory Map (프로세스 수명) |
+| `axel:intent:*` | 없음 (cache only) | — | cache miss → 매번 분류 실행 |
+| `axel:prefetch:*` | 없음 (cache only) | — | prefetch 비활성화 (on-demand only) |
+
+**핵심 원칙**: Redis에 저장된 모든 비즈니스 데이터는 PostgreSQL에도 존재하거나, 유실 시 재생성 가능하다. Redis가 유일한 source of truth인 데이터는 존재하지 않는다. Write는 PG-first (Working Memory는 PG INSERT 후 Redis cache update).
+
+**Degradation Path:**
+1. 개별 명령 실패 → 명령별 재시도 (최대 3회, 지수 백오프) → PG fallback
+2. Circuit breaker OPEN (5회 연속 실패) → 모든 Redis 호출 skip → PG fallback (latency ~150ms 증가)
+3. Pub/sub 불가 → Polling fallback (1초 간격 PG session_events 조회)
+4. 복구 → Circuit breaker HALF_OPEN 성공 → 정상 전환 + cache warm-up
+
+상세 에러 처리 패턴 (5개 critical function 각각)은 ADR-003 참조.
 
 ### Layer 3: Memory Engine
 
@@ -936,7 +995,12 @@ Layer 5: Meta Memory            [NEW]
 ├── TTL: 7일 rolling window
 ├── 용도: 검색 패턴 학습, Speculative Prefetch
 ├── 동작: 자주 접근되는 기억 클러스터를 사전 식별
-└── 갱신: REFRESH MATERIALIZED VIEW CONCURRENTLY (매 6시간)
+├── 갱신: REFRESH MATERIALIZED VIEW CONCURRENTLY (매 6시간)
+└── Feedback loop (ERR-046 해소):
+    ├── 1. 매 semantic search 후 memory_access_patterns에 (query, matched_ids, scores) 기록
+    ├── 2. hot_memories materialized view가 6시간마다 갱신
+    ├── 3. Speculative Prefetch가 hot_memories를 참조하여 typing indicator 시 선제 로딩
+    └── 4. 선제 로딩된 기억이 실제 사용되면 access_count 증가 → 양성 피드백
 ```
 
 #### 3.2 Adaptive Decay v2 (정밀 수식)
@@ -965,7 +1029,7 @@ interface DecayInput {
   hoursElapsed: number;
   accessCount: number;
   connectionCount: number;      // graph relations
-  channelMentions: number;      // 새: 몇 개 채널에서 언급됐는지
+  channelMentions: number;      // 새: 이 기억이 언급된 **고유 채널 수** (distinct count of channel_mentions JSONB keys)
   lastAccessedHoursAgo: number;
   ageHours: number;
 }
@@ -1025,7 +1089,7 @@ function calculateDecayedImportance(input: DecayInput, config: DecayConfig): num
 
 **axnmihn 문제**: character 기반 예산 (1 char ≈ 0.25 tokens 추정) — 실제 토큰 수와 편차 큼
 
-**Axel 해법**: Anthropic SDK countTokens() 기반 정확한 토큰 카운팅 (ADR-012)
+**Axel 해법**: Anthropic SDK countTokens() 기반 정확한 토큰 카운팅 (ADR-012, ADR-018). countTokens()는 항상 async API 호출 — 동기 근사치 사용 안 함. Context assembly 시 한 번에 배치 호출하여 latency 최소화.
 
 ```typescript
 // packages/core/src/context/assembler.ts
@@ -1051,11 +1115,25 @@ interface AssembledContext {
 }
 
 interface ContextSection {
-  name: string;
-  content: string;
-  tokens: number;
-  source: string; // 어떤 memory layer에서 왔는지
+  readonly name: string;
+  readonly content: string;
+  readonly tokens: number;
+  readonly source: string; // 어떤 memory layer에서 왔는지 (e.g., "M1:working", "M3:semantic")
 }
+
+// Context Assembler는 I/O를 직접 수행하지 않음.
+// 각 memory layer의 데이터는 주입된 provider를 통해 가져옴 (ERR-006 해소).
+interface ContextDataProvider {
+  getWorkingMemory(userId: string, limit: number): Promise<readonly Turn[]>;
+  searchSemantic(query: string, limit: number): Promise<readonly MemorySearchResult[]>;
+  traverseGraph(entityId: string, depth: number): Promise<readonly Entity[]>;
+  getSessionArchive(userId: string, days: number): Promise<readonly SessionSummary[]>;
+  getStreamBuffer(userId: string): Promise<readonly StreamEvent[]>;
+  getMetaMemory(userId: string): Promise<readonly PrefetchedMemory[]>;
+  getToolDefinitions(): readonly ToolDefinition[];
+}
+// ContextAssembler는 ContextDataProvider를 생성자 주입받아 사용.
+// 이렇게 하면 core 패키지에서 I/O 없이 테스트 가능.
 ```
 
 **조립 순서** (우선순위 순):
@@ -1114,11 +1192,19 @@ type Persona = z.infer<typeof PersonaSchema>;
 
 interface PersonaEngine {
   load(): Promise<Persona>;
-  reload(): Promise<Persona>;           // hot-reload
+  reload(): Promise<Persona>;           // hot-reload (아래 메커니즘 참조)
   getSystemPrompt(channel: string): string; // 채널별 톤 적응
   evolve(insight: string, confidence: number): Promise<void>;
   updatePreference(key: string, value: unknown): Promise<void>;
 }
+
+// Hot-reload 메커니즘 (ERR-045 해소):
+// 1. fs.watch()로 dynamic_persona.json 파일 변경 감지
+// 2. 변경 감지 시 debounce (500ms) 후 reload() 호출
+// 3. reload()는 Zod PersonaSchema로 파싱 → 실패 시 이전 persona 유지 + 경고 로그
+// 4. 성공 시 내부 캐시 갱신, 다음 getSystemPrompt() 호출부터 새 persona 적용
+// 5. evolve()/updatePreference()는 파일에 atomic write (write to tmp → rename)
+//    → fs.watch() 트리거 → 다른 프로세스에서도 동기화
 
 // 채널별 적응 규칙
 const CHANNEL_ADAPTATIONS: Record<string, { formality: number; verbosity: number }> = {
@@ -1155,12 +1241,13 @@ const CHANNEL_ADAPTATIONS: Record<string, { formality: number; verbosity: number
 // packages/infra/src/llm/types.ts
 
 interface LlmProvider {
-  id: string;
+  readonly id: string;
   chat(params: ChatParams): AsyncGenerator<ChatChunk>;
-  embed(texts: string[]): Promise<Float32Array[]>;
-  countTokens(text: string): Promise<number>;  // async API call (ERR-012, ERR-016)
+  countTokens(text: string): Promise<number>;  // async — Anthropic SDK API call (ADR-012, ADR-018)
   healthCheck(): Promise<boolean>;
 }
+// NOTE: embed()는 EmbeddingService (Section 3.4)가 canonical interface.
+// LLM provider와 embedding provider는 별개 — 모든 LLM이 embedding을 제공하지 않음.
 
 interface ChatParams {
   messages: Message[];
@@ -1196,7 +1283,7 @@ interface RetryConfig {
 **Model Router 전략:**
 
 ```
-Input Message → Intent Classifier (Gemini Flash, ~300-500ms via API)
+Input Message → Intent Classifier (Gemini Flash, ~300-500ms via API — 추정치, 실측 벤치마크 필요)
                      │
          ┌───────────┼───────────┐
          ▼           ▼           ▼
@@ -1226,16 +1313,8 @@ Input Message → Intent Classifier (Gemini Flash, ~300-500ms via API)
 **Axel 해법: 단일 등록 지점 + 자동 생성**
 
 ```typescript
-// packages/core/src/types/tool.ts — 타입 정의는 core에 (ERR-020 해소)
-
-interface ToolDefinition {
-  name: string;
-  description: string;
-  category: "memory" | "file" | "iot" | "research" | "system" | "agent";
-  inputSchema: z.ZodSchema;        // Zod로 정의 → JSON Schema 자동 변환
-  requiresApproval: boolean;       // 위험한 도구는 사용자 승인 필요
-  handler: (args: unknown) => Promise<ToolResult>;
-}
+// ToolDefinition은 Section 3.5 core domain types에서 정의 (단일 정의 지점)
+// 여기서는 등록 유틸리티만 정의
 
 // packages/infra/src/mcp/registry.ts — 등록 로직은 infra에
 
@@ -1352,6 +1431,13 @@ async function* reactLoop(
     iteration++;
   }
 }
+
+// Streaming pipeline 에러 핸들링 (ERR-044 해소):
+// 1. LLM 스트림 중 연결 끊김 → RetryableError → 재시도 (마지막 성공 지점부터)
+// 2. Tool 실행 타임아웃 → ToolTimeoutError → 부분 결과 반환 + 사용자 알림
+// 3. 채널 전송 실패 → 메시지 큐에 보관, 재전송 시도 (최대 3회)
+// 4. 전체 ReAct loop 타임아웃 (300s) → 현재까지의 응답 전송 + "시간 초과" 메시지
+// 모든 에러는 ADR-020 AxelError 계층으로 분류, interaction_logs에 기록.
 ```
 
 **Cross-Channel Session Router (핵심 혁신):**
@@ -1414,10 +1500,17 @@ interface AxelChannel {
   readonly id: string;
   readonly capabilities: ChannelCapabilities;
 
-  // Lifecycle
+  // Lifecycle (ERR-042: reconnection 포함)
   start(): Promise<void>;
   stop(): Promise<void>;
   healthCheck(): Promise<HealthStatus>;
+
+  // Reconnection lifecycle (ERR-042 해소)
+  // 채널 연결이 끊어진 경우 자동 재연결 시도.
+  // 구현체는 지수 백오프 (1s → 2s → 4s → ... → 60s max) + circuit breaker 패턴.
+  // 재연결 실패 시 healthCheck()가 "unhealthy" 반환 → 오케스트레이터가 대체 채널로 전환.
+  onDisconnect?(handler: (reason: string) => void): void;
+  onReconnect?(handler: () => void): void;
 
   // Inbound (채널 → Axel)
   onMessage(handler: InboundHandler): void;
@@ -1459,6 +1552,9 @@ interface OutboundMessage {
   replyTo?: string;
   format?: "text" | "markdown" | "html"; // 채널별 자동 변환
 }
+
+// InboundHandler: 채널에서 메시지 수신 시 호출되는 콜백 (ERR-009 해소)
+type InboundHandler = (message: InboundMessage) => Promise<void>;
 ```
 
 ### Layer 9: Gateway (HTTP/WS)
@@ -1551,6 +1647,28 @@ function handleError(err: unknown, config: AxelConfig): HttpError {
 | #07 | Path traversal (`".." in string`) | `path.resolve()` + `relative_to()` + symlink block |
 | #17 | `str(exc)` disclosure | ENV-aware error handler |
 | #22 | HASS HTTP plaintext | `security.iotRequireHttps: true` default |
+
+**Credential Redaction in Logs (ERR-032 해소):**
+
+모든 구조화 로그 출력 시 민감 데이터 자동 redaction:
+```typescript
+// packages/infra/src/logging/redactor.ts
+const REDACT_PATTERNS = [
+  /(?:api[_-]?key|token|secret|password|authorization)["\s:=]+["']?[A-Za-z0-9_\-\.]{8,}/gi,
+  /(?:Bearer|Basic)\s+[A-Za-z0-9_\-\.]+/gi,
+  /sk-[a-zA-Z0-9]{20,}/g,        // Anthropic API key
+  /AIza[A-Za-z0-9_\-]{35}/g,     // Google API key
+];
+
+function redact(input: string): string {
+  let result = input;
+  for (const pattern of REDACT_PATTERNS) {
+    result = result.replace(pattern, "[REDACTED]");
+  }
+  return result;
+}
+```
+pino logger에 `redact` 옵션으로 필드 레벨 redaction 적용. config 객체의 `apiKey`, `botToken` 등은 자동 마스킹.
 
 **Prompt Injection 방어 (OpenClaw 차용):**
 
@@ -1707,12 +1825,18 @@ Session Router:
   [ ] 비활동 후 새 세션이 생성되는가
   [ ] 채널 전환 시 working memory가 보존되는가
 
-Security:
+Security (ERR-033 보완):
   [ ] Command allowlist에 없는 명령이 거부되는가
+  [ ] Command args에 shell metacharacters가 포함된 경우 거부하는가
   [ ] Path traversal (`../`) 시도가 차단되는가
-  [ ] Production 환경에서 에러 상세가 숨겨지는가
+  [ ] Symlink를 통한 path escape가 차단되는가
+  [ ] Production 환경에서 에러 상세가 숨겨지는가 (requestId만 노출)
   [ ] HASS HTTP 연결이 차단되는가 (HTTPS 필수)
   [ ] Prompt injection 패턴이 감지+래핑되는가
+  [ ] JWT 토큰 만료 시 적절히 거부되는가
+  [ ] Rate limiter가 초과 요청을 429로 응답하는가
+  [ ] 로그에 API key, token이 redaction되어 출력되는가
+  [ ] WebSocket 첫 메시지 auth 실패 시 5초 내 연결 종료되는가
 
 Channel Adapters:
   [ ] Discord 메시지가 InboundMessage로 정규화되는가
@@ -1771,7 +1895,7 @@ Week 6-7: Gateway + Security
   [ ] packages/gateway/auth — JWT + timing-safe
   [ ] packages/gateway/security — Rate limiting, CORS, error handler
   [ ] packages/core/orchestrator — Intent Classifier (Gemini Flash)
-  [ ] apps/webchat — WebChat SPA 초안 (Vite + React)
+  [ ] apps/webchat — WebChat SPA 초안 (SvelteKit — ADR-017)
 
 Milestone: Discord에서 한 대화를 Telegram에서 이어감
 ```
@@ -1856,7 +1980,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 [  ] 코드 리뷰를 요청하면 PR 링크만으로 전체 맥락을 파악한다
 [  ] Mark가 번아웃 징후를 보이면 선제적으로 경고한다 (CS 용어로)
 [  ] 한 달 전 대화에서 언급한 선호를 기억하고 적용한다
-[  ] 모든 응답의 첫 토큰이 500ms 이내에 도달한다
+[  ] 응답 첫 토큰 TTFT: p50 < 500ms, p95 < 1,500ms (LLM API 의존, 네트워크 변동 반영)
 ```
 
 ### 기술적 성공 기준 (v2.0 추가)
@@ -1868,7 +1992,7 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 [  ] TypeScript strict mode: 전 패키지
 [  ] Security critical issues: 0건
 [  ] DB migration: 롤백 가능 (up/down)
-[  ] Docker cold start: < 30초
+[  ] Docker cold start: < 30초 (cached images 기준, 최초 배포 시 < 120초)
 [  ] Memory query latency p99: < 200ms
 [  ] axnmihn 기억 100% 이전 (검증 완료)
 ```
@@ -1914,8 +2038,8 @@ Milestone: "집중 모드" → 조명+알림+연구 자동 조정
 1. ~~**임베딩 모델 최종 선택**~~: → **gemini-embedding-001 (768d)** — ADR-016
    - gemini-embedding-001 선택 (ADR-016). MTEB #1. Re-embed 필수.
 
-2. ~~**WebChat 프레임워크**~~: → **React (Vite)** — PLAN-001
-   - Chat UI 생태계 + OpenClaw 일관성 + Vercel AI SDK streaming hooks.
+2. ~~**WebChat 프레임워크**~~: → **Svelte 5 (SvelteKit)** — ADR-017 (PLAN-001 React 결정 번복)
+   - SvelteKit + svelte-chatui. 번들 크기 최소, Vite 네이티브, 1인 프로젝트에 최적.
 
 3. ~~**CI/CD 파이프라인 상세**~~: → **GitHub Actions 3-stage** — PLAN-001
    - lint/typecheck/test 병렬 → build → deploy (SSH + docker-compose).
