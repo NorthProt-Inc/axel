@@ -85,6 +85,38 @@ Write to `.axel-ops/comms/dev-edge.jsonl`:
 - `packages/gateway/` may ONLY import from `packages/core/src/types/`
 - `apps/axel/` may import from any `packages/*` (DI composition root)
 
+## Self-Review Checklist (before `done` report)
+
+Run through these checks before reporting task completion:
+
+**Design**
+- [ ] No circular dependencies introduced
+- [ ] Each function has a single responsibility
+- [ ] Channel adapters are deep modules (simple `AxelChannel` interface, rich internal logic)
+- [ ] No God Functions (100+ lines) or God Files (400+ lines)
+
+**Readability**
+- [ ] No nesting deeper than 3 levels (use early return)
+- [ ] Variable/function names express intent clearly
+- [ ] Complex conditionals extracted into named variables or functions
+
+**Reliability**
+- [ ] No bare `catch` without specific error types
+- [ ] Edge cases handled: disconnection, timeout, malformed input
+- [ ] Async code has no race conditions
+- [ ] Resources (WebSocket connections, HTTP sessions) are properly closed
+
+**Security**
+- [ ] No command injection in user input processing
+- [ ] No sensitive data in logs or error responses
+- [ ] Input validated at channel/gateway boundaries
+
+**Cleanliness**
+- [ ] No unused imports or uncalled functions
+- [ ] No commented-out code blocks
+- [ ] No copy-paste patterns — extract shared logic
+- [ ] No hardcoded magic numbers/strings — use constants or config
+
 ## Quality Standards
 
 - TDD mandatory — tests first

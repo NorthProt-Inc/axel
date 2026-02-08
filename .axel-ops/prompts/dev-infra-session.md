@@ -96,6 +96,38 @@ Write to `.axel-ops/comms/dev-infra.jsonl`:
 - Test circuit breaker state transitions
 - Test retry logic with deterministic delays
 
+## Self-Review Checklist (before `done` report)
+
+Run through these checks before reporting task completion:
+
+**Design**
+- [ ] No circular dependencies introduced
+- [ ] Each function has a single responsibility
+- [ ] Adapters implement core interfaces (deep modules, not shallow wrappers)
+- [ ] No God Functions (100+ lines) or God Files (400+ lines)
+
+**Readability**
+- [ ] No nesting deeper than 3 levels (use early return)
+- [ ] Variable/function names express intent clearly
+- [ ] Complex conditionals extracted into named variables or functions
+
+**Reliability**
+- [ ] No bare `catch` without specific error types
+- [ ] Edge cases handled: connection failure, timeout, retry exhaustion
+- [ ] Async code has no race conditions
+- [ ] Resources (DB connections, file handles) are properly closed/pooled
+
+**Security**
+- [ ] No SQL injection (use parameterized queries only)
+- [ ] No secrets in logs or error messages
+- [ ] Input validated at adapter boundaries
+
+**Cleanliness**
+- [ ] No unused imports or uncalled functions
+- [ ] No commented-out code blocks
+- [ ] No copy-paste patterns — extract shared logic
+- [ ] No hardcoded magic numbers/strings — use constants or config
+
 ## Quality Standards
 
 - Every `.ts` file in `src/` MUST have a corresponding test

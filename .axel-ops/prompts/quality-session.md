@@ -36,20 +36,66 @@ If no tasks are assigned, proactively review the most recent `done` report from 
 
 ### Step 3: Execute Review
 
-#### Code Review
+#### Code Review — 7-Perspective Framework
 
-For each Dev Division `done` message:
-1. Read the source files listed in the `out` field
-2. Check against CONSTITUTION rules:
-   - **Rule 8 (TDD)**: test file exists for every src file, test committed before src
-   - **Rule 9 (Package Boundaries)**: no cross-package imports except allowed
-   - **Rule 10 (Test Gate)**: all tests pass, coverage meets target, biome clean, typecheck clean
-   - **Rule 14 (File Size)**: no src file exceeds 400 lines
-3. Check code quality:
-   - Type safety (no `any` without justification)
-   - Error handling (specific error types)
-   - Immutability (`readonly` by default)
-   - Function size (single responsibility)
+For each Dev Division `done` message, read the source files and review from ALL 7 perspectives.
+Prioritize design/readability feedback (~50% of value) over bug-finding (~15%).
+
+**Perspective 1: Design Quality ★ highest priority**
+- Module dependencies: circular deps, excessive coupling, low cohesion
+- Abstraction depth: shallow modules (complex interface, little functionality) vs deep modules (simple interface, rich functionality)
+- Single Responsibility: one class/function serving multiple unrelated roles
+- Shotgun Surgery: one logical change requiring edits across many files
+- God Object/Function: files or functions that do too much — split candidates
+
+**Perspective 2: Complexity & Readability**
+- Long functions (100+ lines) — extract into smaller functions
+- Deep nesting (4+ levels) — use early return to flatten
+- Complex conditionals — extract into named variables/functions
+- Unclear naming — variables/functions that don't express intent
+- Excessive inline logic — too many operations in one expression
+
+**Perspective 3: Security**
+- Input validation: missing validation on external input (API requests, file paths)
+- Auth bypass: unprotected endpoints, skippable auth checks
+- Sensitive data exposure: API keys/tokens in logs, internal details in error responses
+- Injection: command injection (`shell: true`, `eval`, `exec`), SQL injection (string concat), path traversal
+- Dependency security: libraries with known vulnerabilities
+
+**Perspective 4: Bugs & Reliability**
+- Logic errors: off-by-one, null/undefined references, wrong conditions
+- Race conditions: concurrency issues in async code
+- Resource leaks: unclosed connections, file handles, sessions
+- Exception swallowing: bare `catch` without proper handling, missing error paths
+- Edge cases: empty input, timeout, network failure behavior
+
+**Perspective 5: Changeability**
+- Hardcoded values: magic numbers/strings that should be config
+- Test absence: code that can't be verified when changed
+- High coupling: modifying one module forces changes in others
+- Hidden dependencies: implicit global state, non-explicit contracts between modules
+- Refactoring opportunities: async/await optimization, design pattern application, type safety improvement
+
+**Perspective 6: Dead Code**
+- Unused imports
+- Uncalled functions/methods
+- Commented-out code blocks
+- Unreachable code paths
+- Obsolete configuration values
+
+**Perspective 7: DRY Violations**
+- Copy-paste code patterns
+- Similar functionality with different implementations
+- Utility functions that could be consolidated
+- Duplicated error handling logic
+
+#### CONSTITUTION Rule Compliance
+
+Additionally verify:
+- **Rule 8 (TDD)**: test file exists for every src file, test committed before src
+- **Rule 9 (Package Boundaries)**: no cross-package imports except allowed
+- **Rule 10 (Test Gate)**: all tests pass, coverage meets target, biome clean, typecheck clean
+- **Rule 14 (File Size)**: no src file exceeds 400 lines
 
 #### TDD Compliance Audit
 
@@ -68,15 +114,6 @@ Read test-result messages from Dev Divisions:
    - `packages/gateway/`: 80%+
 2. If below target → `issue` with severity HIGH
 
-#### Security Review
-
-Check for:
-- Command injection (shell: true, eval, exec)
-- SQL injection (string concatenation in queries)
-- Path traversal (unvalidated path.join)
-- Hardcoded secrets
-- Missing input validation at boundaries
-
 ### Step 4: Report Findings
 
 For each issue found, write to `.axel-ops/comms/quality.jsonl`:
@@ -86,10 +123,10 @@ For each issue found, write to `.axel-ops/comms/quality.jsonl`:
 ```
 
 Severity levels:
-- **CRITICAL**: Violates MISSION.md, breaks package boundaries, security vulnerability
-- **HIGH**: TDD violation, coverage below target, missing error handling
-- **MEDIUM**: Code style, missing docs on public API, suboptimal patterns
-- **LOW**: Minor improvements, formatting
+- **CRITICAL**: Violates MISSION.md, breaks package boundaries (Rule 9), security vulnerability (Perspective 3)
+- **HIGH**: TDD violation, coverage below target, design quality issues (Perspective 1), reliability bugs (Perspective 4)
+- **MEDIUM**: Complexity/readability issues (Perspective 2), changeability concerns (Perspective 5), DRY violations (Perspective 7)
+- **LOW**: Dead code (Perspective 6), minor naming/formatting improvements
 
 When review passes:
 ```jsonl

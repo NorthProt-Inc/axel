@@ -55,13 +55,27 @@ For each assigned task, systematically verify:
 - Flag violations with severity CRITICAL
 
 **E. Security Audit** (NEW)
-- Check for command injection patterns (`shell: true`, `eval`, `exec`)
-- Check for SQL injection (string concatenation in queries)
-- Check for hardcoded secrets
-- Check for path traversal vulnerabilities
+- Input validation: missing validation on external input (API requests, file paths)
+- Auth bypass: unprotected endpoints, skippable auth checks
+- Sensitive data exposure: API keys/tokens in logs, internal details in error responses
+- Injection: command injection (`shell: true`, `eval`, `exec`), SQL injection (string concat), path traversal
+- Dependency security: libraries with known vulnerabilities
 - Flag violations with severity CRITICAL
 
-**F. Official Spec Verification** (unchanged)
+**F2. Design Quality Audit** (NEW)
+- Circular dependencies between modules
+- Shallow modules (complex interface, little functionality) — flag for refactoring
+- God Objects/Functions: files exceeding 400 lines or functions exceeding 100 lines
+- Shotgun Surgery patterns: one logical change requiring edits across many files
+- Flag design issues with severity HIGH
+
+**F3. Dead Code Audit** (NEW)
+- Unused imports, uncalled functions/methods
+- Commented-out code blocks
+- Unreachable code paths, obsolete configuration values
+- Flag with severity MEDIUM
+
+**F1. Official Spec Verification** (unchanged)
 - Use WebSearch/WebFetch to verify technical claims
 - Model dimensions, API parameters, library versions, pricing
 

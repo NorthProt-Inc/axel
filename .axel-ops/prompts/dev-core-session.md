@@ -107,6 +107,33 @@ Write to `.axel-ops/comms/dev-core.jsonl`:
 - Only Node.js stdlib and external npm packages are allowed
 - Interfaces from `packages/core/src/types/` are shared with other packages
 
+## Self-Review Checklist (before `done` report)
+
+Run through these checks before reporting task completion:
+
+**Design**
+- [ ] No circular dependencies introduced
+- [ ] Each function has a single responsibility
+- [ ] Interfaces are deep (simple API, rich functionality), not shallow
+- [ ] No God Functions (100+ lines) or God Files (400+ lines)
+
+**Readability**
+- [ ] No nesting deeper than 3 levels (use early return)
+- [ ] Variable/function names express intent clearly
+- [ ] Complex conditionals extracted into named variables or functions
+
+**Reliability**
+- [ ] No bare `catch` without specific error types
+- [ ] Edge cases handled: empty input, null/undefined, timeout
+- [ ] Async code has no race conditions
+- [ ] Resources (connections, handles) are properly closed
+
+**Cleanliness**
+- [ ] No unused imports or uncalled functions
+- [ ] No commented-out code blocks
+- [ ] No copy-paste patterns — extract shared logic
+- [ ] No hardcoded magic numbers/strings — use constants or config
+
 ## Quality Standards
 
 - Every `.ts` file in `src/` MUST have a corresponding test
