@@ -1,13 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ContextAssembler } from '../../src/context/assembler.js';
-import type { AssembledContext, ContextDataProvider, TokenCounter } from '../../src/context/types.js';
-import type { InboundHandler, InboundMessage, OutboundMessage } from '../../src/types/channel.js';
-import type { ReActEvent } from '../../src/types/react.js';
-import type { ToolDefinition, ToolResult } from '../../src/types/tool.js';
+import type {
+	AssembledContext,
+	ContextDataProvider,
+	TokenCounter,
+} from '../../src/context/types.js';
 import {
-	createInboundHandler,
 	type InboundHandlerDeps,
+	createInboundHandler,
 } from '../../src/orchestrator/inbound-handler.js';
+import { SessionRouter } from '../../src/orchestrator/session-router.js';
 import type {
 	LlmChatChunk,
 	LlmProvider,
@@ -17,9 +19,11 @@ import type {
 	ToolExecutor,
 	UnifiedSession,
 } from '../../src/orchestrator/types.js';
-import { SessionRouter } from '../../src/orchestrator/session-router.js';
 import type { PersonaEngine } from '../../src/persona/engine.js';
+import type { InboundHandler, InboundMessage, OutboundMessage } from '../../src/types/channel.js';
+import type { ReActEvent } from '../../src/types/react.js';
 import type { SessionSummary } from '../../src/types/session.js';
+import type { ToolDefinition, ToolResult } from '../../src/types/tool.js';
 
 // ─── Test Helpers ───
 
@@ -182,7 +186,9 @@ describe('createInboundHandler', () => {
 			const mockAssembler = {
 				assemble: vi.fn().mockResolvedValue({
 					systemPrompt: 'You are Axel.',
-					sections: [{ name: 'workingMemory', content: 'user: hello', tokens: 5, source: 'M1:working' }],
+					sections: [
+						{ name: 'workingMemory', content: 'user: hello', tokens: 5, source: 'M1:working' },
+					],
 					totalTokens: 50,
 					budgetUtilization: { systemPrompt: 45, workingMemory: 5 },
 				} satisfies AssembledContext),
@@ -274,7 +280,10 @@ describe('createInboundHandler', () => {
 				async *chat() {
 					callCount++;
 					if (callCount === 1) {
-						yield { type: 'tool_call' as const, content: { toolName: 'search', args: { q: 'test' }, callId: 'c1' } };
+						yield {
+							type: 'tool_call' as const,
+							content: { toolName: 'search', args: { q: 'test' }, callId: 'c1' },
+						};
 					} else {
 						yield { type: 'text' as const, content: 'Found results.' };
 					}
@@ -320,6 +329,7 @@ describe('createInboundHandler', () => {
 		it('should send an error message when reactLoop yields only errors', async () => {
 			const store = makeSessionStore();
 			const llmProvider: LlmProvider = {
+				// biome-ignore lint/correctness/useYield: intentionally throwing before yield to test error path
 				async *chat() {
 					throw new Error('LLM unavailable');
 				},
@@ -467,7 +477,9 @@ describe('createInboundHandler', () => {
 
 			const handler = createInboundHandler(deps);
 			// Should not throw even without send callback
-			await expect(handler(makeInboundMessage(), vi.fn().mockResolvedValue(undefined))).resolves.not.toThrow();
+			await expect(
+				handler(makeInboundMessage(), vi.fn().mockResolvedValue(undefined)),
+			).resolves.not.toThrow();
 		});
 	});
 

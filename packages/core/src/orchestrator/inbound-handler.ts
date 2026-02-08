@@ -1,7 +1,9 @@
 import type { ContextAssembler } from '../context/assembler.js';
+import type { ContextSection } from '../context/types.js';
+import type { PersonaEngine } from '../persona/engine.js';
 import type { InboundMessage, OutboundMessage } from '../types/channel.js';
 import type { Message } from '../types/message.js';
-import type { PersonaEngine } from '../persona/engine.js';
+import type { ReActEvent } from '../types/react.js';
 import { reactLoop } from './react-loop.js';
 import type { SessionRouter } from './session-router.js';
 import type { LlmProvider, ReActConfig, ToolExecutor } from './types.js';
@@ -25,18 +27,18 @@ export interface InboundHandlerDeps {
 }
 
 /** Fallback error message when processing fails */
-const ERROR_MESSAGE = '죄송합니다, 요청을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+const ERROR_MESSAGE =
+	'죄송합니다, 요청을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 
 /**
  * Create an inbound message handler (plan L7/L8 integration).
  *
  * Wires the full message processing pipeline:
- * 1. AxelChannel.onMessage receives InboundMessage
- * 2. SessionRouter.resolveSession(userId, channelType)
- * 3. PersonaEngine.getSystemPrompt(channel) for channel-adapted prompt
- * 4. ContextAssembler.assemble(userId, query) for context window
- * 5. reactLoop(params) yields ReActEvent stream
- * 6. Accumulate text events → OutboundMessage sent via send callback
+ * 1. SessionRouter.resolveSession(userId, channelType)
+ * 2. PersonaEngine.getSystemPrompt(channel) for channel-adapted prompt
+ * 3. ContextAssembler.assemble(userId, query) for context window
+ * 4. reactLoop(params) yields ReActEvent stream
+ * 5. Accumulate text events → OutboundMessage sent via send callback
  *
  * @param deps - Injected dependencies
  * @returns Handler function matching (InboundMessage, SendCallback) => Promise<void>
@@ -74,14 +76,6 @@ export function createInboundHandler(
 			const messages = buildMessages(assembled.systemPrompt, assembled.sections, message);
 
 			// 5. Run ReAct loop and accumulate text
-			const tools = deps.contextAssembler
-				? (await contextAssembler.assemble({ systemPrompt, userId, query: content })).sections
-					.filter((s) => s.name === 'toolDefinitions')
-					.length > 0
-					? []
-					: []
-				: [];
-
 			const responseText = await consumeReactStream(
 				reactLoop({
 					messages,
@@ -93,21 +87,18 @@ export function createInboundHandler(
 			);
 
 			// 6. Send response
-			const outbound: OutboundMessage = {
+			await send(userId, {
 				content: responseText || ERROR_MESSAGE,
 				format: 'markdown',
-			};
-			await send(userId, outbound);
+			});
 
 			// 7. Update session activity
 			await sessionRouter.updateActivity(resolved.session.sessionId);
-		} catch (err: unknown) {
-			// Send fallback error message
-			const outbound: OutboundMessage = {
+		} catch (_err: unknown) {
+			await send(userId, {
 				content: ERROR_MESSAGE,
 				format: 'markdown',
-			};
-			await send(userId, outbound);
+			});
 		}
 	};
 }
@@ -121,56 +112,46 @@ export function createInboundHandler(
  */
 function buildMessages(
 	systemPrompt: string,
-	sections: readonly { readonly name: string; readonly content: string; readonly tokens: number; readonly source: string }[],
+	sections: readonly ContextSection[],
 	inbound: InboundMessage,
 ): Message[] {
-	const messages: Message[] = [];
-
-	// System message with assembled context
 	const contextParts = sections
 		.filter((s) => s.content.length > 0)
 		.map((s) => `[${s.source}]\n${s.content}`);
 
-	const fullSystemContent = contextParts.length > 0
-		? `${systemPrompt}\n\n${contextParts.join('\n\n')}`
-		: systemPrompt;
+	const fullSystemContent =
+		contextParts.length > 0 ? `${systemPrompt}\n\n${contextParts.join('\n\n')}` : systemPrompt;
 
-	messages.push({
-		sessionId: '',
-		turnId: 0,
-		role: 'system',
-		content: fullSystemContent,
-		channelId: inbound.channelId,
-		timestamp: new Date(),
-		emotionalContext: '',
-		metadata: {},
-	});
-
-	// User message
-	messages.push({
-		sessionId: '',
-		turnId: 1,
-		role: 'user',
-		content: inbound.content,
-		channelId: inbound.channelId,
-		timestamp: inbound.timestamp,
-		emotionalContext: '',
-		metadata: {},
-	});
-
-	return messages;
+	return [
+		{
+			sessionId: '',
+			turnId: 0,
+			role: 'system',
+			content: fullSystemContent,
+			channelId: inbound.channelId,
+			timestamp: new Date(),
+			emotionalContext: '',
+			metadata: {},
+		},
+		{
+			sessionId: '',
+			turnId: 1,
+			role: 'user',
+			content: inbound.content,
+			channelId: inbound.channelId,
+			timestamp: inbound.timestamp,
+			emotionalContext: '',
+			metadata: {},
+		},
+	];
 }
 
 /**
  * Consume the ReAct event stream and accumulate text deltas.
  *
  * Filters message_delta events and concatenates their content.
- * Other events (thinking, tool_call, tool_result, error) are processed
- * but their content is not included in the final response text.
  */
-async function consumeReactStream(
-	stream: AsyncGenerator<import('../types/react.js').ReActEvent>,
-): Promise<string> {
+async function consumeReactStream(stream: AsyncGenerator<ReActEvent>): Promise<string> {
 	const parts: string[] = [];
 
 	for await (const event of stream) {
