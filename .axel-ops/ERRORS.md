@@ -2,20 +2,21 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 54**: 3 open errors (all HIGH from AUDIT-004). FIX-GATEWAY-001 created to resolve.
+> **Cycle 55**: **0 open errors.** ERR-066/067/068 resolved by FIX-GATEWAY-001. Phase D complete.
 
 ## Open
 
 | ID | Severity | Description | Reported By | Date |
 |----|----------|-------------|-------------|------|
-| ERR-066 | HIGH | AUD-065: Gateway WS auth uses query parameter token instead of ADR-019 first-message pattern. Token exposed in URL/server logs. | AUDIT-004 | 0208C54 |
-| ERR-067 | HIGH | AUD-066: rateLimitPerMinute config declared but NO rate limiting implemented in gateway. Plan spec requires rate limiting. | AUDIT-004 | 0208C54 |
-| ERR-068 | HIGH | AUD-067: No request body size limit in gateway. DoS vector. OpenAPI specifies maxLength 32000 for chat input. | AUDIT-004 | 0208C54 |
+| *(none)* | | | | |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-068 | 32KB request body size limit implemented — streaming byte accumulator, 413 Payload Too Large. AUD-067 resolved. | FIX-GATEWAY-001 (dev-edge) | 0208C55 |
+| ERR-067 | In-memory sliding window rate limiting — per-IP request counting, 60s window, 429+Retry-After. /health exempt. AUD-066 resolved. | FIX-GATEWAY-001 (dev-edge) | 0208C55 |
+| ERR-066 | WS auth replaced from query param to ADR-019 first-message pattern — {type:'auth',token:...} first frame, 5s timeout, 4001 close on failure. AUD-065 resolved. | FIX-GATEWAY-001 (dev-edge) | 0208C55 |
 | ERR-065 | zod dependency resolve fixed — pnpm install regenerated symlink, @testcontainers/postgresql added. 475 tests, 0 skips. | FIX-INFRA-001 (devops) | 0208C47 |
 | ERR-064 | Dev-infra root package.json/pnpm-lock.yaml modification — minor ownership overlap, no functional impact. Already resolved via merge. | coord | 0208C47 |
 | ENV-001 | Node.js 22.13.1 confirmed. pnpm 9.15.4 available (npx/packageManager). | CTO (coord) | 0208C31 |

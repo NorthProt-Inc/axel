@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 54**: Phase D Edge Sprint **95%** (16/18 done). QA-018 (CONDITIONAL PASS) + AUDIT-004 (3H 6M 5L) completed. FIX-GATEWAY-001 created for 3 HIGH. SYNC-006 in progress. **637 tests, 50 files** pass.
+> **Cycle 55**: **PHASE D COMPLETE.** 18/18 done. FIX-GATEWAY-001 (3 HIGH gateway security fixes) + SYNC-006 (CTO override — PLAN_SYNC D.4/D.5/D.6) completed. **646 tests, 50 files** pass. All 3 errors resolved. **PHASE E: INTEGRATION** next.
 
 ## Queued
 
@@ -14,8 +14,7 @@
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| SYNC-006 | arch | 0208C53 | C55 |
-| FIX-GATEWAY-001 | dev-edge | 0208C54 | C55 |
+| *(empty — Phase D complete, Phase E tasks to be created)* | | | |
 
 ## Cancelled
 
@@ -125,3 +124,5 @@
 | EDGE-005 | dev-edge | 0208C53 | Gateway HTTP+WS server. Node.js http + ws. /health, /api/v1/chat, /api/v1/chat/stream (SSE), /ws. Security: timing-safe Bearer, CORS, error redaction. 23 tests, 84.34% stmt. 637 tests total. |
 | QA-018 | quality | 0208C54 | Phase D code review batch 2: CONDITIONAL PASS. 0H 8M 6L. TDD PASS, §9 PASS, §14 PASS. Coverage: channels 94%>75%, gateway 84%>80%. |
 | AUDIT-004 | audit | 0208C54 | Phase D code audit: 3H 6M 5L. TDD PASS. §9 PASS. §14 PASS. HIGH: AUD-065 WS auth pattern, AUD-066 rate limiting, AUD-067 body size limit. |
+| FIX-GATEWAY-001 | dev-edge | 0208C55 | 3 HIGH gateway security fixes: (1) WS first-message auth per ADR-019, (2) sliding window rate limiting, (3) 32KB body size limit. 32 tests (+9), 87.01% stmt, 646 total. TDD RED→GREEN→REFACTOR. |
+| SYNC-006 | coord (CTO) | 0208C55 | PLAN_SYNC.md Phase D: D.4 Telegram IN_SYNC (23 tests, 97.66% stmt), D.5 Gateway IN_SYNC (32 tests, 87.01% stmt, 4/12 routes + FIX-GATEWAY-001), D.6 Bootstrap IN_SYNC (33 tests, 86.95% stmt). CTO override (arch 2 cycles). |

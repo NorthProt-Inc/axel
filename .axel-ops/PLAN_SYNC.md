@@ -289,21 +289,27 @@ Source: plan L8, ADR-009
 
 ### D.4 Telegram Channel (EDGE-004)
 
-| Plan Section | Code Location | Status | Last Synced | Notes |
-|---|---|---|---|---|
-| L8 Telegram | `packages/channels/src/telegram/` | NOT_STARTED | — | ADR-009. Grammy. Queued (dep: EDGE-001, DEVOPS-005 — met). |
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L8 Telegram | `packages/channels/src/telegram/telegram-channel.ts` | `TelegramChannel` | IN_SYNC | C55 | ADR-009. grammy Bot API, polling mode. 4096 char splitting, typing indicator via sendChatAction, streaming via editMessageText (1.5s throttle). DI-friendly constructor (createBot/onError). 23 tests, 97.66% stmt. CTO override (SYNC-006 2 cycles). |
+| L8 Telegram Index | `packages/channels/src/telegram/index.ts` | (barrel export) | IN_SYNC | C55 | Re-exports TelegramChannel. |
 
-### D.5 Gateway (EDGE-005)
+### D.5 Gateway (EDGE-005 + FIX-GATEWAY-001)
 
-| Plan Section | Code Location | Status | Last Synced | Notes |
-|---|---|---|---|---|
-| L9 Gateway | `packages/gateway/src/` | NOT_STARTED | — | HTTP/WS. OpenAPI spec (PLAN-002). Dep: EDGE-001, BOOTSTRAP-001. |
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L9 Gateway Server | `packages/gateway/src/server.ts` | `createGatewayServer` | IN_SYNC | C55 | Node.js http + ws. Routes: GET /health, GET /health/detailed, POST /api/v1/chat, POST /api/v1/chat/stream (SSE), WS /ws. Security: timing-safe Bearer auth (HTTP), first-message auth (WS per ADR-019), CORS, error redaction (ADR-011), rate limiting (sliding window per-IP), 32KB body size limit. 391 lines. 32 tests (22 server + 10 WS), 87.01% stmt. FIX-GATEWAY-001 resolved AUD-065/066/067. |
+| L9 Gateway Index | `packages/gateway/src/index.ts` | (barrel export) | IN_SYNC | C55 | Re-exports gateway server. |
+| L9 Partial Routes | — | — | NOT_STARTED | C55 | 8/12 plan routes not yet implemented: /api/v1/memory/search, /api/v1/memory/stats, /api/v1/session/end, /api/v1/tools, /api/v1/tools/execute, /webhooks/telegram, /webhooks/discord. Stub acceptable for Phase D (AUD-072 MEDIUM). Phase E integration scope. |
 
 ### D.6 Bootstrap (BOOTSTRAP-001)
 
-| Plan Section | Code Location | Status | Last Synced | Notes |
-|---|---|---|---|---|
-| Bootstrap | `apps/axel/src/` | NOT_STARTED | — | DI container assembly. Lifecycle management (ADR-021). Dep: EDGE-001, EDGE-002. |
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| Bootstrap Config | `apps/axel/src/config.ts` | `AxelConfigSchema` (Zod), `AxelConfig` | IN_SYNC | C55 | Zod schema with env mapping. All config fields validated. 230 lines. 13 tests. CTO override (SYNC-006 2 cycles). |
+| Bootstrap Container | `apps/axel/src/container.ts` | `createContainer` | IN_SYNC | C55 | ~20 injectable services: PgPool, Redis, 6 memory layers, 2 LLM providers, embedding, session router, context assembler, tool registry, persona engine. ADR-006 constructor injection. 276 lines. 7 tests. |
+| Bootstrap Lifecycle | `apps/axel/src/lifecycle.ts` | `aggregateHealth`, `startupHealthCheck`, `gracefulShutdown` | IN_SYNC | C55 | 4-phase shutdown per ADR-021 (stop accepting → drain pending → close connections → final flush). 137 lines. 13 tests. |
+| Bootstrap Main | `apps/axel/src/main.ts` | `bootstrap` | IN_SYNC | C55 | Entry point. SIGTERM/SIGINT handlers. 60 lines. 0% coverage (entry point, not unit-testable). |
 
 ### D.7 Plan Amendment (PLAN-AMEND-001)
 
@@ -343,3 +349,6 @@ Source: plan L8, ADR-009
 | 51 | D.3 Discord Channel | NOT_STARTED→IN_SYNC | EDGE-003 (DiscordChannel, 29 tests, 92.33% stmt). discord.js AxelChannel impl. | coord (CTO override, SYNC-005) |
 | 51 | D.7 ADR-002 PG 16→17 | plan→plan | AMENDED. ADR-002:23, migration-strategy:9/70/502 updated. AUD-058 resolved. | coord (CTO override, PLAN-AMEND-001) |
 | 51 | D.7 sessions user_id | code→plan | AMENDED. migration-strategy sessions table: user_id + channel_history added. AUD-050 resolved. | coord (CTO override, PLAN-AMEND-001) |
+| 55 | D.4 Telegram Channel | NOT_STARTED→IN_SYNC | EDGE-004 (TelegramChannel, 23 tests, 97.66% stmt). grammy Bot API, polling, 4096 char splitting. | coord (CTO override, SYNC-006) |
+| 55 | D.5 Gateway | NOT_STARTED→IN_SYNC | EDGE-005 + FIX-GATEWAY-001. 32 tests, 87.01% stmt. WS first-message auth (ADR-019), rate limiting, 32KB body limit. 4/12 routes implemented (8 deferred to Phase E). | coord (CTO override, SYNC-006) |
+| 55 | D.6 Bootstrap | NOT_STARTED→IN_SYNC | BOOTSTRAP-001. config (Zod), container (~20 services), lifecycle (4-phase shutdown), main. 33 tests, 86.95% stmt. | coord (CTO override, SYNC-006) |
