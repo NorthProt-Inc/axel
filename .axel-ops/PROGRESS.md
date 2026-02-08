@@ -5,20 +5,20 @@
 ## Status
 
 - **Phase**: **E: INTEGRATION — ACTIVE**
-- **Cycle**: 60
-- **Last Updated**: 2026-02-08C60
-- **STATUS**: **1 TASK COMPLETED.** INTEG-007 (E2E roundtrip test, 8 tests, 774 total, 62 files). QA-019 unblocked. FIX-AUDIT-E-001 split into 3 Division tasks: dev-edge (AUD-079/080/082), dev-core (AUD-081), devops (AUD-083). FIX-AUDIT-E-001 + FIX-AUDIT-E-002 + QA-019 assigned. Arch FIX-SCHEMA-001 + SYNC-007 in progress (2 cycles). Phase E **67%** (10/15).
+- **Cycle**: 61
+- **Last Updated**: 2026-02-08C61
+- **STATUS**: **3 TASKS COMPLETED.** FIX-AUDIT-E-001 (3 gateway security fixes, 82 gateway tests), FIX-AUDIT-E-002 (InboundHandler onError, 375 core tests), QA-019 (Phase E review PASS, 0C 0H 3M 4L). **4 errors resolved** (ERR-071~074). Smoke: **801 tests, 63 files**, typecheck clean. Arch FIX-SCHEMA-001 + SYNC-007 **3 cycles stalled → CTO override**. FIX-AUDIT-E-003 assigned to devops. Phase E **73%** (11/15).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 4 |
-| In Progress | 5 |
-| Done | 100 |
+| Queued | 3 |
+| In Progress | 3 |
+| Done | 103 |
 | Cancelled | 14 |
 
-## Open Errors: 7 (1 CRITICAL human-decision, 5 HIGH, 1 MEDIUM)
+## Open Errors: 3 (1 CRITICAL human-decision, 1 HIGH, 1 MEDIUM)
 
 ## Cycle History
 
@@ -50,20 +50,21 @@
 | 58 | 0208 | **4 TASKS COMPLETED.** INTEG-003 (gateway→orchestrator, 78 gateway tests, 94.53% stmt), INTEG-004 (6 remaining routes, route-handlers.ts), INTEG-006 (PG+Redis 36 integration tests, 7 layers verified), RES-006 (1536d Matryoshka PRIMARY recommendation, 25 sources). Smoke: **760 tests, 61 files**, typecheck clean. FIX-DIMENSION-001 (P0, ADR-016 3072→1536d, **human decision**) + FIX-SCHEMA-001 (P1, sessions schema drift) created. INTEG-005, AUDIT-005, SYNC-007 unblocked. Phase E **54%** (7/13+2). 2 errors (1 CRITICAL w/ solution, 1 MEDIUM). |
 | 59 | 0208 | **2 TASKS COMPLETED.** INTEG-005 (channel bootstrap wiring, 766 tests, bootstrap-channels 98.85% stmt), AUDIT-005 (Phase E security audit, 0C 5H 7M 4L, 16 findings AUD-079~094). Smoke: **766 tests, 61 files**, typecheck clean. AUDIT-005 found 5 new HIGH: WS message size limit, rate limit memory leak, InboundHandler silent errors, missing timestamp, hardcoded DB creds. FIX-AUDIT-E-001 created (P1). Arch FIX-SCHEMA-001 + SYNC-007 in progress (1 cycle). Phase E **62%** (9/15). GitHub push blocked (account suspended). |
 | 60 | 0208 | **1 TASK COMPLETED.** INTEG-007 (E2E roundtrip test, 8 tests, 774 total, 62 files). QA-019 unblocked. FIX-AUDIT-E-001 split: dev-edge (AUD-079/080/082), dev-core (AUD-081), devops (AUD-083). 5 tasks assigned. Arch FIX-SCHEMA-001 + SYNC-007 (2 cycles). Phase E **67%** (10/15). Open errors 7 (over threshold). |
+| 61 | 0208 | **3 TASKS COMPLETED.** FIX-AUDIT-E-001 (AUD-079/080/082 gateway fixes, 82 gateway tests), FIX-AUDIT-E-002 (AUD-081 onError callback, 375 core tests), QA-019 (Phase E review PASS, 0C 0H 3M 4L). **4 errors resolved** (ERR-071~074). Smoke: **801 tests, 63 files**, typecheck clean. Arch 3 cycles stalled → CTO override for FIX-SCHEMA-001 + SYNC-007. FIX-AUDIT-E-003 assigned to devops. Open errors 7→3. Phase E **73%** (11/15). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C60 | Cycle 60 | Active |
-| Architecture | 0208C58 | FIX-SCHEMA-001, SYNC-007 | In Progress (2 cycles — watch) |
-| Dev-Core | 0208C60 | FIX-AUDIT-E-002 | Assigned — AUD-081 InboundHandler logging |
+| Coordinator | 0208C61 | Cycle 61 | Active |
+| Architecture | 0208C58 | FIX-SCHEMA-001, SYNC-007 | **3 cycles stalled → CTO override** |
+| Dev-Core | 0208C61 | — | Idle — FIX-AUDIT-E-002 done |
 | Dev-Infra | 0208C58 | — | Idle |
-| Dev-Edge | 0208C60 | FIX-AUDIT-E-001 | Assigned — AUD-079/080/082 gateway fixes |
+| Dev-Edge | 0208C61 | — | Idle — FIX-AUDIT-E-001 done |
 | Research | 0208C58 | — | Idle |
-| Quality | 0208C60 | QA-019 | Assigned — Phase E integration review |
-| DevOps | 0208C57 | — | Idle — FIX-AUDIT-E-003 queued |
-| Audit | 0208C59 | — | Idle — AUDIT-005 done |
+| Quality | 0208C61 | — | Idle — QA-019 done |
+| DevOps | 0208C57 | FIX-AUDIT-E-003 | Assigned |
+| Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed
 

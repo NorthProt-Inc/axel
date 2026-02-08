@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 60**: **PHASE E: IN PROGRESS.** 10 tasks done (+INTEG-007). 774 tests, 62 files. FIX-AUDIT-E-001 split into 3 Division-specific tasks. QA-019 unblocked. Arch FIX-SCHEMA-001 + SYNC-007 in progress (2 cycles).
+> **Cycle 61**: **PHASE E: IN PROGRESS.** 13 tasks done. 801 tests, 63 files. 3 completed this cycle (FIX-AUDIT-E-001, FIX-AUDIT-E-002, QA-019). Arch FIX-SCHEMA-001 + SYNC-007 **3 cycles stalled → CTO override**. FIX-AUDIT-E-003 assigned to devops. Open errors 3 (down from 7).
 
 ## Queued
 
@@ -11,17 +11,14 @@
 | INTEG-008 | P2 | dev-edge | Webhook routes: /webhooks/telegram, /webhooks/discord (plan L9). Telegram webhook mode as alternative to polling. | INTEG-003 ✓ |
 | CONST-AMEND-001 | P2 | coord | Draft §9 amendment proposal for human review: expand infra allowed imports from `core/src/types/` to `@axel/core/{types,memory,orchestrator}` (AUD-046/047). | — |
 | FIX-DIMENSION-001 | P0 | arch | Amend ADR-016 3072d→1536d per RES-006 Matryoshka recommendation. Update: (1) ADR-016 default dimension, (2) migration-strategy.md vector(3072)→vector(1536), (3) plan body embedding references, (4) GeminiEmbeddingService outputDimensionality config, (5) pg-semantic-memory.ts vector index (now indexable at 1536d). **Human decision needed before execution.** | RES-006 ✓ |
-| FIX-AUDIT-E-003 | P1 | devops | Fix AUD-083: hardcoded DB credentials in tools/migrate CLI — remove fallback credentials, require explicit env vars. TDD mandatory. | — |
 
 ## In Progress
 
 | ID | Division | Started | ETA |
 |----|----------|---------|-----|
-| FIX-SCHEMA-001 | arch | 0208C58 | C61 |
-| SYNC-007 | arch | 0208C58 | C61 |
-| FIX-AUDIT-E-001 | dev-edge | 0208C60 | C61 |
-| FIX-AUDIT-E-002 | dev-core | 0208C60 | C61 |
-| QA-019 | quality | 0208C60 | C61 |
+| FIX-SCHEMA-001 | coord (CTO) | 0208C58 | C62 (CTO override, arch 3 cycles stalled) |
+| SYNC-007 | coord (CTO) | 0208C58 | C62 (CTO override, arch 3 cycles stalled) |
+| FIX-AUDIT-E-003 | devops | 0208C61 | C62 |
 
 ## Cancelled
 
@@ -143,3 +140,6 @@
 | INTEG-005 | dev-edge | 0208C59 | Channel bootstrap wiring: createChannels, wireChannels, createHandleMessage. CLI/Discord/Telegram config-based. main.ts updated. 16 tests, 766 total. bootstrap-channels 98.85% stmt. |
 | AUDIT-005 | audit | 0208C59 | Phase E integration security audit: 0C 5H 7M 4L (AUD-079~094). FIX-GATEWAY-001 prior fixes verified. New HIGH: WS msg size, rate limit leak, silent errors, missing timestamp, hardcoded creds. |
 | INTEG-007 | dev-edge | 0208C60 | E2E integration test: CLI→InboundHandler→mock LLM→memory→response. 8 tests, 774 total (62 files). Full roundtrip verified. |
+| FIX-AUDIT-E-001 | dev-edge | 0208C61 | AUD-079 WS message size limit (64KB), AUD-080 rate limit bucket eviction, AUD-082 missing timestamp. 82 gateway tests, 94.79% stmt. TDD RED→GREEN→REFACTOR. |
+| FIX-AUDIT-E-002 | dev-core | 0208C61 | AUD-081 InboundHandler onError callback. ErrorInfo interface. 375 core tests, 9 new. TDD RED→GREEN→REFACTOR. |
+| QA-019 | quality | 0208C61 | Phase E integration review: PASS. 0C 0H 3M 4L. 801 tests. All CONSTITUTION gates PASS. Coverage all targets exceeded. |
