@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import { createGatewayServer } from '../src/server.js';
 import type { GatewayConfig, GatewayDeps } from '../src/server.js';
 
-function createTestConfig(): GatewayConfig {
+function createTestConfig(overrides?: Partial<GatewayConfig>): GatewayConfig {
 	return {
 		port: 0,
 		host: '127.0.0.1',
@@ -12,6 +12,7 @@ function createTestConfig(): GatewayConfig {
 		env: 'development',
 		corsOrigins: ['http://localhost:3000'],
 		rateLimitPerMinute: 100,
+		...overrides,
 	};
 }
 
@@ -26,13 +27,10 @@ function createMockDeps(): GatewayDeps {
 	};
 }
 
-function connectWs(httpServer: http.Server, token?: string): Promise<WebSocket> {
+function connectWs(httpServer: http.Server): Promise<WebSocket> {
 	return new Promise((resolve, reject) => {
 		const addr = httpServer.address() as { port: number };
-		const url = token
-			? `ws://127.0.0.1:${addr.port}/ws?token=${token}`
-			: `ws://127.0.0.1:${addr.port}/ws`;
-		const ws = new WebSocket(url);
+		const ws = new WebSocket(`ws://127.0.0.1:${addr.port}/ws`);
 		ws.on('open', () => resolve(ws));
 		ws.on('error', reject);
 	});
@@ -48,7 +46,15 @@ function waitForMessage(ws: WebSocket): Promise<Record<string, unknown>> {
 	});
 }
 
-describe('Gateway WebSocket', () => {
+function waitForClose(ws: WebSocket): Promise<{ code: number; reason: string }> {
+	return new Promise((resolve) => {
+		ws.on('close', (code: number, reason: Buffer) => {
+			resolve({ code, reason: reason.toString() });
+		});
+	});
+}
+
+describe('Gateway WebSocket — First-Message Auth (ADR-019)', () => {
 	let server: ReturnType<typeof createGatewayServer>;
 	let httpServer: http.Server;
 
@@ -63,26 +69,77 @@ describe('Gateway WebSocket', () => {
 		await server.stop();
 	});
 
-	describe('connection', () => {
-		it('accepts WebSocket connections with valid token in query', async () => {
-			const ws = await connectWs(httpServer, 'test-auth-token-12345');
+	describe('first-message auth', () => {
+		it('accepts connection and waits for auth message (no query param needed)', async () => {
+			const ws = await connectWs(httpServer);
 
 			expect(ws.readyState).toBe(WebSocket.OPEN);
 			ws.close();
 		});
 
-		it('rejects WebSocket connections without token', async () => {
-			await expect(connectWs(httpServer)).rejects.toThrow();
+		it('authenticates with valid token in first message', async () => {
+			const ws = await connectWs(httpServer);
+
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			const msg = await waitForMessage(ws);
+
+			expect(msg.type).toBe('auth_ok');
+			ws.close();
 		});
 
-		it('rejects WebSocket connections with invalid token', async () => {
-			await expect(connectWs(httpServer, 'wrong-token')).rejects.toThrow();
+		it('rejects invalid token in auth message with code 4001', async () => {
+			const ws = await connectWs(httpServer);
+			const closePromise = waitForClose(ws);
+
+			ws.send(JSON.stringify({ type: 'auth', token: 'wrong-token' }));
+			const { code } = await closePromise;
+
+			expect(code).toBe(4001);
+		});
+
+		it('rejects non-auth first message before authentication', async () => {
+			const ws = await connectWs(httpServer);
+			const closePromise = waitForClose(ws);
+
+			ws.send(JSON.stringify({ type: 'session_info_request' }));
+			const { code } = await closePromise;
+
+			expect(code).toBe(4001);
+		});
+
+		it('closes with 4001 after 5s auth timeout', async () => {
+			const ws = await connectWs(httpServer);
+			const closePromise = waitForClose(ws);
+
+			// Wait for timeout — use fake timers
+			// In real test we just wait, but we can verify the timeout behavior
+			// by checking the close happens with 4001
+			const { code } = await closePromise;
+
+			expect(code).toBe(4001);
+		}, 10_000);
+
+		it('rejects auth message with missing token field', async () => {
+			const ws = await connectWs(httpServer);
+			const closePromise = waitForClose(ws);
+
+			ws.send(JSON.stringify({ type: 'auth' }));
+			const { code } = await closePromise;
+
+			expect(code).toBe(4001);
 		});
 	});
 
-	describe('message handling', () => {
-		it('responds to session_info_request with session_info', async () => {
-			const ws = await connectWs(httpServer, 'test-auth-token-12345');
+	describe('authenticated message handling', () => {
+		async function connectAndAuth(httpServer: http.Server): Promise<WebSocket> {
+			const ws = await connectWs(httpServer);
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+			return ws;
+		}
+
+		it('responds to session_info_request after auth', async () => {
+			const ws = await connectAndAuth(httpServer);
 
 			ws.send(JSON.stringify({ type: 'session_info_request' }));
 			const msg = await waitForMessage(ws);
@@ -91,8 +148,8 @@ describe('Gateway WebSocket', () => {
 			ws.close();
 		});
 
-		it('returns error for invalid JSON', async () => {
-			const ws = await connectWs(httpServer, 'test-auth-token-12345');
+		it('returns error for invalid JSON after auth', async () => {
+			const ws = await connectAndAuth(httpServer);
 
 			ws.send('not json');
 			const msg = await waitForMessage(ws);
@@ -101,8 +158,8 @@ describe('Gateway WebSocket', () => {
 			ws.close();
 		});
 
-		it('returns error for unknown message type', async () => {
-			const ws = await connectWs(httpServer, 'test-auth-token-12345');
+		it('returns error for unknown message type after auth', async () => {
+			const ws = await connectAndAuth(httpServer);
 
 			ws.send(JSON.stringify({ type: 'unknown_type' }));
 			const msg = await waitForMessage(ws);
@@ -114,7 +171,10 @@ describe('Gateway WebSocket', () => {
 
 	describe('close behavior', () => {
 		it('closes cleanly when server stops', async () => {
-			const ws = await connectWs(httpServer, 'test-auth-token-12345');
+			const ws = await connectWs(httpServer);
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+
 			const closedPromise = new Promise<number>((resolve) => {
 				ws.on('close', (code: number) => resolve(code));
 			});
