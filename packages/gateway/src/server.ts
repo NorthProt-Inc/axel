@@ -2,6 +2,7 @@ import * as crypto from 'node:crypto';
 import * as http from 'node:http';
 import type { HealthStatus } from '@axel/core/types';
 import { type WebSocket, WebSocketServer } from 'ws';
+import { classifyError } from './classify-error.js';
 
 const MAX_BODY_BYTES = 32_768; // 32KB
 const WS_AUTH_TIMEOUT_MS = 5_000;
@@ -142,13 +143,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		}
 
 		route.handler(req, res, body).catch((err: unknown) => {
-			const message = err instanceof Error ? err.message : 'Internal Server Error';
-			sendError(
-				res,
-				500,
-				config.env === 'development' ? message : 'Internal Server Error',
-				requestId,
-			);
+			const classified = classifyError(err, config.env);
+			sendError(res, classified.status, classified.message, requestId);
 		});
 	}
 
@@ -179,6 +175,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 			res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 			res.setHeader('Access-Control-Max-Age', '86400');
+			res.setHeader('Vary', 'Origin');
 		}
 		if (req.method === 'OPTIONS') {
 			res.writeHead(204);

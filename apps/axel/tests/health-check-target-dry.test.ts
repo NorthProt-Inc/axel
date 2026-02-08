@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { type HealthCheckTarget as ContainerHCT } from '../src/container.js';
-import { type HealthCheckTarget as LifecycleHCT } from '../src/lifecycle.js';
+import type { HealthCheckTarget as ContainerHCT } from '../src/container.js';
+import type { HealthCheckTarget as LifecycleHCT } from '../src/lifecycle.js';
 
 describe('HealthCheckTarget DRY', () => {
 	it('container.ts imports HealthCheckTarget from lifecycle.ts (no duplicate)', () => {

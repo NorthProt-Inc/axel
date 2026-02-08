@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyError } from '../src/server.js';
+import { classifyError } from '../src/classify-error.js';
 
 describe('classifyError (ADR-011)', () => {
 	it('classifies generic Error as 500 internal_error', () => {

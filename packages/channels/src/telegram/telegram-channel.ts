@@ -9,6 +9,7 @@ import type {
 import { Bot } from 'grammy';
 import type { Api } from 'grammy';
 import type { Context } from 'grammy';
+import { splitMessage } from '../utils/split-message.js';
 
 const TELEGRAM_CHANNEL_ID = 'telegram';
 const TELEGRAM_MAX_MESSAGE_LENGTH = 4096;
@@ -39,6 +40,8 @@ export class TelegramChannel implements AxelChannel {
 	private started = false;
 	private startedAt: Date | null = null;
 	private readonly handlers: InboundHandler[] = [];
+	private readonly disconnectHandlers: Array<(reason: string) => void> = [];
+	private readonly reconnectHandlers: Array<() => void> = [];
 
 	private readonly token: string;
 	private readonly createBotFn: () => Bot;
@@ -93,6 +96,14 @@ export class TelegramChannel implements AxelChannel {
 		this.handlers.push(handler);
 	}
 
+	onDisconnect(handler: (reason: string) => void): void {
+		this.disconnectHandlers.push(handler);
+	}
+
+	onReconnect(handler: () => void): void {
+		this.reconnectHandlers.push(handler);
+	}
+
 	async send(target: string, msg: OutboundMessage): Promise<void> {
 		if (!this.started || !this.api) {
 			throw new Error('Telegram channel not started');
@@ -133,6 +144,10 @@ export class TelegramChannel implements AxelChannel {
 
 		bot.catch((err: unknown) => {
 			this.onErrorFn(err);
+			const reason = err instanceof Error ? err.message : 'Unknown error';
+			for (const handler of this.disconnectHandlers) {
+				handler(reason);
+			}
 		});
 	}
 
@@ -146,8 +161,13 @@ export class TelegramChannel implements AxelChannel {
 			return;
 		}
 
+		const userId = ctx.from?.id != null ? String(ctx.from.id) : '';
+		if (userId.length === 0) {
+			return;
+		}
+
 		const inbound: InboundMessage = {
-			userId: String(ctx.from?.id ?? ''),
+			userId,
 			channelId: String(ctx.chat?.id ?? ''),
 			content: text,
 			timestamp: new Date((ctx.message?.date ?? 0) * 1000),
@@ -211,18 +231,4 @@ async function finalizeStream(api: Api, state: StreamingState, chatId: number): 
 	} else {
 		await api.sendMessage(chatId, displayContent);
 	}
-}
-
-function splitMessage(content: string, maxLength: number): string[] {
-	if (content.length <= maxLength) {
-		return [content];
-	}
-
-	const chunks: string[] = [];
-	let remaining = content;
-	while (remaining.length > 0) {
-		chunks.push(remaining.slice(0, maxLength));
-		remaining = remaining.slice(maxLength);
-	}
-	return chunks;
 }
