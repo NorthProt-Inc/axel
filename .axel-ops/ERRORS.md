@@ -39,6 +39,19 @@
 | ERR-031 | LOW | quality | 0208 | Default command allowlist includes docker/docker-compose/node — privilege escalation risk. Should follow least-privilege principle. | FIX-007 |
 | ERR-032 | LOW | quality | 0208 | DB/Redis connection URLs contain credentials; no redaction spec for error logs. interaction_logs.error could leak connection strings. | FIX-007 |
 | ERR-033 | LOW | quality | 0208 | Security test cases (Section 6.4) missing: JWT expiry, WS auth, webhook signature, SQL injection, rate limiting, CORS preflight tests. | FIX-007 |
+| ERR-034 | **HIGH** | quality | 0208 | DI container covers only 2 of ~15 injectable services. Missing: PersonaEngine, LlmProvider (×3), SessionRouter, AxelChannel (×4), ContextAssembler, ModelRouter, CircuitBreaker, RetryHandler, ToolRegistry. No implementation class names. | FIX-008 |
+| ERR-035 | **HIGH** | quality | 0208 | Core domain types Memory, Message, MemoryEngine used in interfaces but never defined. Distributed agent cannot implement services without type shapes. | FIX-008 |
+| ERR-036 | **HIGH** | quality | 0208 | ReAct loop has zero error handling. No try/catch around llmProvider.chat() or executeTool(). totalTimeoutMs never enforced. No partial result on maxIterations. | FIX-008 |
+| ERR-037 | **HIGH** | quality | 0208 | No error type hierarchy. ToolError, HttpError, FailoverError, classifyError() mentioned but never defined. No base type, no category enum. | FIX-008, ADR-020 |
+| ERR-038 | **HIGH** | quality | 0208 | Redis serves 5 critical functions with zero error handling. No fallback, no reconnection strategy, no degradation paths. Compounds ERR-010. | FIX-008, ADR-021 |
+| ERR-039 | **HIGH** | quality | 0208 | Memory consolidation (L2→L3) entirely unspecified. No algorithm, no duplicate detection, no importance scoring, no trigger mechanism. | FIX-008 |
+| ERR-040 | **HIGH** | quality | 0208 | Graceful shutdown unspecified. No SIGTERM handling, no shutdown ordering, no Redis-to-PG flush. Docker 10s grace vs 300s totalTimeout = guaranteed data loss. | FIX-008, ADR-021 |
+| ERR-041 | **HIGH** | quality | 0208 | Session lifecycle has no state machine. No SessionState enum, no idle-to-ended transition handler, no archival mechanism, no concurrent session policy. | FIX-008 |
+| ERR-042 | MEDIUM | quality | 0208 | AxelChannel interface lacks reconnection lifecycle. No reconnect(), no onDisconnect, no reconnection backoff. HealthStatus type undefined. | FIX-009 |
+| ERR-043 | MEDIUM | quality | 0208 | Circuit Breaker has config but no state machine (closed/open/half-open). No integration with fallback chain. Scoped only to LLM. | FIX-009, ADR-021 |
+| ERR-044 | MEDIUM | quality | 0208 | Streaming pipeline no error handling. No partial response recovery, no client disconnect detection, no abort mechanism, no backpressure. | FIX-009 |
+| ERR-045 | MEDIUM | quality | 0208 | PersonaEngine hot-reload has no in-flight request handling. No atomic swap, no file-watch trigger, no malformed input recovery. | FIX-009 |
+| ERR-046 | LOW | quality | 0208 | Meta Memory (L5) feedback loop to L0 Speculative Prefetch described conceptually but no mechanism defined. | FIX-009 |
 
 ## Resolved
 
