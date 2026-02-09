@@ -35,7 +35,7 @@
 | Division | Code | Owned Directories | Model | Worktree |
 |----------|------|------------------|-------|----------|
 | **Research** | `research` | `docs/research/` | sonnet | `axel-wt-research` |
-| **DevOps** | `devops` | `packages/*/package.json`, `packages/*/tsconfig.json`, `packages/*/vitest.config.ts`, `docker/`, `.github/`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `biome.json`, `.axel-ops/DEPLOY.md`, `tools/migrate/` | sonnet | `axel-wt-devops` |
+| **DevOps** | `devops` | `package.json` (root), `vitest.config.ts` (root), `packages/*/package.json`, `packages/*/tsconfig.json`, `packages/*/vitest.config.ts`, `apps/*/package.json`, `apps/*/tsconfig.json`, `apps/*/vitest.config.ts`, `docker/`, `.github/`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `biome.json`, `.axel-ops/DEPLOY.md`, `tools/`, `scripts/` | sonnet | `axel-wt-devops` |
 
 **Rule**: A Division may ONLY create/modify files in its owned directories. Reading any file is allowed.
 

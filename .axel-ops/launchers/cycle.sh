@@ -90,7 +90,7 @@ get_owned_paths() {
         research)
             echo "docs/research/ .axel-ops/comms/research.jsonl" ;;
         devops)
-            echo "docker/ .github/ pnpm-workspace.yaml tsconfig.base.json biome.json .axel-ops/DEPLOY.md tools/migrate/ pnpm-lock.yaml .axel-ops/comms/devops.jsonl" ;;
+            echo "package.json vitest.config.ts packages/*/package.json packages/*/tsconfig.json packages/*/vitest.config.ts apps/*/package.json apps/*/tsconfig.json apps/*/vitest.config.ts docker/ .github/ pnpm-workspace.yaml tsconfig.base.json biome.json .axel-ops/DEPLOY.md tools/ scripts/ pnpm-lock.yaml .axel-ops/comms/devops.jsonl" ;;
         *) echo "" ;;
     esac
 }
@@ -162,6 +162,14 @@ docs($div): cycle $CYCLE_ID
 Co-Authored-By: $co_author <noreply@anthropic.com>
 EOF
 )" || true
+    fi
+
+    # Safety check: warn if untracked files remain (possible ownership gap)
+    local untracked
+    untracked=$(git ls-files --others --exclude-standard 2>/dev/null | head -5)
+    if [ -n "$untracked" ]; then
+        log "$div WARNING: untracked files after commit (possible ownership gap):"
+        echo "$untracked" | while IFS= read -r f; do log "  $f"; done
     fi
 
     log "=== $div DONE ==="
