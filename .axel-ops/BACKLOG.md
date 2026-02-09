@@ -2,19 +2,32 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 198**: **STEADY STATE.** 1534 tests (verified C198), typecheck PASSES, 0 errors. All human.md directives resolved. Roadmap exhausted. Awaiting next direction from Mark.
+> **Cycle 199**: **IMPROVEMENT MODE → PHASE 1 LAUNCH.** STEADY STATE 10-cycle anti-pattern 해소. Phase 1 (Channels + Cross-Channel) + openclaw 참조 기능 추가. human.md P1 "기능 추가 집중" 실행.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| (none) | — | — | — | — |
+| RES-010 | P1 | research | Link Understanding 리서치: URL 추출+요약 (Readability/Defuddle), openclaw 패턴 분석, Axel 아키텍처 적합성 | 0209C199 |
+| RES-011 | P1 | research | Intent Classifier 리서치: Gemini Flash 기반 의도 분류, plan §L7 Intent Classifier 사양, 라우팅 패턴 | 0209C199 |
+| RES-012 | P2 | research | Plugin/Skill SDK 리서치: openclaw plugin-sdk 패턴, Zod manifest, hot-reload, Axel ToolRegistry 확장 | 0209C199 |
 
 ## Queued
 
-| ID | Priority | Division | Task | Created |
-|----|----------|----------|------|---------|
-| (none) | — | — | — | — |
+| ID | Priority | Division | Task | Depends | Created |
+|----|----------|----------|------|---------|---------|
+| FEAT-LINK-001 | P1 | dev-core | Link Understanding: URL 추출기 + 콘텐츠 요약기 (core/types + pure functions) | RES-010 | 0209C199 |
+| FEAT-LINK-002 | P1 | dev-infra | Link Understanding: HTTP fetcher + Readability parser + 임베딩 저장 | RES-010, FEAT-LINK-001 | 0209C199 |
+| FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-001, FEAT-LINK-002 | 0209C199 |
+| FEAT-INTENT-001 | P1 | dev-core | Intent Classifier: IntentType enum, ClassificationResult, IntentClassifier DI interface | RES-011 | 0209C199 |
+| FEAT-INTENT-002 | P1 | dev-infra | Intent Classifier: Gemini Flash 기반 LLM intent classifier 구현 | RES-011, FEAT-INTENT-001 | 0209C199 |
+| FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-001, FEAT-INTENT-002 | 0209C199 |
+| FEAT-PLUGIN-001 | P2 | dev-core | Plugin SDK: PluginManifest Zod schema, PluginRegistry interface, lifecycle hooks | RES-012 | 0209C199 |
+| FEAT-PLUGIN-002 | P2 | dev-infra | Plugin SDK: FilePluginLoader, hot-reload (fs.watch), ToolRegistry integration | RES-012, FEAT-PLUGIN-001 | 0209C199 |
+| FEAT-CANVAS-001 | P2 | ui-ux | Interactive Canvas: agent-driven UI components (buttons, forms), WS 이벤트 프로토콜 | — | 0209C199 |
+| FEAT-ONBOARD-001 | P2 | dev-edge | Onboarding Wizard: CLI interactive setup (채널 설정, API 키 검증, DB 마이그레이션) | — | 0209C199 |
+| FEAT-BROWSER-001 | P2 | dev-infra | Browser Tool: Playwright 기반 웹 자동화 (navigate, screenshot, extract), ToolRegistry 등록 | — | 0209C199 |
+| QA-027 | P1 | quality | Phase 1 batch 1 코드 리뷰 (FEAT-LINK + FEAT-INTENT 완료 후) | FEAT-LINK-003, FEAT-INTENT-003 | 0209C199 |
 
 ## Cancelled
 
