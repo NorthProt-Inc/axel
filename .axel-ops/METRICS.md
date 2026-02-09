@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 104
+## Current Cycle: 105
 
 ## Division Performance (Last 10 Cycles)
 
@@ -10,9 +10,9 @@
 |----------|---------------|-----------------|--------|--------|
 | coord | — | 73 cycles | 0 | Active |
 | arch | 1 cycle | 8 (+2: FIX-MIGRATION-009, ADR-STATUS-001) | 5 (all CTO override) | FIX-MIGRATION-009+ADR-STATUS-001 DONE C103. Idle. |
-| dev-core | 1 cycle | 9 | 1 (FIX-BUG-001 4cy → CTO resolved) | FIX-FILESIZE-001 + GAP-SESSION-001 assigned C103. |
-| dev-infra | 1 cycle | 11 | 0 | GAP-REDIS-CB-001 + GAP-CMD-001 assigned C103. |
-| dev-edge | 1 cycle | 21 | 0 | GAP-PROMPT-001 + GAP-WEBHOOK-001 assigned C103. |
+| dev-core | 1 cycle | 9 | 2 (FIX-BUG-001 4cy CTO, current 3cy) | **3cy stall.** FIX-FILESIZE-001 + GAP-SESSION-001. CTO override C106. |
+| dev-infra | 1 cycle | 11 | 1 (current 3cy) | **3cy stall.** GAP-REDIS-CB-001 + GAP-CMD-001. CTO override C106. |
+| dev-edge | 1 cycle | 21 | 1 (current 3cy) | **3cy stall.** GAP-PROMPT-001 + GAP-WEBHOOK-001. CTO override C106. |
 | quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. Next: dev completion review. |
 | research | 1 cycle | 3 | 0 | Idle (14 cycles). |
 | devops | 1 cycle | 28 | 0 | Idle. |
@@ -24,7 +24,7 @@
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
 | Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK (all resolved C102) |
+| Stalled Tasks (3+ cycles) | 6 | 0 | **ALERT** (3 Divisions × 2 tasks, C103→C105) |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -80,3 +80,4 @@
 | 102 | coord (CTO override) | 3 (FIX-BUG-001, QA-024, SYNC-008) | 0 | **3 STALL TASKS RESOLVED.** P2 GAP 6건 + P3 1건 생성. 1156 tests. 0 errors. |
 | 103 | arch, dev-core, dev-edge, dev-infra | 2 (FIX-MIGRATION-009, ADR-STATUS-001) | 0 | **Arch 2 DONE.** DRIFT-009 resolved, 21 ADRs ACCEPTED. 6 P2 security hardening tasks assigned (3 Divisions). 1156 tests. 0 errors. |
 | 104 | dev-core, dev-edge, dev-infra | 0 | 0 | **Monitoring.** 6 P2 tasks in progress (2 cycles). No completions. Drift CLEAN. 1156 tests. 0 errors. |
+| 105 | dev-core, dev-edge, dev-infra | 0 | 0 | **3cy stall alert.** 6 P2 tasks (3 cycles). metric-alert issued. CTO override C106. 1156 tests. 0 errors. |

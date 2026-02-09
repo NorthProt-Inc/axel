@@ -4,10 +4,10 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation — Security Hardening Sprint.** 6 P2 GAP 태스크 3 Division 진행 중 (2 cycles).
-- **Cycle**: 104
-- **Last Updated**: 2026-02-09C104
-- **STATUS**: Monitoring cycle. 6 P2 security hardening tasks in progress (dev-core/dev-edge/dev-infra, 2 cycles). No completions, no new errors. **1156 tests (verified C104), typecheck PASSES. 0 errors.**
+- **Phase**: **Post-Implementation — Security Hardening Sprint.** 6 P2 GAP 태스크 3 Division 진행 중 (3 cycles — stall threshold 도달).
+- **Cycle**: 105
+- **Last Updated**: 2026-02-09C105
+- **STATUS**: 3-cycle stall alert. 6 P2 security hardening tasks — no completions after 3 cycles (C103~C105). metric-alert issued. CTO override next cycle if no Division output. **1156 tests (verified C105), typecheck PASSES. 0 errors.**
 
 ## Task Counts
 
@@ -94,21 +94,22 @@
 | 102 | 0209 | **3 TASKS DONE (CTO override).** FIX-BUG-001 (ScoredMemory.dbId 추가, container.ts matchedMemoryIds 수정), QA-024 (Mark 16건 커밋 리뷰 0C 0H), SYNC-008 (arch merge 확인 66e3377). P2 GAP 6건 + P3 1건 생성. 모든 stall task 해소. **1156 tests, typecheck PASSES.** 0 errors. |
 | 103 | 0209 | **2 ARCH TASKS DONE.** FIX-MIGRATION-009 (DRIFT-009 resolved, migration 009 DEPRECATED, 010-011 documented), ADR-STATUS-001 (9 ADRs PROPOSED→ACCEPTED, all 21 ADRs ACCEPTED). **6 P2 security hardening tasks assigned** to dev-core (FIX-FILESIZE-001+GAP-SESSION-001), dev-edge (GAP-PROMPT-001+GAP-WEBHOOK-001), dev-infra (GAP-REDIS-CB-001+GAP-CMD-001). **1156 tests (verified), typecheck PASSES.** 0 errors. |
 | 104 | 0209 | **Monitoring cycle.** No completions. 6 P2 security hardening tasks in progress (2 cycles, not stalled). No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified), typecheck PASSES.** |
+| 105 | 0209 | **3-cycle stall alert.** No completions. 6 P2 security hardening tasks (3 cycles — stall threshold). metric-alert issued. No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified C105), typecheck PASSES.** CTO override next cycle if no output. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C104 | Cycle 104 | Active |
+| Coordinator | 0209C105 | Cycle 105 | Active |
 | Architecture | 0209C103 | — | Idle. |
-| Dev-Core | 0209C103 | FIX-FILESIZE-001 + GAP-SESSION-001 | In progress (2 cycles). inbound-handler 분리 + session state machine. |
-| Dev-Infra | 0209C103 | GAP-REDIS-CB-001 + GAP-CMD-001 | In progress (2 cycles). Redis CB + command validation. |
-| Dev-Edge | 0209C103 | GAP-PROMPT-001 + GAP-WEBHOOK-001 | In progress (2 cycles). Prompt injection defense + webhook sig. |
-| UI/UX | 0208C82 | — | Idle (22 cycles). |
-| Research | 0208C89 | — | Idle (15 cycles). |
+| Dev-Core | 0209C103 | FIX-FILESIZE-001 + GAP-SESSION-001 | **3 cycles no output.** metric-alert. CTO override C106. |
+| Dev-Infra | 0209C103 | GAP-REDIS-CB-001 + GAP-CMD-001 | **3 cycles no output.** metric-alert. CTO override C106. |
+| Dev-Edge | 0209C103 | GAP-PROMPT-001 + GAP-WEBHOOK-001 | **3 cycles no output.** metric-alert. CTO override C106. |
+| UI/UX | 0208C82 | — | Idle (23 cycles). |
+| Research | 0208C89 | — | Idle (16 cycles). |
 | Quality | 0209C102 | — | Idle. Next: review after dev completions. |
 | DevOps | 0209C101 | — | Idle. |
-| Audit | 0208C89 | — | Idle (15 cycles). |
+| Audit | 0208C89 | — | Idle (16 cycles). |
 
 ## Human Intervention Needed
 
