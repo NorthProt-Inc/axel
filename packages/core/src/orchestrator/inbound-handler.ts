@@ -28,6 +28,52 @@ export interface ErrorInfo {
  *
  * All injected via createInboundHandler factory function.
  */
+/** Semantic memory writer interface for M3 write path */
+export interface SemanticMemoryWriterLike {
+	storeConversationMemory(params: {
+		readonly userContent: string;
+		readonly assistantContent: string;
+		readonly channelId: string;
+		readonly sessionId: string;
+	}): Promise<string | null>;
+}
+
+/** Entity extractor interface for M4 write path */
+export interface EntityExtractorLike {
+	extract(
+		userContent: string,
+		assistantContent: string,
+	): Promise<{
+		readonly entities: readonly {
+			readonly name: string;
+			readonly type: string;
+			readonly properties: Readonly<Record<string, unknown>>;
+		}[];
+		readonly relations: readonly {
+			readonly source: string;
+			readonly target: string;
+			readonly type: string;
+		}[];
+	}>;
+}
+
+/** Conceptual memory interface for M4 write path */
+export interface ConceptualMemoryLike {
+	addEntity(entity: {
+		readonly name: string;
+		readonly entityType: string;
+		readonly metadata?: Readonly<Record<string, unknown>>;
+	}): Promise<string>;
+	addRelation(relation: {
+		readonly sourceId: string;
+		readonly targetId: string;
+		readonly relationType: string;
+		readonly weight: number;
+	}): Promise<void>;
+	findEntity(name: string): Promise<{ readonly entityId: string } | null>;
+	incrementMentions(entityId: string): Promise<void>;
+}
+
 export interface InboundHandlerDeps {
 	readonly sessionRouter: SessionRouter;
 	readonly contextAssembler: ContextAssembler;
@@ -36,6 +82,9 @@ export interface InboundHandlerDeps {
 	readonly personaEngine: PersonaEngine;
 	readonly workingMemory: WorkingMemory;
 	readonly episodicMemory: EpisodicMemory;
+	readonly semanticMemoryWriter?: SemanticMemoryWriterLike;
+	readonly entityExtractor?: EntityExtractorLike;
+	readonly conceptualMemory?: ConceptualMemoryLike;
 	readonly toolDefinitions?: readonly ToolDefinition[];
 	readonly config?: ReActConfig;
 	readonly onError?: (info: ErrorInfo) => void;
@@ -69,6 +118,9 @@ export function createInboundHandler(
 		personaEngine,
 		workingMemory,
 		episodicMemory,
+		semanticMemoryWriter,
+		entityExtractor,
+		conceptualMemory,
 		toolDefinitions = [],
 		config = DEFAULT_REACT_CONFIG,
 		onError,
@@ -128,6 +180,9 @@ export function createInboundHandler(
 				responseText,
 				now,
 				baseTurnId,
+				semanticMemoryWriter,
+				entityExtractor,
+				conceptualMemory,
 			);
 		} catch (err: unknown) {
 			// AUD-081: Report error details for observability
@@ -166,11 +221,15 @@ async function persistToMemory(
 	assistantContent: string,
 	assistantTimestamp: Date,
 	baseTurnId: number,
+	semanticMemoryWriter?: SemanticMemoryWriterLike,
+	entityExtractor?: EntityExtractorLike,
+	conceptualMemory?: ConceptualMemoryLike,
 ): Promise<void> {
 	try {
 		const userTokenCount = estimateTokenCount(userContent);
 		const assistantTokenCount = estimateTokenCount(assistantContent);
 
+		// M1: Working Memory
 		await workingMemory.pushTurn(userId, {
 			turnId: baseTurnId + 1,
 			role: 'user',
@@ -189,6 +248,7 @@ async function persistToMemory(
 			tokenCount: assistantTokenCount,
 		});
 
+		// M2: Episodic Memory
 		await episodicMemory.addMessage(sessionId, {
 			role: 'user',
 			content: userContent,
@@ -204,9 +264,68 @@ async function persistToMemory(
 			timestamp: assistantTimestamp,
 			tokenCount: assistantTokenCount,
 		});
+
+		// M3: Semantic Memory (fire-and-forget)
+		if (semanticMemoryWriter) {
+			semanticMemoryWriter
+				.storeConversationMemory({ userContent, assistantContent, channelId, sessionId })
+				.catch(() => {
+					// Silent — M3 persistence must not break the response flow
+				});
+		}
+
+		// M4: Conceptual Memory — entity extraction (fire-and-forget)
+		if (entityExtractor && conceptualMemory) {
+			extractAndStoreEntities(entityExtractor, conceptualMemory, userContent, assistantContent).catch(
+				() => {
+					// Silent — M4 persistence must not break the response flow
+				},
+			);
+		}
 	} catch {
 		// Memory persistence failure must not break the response flow.
 		// The response has already been sent successfully.
+	}
+}
+
+/** Extract entities from conversation and store to M4 conceptual memory */
+async function extractAndStoreEntities(
+	entityExtractor: EntityExtractorLike,
+	conceptualMemory: ConceptualMemoryLike,
+	userContent: string,
+	assistantContent: string,
+): Promise<void> {
+	const extracted = await entityExtractor.extract(userContent, assistantContent);
+
+	// Store entities (upsert: find existing or create new)
+	const entityIdMap = new Map<string, string>();
+	for (const entity of extracted.entities) {
+		const existing = await conceptualMemory.findEntity(entity.name);
+		if (existing) {
+			await conceptualMemory.incrementMentions(existing.entityId);
+			entityIdMap.set(entity.name, existing.entityId);
+		} else {
+			const entityId = await conceptualMemory.addEntity({
+				name: entity.name,
+				entityType: entity.type,
+				metadata: entity.properties,
+			});
+			entityIdMap.set(entity.name, entityId);
+		}
+	}
+
+	// Store relations
+	for (const relation of extracted.relations) {
+		const sourceId = entityIdMap.get(relation.source);
+		const targetId = entityIdMap.get(relation.target);
+		if (sourceId && targetId) {
+			await conceptualMemory.addRelation({
+				sourceId,
+				targetId,
+				relationType: relation.type,
+				weight: 1.0,
+			});
+		}
 	}
 }
 

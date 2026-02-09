@@ -63,6 +63,7 @@ export interface ContextDataProvider {
 	getWorkingMemory(userId: string, limit: number): Promise<readonly Turn[]>;
 	searchSemantic(query: string, limit: number): Promise<readonly MemorySearchResult[]>;
 	traverseGraph(entityId: string, depth: number): Promise<readonly Entity[]>;
+	searchEntities?(query: string): Promise<Entity | null>;
 	getSessionArchive(userId: string, days: number): Promise<readonly SessionSummary[]>;
 	getStreamBuffer(userId: string): Promise<readonly StreamEvent[]>;
 	getMetaMemory(userId: string): Promise<readonly HotMemory[]>;

@@ -8,6 +8,8 @@ export function createResourceHandlers(deps: GatewayDeps): {
 	handleMemoryStats: RouteHandler;
 	handleSession: RouteHandler;
 	handleSessionEnd: RouteHandler;
+	handleSessions: RouteHandler;
+	handleSessionMessages: RouteHandler;
 	handleTools: RouteHandler;
 	handleToolExecute: RouteHandler;
 } {
@@ -129,11 +131,45 @@ export function createResourceHandlers(deps: GatewayDeps): {
 		});
 	}
 
+	async function handleSessions(
+		_req: http.IncomingMessage,
+		res: http.ServerResponse,
+	): Promise<void> {
+		const requestId = generateRequestId();
+		if (!deps.listSessions) {
+			sendError(res, 503, 'Session history not configured', requestId);
+			return;
+		}
+		const sessions = await deps.listSessions('gateway-user');
+		sendJson(res, 200, { sessions, requestId });
+	}
+
+	async function handleSessionMessages(
+		req: http.IncomingMessage,
+		res: http.ServerResponse,
+	): Promise<void> {
+		const requestId = generateRequestId();
+		if (!deps.getSessionMessages) {
+			sendError(res, 503, 'Session messages not configured', requestId);
+			return;
+		}
+		const url = req.url ?? '';
+		const match = /\/api\/v1\/sessions\/([^/]+)\/messages/.exec(url);
+		if (!match?.[1]) {
+			sendError(res, 400, 'Missing sessionId', requestId);
+			return;
+		}
+		const messages = await deps.getSessionMessages(match[1]);
+		sendJson(res, 200, { messages, requestId });
+	}
+
 	return {
 		handleMemorySearch,
 		handleMemoryStats,
 		handleSession,
 		handleSessionEnd,
+		handleSessions,
+		handleSessionMessages,
 		handleTools,
 		handleToolExecute,
 	};

@@ -2,6 +2,7 @@ import type { ContextDataProvider, TokenCounter } from '@axel/core/context';
 import { ContextAssembler } from '@axel/core/context';
 import type {
 	ConceptualMemory,
+	Entity,
 	EpisodicMemory,
 	MetaMemory,
 	SemanticMemory,
@@ -9,6 +10,7 @@ import type {
 	WorkingMemory,
 } from '@axel/core/memory';
 import type { LlmProvider, SessionStore, ToolExecutor } from '@axel/core/orchestrator';
+import type { MemorySearchResult } from '@axel/core/types';
 import { SessionRouter } from '@axel/core/orchestrator';
 import {
 	AnthropicLlmProvider,
@@ -25,6 +27,8 @@ import {
 	PgSessionStore,
 	RedisStreamBuffer,
 	RedisWorkingMemory,
+	SemanticMemoryWriter,
+	EntityExtractor,
 	ToolRegistry,
 } from '@axel/infra';
 import type { HealthCheckTarget } from './lifecycle.js';
@@ -104,6 +108,8 @@ export interface Container {
 	readonly semanticMemory: SemanticMemory;
 	readonly conceptualMemory: ConceptualMemory;
 	readonly metaMemory: MetaMemory;
+	readonly semanticMemoryWriter: SemanticMemoryWriter;
+	readonly entityExtractor: EntityExtractor;
 	readonly sessionStore: SessionStore;
 	readonly sessionRouter: SessionRouter;
 	readonly anthropicProvider: LlmProvider;
@@ -138,22 +144,50 @@ class MemoryContextDataProvider implements ContextDataProvider {
 	constructor(
 		private readonly wm: WorkingMemory,
 		private readonly em: EpisodicMemory,
+		private readonly sm: SemanticMemory,
+		private readonly cm: ConceptualMemory,
 		private readonly mm: MetaMemory,
 		private readonly tr: ToolRegistry,
+		private readonly embeddingService: GeminiEmbeddingService,
 	) {}
 
 	async getWorkingMemory(userId: string, limit: number) {
 		return this.wm.getTurns(userId, limit);
 	}
 
-	async searchSemantic(_query: string, _limit: number) {
-		// Requires embedding generation — deferred to message flow wiring
-		return [];
+	async searchSemantic(query: string, limit: number) {
+		const embedding = await this.embeddingService.embed(query, 'RETRIEVAL_QUERY');
+		const scored = await this.sm.search({ text: query, embedding, limit });
+		const results: MemorySearchResult[] = scored.map((s) => ({
+			memory: s.memory,
+			score: s.finalScore,
+			source: 'semantic' as const,
+		}));
+
+		// M5: Record access pattern
+		if (results.length > 0) {
+			this.mm
+				.recordAccess({
+					queryText: query,
+					matchedMemoryIds: results.map((r) => r.memory.accessCount),
+					relevanceScores: results.map((r) => r.score),
+					channelId: 'context-assembler',
+				})
+				.catch(() => {
+					// Silent — meta memory recording must not break search
+				});
+		}
+
+		return results;
 	}
 
-	async traverseGraph(_entityId: string, _depth: number) {
-		// Requires GraphNode→Entity conversion — deferred
-		return [];
+	async traverseGraph(entityId: string, depth: number) {
+		const nodes = await this.cm.traverse(entityId, depth);
+		return nodes.map((n) => n.entity);
+	}
+
+	async searchEntities(query: string): Promise<Entity | null> {
+		return this.cm.findEntity(query);
 	}
 
 	async getSessionArchive(userId: string, _days: number) {
@@ -236,6 +270,15 @@ export function createContainer(deps: ContainerDeps): Container {
 		DEFAULT_EMBEDDING_CONFIG,
 	);
 
+	// Semantic Memory Writer (M3 write path)
+	const semanticMemoryWriter = new SemanticMemoryWriter(
+		{ embed: (text: string) => embeddingService.embed(text, 'RETRIEVAL_DOCUMENT') },
+		semanticMemory,
+	);
+
+	// Entity Extractor (M4 write path)
+	const entityExtractor = new EntityExtractor(deps.googleClient);
+
 	// Tool system (ADR-010)
 	const toolRegistry = new ToolRegistry();
 	const toolExecutor = new McpToolExecutor(toolRegistry);
@@ -245,8 +288,11 @@ export function createContainer(deps: ContainerDeps): Container {
 	const contextDataProvider = new MemoryContextDataProvider(
 		workingMemory,
 		episodicMemory,
+		semanticMemory,
+		conceptualMemory,
 		metaMemory,
 		toolRegistry,
+		embeddingService,
 	);
 	const contextAssembler = new ContextAssembler(contextDataProvider, tokenCounter);
 
@@ -270,6 +316,8 @@ export function createContainer(deps: ContainerDeps): Container {
 		semanticMemory,
 		conceptualMemory,
 		metaMemory,
+		semanticMemoryWriter,
+		entityExtractor,
 		sessionStore,
 		sessionRouter,
 		anthropicProvider,

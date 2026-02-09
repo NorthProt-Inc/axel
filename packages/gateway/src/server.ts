@@ -50,6 +50,18 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 			requiresAuth: true,
 			handler: rh.handleSessionEnd,
 		},
+		{
+			method: 'GET',
+			path: '/api/v1/sessions',
+			requiresAuth: true,
+			handler: rh.handleSessions,
+		},
+		{
+			method: 'GET',
+			path: '/api/v1/sessions/*',
+			requiresAuth: true,
+			handler: rh.handleSessionMessages,
+		},
 		{ method: 'GET', path: '/api/v1/tools', requiresAuth: true, handler: rh.handleTools },
 		{
 			method: 'POST',
@@ -149,7 +161,11 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	): void {
 		const method = req.method ?? 'GET';
 		const path = (req.url ?? '/').split('?')[0] ?? '/';
-		const route = routes.find((r) => r.method === method && r.path === path);
+		const route = routes.find(
+			(r) =>
+				r.method === method &&
+				(r.path === path || (r.path.endsWith('/*') && path.startsWith(r.path.slice(0, -2)))),
+		);
 
 		if (!route) {
 			sendError(res, 404, 'Not Found', requestId);

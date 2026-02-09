@@ -27,6 +27,8 @@ let currentSessionId = $state<string | null>(null);
 let isStreaming = $state(false);
 let wsConnection = $state<WebSocket | null>(null);
 let wsAuthenticated = $state(false);
+let apiBaseUrl = '';
+let apiToken = '';
 
 export const messages = {
 	get value() {
@@ -63,7 +65,10 @@ export function sendMessage(content: string): void {
 	}
 }
 
-export function connectWebSocket(url: string, token: string): void {
+export function connectWebSocket(url: string, token: string, gatewayUrl?: string): void {
+	apiToken = token;
+	apiBaseUrl = gatewayUrl ?? url.replace(/^ws/, 'http').replace(/\/ws$/, '');
+
 	const ws = new WebSocket(url);
 	let authenticated = false;
 
@@ -91,6 +96,9 @@ export function connectWebSocket(url: string, token: string): void {
 		} else if (parsed.type === 'done') {
 			messageList = applyDone(messageList);
 			isStreaming = false;
+			if (parsed.sessionId) {
+				currentSessionId = parsed.sessionId;
+			}
 		}
 	});
 
@@ -101,6 +109,54 @@ export function connectWebSocket(url: string, token: string): void {
 	});
 
 	wsConnection = ws;
+}
+
+export async function loadSessions(): Promise<void> {
+	try {
+		const res = await fetch(`${apiBaseUrl}/api/v1/sessions`, {
+			headers: { Authorization: `Bearer ${apiToken}` },
+		});
+		if (!res.ok) return;
+		const data = (await res.json()) as {
+			sessions: readonly {
+				sessionId: string;
+				title?: string;
+				channelId: string;
+				startedAt: string;
+			}[];
+		};
+		sessionList = data.sessions.map((s) => ({
+			id: s.sessionId,
+			title: s.title ?? `Session ${s.sessionId.slice(0, 8)}`,
+			createdAt: new Date(s.startedAt),
+		}));
+	} catch {
+		// Silent — session loading failure is non-critical
+	}
+}
+
+export async function loadMessages(sessionId: string): Promise<void> {
+	try {
+		const res = await fetch(`${apiBaseUrl}/api/v1/sessions/${sessionId}/messages`, {
+			headers: { Authorization: `Bearer ${apiToken}` },
+		});
+		if (!res.ok) return;
+		const data = (await res.json()) as {
+			messages: readonly {
+				role: string;
+				content: string;
+				timestamp: string;
+			}[];
+		};
+		messageList = data.messages.map((m) => ({
+			id: crypto.randomUUID(),
+			role: m.role as 'user' | 'assistant' | 'system',
+			content: m.content,
+			timestamp: new Date(m.timestamp),
+		}));
+	} catch {
+		// Silent — message loading failure is non-critical
+	}
 }
 
 export function createSession(): void {
@@ -114,7 +170,7 @@ export function createSession(): void {
 	messageList = [];
 }
 
-export function switchSession(id: string): void {
+export async function switchSession(id: string): Promise<void> {
 	currentSessionId = id;
-	messageList = [];
+	await loadMessages(id);
 }

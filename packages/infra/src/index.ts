@@ -18,3 +18,4 @@ export { AnthropicLlmProvider } from './llm/anthropic-provider.js';
 export { GoogleLlmProvider, type GoogleGenAIClient } from './llm/google-provider.js';
 export { defineTool, ToolRegistry, McpToolExecutor, validatePath } from './mcp/tool-registry.js';
 export { SemanticMemoryWriter } from './memory/semantic-memory-writer.js';
+export { EntityExtractor } from './memory/entity-extractor.js';

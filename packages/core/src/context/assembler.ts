@@ -99,9 +99,16 @@ export class ContextAssembler {
 			this.budget.semanticSearch,
 		);
 
-		// 4. Graph Traversal (M4) — only if entityId provided
-		if (entityId !== undefined) {
-			const entities = await this.provider.traverseGraph(entityId, DEFAULTS.graphDepth);
+		// 4. Graph Traversal (M4) — resolve entityId from query if not provided
+		let resolvedEntityId = entityId;
+		if (resolvedEntityId === undefined && this.provider.searchEntities) {
+			const entity = await this.provider.searchEntities(query);
+			if (entity) {
+				resolvedEntityId = entity.entityId;
+			}
+		}
+		if (resolvedEntityId !== undefined) {
+			const entities = await this.provider.traverseGraph(resolvedEntityId, DEFAULTS.graphDepth);
 			await this.addSection(
 				sections,
 				'graphTraversal',

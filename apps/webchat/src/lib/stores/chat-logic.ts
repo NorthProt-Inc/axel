@@ -12,6 +12,7 @@ export interface WsChunkMessage {
 
 export interface WsDoneMessage {
 	readonly type: 'done';
+	readonly sessionId?: string;
 }
 
 export type WsMessage = WsChunkMessage | WsDoneMessage;
@@ -26,7 +27,10 @@ export function parseWsMessage(raw: string): WsMessage | null {
 			return { type: 'chunk', content: data.content };
 		}
 		if (data.type === 'done') {
-			return { type: 'done' };
+			return {
+				type: 'done',
+				sessionId: typeof data.sessionId === 'string' ? data.sessionId : undefined,
+			};
 		}
 		return null;
 	} catch {

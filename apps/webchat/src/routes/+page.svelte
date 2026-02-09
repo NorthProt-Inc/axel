@@ -4,12 +4,13 @@ import { PUBLIC_WS_URL, PUBLIC_API_TOKEN } from '$env/static/public';
 import MessageList from '$lib/components/MessageList.svelte';
 import MessageInput from '$lib/components/MessageInput.svelte';
 import ChatSidebar from '$lib/components/ChatSidebar.svelte';
-import { messages, sendMessage, connectWebSocket } from '$lib/stores/chat.svelte';
+import { messages, sendMessage, connectWebSocket, loadSessions } from '$lib/stores/chat.svelte';
 
 let sidebarOpen = $state(false);
 
-onMount(() => {
+onMount(async () => {
 	connectWebSocket(PUBLIC_WS_URL, PUBLIC_API_TOKEN);
+	await loadSessions();
 });
 
 function handleSend(content: string) {

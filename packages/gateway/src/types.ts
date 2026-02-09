@@ -91,6 +91,24 @@ export type DiscordFollowUp = (
 	content: string,
 ) => Promise<void>;
 
+/** Session summary for session list API */
+export interface SessionListItem {
+	readonly sessionId: string;
+	readonly title: string;
+	readonly channelId: string;
+	readonly turnCount: number;
+	readonly startedAt: string;
+	readonly endedAt: string | null;
+}
+
+/** Message record for session messages API */
+export interface SessionMessageItem {
+	readonly role: string;
+	readonly content: string;
+	readonly channelId: string;
+	readonly timestamp: string;
+}
+
 export interface GatewayDeps {
 	readonly healthCheck: () => Promise<HealthStatus>;
 	readonly handleMessage?: HandleMessage;
@@ -99,6 +117,8 @@ export interface GatewayDeps {
 	readonly getMemoryStats?: () => Promise<Record<string, unknown>>;
 	readonly getSession?: (userId: string) => Promise<Record<string, unknown> | null>;
 	readonly endSession?: (sessionId: string) => Promise<Record<string, unknown>>;
+	readonly listSessions?: (userId: string) => Promise<readonly SessionListItem[]>;
+	readonly getSessionMessages?: (sessionId: string) => Promise<readonly SessionMessageItem[]>;
 	readonly listTools?: () => readonly Record<string, unknown>[];
 	readonly executeTool?: (params: ToolExecuteParams) => Promise<ToolExecuteResult>;
 }

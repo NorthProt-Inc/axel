@@ -83,6 +83,48 @@ class PgEpisodicMemory implements EpisodicMemory {
 		return (result.rows as SessionRow[]).map(toSessionSummary);
 	}
 
+	async getSessionMessages(sessionId: string): Promise<readonly MessageRecord[]> {
+		const result = await this.pool.query(
+			`SELECT role, content, channel_id, timestamp, token_count
+			 FROM messages
+			 WHERE session_id = $1
+			 ORDER BY timestamp ASC`,
+			[sessionId],
+		);
+		return (result.rows as MessageRow[]).map(toMessageRecord);
+	}
+
+	async listSessions(
+		userId: string,
+		limit = 50,
+	): Promise<
+		readonly {
+			sessionId: string;
+			title: string;
+			channelId: string;
+			turnCount: number;
+			startedAt: Date;
+			endedAt: Date | null;
+		}[]
+	> {
+		const result = await this.pool.query(
+			`SELECT session_id, summary, channel_id, turn_count, started_at, ended_at
+			 FROM sessions
+			 WHERE user_id = $1
+			 ORDER BY started_at DESC
+			 LIMIT $2`,
+			[userId, limit],
+		);
+		return (result.rows as SessionRow[]).map((r) => ({
+			sessionId: r.session_id,
+			title: r.summary ?? `Session ${r.session_id.slice(0, 8)}`,
+			channelId: r.channel_id,
+			turnCount: r.turn_count,
+			startedAt: r.started_at,
+			endedAt: r.ended_at ?? null,
+		}));
+	}
+
 	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {
 		const result = await this.pool.query(
 			`SELECT role, content, channel_id, timestamp, token_count
