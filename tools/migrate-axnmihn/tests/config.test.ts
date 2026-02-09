@@ -1,8 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('config', () => {
 	beforeEach(() => {
 		vi.resetModules();
+		vi.unstubAllEnvs();
+		delete process.env.AXNMIHN_DATA_PATH;
+		delete process.env.AXNMIHN_DB_PATH;
+		delete process.env.AXEL_DB_URL;
+		delete process.env.GOOGLE_API_KEY;
+	});
+
+	afterEach(() => {
+		vi.unstubAllEnvs();
 	});
 
 	describe('validateEnvironment', () => {
@@ -13,7 +22,6 @@ describe('config', () => {
 			vi.stubEnv('GOOGLE_API_KEY', 'test-key');
 			const { validateEnvironment } = await import('../src/config.js');
 			expect(() => validateEnvironment()).not.toThrow();
-			vi.unstubAllEnvs();
 		});
 
 		it('should throw when AXNMIHN_DATA_PATH is missing', async () => {
@@ -22,7 +30,6 @@ describe('config', () => {
 			vi.stubEnv('GOOGLE_API_KEY', 'test-key');
 			const { validateEnvironment } = await import('../src/config.js');
 			expect(() => validateEnvironment()).toThrow('AXNMIHN_DATA_PATH');
-			vi.unstubAllEnvs();
 		});
 
 		it('should throw when AXNMIHN_DB_PATH is missing', async () => {
@@ -31,7 +38,6 @@ describe('config', () => {
 			vi.stubEnv('GOOGLE_API_KEY', 'test-key');
 			const { validateEnvironment } = await import('../src/config.js');
 			expect(() => validateEnvironment()).toThrow('AXNMIHN_DB_PATH');
-			vi.unstubAllEnvs();
 		});
 
 		it('should throw when AXEL_DB_URL is missing', async () => {
@@ -40,7 +46,6 @@ describe('config', () => {
 			vi.stubEnv('GOOGLE_API_KEY', 'test-key');
 			const { validateEnvironment } = await import('../src/config.js');
 			expect(() => validateEnvironment()).toThrow('AXEL_DB_URL');
-			vi.unstubAllEnvs();
 		});
 
 		it('should throw when GOOGLE_API_KEY is missing', async () => {
@@ -49,7 +54,6 @@ describe('config', () => {
 			vi.stubEnv('AXEL_DB_URL', 'postgresql://localhost:5432/axel');
 			const { validateEnvironment } = await import('../src/config.js');
 			expect(() => validateEnvironment()).toThrow('GOOGLE_API_KEY');
-			vi.unstubAllEnvs();
 		});
 	});
 
@@ -65,7 +69,6 @@ describe('config', () => {
 			expect(config.axnmihnDbPath).toBe('/data/sqlite.db');
 			expect(config.axelDbUrl).toBe('postgresql://localhost/axel');
 			expect(config.googleApiKey).toBe('key-123');
-			vi.unstubAllEnvs();
 		});
 	});
 });
