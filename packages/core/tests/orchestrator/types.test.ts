@@ -95,6 +95,7 @@ describe('UnifiedSession type', () => {
 			startedAt: new Date(),
 			lastActivityAt: new Date(),
 			turnCount: 0,
+			state: 'active',
 		};
 		expect(session.sessionId).toBe('sess-001');
 		expect(session.userId).toBe('mark');
@@ -115,6 +116,7 @@ describe('ResolvedSession type', () => {
 				startedAt: new Date(),
 				lastActivityAt: new Date(),
 				turnCount: 5,
+				state: 'active',
 			},
 			isNew: false,
 			channelSwitched: true,
@@ -201,12 +203,14 @@ describe('SessionStore interface', () => {
 					startedAt: new Date(),
 					lastActivityAt: new Date(),
 					turnCount: 0,
+					state: 'initializing',
 				},
 				isNew: true,
 				channelSwitched: false,
 				previousSession: null,
 			}),
 			updateActivity: async () => {},
+			updateState: async () => {},
 			getActive: async () => null,
 			getStats: async () => ({
 				totalTurns: 0,

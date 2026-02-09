@@ -1,4 +1,5 @@
-import type { SessionSummary } from '../types/session.js';
+import type { SessionState, SessionSummary } from '../types/session.js';
+import { transition } from './session-state-machine.js';
 import type {
 	ChannelContext,
 	ResolvedSession,
@@ -8,27 +9,67 @@ import type {
 } from './types.js';
 
 /**
- * Cross-Channel Session Router (ADR-014).
+ * Cross-Channel Session Router (ADR-014 + ADR-021).
  *
  * Routes incoming messages to the correct unified session.
  * Delegates actual session storage to the injected SessionStore.
+ * Validates state transitions per ADR-021 session state machine.
  *
  * Key responsibilities:
- * - Session resolution (new or existing)
+ * - Session resolution (new or existing) with state transition
  * - Channel context extraction for LLM
  * - Activity tracking
- * - Session lifecycle (end → summary)
+ * - Session lifecycle (end → summary) with state validation
  */
 export class SessionRouter {
 	private readonly store: SessionStore;
+
+	/** Internal state cache for transition validation (sessionId → session) */
+	private readonly stateCache = new Map<string, UnifiedSession>();
 
 	constructor(store: SessionStore) {
 		this.store = store;
 	}
 
-	/** Resolve session for incoming message (ADR-014 lifecycle) */
+	/**
+	 * Resolve session for incoming message (ADR-014 lifecycle).
+	 *
+	 * For new sessions: transitions initializing → active (ADR-021).
+	 * For existing sessions: session remains in its current state.
+	 */
 	async resolveSession(userId: string, channelId: string): Promise<ResolvedSession> {
-		return this.store.resolve(userId, channelId);
+		const resolved = await this.store.resolve(userId, channelId);
+
+		if (resolved.isNew) {
+			// New session: validate initializing → active (ADR-021)
+			transition(resolved.session.state, 'active');
+			await this.store.updateState(resolved.session.sessionId, 'active');
+			const activeSession: UnifiedSession = { ...resolved.session, state: 'active' };
+			this.stateCache.set(activeSession.sessionId, activeSession);
+			return { ...resolved, session: activeSession };
+		}
+
+		// Existing session: cache latest state
+		this.stateCache.set(resolved.session.sessionId, resolved.session);
+		return resolved;
+	}
+
+	/**
+	 * Transition session to a new state with validation (ADR-021).
+	 *
+	 * Used by orchestrator (react-loop) for active → thinking, thinking → tool_executing, etc.
+	 *
+	 * @throws {SessionTransitionError} if the transition is not valid
+	 */
+	async transitionState(sessionId: string, newState: SessionState): Promise<void> {
+		const cached = this.stateCache.get(sessionId);
+		if (!cached) {
+			return;
+		}
+
+		transition(cached.state, newState);
+		await this.store.updateState(sessionId, newState);
+		this.stateCache.set(sessionId, { ...cached, state: newState });
 	}
 
 	/**
@@ -71,8 +112,35 @@ export class SessionRouter {
 		return this.store.getStats(sessionId);
 	}
 
-	/** End session and generate summary for episodic memory */
+	/**
+	 * End session and generate summary for episodic memory (ADR-021).
+	 *
+	 * Validates state transitions: active → summarizing → ending → ended.
+	 *
+	 * @throws {SessionTransitionError} if session is not in 'active' state
+	 */
 	async endSession(sessionId: string): Promise<SessionSummary> {
-		return this.store.end(sessionId);
+		const cached = this.stateCache.get(sessionId);
+
+		if (cached) {
+			// Validate: active → summarizing (ADR-021)
+			transition(cached.state, 'summarizing');
+			await this.store.updateState(sessionId, 'summarizing');
+
+			// summarizing → ending
+			transition('summarizing', 'ending');
+			await this.store.updateState(sessionId, 'ending');
+		}
+
+		const summary = await this.store.end(sessionId);
+
+		if (cached) {
+			// ending → ended
+			transition('ending', 'ended');
+			await this.store.updateState(sessionId, 'ended');
+			this.stateCache.delete(sessionId);
+		}
+
+		return summary;
 	}
 }

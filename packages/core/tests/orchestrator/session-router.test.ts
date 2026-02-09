@@ -273,43 +273,37 @@ describe('SessionRouter', () => {
 			// (store removes it, so we check it was processed without error)
 		});
 
-		it('should throw SessionTransitionError when ending a session not in active state', async () => {
+		it('should throw SessionTransitionError when ending a session in thinking state', async () => {
 			const resolved = await router.resolveSession('mark', 'discord');
 			const sessionId = resolved.session.sessionId;
 
-			// Manually set session to 'thinking' state (not endable)
-			const session = store.sessions.get('mark');
-			if (session) {
-				store.sessions.set('mark', { ...session, state: 'thinking' });
-			}
+			// Transition to thinking via public API (active → thinking is valid)
+			await router.transitionState(sessionId, 'thinking');
 
+			// thinking → summarizing is invalid per ADR-021
 			await expect(router.endSession(sessionId)).rejects.toThrow(SessionTransitionError);
 		});
 
-		it('should throw SessionTransitionError when ending a session in ended state', async () => {
+		it('should throw SessionTransitionError when ending a session in tool_executing state', async () => {
 			const resolved = await router.resolveSession('mark', 'discord');
 			const sessionId = resolved.session.sessionId;
 
-			// Set session to 'ended' state
-			const session = store.sessions.get('mark');
-			if (session) {
-				store.sessions.set('mark', { ...session, state: 'ended' });
-			}
+			// active → thinking → tool_executing
+			await router.transitionState(sessionId, 'thinking');
+			await router.transitionState(sessionId, 'tool_executing');
 
+			// tool_executing → summarizing is invalid per ADR-021
 			await expect(router.endSession(sessionId)).rejects.toThrow(SessionTransitionError);
 		});
 
-		it('should throw SessionTransitionError when ending a session in initializing state', async () => {
+		it('should throw SessionTransitionError for invalid transitionState call', async () => {
 			const resolved = await router.resolveSession('mark', 'discord');
 			const sessionId = resolved.session.sessionId;
 
-			// Set session to 'initializing' state
-			const session = store.sessions.get('mark');
-			if (session) {
-				store.sessions.set('mark', { ...session, state: 'initializing' });
-			}
-
-			await expect(router.endSession(sessionId)).rejects.toThrow(SessionTransitionError);
+			// active → ended is invalid (must go through summarizing → ending → ended)
+			await expect(router.transitionState(sessionId, 'ended')).rejects.toThrow(
+				SessionTransitionError,
+			);
 		});
 
 		it('should call store.updateState during endSession lifecycle', async () => {

@@ -37,6 +37,7 @@ export interface UnifiedSession {
 	readonly startedAt: Date;
 	readonly lastActivityAt: Date;
 	readonly turnCount: number;
+	readonly state: SessionState;
 }
 
 /** Result of session resolution — new or existing */
@@ -108,6 +109,7 @@ export interface ToolExecutor {
 export interface SessionStore {
 	resolve(userId: string, channelId: string): Promise<ResolvedSession>;
 	updateActivity(sessionId: string): Promise<void>;
+	updateState(sessionId: string, newState: SessionState): Promise<void>;
 	getActive(userId: string): Promise<UnifiedSession | null>;
 	getStats(sessionId: string): Promise<SessionStats>;
 	end(sessionId: string): Promise<SessionSummary>;

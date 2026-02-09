@@ -49,13 +49,14 @@ function makeSession(overrides?: Partial<UnifiedSession>): UnifiedSession {
 		startedAt: new Date('2026-02-08T11:00:00Z'),
 		lastActivityAt: new Date('2026-02-08T12:00:00Z'),
 		turnCount: 1,
+		state: 'active',
 		...overrides,
 	};
 }
 
 function makeResolvedSession(overrides?: Partial<ResolvedSession>): ResolvedSession {
 	return {
-		session: makeSession(),
+		session: makeSession({ state: 'initializing' }),
 		isNew: true,
 		channelSwitched: false,
 		previousSession: null,
@@ -67,6 +68,7 @@ function makeSessionStore(resolved?: ResolvedSession): SessionStore {
 	return {
 		resolve: vi.fn().mockResolvedValue(resolved ?? makeResolvedSession()),
 		updateActivity: vi.fn().mockResolvedValue(undefined),
+		updateState: vi.fn().mockResolvedValue(undefined),
 		getActive: vi.fn().mockResolvedValue(null),
 		getStats: vi.fn().mockResolvedValue({
 			totalTurns: 1,
@@ -1131,7 +1133,7 @@ describe('createInboundHandler', () => {
 
 		it('should pass correct turnId values based on session turnCount', async () => {
 			const store = makeSessionStore(
-				makeResolvedSession({ session: makeSession({ turnCount: 5 }) }),
+				makeResolvedSession({ session: makeSession({ turnCount: 5, state: 'initializing' }) }),
 			);
 			const workingMemory = makeWorkingMemory();
 			const mockAssembler = {
