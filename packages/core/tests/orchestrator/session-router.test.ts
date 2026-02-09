@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SessionTransitionError } from '../../src/orchestrator/session-state-machine.js';
 import { SessionRouter } from '../../src/orchestrator/session-router.js';
 import type {
 	ResolvedSession,
@@ -6,7 +7,7 @@ import type {
 	SessionStore,
 	UnifiedSession,
 } from '../../src/orchestrator/types.js';
-import type { SessionSummary } from '../../src/types/session.js';
+import type { SessionState, SessionSummary } from '../../src/types/session.js';
 
 // ─── In-Memory Session Store (test double) ───
 
@@ -51,6 +52,7 @@ function makeInMemorySessionStore(): SessionStore & {
 				startedAt: new Date(),
 				lastActivityAt: new Date(),
 				turnCount: 0,
+				state: 'initializing',
 			};
 			sessions.set(userId, newSession);
 			return {
@@ -116,6 +118,14 @@ function makeInMemorySessionStore(): SessionStore & {
 				startedAt: new Date(),
 				endedAt: new Date(),
 			};
+		},
+		updateState: async (sessionId: string, newState: SessionState) => {
+			for (const [userId, session] of sessions) {
+				if (session.sessionId === sessionId) {
+					sessions.set(userId, { ...session, state: newState });
+					return;
+				}
+			}
 		},
 	};
 }
@@ -232,6 +242,91 @@ describe('SessionRouter', () => {
 			await router.updateActivity(resolved.session.sessionId);
 			const active = await router.getActiveSession('mark');
 			expect(active?.turnCount).toBe(1);
+		});
+	});
+
+	// ─── GAP-SESSION-001: State Transition Validation ───
+
+	describe('state transition validation (ADR-021)', () => {
+		it('should set new session state to active after resolveSession', async () => {
+			const result = await router.resolveSession('mark', 'discord');
+			expect(result.session.state).toBe('active');
+		});
+
+		it('should keep state as active for existing session resolution', async () => {
+			const first = await router.resolveSession('mark', 'discord');
+			const second = await router.resolveSession('mark', 'discord');
+			expect(second.session.state).toBe('active');
+		});
+
+		it('should transition to active on channel switch', async () => {
+			await router.resolveSession('mark', 'discord');
+			const result = await router.resolveSession('mark', 'telegram');
+			expect(result.session.state).toBe('active');
+		});
+
+		it('should validate endSession transitions session through summarizing → ending → ended', async () => {
+			const resolved = await router.resolveSession('mark', 'discord');
+			const summary = await router.endSession(resolved.session.sessionId);
+			expect(summary.sessionId).toBe(resolved.session.sessionId);
+			// After endSession, the session should have been ended
+			// (store removes it, so we check it was processed without error)
+		});
+
+		it('should throw SessionTransitionError when ending a session not in active state', async () => {
+			const resolved = await router.resolveSession('mark', 'discord');
+			const sessionId = resolved.session.sessionId;
+
+			// Manually set session to 'thinking' state (not endable)
+			const session = store.sessions.get('mark');
+			if (session) {
+				store.sessions.set('mark', { ...session, state: 'thinking' });
+			}
+
+			await expect(router.endSession(sessionId)).rejects.toThrow(SessionTransitionError);
+		});
+
+		it('should throw SessionTransitionError when ending a session in ended state', async () => {
+			const resolved = await router.resolveSession('mark', 'discord');
+			const sessionId = resolved.session.sessionId;
+
+			// Set session to 'ended' state
+			const session = store.sessions.get('mark');
+			if (session) {
+				store.sessions.set('mark', { ...session, state: 'ended' });
+			}
+
+			await expect(router.endSession(sessionId)).rejects.toThrow(SessionTransitionError);
+		});
+
+		it('should throw SessionTransitionError when ending a session in initializing state', async () => {
+			const resolved = await router.resolveSession('mark', 'discord');
+			const sessionId = resolved.session.sessionId;
+
+			// Set session to 'initializing' state
+			const session = store.sessions.get('mark');
+			if (session) {
+				store.sessions.set('mark', { ...session, state: 'initializing' });
+			}
+
+			await expect(router.endSession(sessionId)).rejects.toThrow(SessionTransitionError);
+		});
+
+		it('should call store.updateState during endSession lifecycle', async () => {
+			const updateStateSpy = vi.spyOn(store, 'updateState');
+			const resolved = await router.resolveSession('mark', 'discord');
+			await router.endSession(resolved.session.sessionId);
+
+			// Should have been called for summarizing, ending, ended transitions
+			expect(updateStateSpy).toHaveBeenCalledWith(resolved.session.sessionId, 'summarizing');
+			expect(updateStateSpy).toHaveBeenCalledWith(resolved.session.sessionId, 'ending');
+			expect(updateStateSpy).toHaveBeenCalledWith(resolved.session.sessionId, 'ended');
+		});
+
+		it('should call store.updateState to active when resolving a new session', async () => {
+			const updateStateSpy = vi.spyOn(store, 'updateState');
+			await router.resolveSession('mark', 'discord');
+			expect(updateStateSpy).toHaveBeenCalledWith(expect.any(String), 'active');
 		});
 	});
 });
