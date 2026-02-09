@@ -2,22 +2,22 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 102
+## Current Cycle: 103
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 72 cycles (+3: FIX-BUG-001, QA-024, SYNC-008 override/confirm) | 0 | Active |
-| arch | 1 cycle | 6 (+1: SYNC-008 merged) | 5 (all CTO override) | Idle. FIX-MIGRATION-009 queued. |
-| dev-core | 1 cycle | 9 | 1 (FIX-BUG-001 4cy → CTO resolved) | Idle. FIX-FILESIZE-001 + GAP-SESSION-001 queued. |
-| dev-infra | 1 cycle | 11 | 0 | Idle (9 cycles). GAP-REDIS-CB-001 + GAP-CMD-001 queued. |
-| dev-edge | 1 cycle | 21 | 0 | Idle (5 cycles). GAP-PROMPT-001 + GAP-WEBHOOK-001 queued. |
-| quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. |
-| research | 1 cycle | 3 | 0 | Idle (13 cycles). |
+| coord | — | 73 cycles | 0 | Active |
+| arch | 1 cycle | 8 (+2: FIX-MIGRATION-009, ADR-STATUS-001) | 5 (all CTO override) | FIX-MIGRATION-009+ADR-STATUS-001 DONE C103. Idle. |
+| dev-core | 1 cycle | 9 | 1 (FIX-BUG-001 4cy → CTO resolved) | FIX-FILESIZE-001 + GAP-SESSION-001 assigned C103. |
+| dev-infra | 1 cycle | 11 | 0 | GAP-REDIS-CB-001 + GAP-CMD-001 assigned C103. |
+| dev-edge | 1 cycle | 21 | 0 | GAP-PROMPT-001 + GAP-WEBHOOK-001 assigned C103. |
+| quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. Next: dev completion review. |
+| research | 1 cycle | 3 | 0 | Idle (14 cycles). |
 | devops | 1 cycle | 28 | 0 | Idle. |
-| ui-ux | 1 cycle | 7 | 0 | Idle (20 cycles). |
-| audit | 1 cycle | 5 | 0 | Idle (13 cycles). |
+| ui-ux | 1 cycle | 7 | 0 | Idle (21 cycles). |
+| audit | 1 cycle | 5 | 0 | Idle (14 cycles). |
 
 ## Bottleneck Indicators
 
@@ -69,16 +69,13 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC/BIOME/README-002) | 0 | **4 TASKS DONE.** 985 tests (+10). 0 errors. |
-| 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 in progress. 985 tests. 0 errors. |
-| 92 | dev-edge, devops, dev-infra | 0 (+1 human) | 0 | FIX-CYCLESH-001 DONE (Mark). 985 tests. 0 errors. |
-| 93 | devops, quality | 4 (FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 merges. 1075 tests (+90). 0 errors. |
 | 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC → P0 BLOCKERS.** typecheck+build FAILS. 3 fix tasks. 1075 tests. 3 errors. |
 | 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. 1075 tests. 4 errors. |
 | 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건. 5 in progress (2cy). 1075 tests. 4 errors. |
 | 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |
 | 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 1075 tests. 0 errors. |
 | 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 1108 tests. 1 error. |
-| 100 | devops, quality, dev-core | 11 (10 Mark direct + FIX-TYPECHECK-002 Mark) | 1 (ERR-092) | **Mark 10건 대규모 기능 커밋 (+48 tests).** Logger, FallbackLLM, TokenCounter, InteractionLogger, Consolidation, Decay, WS events. ERR-091 RESOLVED, ERR-092 CRITICAL NEW (stale dist). 1156 tests, 99 files. 1 error. |
-| 101 | coord (CTO override) | 1 (FIX-TYPECHECK-003) | 0 | **ERR-092 RESOLVED.** typecheck `tsc -b` 전환 + unused import + container.ts fixes. typecheck PASSES. 1156 tests. 0 errors. 2 stalled tasks (FIX-BUG-001, QA-024 3cy). |
-| 102 | coord (CTO override) | 3 (FIX-BUG-001, QA-024, SYNC-008) | 0 | **3 STALL TASKS RESOLVED.** FIX-BUG-001 (ScoredMemory.dbId+matchedMemoryIds fix), QA-024 (Mark 16건 리뷰 0C 0H), SYNC-008 (arch merge confirmed). P2 GAP 6건 + P3 1건 생성. 1156 tests. 0 errors. 0 stalls. |
+| 100 | devops, quality, dev-core | 11 (10 Mark direct + FIX-TYPECHECK-002 Mark) | 1 (ERR-092) | **Mark 10건 대규모 기능 커밋 (+48 tests).** 1156 tests, 99 files. 1 error. |
+| 101 | coord (CTO override) | 1 (FIX-TYPECHECK-003) | 0 | **ERR-092 RESOLVED.** typecheck `tsc -b` 전환. 1156 tests. 0 errors. |
+| 102 | coord (CTO override) | 3 (FIX-BUG-001, QA-024, SYNC-008) | 0 | **3 STALL TASKS RESOLVED.** P2 GAP 6건 + P3 1건 생성. 1156 tests. 0 errors. |
+| 103 | arch, dev-core, dev-edge, dev-infra | 2 (FIX-MIGRATION-009, ADR-STATUS-001) | 0 | **Arch 2 DONE.** DRIFT-009 resolved, 21 ADRs ACCEPTED. 6 P2 security hardening tasks assigned (3 Divisions). 1156 tests. 0 errors. |

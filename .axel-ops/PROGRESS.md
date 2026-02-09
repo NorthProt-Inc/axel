@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation — Rapid Feature Development.** 모든 stall task CTO override 완료. P2 GAP 태스크 6건 + P3 1건 생성.
-- **Cycle**: 102
-- **Last Updated**: 2026-02-09C102
-- **STATUS**: **FIX-BUG-001 RESOLVED (CTO override).** ScoredMemory.dbId 추가, PG search id SELECT, container.ts matchedMemoryIds 수정. **QA-024 DONE (CTO override).** Mark 16건 커밋 리뷰 0C 0H. SYNC-008 arch merge 확인 (66e3377). P2 GAP 6건 + P3 1건 생성. **1156 tests, typecheck PASSES. 0 errors.**
+- **Phase**: **Post-Implementation — Security Hardening Sprint.** 6 P2 GAP 태스크 3 Division 배정. Arch FIX-MIGRATION-009 + ADR-STATUS-001 완료.
+- **Cycle**: 103
+- **Last Updated**: 2026-02-09C103
+- **STATUS**: Arch 2건 완료 (FIX-MIGRATION-009: DRIFT-009 resolved, ADR-STATUS-001: 21 ADRs ACCEPTED). 6 P2 태스크 dev-core/dev-edge/dev-infra 배정. **1156 tests (verified), typecheck PASSES. 0 errors.**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 8 |
-| In Progress | 0 |
-| Done | 180 (+3: FIX-BUG-001, QA-024, SYNC-008) |
+| Queued | 0 |
+| In Progress | 6 |
+| Done | 182 (+2: FIX-MIGRATION-009, ADR-STATUS-001) |
 | Cancelled | 15 |
 
 ## Open Errors: 0
@@ -92,21 +92,22 @@
 | 100 | 0209 | **Mark 10건 대규모 기능 커밋. +48 tests, +8 test files.** Logger+pino (89b4190), AnthropicTokenCounter (9063a63), FallbackLlmProvider (d0b42bf), PgInteractionLogger (a3005ab), L2→L3 consolidation (b15044c+16583e7), batch decay scheduler (c83d5cb), WS heartbeat/typing/session_end/tool (2649093), token /3 fix (53fb1cf), sync 49 files (9fb41b5). ERR-091 RESOLVED (Mark). ERR-092 CRITICAL 신규: infra 23 typecheck errors (stale core/dist/). FIX-TYPECHECK-003 P0 생성. FIX-TYPECHECK-002 DONE. QA-024 scope 확대. **1156 tests (1156 pass, 36 skip), 99 files.** 1 error. |
 | 101 | 0209 | **ERR-092 RESOLVED (CTO override).** FIX-TYPECHECK-003: root typecheck `pnpm -r typecheck` → `tsc -b` 전환 (project references 정상 resolve). stale dist/ + tsbuildinfo 정리. fallback-provider.ts unused import 제거. container.ts FallbackLlmProvider type predicate + EmbeddingTaskType 수정. **typecheck PASSES. 1156 tests, 0 FAIL.** 0 errors. FIX-BUG-001 + QA-024 3cy stall → CTO override 예정. |
 | 102 | 0209 | **3 TASKS DONE (CTO override).** FIX-BUG-001 (ScoredMemory.dbId 추가, container.ts matchedMemoryIds 수정), QA-024 (Mark 16건 커밋 리뷰 0C 0H), SYNC-008 (arch merge 확인 66e3377). P2 GAP 6건 + P3 1건 생성. 모든 stall task 해소. **1156 tests, typecheck PASSES.** 0 errors. |
+| 103 | 0209 | **2 ARCH TASKS DONE.** FIX-MIGRATION-009 (DRIFT-009 resolved, migration 009 DEPRECATED, 010-011 documented), ADR-STATUS-001 (9 ADRs PROPOSED→ACCEPTED, all 21 ADRs ACCEPTED). **6 P2 security hardening tasks assigned** to dev-core (FIX-FILESIZE-001+GAP-SESSION-001), dev-edge (GAP-PROMPT-001+GAP-WEBHOOK-001), dev-infra (GAP-REDIS-CB-001+GAP-CMD-001). **1156 tests (verified), typecheck PASSES.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C102 | Cycle 102 | Active |
-| Architecture | 0209C101 | — | Idle. SYNC-008 완료 (merged 66e3377). FIX-MIGRATION-009 (P2) + ADR-STATUS-001 (P3) queued. |
-| Dev-Core | 0209C102 | — | FIX-BUG-001 DONE (CTO override). FIX-FILESIZE-001 (P2) + GAP-SESSION-001 (P2) queued. |
-| Dev-Infra | 0208C93 | — | Idle (9 cycles). GAP-REDIS-CB-001 (P2) + GAP-CMD-001 (P2) queued. |
-| Dev-Edge | 0208C97 | — | Idle (5 cycles). GAP-PROMPT-001 (P2) + GAP-WEBHOOK-001 (P2) queued. |
-| UI/UX | 0208C82 | — | Idle (20 cycles). |
-| Research | 0208C89 | — | Idle (13 cycles). |
-| Quality | 0209C102 | — | QA-024 DONE (CTO override). |
+| Coordinator | 0209C103 | Cycle 103 | Active |
+| Architecture | 0209C103 | — | FIX-MIGRATION-009 + ADR-STATUS-001 DONE (merged fabfc6d). Idle. |
+| Dev-Core | 0209C103 | FIX-FILESIZE-001 + GAP-SESSION-001 | Assigned C103. inbound-handler 분리 + session state machine. |
+| Dev-Infra | 0209C103 | GAP-REDIS-CB-001 + GAP-CMD-001 | Assigned C103. Redis CB + command validation. |
+| Dev-Edge | 0209C103 | GAP-PROMPT-001 + GAP-WEBHOOK-001 | Assigned C103. Prompt injection defense + webhook sig. |
+| UI/UX | 0208C82 | — | Idle (21 cycles). |
+| Research | 0208C89 | — | Idle (14 cycles). |
+| Quality | 0209C102 | — | Idle. Next: review after dev completions. |
 | DevOps | 0209C101 | — | Idle. |
-| Audit | 0208C89 | — | Idle (13 cycles). |
+| Audit | 0208C89 | — | Idle (14 cycles). |
 
 ## Human Intervention Needed
 
