@@ -103,6 +103,12 @@ const SecurityConfigSchema = z.object({
 		.default(['execute_command', 'delete_file', 'hass_control_device']),
 });
 
+const GatewayConfigSchema = z.object({
+	authToken: z.string().min(1),
+	corsOrigins: z.array(z.string()).default(['http://localhost:3000']),
+	trustedProxies: z.array(z.string()).default([]),
+});
+
 const PersonaConfigSchema = z.object({
 	path: z.string().default('./data/dynamic_persona.json'),
 	hotReload: z.boolean().default(true),
@@ -128,6 +134,7 @@ export const AxelConfigSchema = z.object({
 	llm: LlmConfigSchema,
 	memory: MemoryConfigSchema.default(MemoryConfigSchema.parse({})),
 	channels: ChannelConfigSchema.default(ChannelConfigSchema.parse({})),
+	gateway: GatewayConfigSchema.optional(),
 	security: SecurityConfigSchema.default(SecurityConfigSchema.parse({})),
 	persona: PersonaConfigSchema.default(PersonaConfigSchema.parse({})),
 });
@@ -185,6 +192,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 			},
 		},
 		channels: buildChannelConfig(env),
+		gateway: buildGatewayConfig(env),
 		security: {
 			maxRequestsPerMinute: getEnvInt(env, 'AXEL_MAX_REQUESTS_PER_MINUTE'),
 		},
@@ -196,6 +204,20 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 
 	const cleaned = stripUndefined(raw);
 	return AxelConfigSchema.parse(cleaned);
+}
+
+function buildGatewayConfig(
+	env: Record<string, string | undefined>,
+): Record<string, unknown> | undefined {
+	const authToken = getEnv(env, 'AXEL_GATEWAY_AUTH_TOKEN');
+	if (!authToken) return undefined;
+
+	const corsRaw = getEnv(env, 'AXEL_GATEWAY_CORS_ORIGINS');
+	const corsOrigins = corsRaw ? corsRaw.split(',').map((s) => s.trim()) : undefined;
+
+	const result: Record<string, unknown> = { authToken };
+	if (corsOrigins) result.corsOrigins = corsOrigins;
+	return result;
 }
 
 function buildChannelConfig(

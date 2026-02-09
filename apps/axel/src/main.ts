@@ -1,4 +1,5 @@
 import type { PersonaEngine } from '@axel/core/persona';
+import { createGatewayServer } from '@axel/gateway';
 import {
 	createActiveUserTracker,
 	createChannels,
@@ -7,7 +8,7 @@ import {
 } from './bootstrap-channels.js';
 import { loadConfig } from './config.js';
 import { type ContainerDeps, createContainer } from './container.js';
-import { gracefulShutdown, startupHealthCheck } from './lifecycle.js';
+import { aggregateHealth, gracefulShutdown, startupHealthCheck } from './lifecycle.js';
 
 const SHUTDOWN_TIMEOUT_MS = 30_000;
 
@@ -25,8 +26,9 @@ export interface BootstrapOptions {
  * 4. Run startup health check
  * 5. Create and wire channels
  * 6. Create gateway HandleMessage adapter
- * 7. Start all channels
- * 8. Register signal handlers for graceful shutdown
+ * 7. Start gateway HTTP/WS server (if configured)
+ * 8. Start all channels
+ * 9. Register signal handlers for graceful shutdown
  */
 export async function bootstrap(
 	env: Record<string, string | undefined> = process.env,
@@ -60,13 +62,40 @@ export async function bootstrap(
 	// Wire InboundHandler to channels
 	wireChannels(channels, container, personaEngine, activeUserTracker);
 
-	// Create gateway HandleMessage adapter (available for gateway wiring)
-	const _handleMessage = createHandleMessage(container, personaEngine);
+	// Create gateway HandleMessage adapter
+	const handleMessage = createHandleMessage(container, personaEngine);
+
+	// Start gateway HTTP/WS server (if AXEL_GATEWAY_AUTH_TOKEN is set)
+	let gatewayStop: (() => Promise<void>) | undefined;
+	if (config.gateway) {
+		const gateway = createGatewayServer(
+			{
+				port: config.port,
+				host: config.host,
+				authToken: config.gateway.authToken,
+				env: config.env,
+				corsOrigins: config.gateway.corsOrigins,
+				rateLimitPerMinute: config.security.maxRequestsPerMinute,
+				trustedProxies: config.gateway.trustedProxies,
+			},
+			{
+				healthCheck: () => aggregateHealth(container.healthCheckTargets),
+				handleMessage,
+			},
+		);
+		await gateway.start();
+		gatewayStop = gateway.stop;
+		console.log(`Axel gateway listening on ${config.host}:${config.port}`);
+	}
 
 	// Start all channels
 	for (const channel of channels) {
 		await channel.start();
 	}
+
+	console.log(
+		`Axel started (env=${config.env}, channels=${channels.length}, gateway=${config.gateway ? 'on' : 'off'})`,
+	);
 
 	// Graceful shutdown handler (ADR-021)
 	let shutdownInProgress = false;
@@ -79,6 +108,15 @@ export async function bootstrap(
 		}, SHUTDOWN_TIMEOUT_MS);
 
 		try {
+			// Stop gateway first
+			if (gatewayStop) {
+				try {
+					await gatewayStop();
+				} catch (_err: unknown) {
+					// Continue shutdown even if gateway stop fails
+				}
+			}
+
 			await gracefulShutdown({
 				channels,
 				workingMemory: container.workingMemory,
