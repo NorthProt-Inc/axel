@@ -9,6 +9,7 @@ export type {
 	CreateSessionParams,
 	MessageRecord,
 	EpisodicMemory,
+	SessionListInfo,
 	NewMemory,
 	SemanticQuery,
 	ScoredMemory,

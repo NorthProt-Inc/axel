@@ -81,6 +81,16 @@ export interface MessageRecord {
 	readonly tokenCount: number;
 }
 
+/** Session list entry for UI display */
+export interface SessionListInfo {
+	readonly sessionId: string;
+	readonly title: string;
+	readonly channelId: string;
+	readonly turnCount: number;
+	readonly startedAt: Date;
+	readonly endedAt: Date | null;
+}
+
 /** M2 Episodic Memory interface (ADR-013) */
 export interface EpisodicMemory {
 	readonly layerName: 'M2:episodic';
@@ -88,6 +98,8 @@ export interface EpisodicMemory {
 	endSession(sessionId: string, summary: string): Promise<void>;
 	addMessage(sessionId: string, message: MessageRecord): Promise<void>;
 	getRecentSessions(userId: string, limit: number): Promise<readonly SessionSummary[]>;
+	getSessionMessages(sessionId: string): Promise<readonly MessageRecord[]>;
+	listSessions(userId: string, limit?: number): Promise<readonly SessionListInfo[]>;
 	searchByTopic(topic: string, limit: number): Promise<readonly SessionSummary[]>;
 	searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]>;
 	healthCheck(): Promise<ComponentHealth>;

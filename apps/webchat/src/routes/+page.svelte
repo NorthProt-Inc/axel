@@ -3,7 +3,7 @@ import { PUBLIC_API_TOKEN, PUBLIC_WS_URL } from '$env/static/public';
 import ChatSidebar from '$lib/components/ChatSidebar.svelte';
 import MessageInput from '$lib/components/MessageInput.svelte';
 import MessageList from '$lib/components/MessageList.svelte';
-import { connectWebSocket, loadSessions, messages, sendMessage } from '$lib/stores/chat.svelte';
+import { connectWebSocket, loadMessages, loadSessions, messages, sendMessage, sessions } from '$lib/stores/chat.svelte';
 import { onMount } from 'svelte';
 
 let sidebarOpen = $state(false);
@@ -11,6 +11,12 @@ let sidebarOpen = $state(false);
 onMount(async () => {
 	connectWebSocket(PUBLIC_WS_URL, PUBLIC_API_TOKEN);
 	await loadSessions();
+
+	// Restore most recent session messages
+	const latestSession = sessions.value[0];
+	if (latestSession) {
+		await loadMessages(latestSession.id);
+	}
 });
 
 function handleSend(content: string) {

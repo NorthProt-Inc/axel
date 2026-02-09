@@ -81,6 +81,45 @@ export async function bootstrap(
 			{
 				healthCheck: () => aggregateHealth(container.healthCheckTargets),
 				handleMessage,
+				getSession: async (userId) => {
+					const session = await container.sessionRouter.getActiveSession(userId);
+					if (!session) return null;
+					return {
+						sessionId: session.sessionId,
+						userId: session.userId,
+						channelId: session.activeChannelId,
+						startedAt: session.startedAt.toISOString(),
+						turnCount: session.turnCount,
+					};
+				},
+				endSession: async (sessionId) => {
+					const summary = await container.sessionRouter.endSession(sessionId);
+					return {
+						sessionId: summary.sessionId,
+						summary: summary.summary,
+						turnCount: summary.turnCount,
+					};
+				},
+				listSessions: async (userId) => {
+					const sessions = await container.episodicMemory.listSessions(userId);
+					return sessions.map((s) => ({
+						sessionId: s.sessionId,
+						title: s.title,
+						channelId: s.channelId,
+						turnCount: s.turnCount,
+						startedAt: s.startedAt.toISOString(),
+						endedAt: s.endedAt?.toISOString() ?? null,
+					}));
+				},
+				getSessionMessages: async (sessionId) => {
+					const msgs = await container.episodicMemory.getSessionMessages(sessionId);
+					return msgs.map((m) => ({
+						role: m.role,
+						content: m.content,
+						channelId: m.channelId,
+						timestamp: m.timestamp.toISOString(),
+					}));
+				},
 			},
 		);
 		await gateway.start();

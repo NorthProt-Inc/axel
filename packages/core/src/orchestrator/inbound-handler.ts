@@ -225,11 +225,11 @@ async function persistToMemory(
 	entityExtractor?: EntityExtractorLike,
 	conceptualMemory?: ConceptualMemoryLike,
 ): Promise<void> {
-	try {
-		const userTokenCount = estimateTokenCount(userContent);
-		const assistantTokenCount = estimateTokenCount(assistantContent);
+	const userTokenCount = estimateTokenCount(userContent);
+	const assistantTokenCount = estimateTokenCount(assistantContent);
 
-		// M1: Working Memory
+	// M1: Working Memory (independent — failure must not block M2)
+	try {
 		await workingMemory.pushTurn(userId, {
 			turnId: baseTurnId + 1,
 			role: 'user',
@@ -238,7 +238,6 @@ async function persistToMemory(
 			timestamp: userTimestamp,
 			tokenCount: userTokenCount,
 		});
-
 		await workingMemory.pushTurn(userId, {
 			turnId: baseTurnId + 2,
 			role: 'assistant',
@@ -247,8 +246,12 @@ async function persistToMemory(
 			timestamp: assistantTimestamp,
 			tokenCount: assistantTokenCount,
 		});
+	} catch {
+		// M1 failure must not block M2/M3/M4
+	}
 
-		// M2: Episodic Memory
+	// M2: Episodic Memory (independent)
+	try {
 		await episodicMemory.addMessage(sessionId, {
 			role: 'user',
 			content: userContent,
@@ -256,7 +259,6 @@ async function persistToMemory(
 			timestamp: userTimestamp,
 			tokenCount: userTokenCount,
 		});
-
 		await episodicMemory.addMessage(sessionId, {
 			role: 'assistant',
 			content: assistantContent,
@@ -264,30 +266,29 @@ async function persistToMemory(
 			timestamp: assistantTimestamp,
 			tokenCount: assistantTokenCount,
 		});
-
-		// M3: Semantic Memory (fire-and-forget)
-		if (semanticMemoryWriter) {
-			semanticMemoryWriter
-				.storeConversationMemory({ userContent, assistantContent, channelId, sessionId })
-				.catch(() => {
-					// Silent — M3 persistence must not break the response flow
-				});
-		}
-
-		// M4: Conceptual Memory — entity extraction (fire-and-forget)
-		if (entityExtractor && conceptualMemory) {
-			extractAndStoreEntities(
-				entityExtractor,
-				conceptualMemory,
-				userContent,
-				assistantContent,
-			).catch(() => {
-				// Silent — M4 persistence must not break the response flow
-			});
-		}
 	} catch {
-		// Memory persistence failure must not break the response flow.
-		// The response has already been sent successfully.
+		// M2 failure must not break the response flow
+	}
+
+	// M3: Semantic Memory (fire-and-forget)
+	if (semanticMemoryWriter) {
+		semanticMemoryWriter
+			.storeConversationMemory({ userContent, assistantContent, channelId, sessionId })
+			.catch(() => {
+				// Silent — M3 persistence must not break the response flow
+			});
+	}
+
+	// M4: Conceptual Memory — entity extraction (fire-and-forget)
+	if (entityExtractor && conceptualMemory) {
+		extractAndStoreEntities(
+			entityExtractor,
+			conceptualMemory,
+			userContent,
+			assistantContent,
+		).catch(() => {
+			// Silent — M4 persistence must not break the response flow
+		});
 	}
 }
 

@@ -1,6 +1,11 @@
 import type { ComponentHealth } from '../types/health.js';
 import type { SessionSummary } from '../types/session.js';
-import type { CreateSessionParams, EpisodicMemory, MessageRecord } from './types.js';
+import type {
+	CreateSessionParams,
+	EpisodicMemory,
+	MessageRecord,
+	SessionListInfo,
+} from './types.js';
 
 interface StoredSession {
 	readonly sessionId: string;
@@ -72,6 +77,27 @@ export class InMemoryEpisodicMemory implements EpisodicMemory {
 			)
 			.slice(0, limit)
 			.map((s) => this.toSessionSummary(s));
+	}
+
+	async getSessionMessages(sessionId: string): Promise<readonly MessageRecord[]> {
+		const session = this.sessions.get(sessionId);
+		if (!session) return [];
+		return [...session.messages];
+	}
+
+	async listSessions(userId: string, limit = 50): Promise<readonly SessionListInfo[]> {
+		return [...this.sessions.values()]
+			.filter((s) => s.userId === userId)
+			.sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
+			.slice(0, limit)
+			.map((s) => ({
+				sessionId: s.sessionId,
+				title: s.summary ?? `Session ${s.sessionId.slice(0, 8)}`,
+				channelId: s.channelId,
+				turnCount: s.messages.length,
+				startedAt: s.startedAt,
+				endedAt: s.endedAt,
+			}));
 	}
 
 	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {

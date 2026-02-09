@@ -40,8 +40,10 @@ class PgEpisodicMemory implements EpisodicMemory {
 
 	async addMessage(sessionId: string, message: MessageRecord): Promise<void> {
 		await this.pool.query(
-			`INSERT INTO messages (session_id, role, content, channel_id, timestamp, token_count)
-			 VALUES ($1, $2, $3, $4, $5, $6)`,
+			`INSERT INTO messages (session_id, turn_id, role, content, channel_id, timestamp, token_count)
+			 VALUES ($1,
+			         (SELECT COALESCE(MAX(turn_id), 0) + 1 FROM messages WHERE session_id = $1),
+			         $2, $3, $4, $5, $6)`,
 			[
 				sessionId,
 				message.role,
