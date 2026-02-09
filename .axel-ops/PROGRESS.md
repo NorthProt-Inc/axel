@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **Phase G: FEATURE SPRINT.** Human directive P1 — 기능 추가 집중, openclaw 참조, UX 대폭 개선.
-- **Cycle**: 107
-- **Last Updated**: 2026-02-09C107
-- **STATUS**: **FEATURE SPRINT KICKOFF.** OpenClaw 심층 분석 완료 (15개 아키텍처 패턴 식별: multi-channel routing, skills platform, cron, browser automation, session isolation, identity linking 등). Axel 갭 분석 완료 (53 gaps across 8 categories, 13 HIGH). 14 tasks 생성, 7 Divisions 활성화. 최우선: Web Search Tool + File Handler + Multi-modal + Slack Channel. **1287 tests (verified C107), typecheck PASSES. 0 errors.**
+- **Cycle**: 108
+- **Last Updated**: 2026-02-09C108
+- **STATUS**: **2 RESEARCH TASKS DONE.** RES-008 (Web Search Tool: Brave API 권장, 35+ sources) + RES-009 (Multi-modal Vision: Anthropic Vision 권장, 30+ sources) 완료. FEAT-TOOL-001 (web search) 구현에 RES-008 반영 가능. rebase_fail 4건 감지 (dev-infra/quality/dev-core/dev-edge) — cycle.sh git pull --rebase 충돌, Division 작업 자체는 미영향. **1287 tests (verified C108), typecheck PASSES. 0 errors.**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 7 |
-| In Progress | 7 |
-| Done | 188 |
+| In Progress | 5 |
+| Done | 190 |
 | Cancelled | 15 |
 
 ## Open Errors: 0
@@ -97,21 +97,22 @@
 | 105 | 0209 | **3-cycle stall alert.** No completions. 6 P2 security hardening tasks (3 cycles — stall threshold). metric-alert issued. No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified C105), typecheck PASSES.** CTO override next cycle if no output. |
 | 106 | 0209 | **ALL 6 SECURITY HARDENING TASKS DONE (CTO override).** FIX-FILESIZE-001 (inbound-handler 439→267 lines, persistToMemory extracted to memory-persistence.ts), GAP-SESSION-001 (session-state.ts: state machine validation, 21 tests), GAP-REDIS-CB-001 (RedisWorkingMemory ad-hoc→CircuitBreaker, 12 tests), GAP-CMD-001 (shell metachar + cwd validation, 12 tests), GAP-PROMPT-001 (4-layer prompt injection defense, 18 tests), GAP-WEBHOOK-001 (Telegram+Discord signature verification tests, 8 tests). **1287 tests (+131), typecheck PASSES.** 0 errors. 0 queued, 0 in progress. |
 | 107 | 0209 | **FEATURE SPRINT KICKOFF (Phase G).** OpenClaw 심층 분석 + Axel 갭 분석 완료. 14 tasks 생성: RES-008/009 (web search + multi-modal 리서치), FEAT-TOOL-001/002 (web search + file handler 구현), FEAT-CORE-001 (multi-modal message), FEAT-CHAN-001 (Slack channel), QA-025 (C106 리뷰 + Feature Sprint 검토). 7 queued: FEAT-CORE-002 (notifications), FEAT-CHAN-002 (voice I/O), FEAT-UI-001/002 (WebChat+CLI 개선), FEAT-INFRA-001 (Ollama), FEAT-OPS-001/002 (observability+backup). **1287 tests (verified C107), typecheck PASSES.** 0 errors. |
+| 108 | 0209 | **2 RESEARCH TASKS DONE.** RES-008 (Web Search Tool: Brave API 권장, Tavily/SearXNG 비교, 35+ sources), RES-009 (Multi-modal Vision: Anthropic Vision 권장, Gemini Phase 2, ContentBlock 설계, 30+ sources). rebase_fail 4건 (cycle.sh 인프라 — Division 작업 미영향). 5 tasks in progress (FEAT-TOOL-001/002, FEAT-CORE-001, FEAT-CHAN-001, QA-025, 1 cycle). **1287 tests (verified C108), typecheck PASSES.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C107 | Cycle 107 — Feature Sprint planning | Active |
-| Architecture | 0209C103 | — | Idle. Activate next cycle for FEAT ADR reviews. |
-| Dev-Core | 0209C107 | FEAT-CORE-001 (multi-modal message) | Assigned C107. |
-| Dev-Infra | 0209C107 | FEAT-TOOL-001 (web search) + FEAT-TOOL-002 (file handler) | Assigned C107. |
-| Dev-Edge | 0209C107 | FEAT-CHAN-001 (Slack channel) | Assigned C107. |
-| UI/UX | 0208C82 | — | Idle (25 cycles). FEAT-UI-001/002 queued (dep: FEAT-CORE-001). |
-| Research | 0209C107 | RES-008 (web search) + RES-009 (multi-modal) | Assigned C107. |
-| Quality | 0209C107 | QA-025 (C106 리뷰 + Feature Sprint) | Assigned C107. |
+| Coordinator | 0209C108 | Cycle 108 — Feature Sprint processing | Active |
+| Architecture | 0209C103 | — | Idle. Activate for FEAT ADR reviews when dev tasks done. |
+| Dev-Core | 0209C107 | FEAT-CORE-001 (multi-modal message) | In progress (1 cycle). rebase_fail — needs branch sync. |
+| Dev-Infra | 0209C107 | FEAT-TOOL-001 (web search) + FEAT-TOOL-002 (file handler) | In progress (1 cycle). rebase_fail — needs branch sync. RES-008 결과 반영 가능. |
+| Dev-Edge | 0209C107 | FEAT-CHAN-001 (Slack channel) | In progress (1 cycle). rebase_fail — needs branch sync. |
+| UI/UX | 0208C82 | — | Idle (26 cycles). FEAT-UI-001/002 queued (dep: FEAT-CORE-001). |
+| Research | 0209C108 | — | **RES-008 + RES-009 DONE.** Idle. Activate for next research. |
+| Quality | 0209C107 | QA-025 (C106 리뷰 + Feature Sprint) | In progress (1 cycle). rebase_fail — needs branch sync. |
 | DevOps | 0209C101 | — | Idle. FEAT-OPS-001/002 queued (P2). |
-| Audit | 0208C89 | — | Idle (18 cycles). Activate at Feature Sprint milestone. |
+| Audit | 0208C89 | — | Idle (19 cycles). Activate at Feature Sprint milestone. |
 
 ## Human Intervention Needed
 

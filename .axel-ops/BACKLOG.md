@@ -2,14 +2,12 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 107 (Feature Sprint Kickoff)**: Human directive P1 — 기능 추가 집중, openclaw 참조, UX 대폭 개선. 14 tasks created across 7 Divisions. **1287 tests (verified C107), typecheck PASSES. 0 errors.**
+> **Cycle 108**: Feature Sprint 진행 중. RES-008/009 완료. 5 tasks in progress (dev-infra, dev-core, dev-edge, quality). rebase_fail 4건 감지 (cycle.sh 인프라). **1287 tests (verified C108), typecheck PASSES. 0 errors.**
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| RES-008 | P1 | research | Web search tool 구현 리서치: Tavily/Brave/SearXNG API 비교, MCP tool 패턴 조사, OpenClaw skill 구조 참조 | 0209C107 |
-| RES-009 | P1 | research | Multi-modal (vision) 구현 리서치: Anthropic Vision API + Google Gemini Vision, Message ContentBlock 설계, 파일 업로드 패턴 조사 | 0209C107 |
 | FEAT-TOOL-001 | P1 | dev-infra | Web Search Tool 구현: Tavily/Brave API adapter, ToolDefinition 등록, 결과 포맷팅. TDD. | 0209C107 |
 | FEAT-TOOL-002 | P1 | dev-infra | File Handler Tool 구현: 파일 읽기/쓰기, PDF 텍스트 추출, 파일 요약. path boundary 검증 필수. TDD. | 0209C107 |
 | FEAT-CORE-001 | P1 | dev-core | Multi-modal Message 지원: Message type ContentBlock 확장 (text/image/file), InboundHandler 멀티모달 파이프라인. TDD. | 0209C107 |
@@ -52,6 +50,8 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| RES-008 | research | 0209C108 | Web Search Tool 리서치 완료. Brave Search API 권장 ($5/1K, Free 2K/mo). Tavily ($8/1K) vs SearXNG (self-hosted) 비교. OpenClaw 구현 패턴 참조. Phase 1: Brave, Phase 2: Tavily fallback. 35+ sources. docs/research/RES-008-web-search-tool.md. |
+| RES-009 | research | 0209C108 | Multi-modal Vision 리서치 완료. Anthropic Vision 권장 (Haiku $1/MTok, base64). Gemini Vision Phase 2 (비디오). ContentBlock discriminated union 설계. Phase 1: Anthropic base64, Phase 2: Gemini video. 30+ sources. docs/research/RES-009-multimodal-vision.md. |
 | FIX-FILESIZE-001 | coord (CTO override) | 0209C106 | §14 위반 해결: inbound-handler.ts 439→267 lines. persistToMemory+extractAndStoreEntities+estimateTokenCount → memory-persistence.ts (184 lines) 추출. 1287 tests, typecheck PASSES. |
 | GAP-SESSION-001 | coord (CTO override) | 0209C106 | GAP-11: session-state.ts 생성. 7-state FSM transition validation (VALID_TRANSITIONS map, isValidTransition, assertTransition). UnifiedSession.state 필드 추가. 21 tests. ADR-021. |
 | GAP-REDIS-CB-001 | coord (CTO override) | 0209C106 | GAP-10: RedisWorkingMemory ad-hoc RedisState → CircuitBreaker (infra/common/) 적용. 8 bare catch → circuit.execute() 패턴. ADR-003. 12 tests. |

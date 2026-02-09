@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 107
+## Current Cycle: 108
 
 ## Division Performance (Last 10 Cycles)
 
@@ -14,7 +14,7 @@
 | dev-infra | 1 cycle | 11 | 1 (GAP-REDIS-CB+GAP-CMD 4cy CTO) | Idle. CTO override C106 resolved stall. |
 | dev-edge | 1 cycle | 21 | 1 (GAP-PROMPT+GAP-WEBHOOK 4cy CTO) | Idle. CTO override C106 resolved stall. |
 | quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. Next: QA-025 review 6 CTO overrides. |
-| research | 1 cycle | 3 | 0 | Idle (17 cycles). |
+| research | 1 cycle | 5 | 0 | **RES-008+009 DONE C108.** |
 | devops | 1 cycle | 28 | 0 | Idle. |
 | ui-ux | 1 cycle | 7 | 0 | Idle (24 cycles). |
 | audit | 1 cycle | 5 | 0 | Idle (17 cycles). |
@@ -65,7 +65,7 @@
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
 | UI/UX Sprint | **DONE** | 79 | 85 | 100% (8/8 UI tasks + QA-022 PASS + FIX-PUNYCODE-002 resolved). 975 tests, 85 files. 0 errors. |
 | F: Production Hardening | **DONE** | 86 | 106 | 100% (Mark 10 커밋 + memory fixes + security hardening 6건). 1287 tests, 104 files. 0 errors. |
-| G: Feature Sprint | **ACTIVE** | 107 | — | 0% (7/14 assigned, 7 queued). Web search, file handler, multi-modal, Slack, voice, UI overhaul. |
+| G: Feature Sprint | **ACTIVE** | 107 | — | 14% (2/14 done, 5 in progress, 7 queued). RES-008+009 done. Web search, file handler, multi-modal, Slack in progress. |
 
 ## Cycle History (Last 10)
 
@@ -82,3 +82,4 @@
 | 105 | dev-core, dev-edge, dev-infra | 0 | 0 | **3cy stall alert.** 6 P2 tasks (3 cycles). metric-alert issued. CTO override C106. 1156 tests. 0 errors. |
 | 106 | coord (CTO override) | 6 (FIX-FILESIZE-001, GAP-SESSION-001, GAP-REDIS-CB-001, GAP-CMD-001, GAP-PROMPT-001, GAP-WEBHOOK-001) | 0 | **ALL 6 SECURITY HARDENING DONE (CTO override).** +131 tests. 1287 tests. 0 errors. All stalls resolved. |
 | 107 | research, dev-infra, dev-core, dev-edge, quality | 0 | 0 | **FEATURE SPRINT KICKOFF.** OpenClaw 분석 + 갭 분석. 14 tasks 생성. 7 Divisions activated. 1287 tests (verified). 0 errors. |
+| 108 | research, dev-infra, dev-core, dev-edge, quality | 2 (RES-008, RES-009) | 0 | **2 RESEARCH DONE.** Brave API + Anthropic Vision 권장. rebase_fail 4건 (infra). 5 tasks in progress. 1287 tests (verified). 0 errors. |
