@@ -74,7 +74,7 @@ class PgSemanticMemory implements SemanticMemory {
 		params.push(query.limit);
 
 		const sql = `
-			SELECT uuid, content, memory_type, importance, embedding,
+			SELECT id, uuid, content, memory_type, importance, embedding,
 			       created_at, last_accessed, access_count,
 			       source_channel, channel_mentions, source_session,
 			       decayed_importance, last_decayed_at,
@@ -225,6 +225,7 @@ interface DecayMemoryRow {
 }
 
 interface MemoryRow {
+	id?: number;
 	uuid: string;
 	content: string;
 	memory_type: string;
@@ -268,6 +269,7 @@ function toScoredMemory(row: MemoryRow): ScoredMemory {
 		vectorScore,
 		textScore,
 		finalScore: 0.7 * vectorScore + 0.3 * textScore,
+		dbId: row.id,
 	};
 }
 

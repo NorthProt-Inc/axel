@@ -491,7 +491,7 @@ Source: RES-007 (CLI 기억 상실 ROOT CAUSE)
 |---|---|---|---|---|
 | DRIFT-009 | MEDIUM | migration 009 vs ADR-016 / container.ts | 009 restores 3072d, but container.ts uses 1536d, ADR-016 says 1536d Matryoshka. Dimension inconsistency. | Plan amendment needed: clarify final dimension decision + update migration-strategy.md |
 | DRIFT-MIGDOC | MEDIUM | migration-strategy.md | Migrations 009-011 not documented in migration-strategy.md execution order or directory structure. | Plan amendment: add 009-011 documentation |
-| FIX-BUG-001 | HIGH | container.ts matchedMemoryIds | `results.map(r => r.memory.accessCount)` — accessCount(number) used as memoryId(string). In Progress (dev-core, 3cy). | Awaiting dev-core fix. |
+| ~~FIX-BUG-001~~ | ~~HIGH~~ | ~~container.ts matchedMemoryIds~~ | **RESOLVED C102.** ScoredMemory.dbId added (core/memory/types.ts), PG search returns id (infra/db/pg-semantic-memory.ts), container.ts uses `scored.map(s => s.dbId ?? 0)`. | Lyra (CTO override C102). |
 
 ## Drift Log
 

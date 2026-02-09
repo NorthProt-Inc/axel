@@ -2,22 +2,26 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 101 (CTO update)**: **ERR-092 RESOLVED (CTO override).** typecheck 스크립트 `pnpm -r typecheck` → `tsc -b` 전환 (project references 정상 resolve). fallback-provider.ts unused import 제거. container.ts type-safe FallbackLlmProvider 초기화 + EmbeddingTaskType 수정. **typecheck PASSES. 1156 tests (1156 pass, 36 skip), 99 files.** FIX-BUG-001 3cy stall → CTO override 예정. QA-024 3cy stall → scope 분할.
+> **Cycle 102 (CTO update)**: **FIX-BUG-001 RESOLVED (CTO override).** ScoredMemory.dbId 추가, PG search에 id SELECT, container.ts matchedMemoryIds 올바른 dbId 전달. **QA-024 DONE (CTO override).** Mark 16건 커밋 리뷰 완료 — 0 CRITICAL, 0 HIGH 신규. SYNC-008 arch merge 확인 (66e3377). **1156 tests, typecheck PASSES. 0 errors.** P2 GAP 태스크 6건 생성.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-BUG-001 | P1 | dev-core | container.ts `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. **3 cycles → CTO override next cycle.** | C99 |
-| QA-024 | P1 | quality | Mark 커밋 **16건** 종합 리뷰. **3 cycles → CTO override next cycle.** | C99 (scope 확대 C100) |
+| (none) | — | — | — | — |
 
 ## Queued
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
-| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts → §14 (400 lines) 위반 가능성. persistToMemory 분리. | C98 |
-| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: Logger, pino, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool, migration 009-011, FilePersonaEngine. **4 cycles queued — Rule 11 경고.** | C98 (scope 확장 C100) |
-| MARK-PERSONA-001 | P2 | — | Mark(Human) 직접 구현: FilePersonaEngine (packages/infra/src/persona/, 168 lines, 19 tests). 커밋됨 (9fb41b5). §1 소유권: infra → dev-infra. | C99 |
+| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts 438 lines → §14 (400 lines) 위반. persistToMemory 분리. | C98 |
+| GAP-SESSION-001 | P2 | dev-core | GAP-11: Session state machine 런타임 검증 구현. 현재 타입만 존재, 전환 규칙 미적용. ADR-021. | C102 |
+| GAP-PROMPT-001 | P2 | dev-edge | GAP-08: Prompt injection defense 4-layer 구현 (input sanitization, system prompt isolation, output filtering, context boundary). ADR-019. | C102 |
+| GAP-WEBHOOK-001 | P2 | dev-edge | GAP-12: Webhook signature verification 강화 (Discord Ed25519 + Telegram secret_token — 기존 INTEG-008 구현 확인/보완). ADR-019. | C102 |
+| GAP-REDIS-CB-001 | P2 | dev-infra | GAP-10: Redis fallback circuit breaker 전면 적용. RedisWorkingMemory 8 bare catch → CircuitBreaker 클래스 사용. ADR-003. | C102 |
+| GAP-CMD-001 | P2 | dev-infra | GAP-07: Command arg/cwd 검증 강화. McpToolExecutor commandAllowlist + path traversal 보완. ADR-019. | C102 |
+| FIX-MIGRATION-009 | P2 | arch | PLAN_SYNC DRIFT-009: migration 009 (3072d) vs ADR-016/container.ts (1536d) dimension inconsistency. migration-strategy.md에 009-011 문서화. | C102 |
+| ADR-STATUS-001 | P3 | arch | INC-03: PROPOSED ADR → ACCEPTED 상태 업데이트 (ADR-013~021). | C102 |
 
 ## Cancelled
 
@@ -37,11 +41,15 @@
 | ADR-020 | Absorbed into WP-5 | WP-5 |
 | ADR-021 | Absorbed into WP-6 | WP-6 |
 | QA-012 | 5 cycles stalled (C34→C39). CORE-001 types already verified by SYNC-002. Scope absorbed into QA-013. | QA-013 |
+| MARK-PERSONA-001 | Mark(Human) 직접 구현 완료 (9fb41b5). BACKLOG 추적 불필요. | — |
 
 ## Done
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FIX-BUG-001 | coord (CTO override) | 0209C102 | matchedMemoryIds 논리 버그 수정. ScoredMemory.dbId 추가, PG search `id` SELECT, container.ts `scored.map(s => s.dbId ?? 0)`. 1156 tests, typecheck PASSES. |
+| QA-024 | coord (CTO override) | 0209C102 | Mark 16건 커밋 종합 리뷰. 0 CRITICAL, 0 HIGH 신규. §14 위반 1건 (inbound-handler 438 lines, FIX-FILESIZE-001). fallback-provider yield* 패턴 정상 확인. |
+| SYNC-008 | arch | 0209C101 | PLAN_SYNC Phase F: 12 subsections mapped (F.1~F.12). Merged 66e3377. DRIFT-009 (migration 009 dimension) 식별. |
 | FIX-TYPECHECK-003 | coord (CTO override) | 0209C101 | ERR-092 RESOLVED. root typecheck `tsc -b` 전환, stale dist/ 정리, fallback-provider.ts unused import, container.ts type-safe fixes. 1156 tests, 0 errors. |
 | PLAN-001 | arch | 0207T2200 | docs/plan/v2-open-items-decisions.md |
 | ADR-013 | arch | 0207T2200 | docs/adr/013-six-layer-memory-architecture.md |

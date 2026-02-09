@@ -137,6 +137,8 @@ export interface ScoredMemory {
 	readonly vectorScore: number;
 	readonly textScore: number;
 	readonly finalScore: number;
+	/** Database integer PK (for M5 meta-memory access pattern tracking) */
+	readonly dbId?: number | undefined;
 }
 
 /** Result of a decay processing run */

@@ -170,13 +170,13 @@ class MemoryContextDataProvider implements ContextDataProvider {
 			source: 'semantic' as const,
 		}));
 
-		// M5: Record access pattern
-		if (results.length > 0) {
+		// M5: Record access pattern (dbId from PG search, fallback to 0 for in-memory stub)
+		if (scored.length > 0) {
 			this.mm
 				.recordAccess({
 					queryText: query,
-					matchedMemoryIds: results.map((r) => r.memory.accessCount),
-					relevanceScores: results.map((r) => r.score),
+					matchedMemoryIds: scored.map((s) => s.dbId ?? 0),
+					relevanceScores: scored.map((s) => s.finalScore),
 					channelId: 'context-assembler',
 				})
 				.catch(() => {
