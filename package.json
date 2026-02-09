@@ -4,6 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"postinstall": "node scripts/patch-punycode.js",
 		"typecheck": "tsc -b --noEmit",
 		"test": "vitest run --passWithNoTests",
 		"test:watch": "vitest",
@@ -30,6 +31,11 @@
 	"pnpm": {
 		"packageExtensions": {
 			"tr46@0.0.3": {
+				"dependencies": {
+					"punycode": "^2.3.1"
+				}
+			},
+			"whatwg-url@5.0.0": {
 				"dependencies": {
 					"punycode": "^2.3.1"
 				}
