@@ -4,9 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+packageExtensionsChecksum: f82047138a008e1073df626cfbc513eb
+
 importers:
 
   .:
+    dependencies:
+      punycode:
+        specifier: ^2.3.1
+        version: 2.3.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -127,6 +133,9 @@ importers:
       grammy:
         specifier: ^1.39.3
         version: 1.39.3
+      punycode:
+        specifier: ^2.3.1
+        version: 2.3.1
     devDependencies:
       typescript:
         specifier: ^5.7.3
@@ -2322,6 +2331,10 @@ packages:
 
   pump@3.0.3:
     resolution: {integrity: sha512-todwxLMY7/heScKmntwQG8CXVkWUOdYxIvY2s0VWAAMh/nd8SoYiRaKjlr7+iCs984f2P8zvrfWcDDYVb73NfA==}
+
+  punycode@2.3.1:
+    resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
+    engines: {node: '>=6'}
 
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
@@ -4840,6 +4853,8 @@ snapshots:
       end-of-stream: 1.4.5
       once: 1.4.0
 
+  punycode@2.3.1: {}
+
   quick-format-unescaped@4.0.4: {}
 
   readable-stream@2.3.8:
@@ -5227,7 +5242,9 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  tr46@0.0.3: {}
+  tr46@0.0.3:
+    dependencies:
+      punycode: 2.3.1
 
   trim-lines@3.0.1: {}
 

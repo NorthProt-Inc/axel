@@ -17,7 +17,8 @@
 	"dependencies": {
 		"@axel/core": "workspace:*",
 		"discord.js": "^14.25.1",
-		"grammy": "^1.39.3"
+		"grammy": "^1.39.3",
+		"punycode": "^2.3.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.3",
