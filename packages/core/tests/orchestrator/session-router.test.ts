@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SessionTransitionError } from '../../src/orchestrator/session-state-machine.js';
 import { SessionRouter } from '../../src/orchestrator/session-router.js';
+import { SessionTransitionError } from '../../src/orchestrator/session-state-machine.js';
 import type {
 	ResolvedSession,
 	SessionStats,
