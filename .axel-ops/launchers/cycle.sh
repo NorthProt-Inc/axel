@@ -120,11 +120,12 @@ run_division() {
 
     cd "$worktree"
     # Sync division branch with latest main (local, no network needed)
-    # If rebase fails, hard-reset to main to prevent cumulative drift
+    # If rebase fails, SKIP this cycle (preserve branch state for investigation)
     git rebase main --quiet 2>&1 || {
         git rebase --abort 2>/dev/null || true
-        log "$div REBASE FAILED — resetting branch to main (prevent drift)"
-        git reset --hard main 2>/dev/null || true
+        log "$div REBASE FAILED — SKIPPING this cycle (preserving branch state)"
+        echo "{\"ts\":\"$(date -Iseconds)\",\"from\":\"cycle\",\"type\":\"rebase_fail\",\"div\":\"$div\",\"cycle\":\"$CYCLE_ID\"}" >> "$OPS/comms/broadcast.jsonl"
+        return 0
     }
 
     set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
@@ -165,11 +166,25 @@ EOF
     fi
 
     # Safety check: warn if untracked files remain (possible ownership gap)
+    # Only warn for files within owned paths (filter out noise from other divisions)
     local untracked
-    untracked=$(git ls-files --others --exclude-standard 2>/dev/null | head -5)
+    untracked=$(git diff --name-only --diff-filter=U 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null | head -10)
     if [ -n "$untracked" ]; then
-        log "$div WARNING: untracked files after commit (possible ownership gap):"
-        echo "$untracked" | while IFS= read -r f; do log "  $f"; done
+        local owned_pattern
+        owned_pattern=$(get_owned_paths "$div" | tr ' ' '\n' | sed 's|/$||' | head -20)
+        local relevant=""
+        while IFS= read -r f; do
+            while IFS= read -r op; do
+                if [[ "$f" == "$op"* ]]; then
+                    relevant+="$f"$'\n'
+                    break
+                fi
+            done <<< "$owned_pattern"
+        done <<< "$untracked"
+        if [ -n "$relevant" ]; then
+            log "$div WARNING: untracked owned files after commit:"
+            echo "$relevant" | head -5 | while IFS= read -r f; do [ -n "$f" ] && log "  $f"; done
+        fi
     fi
 
     log "=== $div DONE ==="
@@ -230,30 +245,48 @@ for pid in "${PIDS[@]}"; do
     wait "$pid" || true
 done
 
-# ── Phase 3: Merge + Smoke Test (sequential, main) ──
+# ── Phase 3: Per-Division Merge + Smoke Test (sequential, main) ──
 cd "$MAIN_REPO"
 
-# Save pre-merge state for clean rollback
-PRE_MERGE_SHA=$(git rev-parse HEAD)
-
 MERGED_BRANCHES=()
+FAILED_DIVS=()
 for div in $ACTIVE_DIVS; do
     br=$(get_branch "$div")
     if [ "$br" = "main" ]; then
         continue
     fi
-    git merge "$br" --no-ff --no-edit --quiet 2>>"$OPS/logs/cycle.log" && {
-        MERGED_BRANCHES+=("$br")
-        log "MERGED $br into main"
-    } || {
+
+    PRE_DIV_SHA=$(git rev-parse HEAD)
+
+    # Attempt merge
+    git merge "$br" --no-ff --no-edit --quiet 2>>"$OPS/logs/cycle.log" || {
         log "MERGE CONFLICT on $br — skipping, will retry next cycle"
         git merge --abort 2>/dev/null || true
+        continue
     }
+
+    # Per-division typecheck — revert only this merge if it breaks
+    TYPECHECK_OUT=$(cd "$MAIN_REPO" && pnpm typecheck 2>&1) || {
+        log "TYPECHECK FAIL after merging $br — reverting $div only"
+        echo "$TYPECHECK_OUT" | head -20 | while IFS= read -r line; do log "  TC: $line"; done
+        git reset --hard "$PRE_DIV_SHA"
+        FAILED_DIVS+=("$div")
+        continue
+    }
+
+    MERGED_BRANCHES+=("$br")
+    log "MERGED $br into main (typecheck OK)"
 done
 
-# Smoke test after merge
+# Log failed divisions summary
+if [ ${#FAILED_DIVS[@]} -gt 0 ]; then
+    log "DIVISIONS REVERTED (typecheck fail): ${FAILED_DIVS[*]}"
+fi
+
+# Final smoke test (install + full test) on successfully merged set
 if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
-    log "SMOKE TEST START"
+    log "SMOKE TEST START (merged: ${MERGED_BRANCHES[*]})"
+    PRE_SMOKE_SHA=$(git rev-parse HEAD)
     SMOKE_PASS=true
 
     cd "$MAIN_REPO"
@@ -263,23 +296,17 @@ if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
     }
 
     if [ "$SMOKE_PASS" = true ]; then
-        pnpm typecheck 2>>"$OPS/logs/cycle.log" || {
-            log "SMOKE FAIL: typecheck"
-            SMOKE_PASS=false
-        }
-    fi
-
-    if [ "$SMOKE_PASS" = true ]; then
-        pnpm test 2>>"$OPS/logs/cycle.log" || {
+        TEST_OUT=$(pnpm test 2>&1) || {
             log "SMOKE FAIL: test"
+            echo "$TEST_OUT" | head -20 | while IFS= read -r line; do log "  TEST: $line"; done
             SMOKE_PASS=false
         }
     fi
 
     if [ "$SMOKE_PASS" = false ]; then
-        log "SMOKE TEST FAILED — resetting to pre-merge state ($PRE_MERGE_SHA)"
-        git reset --hard "$PRE_MERGE_SHA"
-        log "RESET to $PRE_MERGE_SHA"
+        log "SMOKE TEST FAILED — resetting to pre-smoke state ($PRE_SMOKE_SHA)"
+        git reset --hard "$PRE_SMOKE_SHA"
+        log "RESET to $PRE_SMOKE_SHA"
     else
         log "SMOKE TEST PASSED"
     fi

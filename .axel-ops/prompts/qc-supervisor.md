@@ -23,15 +23,31 @@ From each worker report, extract all `[FINDING-*]` lines. For each finding, crea
   - Worker runtime, Redis down → `runtime-redis-down`
   - Worker docs, README broken link → `docs-readme-brokenlink`
 
+### Step 3.5: Cascade Detection (Root Cause Analysis)
+After extracting all findings, check for **cascading failures** — where one failure causes downstream failures:
+- If a build step fails (e.g., `pnpm install`), subsequent steps that depend on it (e.g., `pnpm build`, `migration check`) are **cascade failures**, not independent issues.
+- For cascade findings, add a `root_fp` field pointing to the root cause fingerprint.
+- When reporting to human.md: **only report the root cause**. List cascade findings as sub-items under the root cause.
+- Example cascade: `build-pnpm-notfound` → `build-artifacts-missing` → `build-migrate-missing` — only `build-pnpm-notfound` is the real issue.
+
+Cascade detection heuristics:
+1. Same worker, sequential test steps where earlier step failed → later failures are cascade
+2. Missing artifact/binary errors following a build/install failure → cascade
+3. "command not found" or "module not found" after install failure → cascade
+
 ### Step 4: Differential Analysis
-For each finding:
-- **If fingerprint exists in known-issues with status FAIL**: This is a KNOWN issue. Update `last` timestamp and increment `count`. Do NOT report to human.md.
-- **If fingerprint exists with status RESOLVED**: Issue has regressed. Change status back to FAIL, update timestamps. Report as REGRESSION to human.md.
-- **If fingerprint does NOT exist in known-issues**: This is a NEW issue. Add to known-issues. Report to human.md.
+For each finding (skip cascade findings — only process root causes and independent findings):
+- **If fingerprint exists in known-issues with status FAIL**: This is a KNOWN issue. Update `last` timestamp to current CYCLE_ID. **You MUST increment `count` by 1** (read the existing value and add 1). Do NOT report to human.md.
+- **If fingerprint exists with status RESOLVED**: Issue has regressed. Change status back to FAIL, update `last` timestamp. Report as REGRESSION to human.md.
+- **If fingerprint does NOT exist in known-issues**: This is a NEW issue. Add to known-issues with `count: 1`. Report to human.md.
+
+For cascade findings: add them to known-issues with a `root_fp` field but do NOT count them separately in human.md.
 
 For known issues that are NOT found in current reports:
 - If status is FAIL: Change to RESOLVED, set `resolved_cycle` to current CYCLE_ID.
-- If status is RESOLVED and `count` of resolved cycles >= 5: Remove the entry (auto-cleanup).
+- If status is RESOLVED and it has been resolved for 5+ consecutive cycles (check `resolved_cycle` vs current): Remove the entry (auto-cleanup).
+
+**Critical**: The `count` field means "number of cycles this issue was observed". It MUST increase by 1 every cycle the issue appears. Double-check your math before writing.
 
 ### Step 5: Flood Check
 Before writing to human.md, count existing unchecked QC items:

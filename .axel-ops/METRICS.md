@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 92
+## Current Cycle: 93
 
 ## Division Performance (Last 10 Cycles)
 
@@ -41,6 +41,8 @@
 | `packages/ui/` | 80% | 95.77% stmt (cli), 100% (tokens), 100% (streaming). 62 tests, 9 test files. | +15% over target |
 | `apps/webchat/` | — | 68 tests (markdown 8 + enhanced-markdown 17 + chat-logic 14 + ws-auth 9 + session-api 13 + tokens-integration 7). Pure logic tests. | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
+| `tools/migrate-axnmihn/` | — | TBD (MIGRATE-IMPL-001, newly merged) | — |
+| `packages/infra/src/memory/` | 80% | 100% stmt (SemanticMemoryWriter, 18 tests) | +20% over target |
 
 ## Sprint Progress
 
@@ -59,10 +61,6 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 80 | ui-ux, quality | 5 (UI-001/003/004/007, QA-021) | 0 | **5 TASKS DONE.** 933 tests (+53), 82 files. UI/UX Sprint **50%**. UI-002/005/006 assigned. FIX-UI-001 created. |
-| 81 | ui-ux | 0 | 0 | **No completions.** UI-002/005/006 in progress (1 cycle). FIX-UI-001 queued (P2). 933 tests, 82 files. Drift CLEAN. |
-| 82 | ui-ux, coord | 3 (UI-002/005/006) | 0 | **3 TASKS DONE.** 975 tests (+42), 84 files. Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1). UI/UX Sprint **88%**. DevOps + Quality activated next cycle. |
-| 83 | devops, quality | 0 | 0 | **No completions.** 4 tasks in progress (FIX-PUNYCODE-001, README-001, QA-022, FIX-UI-001). Assigned C82, 1 cycle. 975 tests. Drift CLEAN. |
 | 84 | devops, quality | 3 (FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 1 (ERR-086) | **3 DONE (1 불완전).** FIX-PUNYCODE-001 punycode override → 3 telegram test FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0. Human directives 3건: RES-007, push 비활성, §1 소유권. 969 tests (933p+36s), 3 suite FAIL, 85 files. |
 | 85 | devops, quality | 2 (FIX-PUNYCODE-002, QA-022) | 0 (1 resolved) | **UI/UX SPRINT COMPLETE.** ERR-086 resolved (975 tests pass). QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리. 3 cleanup tasks queued. 0 errors. |
 | 86 | research, devops | 0 | 0 | **Post-sprint cleanup.** RES-007, FIX-README-001, FIX-PUNYCODE-003 in progress (assigned C85). 975 tests. 0 errors. Drift CLEAN. |
@@ -72,3 +70,4 @@
 | 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC-001, FIX-BIOME-001, FIX-README-002) | 0 | **4 TASKS DONE.** FIX-MEMORY-001 (InboundHandler memory DI, +10 tests). 3 devops fixes. 2 blocks processed. QC 7건 처리, FIX-BUILD-001(P2) 생성. **985 tests (+10).** 0 errors. |
 | 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 tasks in progress (FIX-MEMORY-002, FIX-BUILD-001, FIX-MEMORY-003). FIX-MEMORY-003 unblocked → dev-infra assigned. Drift CLEAN. 985 tests. 0 errors. |
 | 92 | dev-edge, devops, dev-infra | 0 (+1 FIX-CYCLESH-001 human) | 0 | Human directives 2건. FIX-CYCLESH-001 DONE (Mark). MIGRATE-IMPL-001 + FIX-DOCS-001 queued. QC 13건 분류. 3 tasks in progress (2 cycles). 985 tests. 0 errors. |
+| 93 | devops, quality | 4 (FIX-MEMORY-002, FIX-MEMORY-003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 branches merged. 1075 tests (+90), 90 files. §1 위반 1건 (MIGRATE-IMPL-001). QA-023 + FIX-DOCS-001 assigned. 0 errors. |

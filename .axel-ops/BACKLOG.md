@@ -2,22 +2,18 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 92 (CTO update)**: Human directives 2건 처리 (cycle.sh patches/ 확인 ✅, 리서치→구현 태스크 생성). FIX-CYCLESH-001 해결 (Mark 커밋 0966063). QC reports 13건 분류, FIX-DOCS-001 생성. MIGRATE-IMPL-001 생성 (human directive). 3 tasks in progress (2 cycles). **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+> **Cycle 93 (CTO update)**: 3 Division branches merged. **4 tasks completed**: FIX-MEMORY-002 (dev-edge), FIX-MEMORY-003 (dev-infra), MIGRATE-IMPL-001 (dev-infra, §1 위반 기록), FIX-BUILD-001 (devops). Dependencies unblocked: FIX-DOCS-001 할당. Quality 활성화 (5 cycles since last review + new code). **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** 0 errors.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-MEMORY-002 | P1 | dev-edge | RES-007 ROOT CAUSE #2: apps/axel/src/lifecycle.ts gracefulShutdown에서 flush('*') → flush(activeUserId) 수정. | C90 |
-| FIX-BUILD-001 | P2 | devops | Production 빌드 파이프라인: (1) root package.json에 `build` 스크립트 추가 (tsc -b), (2) 각 workspace에 build config, (3) README `format --check` 문서 수정. | C90 |
-| FIX-MEMORY-003 | P2 | dev-infra | RES-007 ROOT CAUSE #3: M3 semantic store write path 연결 (embedding 의존성). InboundHandler → SemanticMemory.store() 호출 경로 구현. | C91 |
+| FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트 (Axel 환경변수 반영), (2) operation.md 불필요 build step 제거, (3) README에 operation.md 언급 추가, (4) 환경변수 네이밍 일관성 확인. | C93 |
+| QA-023 | P1 | quality | Post-merge 코드 리뷰: FIX-MEMORY-002 (lifecycle flush), FIX-MEMORY-003 (SemanticMemoryWriter), MIGRATE-IMPL-001 (migrate-axnmihn), FIX-BUILD-001 (build pipeline). TDD 검증, §1 소유권 위반 감사 (MIGRATE-IMPL-001 tools/ dev-infra 작성), §9 패키지 경계 확인. | C93 |
 
 ## Queued
 
-| ID | Priority | Division | Task | Dependencies |
-|----|----------|----------|------|-------------|
-| MIGRATE-IMPL-001 | P1 | dev-infra | axnmihn→Axel 데이터 마이그레이션 스크립트 구현. MIGRATE-PLAN-001 리서치 기반. tools/migrate-axnmihn/ 디렉토리 생성, SQLite 추출, 3072d→1536d 재임베딩, PG 로드, 검증 SQL. docs/research/MIGRATE-001-axnmihn-migration-plan.md 참조. | FIX-MEMORY-003 |
-| FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트 (Axel 환경변수 반영), (2) operation.md 불필요 build step 제거, (3) README에 operation.md 언급 추가, (4) 환경변수 네이밍 일관성 확인. | FIX-BUILD-001 |
+(none)
 
 ## Cancelled
 
@@ -184,3 +180,7 @@
 | FIX-BIOME-001 | devops | 0208C90 | biome.json apps/webchat/.svelte-kit/** ignore 추가. QC report 54/56 biome errors 해결. Commit 13c580c. |
 | FIX-README-002 | devops | 0208C90 | apps/axel/README.md dist/main.js 경로 수정. Commit de719c0. |
 | FIX-CYCLESH-001 | **Mark (Human direct)** | 0208C92 | **Mark(Human) 직접 수정** 커밋 `0966063`. cycle.sh:93 devops 소유 경로에 `patches/` 추가 완료. QC 시스템 추가와 함께 적용됨. |
+| FIX-MEMORY-002 | dev-edge | 0208C93 | RES-007 ROOT CAUSE #2: gracefulShutdown flush('*') → per-user flush via ActiveUserTracker.getActiveUserIds(). bootstrap-channels에서 workingMemory+episodicMemory DI 완성. 5 tests, 990 total (branch). TDD RED→GREEN→REFACTOR. |
+| FIX-BUILD-001 | devops | 0208C93 | Production build pipeline: root build script (tsc -b), 8 workspace build scripts, tsconfig.json 8 project references, format:check script, DEPLOY.md. 985 tests pass. |
+| FIX-MEMORY-003 | dev-infra | 0208C93 | RES-007 ROOT CAUSE #3: SemanticMemoryWriter 구현. EmbeddingProvider→SemanticMemory.store() 브릿지. Importance heuristic (length+keyword). 18 tests, 100% coverage. TDD RED→GREEN→REFACTOR. |
+| MIGRATE-IMPL-001 | dev-infra | 0208C93 | axnmihn→Axel 마이그레이션 스크립트 구현. tools/migrate-axnmihn/ (config, migrate, transform, validate, types). SQLite 추출, 3072d→1536d 재임베딩, PG 로드, 검증. TDD RED→GREEN. **§1 위반 기록**: tools/ 는 devops 소유이나 dev-infra가 작성. CTO 배정 오류. |
