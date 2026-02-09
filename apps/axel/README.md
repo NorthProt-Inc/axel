@@ -257,7 +257,7 @@ pnpm start
 pnpm build
 
 # Run with PM2 or systemd
-pm2 start dist/main.js --name axel
+pm2 start apps/axel/dist/main.js --name axel
 
 # Or with systemd
 systemctl start axel.service
