@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 95
+## Current Cycle: 96
 
 ## Division Performance (Last 10 Cycles)
 
@@ -63,7 +63,6 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 86 | research, devops | 0 | 0 | **Post-sprint cleanup.** RES-007, FIX-README-001, FIX-PUNYCODE-003 in progress. 975 tests. 0 errors. |
 | 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE. 975 tests. 0 errors. |
 | 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
 | 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
@@ -73,3 +72,4 @@
 | 93 | devops, quality | 4 (FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 merges. 1075 tests (+90). 0 errors. |
 | 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC → P0 BLOCKERS.** typecheck+build FAILS. 3 fix tasks. 1075 tests. 3 errors. |
 | 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. Mark 커밋 3건 확인. 1075 tests. 4 errors. |
+| 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건: 1 DUPLICATE, 1 scope, 1 FALSE POSITIVE, 1 cascade. 5 in progress (2cy). 1075 tests. 4 errors. |

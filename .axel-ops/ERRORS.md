@@ -2,7 +2,7 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 95 (CTO update)**: 4 errors open (3 CRITICAL, 1 HIGH). QC C1854 보고서 3건 처리. config.ts TS4111 에러 추가 발견 (ERR-090, Mark 커밋 7df32f5). FIX-CONTAINER-001 scope 확장.
+> **Cycle 96 (CTO update)**: 4 errors open (3 CRITICAL, 1 HIGH). 변동 없음. QC C1907 4건 처리: 1 DUPLICATE, 1 FIX-DOCS-001 scope, 1 FALSE POSITIVE (.env API keys), 1 cascade. 5 fix tasks in progress (2 cycles).
 
 ## Open
 

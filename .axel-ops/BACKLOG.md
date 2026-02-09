@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 95 (CTO update)**: QC C1854 reports 3건 추가 처리. config.ts TS4111 (ERR-090) — Mark 커밋 `7df32f5`에서 도입. FIX-CONTAINER-001 scope 확장 (container.ts + config.ts). migrate CLI 보고는 FIX-MIGRATE-CLI-001 중복. Gateway dist cascade. Mark 커밋 3건 확인: gateway bootstrap, webchat WS, WS protocol fix. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** typecheck FAILS. 4 errors open (3C+1H).
+> **Cycle 96 (CTO update)**: QC C1907 4건 처리 (1 DUPLICATE, 1 FIX-DOCS-001, 1 FALSE POSITIVE, 1 cascade). 0 completions. 5 tasks in progress (2 cycles). FIX-TYPECHECK-001/FIX-CONTAINER-001 approaching stall — next cycle CTO override if no completion. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** typecheck FAILS. 4 errors open (3C+1H).
 
 ## In Progress
 

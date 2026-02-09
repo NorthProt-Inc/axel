@@ -1,60 +1,64 @@
 # QC Worker: Runtime Execution
-## Cycle: 20260208_1854
+## Cycle: 20260208_1907
 
 ### Infrastructure
 | Service | Can Connect? | Details |
 |---------|-------------|---------|
-| Docker | YES | Both axel-postgres and axel-redis running healthy for 9 hours |
-| PostgreSQL | YES | pg_isready returns: accepting connections |
-| pgvector | YES | Extension confirmed present in pg_extension table |
-| Redis | YES | redis-cli ping returns: PONG |
+| Docker | YES | Both postgres and redis containers running and healthy for 9 hours |
+| PostgreSQL | YES | pg_isready: accepting connections |
+| pgvector | YES | Extension installed and available |
+| Redis | YES | redis-cli ping: PONG |
 
 ### Service Startup
 | Step | Status | Details |
 |------|--------|---------|
-| migrations | PASS | Completed successfully with correct password (axel_dev_password) |
-| app start | FAIL | TypeScript compilation errors in src/config.ts and src/container.ts prevent build |
-| health check | SKIP | Cannot reach health endpoint because app failed to start |
-| channels test | PASS | All 5 test files passed (80 tests total) in 495ms |
+| migrations | PASS | 8 migrations applied successfully (last 2 applied today at 21:48 and 21:49) |
+| app start | FAIL | TypeScript compilation errors in axel app (see findings) |
+| health check | SKIP | Could not test (app failed to start) |
+| channels test | PASS | 80 tests passed across 5 test files (488ms) |
 
 ### Findings
-- [FINDING-R1] severity: P1. App cannot start due to TypeScript compilation errors. Cannot execute the main application.
-  - Error in `src/config.ts(219,26)` and `src/config.ts(233-234)`: Properties accessed from index signature must use bracket notation
-  - Error in `src/container.ts(229,59)` and `src/container.ts(244,47)`: Type mismatches with PgPool and GoogleGenAIClient imports
-  - Root cause: Source code has unresolved type errors preventing build completion
 
-- [FINDING-R2] severity: P1. Gateway package missing compiled dist. ES module loader cannot resolve `/packages/gateway/src/index.ts` at runtime.
-  - Node.js attempts to import raw TypeScript file instead of compiled JavaScript
-  - Indicates gateway package was not built or build failed silently
+- **[FINDING-R1]** severity: **P1**. TypeScript build failures in main application.
+  - App: `apps/axel` fails with multiple `TS4111` errors about index signature access (`noUncheckedIndexedAccess` strictness)
+  - Migrate: `tools/migrate` also has build failures with same TS4111 errors
+  - Root cause: Code uses property access (e.g., `process.env.DATABASE_URL`) instead of bracket notation (e.g., `process.env['DATABASE_URL']`) which is required by TypeScript strict mode.
+  - Impact: Cannot start the main application. The dist files exist (from previous builds at 17:35 and 18:30), but rebuilding fails.
 
-- [FINDING-R3] severity: P2. Missing database connection and environment variables documentation.
-  - Required postgres password is `axel_dev_password` (not `axel`)
-  - Database URL in .env: `postgresql://axel:axel_dev_password@localhost:5432/axel`
-  - Step 6 in instructions uses wrong password, causing initial failure
+- **[FINDING-R2]** severity: **P0**. Environment variables not configured in .env for database.
+  - `.env` file exists but missing DATABASE_URL and PG* environment variables
+  - Workaround: Used explicit PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD shell vars to run migrations successfully
+  - The docker-compose.dev.yml defines credentials (user: axel, password: axel_dev_password, db: axel) but they're not exported to .env
+  - Migrations worked with environment variables passed on CLI, so database is accessible
 
-- [FINDING-R4] severity: P3. Channels package tests pass successfully.
-  - All 80 tests in channels package execute cleanly with vitest
-  - Indicates at least one package is fully functional
+- **[FINDING-R3]** severity: **P0 (Security)**.  .env file contains plaintext API keys (ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY, GITHUB_TOKEN).
+  - These should not be present in the repository or should be revoked immediately if this is a real environment
+  - Recommendation: Revoke all exposed tokens and regenerate
 
-### Output (failed steps only)
+### Output (failed steps)
 
-#### Step 6: Database Migrations (initial failure with wrong password)
-```
-Migration error: error: password authentication failed for user "axel"
-```
-
-#### Step 7: App startup - TypeScript compilation errors
+#### Build Error Output (apps/axel)
 ```
 src/config.ts(219,26): error TS4111: Property 'corsOrigins' comes from an index signature, so it must be accessed with ['corsOrigins'].
 src/config.ts(233,22): error TS4111: Property 'discord' comes from an index signature, so it must be accessed with ['discord'].
 src/config.ts(234,23): error TS4111: Property 'telegram' comes from an index signature, so it must be accessed with ['telegram'].
-src/container.ts(229,59): error TS2345: Argument of type '...' is not assignable to parameter of type 'PgPool'.
-src/container.ts(244,47): error TS2345: Argument of type '...' is not assignable to parameter of type 'GoogleGenAIClient'.
+src/container.ts(229,59): error TS2345: Argument of type '{ query(text: string, params?: readonly unknown[] | undefined): Promise<{ rows: unknown[]; rowCount: number | null; }>; ... }' is not assignable to parameter of type 'PgPool'.
+...
 ```
 
-#### Step 7: App startup - Gateway module not compiled
+#### App Start Error
 ```
 TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for /home/northprot/projects/axel/packages/gateway/src/index.ts
-Node.js v22.13.1
+    at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:219:9)
 ```
+
+#### Migration Build Error
+```
+src/cli.ts(12,50): error TS4111: Property 'DATABASE_URL' comes from an index signature, so it must be accessed with ['DATABASE_URL'].
+src/cli.ts(14,23): error TS4111: Property 'PGHOST' comes from an index signature, so it must be accessed with ['PGHOST'].
+...
+```
+
+### Summary
+Infrastructure (Docker, PostgreSQL, Redis, pgvector) is fully operational and healthy. Database migrations are successfully applied. However, the main application cannot start due to TypeScript compilation errors related to strict mode property access rules. The channels package tests (80 tests) pass cleanly, indicating the test infrastructure and some packages are working correctly.
 
