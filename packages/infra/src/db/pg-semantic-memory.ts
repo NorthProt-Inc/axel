@@ -1,3 +1,5 @@
+import { decayBatch } from '@axel/core/decay';
+import type { DecayInput } from '@axel/core/decay';
 import type {
 	DecayResult,
 	DecayRunConfig,
@@ -89,35 +91,79 @@ class PgSemanticMemory implements SemanticMemory {
 	}
 
 	async decay(config: DecayRunConfig): Promise<DecayResult> {
-		const statsResult = await this.pool.query('SELECT importance FROM memories');
-		const allImportances = (statsResult.rows as { importance: number }[]).map((r) => r.importance);
+		if (!config.decayConfig) {
+			// No decay config — legacy mode: just delete below threshold
+			const countResult = await this.pool.query('SELECT COUNT(*) AS cnt FROM memories');
+			const processed = Number((countResult.rows[0] as { cnt: string }).cnt);
+			const deleteResult = await this.pool.query('DELETE FROM memories WHERE importance < $1', [
+				config.threshold,
+			]);
+			return { processed, deleted: deleteResult.rowCount ?? 0, minImportance: 0, maxImportance: 0, avgImportance: 0 };
+		}
 
-		const deleteResult = await this.pool.query('DELETE FROM memories WHERE importance < $1', [
-			config.threshold,
-		]);
+		// Load all memories for decay calculation
+		const loadResult = await this.pool.query(
+			`SELECT uuid, importance, memory_type, created_at, last_accessed,
+			        access_count, channel_mentions
+			 FROM memories`,
+		);
+		const rows = loadResult.rows as DecayMemoryRow[];
 
-		const processed = allImportances.length;
-		const deleted = deleteResult.rowCount ?? 0;
-
-		if (processed === 0) {
+		if (rows.length === 0) {
 			return { processed: 0, deleted: 0, minImportance: 0, maxImportance: 0, avgImportance: 0 };
 		}
 
+		const now = Date.now();
+		const inputs: DecayInput[] = rows.map((r) => {
+			const createdMs = r.created_at.getTime();
+			const lastAccessedMs = r.last_accessed.getTime();
+			const channelCount = r.channel_mentions ? Object.keys(r.channel_mentions).length : 0;
+			return {
+				importance: r.importance,
+				memoryType: r.memory_type as DecayInput['memoryType'],
+				hoursElapsed: (now - createdMs) / 3_600_000,
+				accessCount: Math.max(1, r.access_count),
+				connectionCount: 0,
+				channelMentions: channelCount,
+				lastAccessedHoursAgo: (now - lastAccessedMs) / 3_600_000,
+				ageHours: (now - createdMs) / 3_600_000,
+			};
+		});
+
+		const decayed = decayBatch(inputs, config.decayConfig);
+
+		// Batch UPDATE + collect stats
+		let deleted = 0;
 		let min = Number.POSITIVE_INFINITY;
 		let max = Number.NEGATIVE_INFINITY;
 		let total = 0;
-		for (const imp of allImportances) {
-			if (imp < min) min = imp;
-			if (imp > max) max = imp;
-			total += imp;
+
+		for (let i = 0; i < rows.length; i++) {
+			const newImportance = decayed[i]!;
+			const row = rows[i]!;
+
+			if (newImportance < config.threshold) {
+				await this.pool.query('DELETE FROM memories WHERE uuid = $1', [row.uuid]);
+				deleted++;
+			} else {
+				await this.pool.query(
+					`UPDATE memories SET importance = $1, decayed_importance = $1, last_decayed_at = NOW()
+					 WHERE uuid = $2`,
+					[newImportance, row.uuid],
+				);
+				if (newImportance < min) min = newImportance;
+				if (newImportance > max) max = newImportance;
+				total += newImportance;
+			}
 		}
 
+		const surviving = rows.length - deleted;
 		return {
-			processed,
+			processed: rows.length,
 			deleted,
-			minImportance: min,
-			maxImportance: max,
-			avgImportance: total / processed,
+			minImportance: surviving > 0 ? min : 0,
+			maxImportance: surviving > 0 ? max : 0,
+			avgImportance: surviving > 0 ? total / surviving : 0,
 		};
 	}
 
@@ -166,6 +212,16 @@ class PgSemanticMemory implements SemanticMemory {
 			};
 		}
 	}
+}
+
+interface DecayMemoryRow {
+	uuid: string;
+	importance: number;
+	memory_type: string;
+	created_at: Date;
+	last_accessed: Date;
+	access_count: number;
+	channel_mentions: Record<string, number> | null;
 }
 
 interface MemoryRow {

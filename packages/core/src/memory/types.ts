@@ -1,3 +1,4 @@
+import type { DecayConfig } from '../decay/types.js';
 import type { ComponentHealth } from '../types/health.js';
 import type { Memory, MemoryType } from '../types/memory.js';
 import type { MessageRole } from '../types/message.js';
@@ -150,6 +151,7 @@ export interface DecayResult {
 /** Decay run configuration */
 export interface DecayRunConfig {
 	readonly threshold: number;
+	readonly decayConfig?: DecayConfig;
 }
 
 /** M3 Semantic Memory interface (ADR-013, ADR-016) */

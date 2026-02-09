@@ -242,22 +242,15 @@ describe('PgSemanticMemory', () => {
 	});
 
 	describe('decay()', () => {
-		it('should process and delete low-importance memories', async () => {
-			// First query: get all memories for processing
-			// Second query: delete below threshold
+		it('legacy mode: deletes below threshold without decay calculation', async () => {
 			mockPool.query
 				.mockResolvedValueOnce({
-					rows: [
-						{ importance: 0.1 },
-						{ importance: 0.3 },
-						{ importance: 0.6 },
-						{ importance: 0.8 },
-					],
-					rowCount: 4,
+					rows: [{ cnt: '4' }],
+					rowCount: 1,
 				})
 				.mockResolvedValueOnce({
 					rows: [],
-					rowCount: 2, // 2 deleted (0.1 and 0.3 < threshold 0.5)
+					rowCount: 2,
 				});
 
 			const { PgSemanticMemory } = await import('../../src/db/index.js');
@@ -267,8 +260,66 @@ describe('PgSemanticMemory', () => {
 
 			expect(result.processed).toBe(4);
 			expect(result.deleted).toBe(2);
-			expect(result.minImportance).toBeCloseTo(0.1);
-			expect(result.maxImportance).toBeCloseTo(0.8);
+		});
+
+		it('with decayConfig: applies decay calculation and updates importance', async () => {
+			const now = new Date();
+			const oneHourAgo = new Date(now.getTime() - 3_600_000);
+			mockPool.query
+				.mockResolvedValueOnce({
+					rows: [
+						{
+							uuid: 'mem-1',
+							importance: 0.8,
+							memory_type: 'fact',
+							created_at: oneHourAgo,
+							last_accessed: now,
+							access_count: 3,
+							channel_mentions: { cli: 1, discord: 1 },
+						},
+						{
+							uuid: 'mem-2',
+							importance: 0.02,
+							memory_type: 'conversation',
+							created_at: oneHourAgo,
+							last_accessed: oneHourAgo,
+							access_count: 1,
+							channel_mentions: null,
+						},
+					],
+					rowCount: 2,
+				})
+				// Subsequent UPDATE/DELETE calls
+				.mockResolvedValue({ rows: [], rowCount: 1 });
+
+			const { PgSemanticMemory } = await import('../../src/db/index.js');
+			const mem: SemanticMemory = new PgSemanticMemory(mockPool as any);
+
+			const { DEFAULT_DECAY_CONFIG } = await import('@axel/core/decay');
+			const result: DecayResult = await mem.decay({
+				threshold: DEFAULT_DECAY_CONFIG.deleteThreshold,
+				decayConfig: DEFAULT_DECAY_CONFIG,
+			});
+
+			expect(result.processed).toBe(2);
+			// mem-2 with importance 0.02 will decay further and get deleted
+			expect(result.deleted).toBeGreaterThanOrEqual(1);
+		});
+
+		it('with decayConfig: returns zeros for empty table', async () => {
+			mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+			const { PgSemanticMemory } = await import('../../src/db/index.js');
+			const mem: SemanticMemory = new PgSemanticMemory(mockPool as any);
+
+			const { DEFAULT_DECAY_CONFIG } = await import('@axel/core/decay');
+			const result = await mem.decay({
+				threshold: DEFAULT_DECAY_CONFIG.deleteThreshold,
+				decayConfig: DEFAULT_DECAY_CONFIG,
+			});
+
+			expect(result.processed).toBe(0);
+			expect(result.deleted).toBe(0);
 		});
 	});
 

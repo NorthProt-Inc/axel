@@ -148,6 +148,28 @@ export async function bootstrap(
 		});
 	}, consolidationIntervalMs);
 
+	// Batch decay scheduler (GAP-06, ADR-015)
+	const decayIntervalMs = consolidationIntervalMs;
+	const decayTimer = setInterval(() => {
+		container.semanticMemory
+			.decay({
+				threshold: config.memory.decay.deleteThreshold,
+				decayConfig: config.memory.decay,
+			})
+			.then((result) => {
+				container.logger.info('Decay batch completed', {
+					processed: result.processed,
+					deleted: result.deleted,
+					avgImportance: result.avgImportance,
+				});
+			})
+			.catch((err: unknown) => {
+				container.logger.error('Decay batch failed', {
+					error: err instanceof Error ? err.message : String(err),
+				});
+			});
+	}, decayIntervalMs);
+
 	// Graceful shutdown handler (ADR-021)
 	let shutdownInProgress = false;
 	const shutdown = async () => {
@@ -155,6 +177,7 @@ export async function bootstrap(
 		shutdownInProgress = true;
 
 		clearInterval(consolidationTimer);
+		clearInterval(decayTimer);
 
 		const timer = setTimeout(() => {
 			process.exit(1);
