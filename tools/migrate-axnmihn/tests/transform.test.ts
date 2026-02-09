@@ -1,20 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-	transformRole,
-	transformSession,
-	transformMessage,
+	estimateTokenCount,
+	parseKeyTopics,
+	transformEntity,
 	transformInteractionLog,
 	transformMemory,
-	transformEntity,
+	transformMessage,
 	transformRelation,
+	transformRole,
+	transformSession,
 	transformSessionSummary,
-	parseKeyTopics,
-	estimateTokenCount,
 } from '../src/transform.js';
 import type {
-	AxnmihnSession,
-	AxnmihnMessage,
 	AxnmihnInteractionLog,
+	AxnmihnMessage,
+	AxnmihnSession,
 	ChromaMemory,
 	KnowledgeGraphEntity,
 	KnowledgeGraphRelation,
@@ -125,10 +125,10 @@ describe('transform', () => {
 			};
 			const result = transformSessionSummary(source);
 			expect(result).not.toBeNull();
-			expect(result!.session_id).toBe('sess-001');
-			expect(result!.summary).toBe('Test summary');
-			expect(result!.key_topics).toEqual(['topic1']);
-			expect(result!.emotional_tone).toBe('neutral');
+			expect(result?.session_id).toBe('sess-001');
+			expect(result?.summary).toBe('Test summary');
+			expect(result?.key_topics).toEqual(['topic1']);
+			expect(result?.emotional_tone).toBe('neutral');
 		});
 
 		it('should return null when no summary data exists', () => {

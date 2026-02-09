@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-	createAuthMessage,
-	parseAuthResponse,
-	isAuthOk,
 	type WsAuthMessage,
+	createAuthMessage,
+	isAuthOk,
+	parseAuthResponse,
 } from '../src/lib/stores/ws-auth.js';
 
 describe('WebSocket Authentication — ADR-019 first-message auth', () => {

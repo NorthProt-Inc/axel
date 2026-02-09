@@ -1,18 +1,18 @@
-import { describe, it, expect } from 'vitest';
-import {
-	validateSourceSessions,
-	validateSourceMessages,
-	validateKnowledgeGraph,
-	validateChromaMemories,
-	filterOrphanedRelations,
-} from '../src/validate.js';
+import { describe, expect, it } from 'vitest';
 import type {
-	AxnmihnSession,
 	AxnmihnMessage,
+	AxnmihnSession,
 	ChromaMemory,
 	KnowledgeGraphEntity,
 	KnowledgeGraphRelation,
 } from '../src/types.js';
+import {
+	filterOrphanedRelations,
+	validateChromaMemories,
+	validateKnowledgeGraph,
+	validateSourceMessages,
+	validateSourceSessions,
+} from '../src/validate.js';
 
 describe('validate', () => {
 	describe('validateSourceSessions', () => {
@@ -259,7 +259,7 @@ describe('validate', () => {
 			];
 			const result = filterOrphanedRelations(relations, entityIds);
 			expect(result).toHaveLength(1);
-			expect(result[0]!.relation_type).toBe('prefers');
+			expect(result[0]?.relation_type).toBe('prefers');
 		});
 
 		it('should return all relations when none are orphaned', () => {

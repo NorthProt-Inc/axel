@@ -1,10 +1,10 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { PUBLIC_WS_URL, PUBLIC_API_TOKEN } from '$env/static/public';
-import MessageList from '$lib/components/MessageList.svelte';
-import MessageInput from '$lib/components/MessageInput.svelte';
+import { PUBLIC_API_TOKEN, PUBLIC_WS_URL } from '$env/static/public';
 import ChatSidebar from '$lib/components/ChatSidebar.svelte';
-import { messages, sendMessage, connectWebSocket, loadSessions } from '$lib/stores/chat.svelte';
+import MessageInput from '$lib/components/MessageInput.svelte';
+import MessageList from '$lib/components/MessageList.svelte';
+import { connectWebSocket, loadSessions, messages, sendMessage } from '$lib/stores/chat.svelte';
+import { onMount } from 'svelte';
 
 let sidebarOpen = $state(false);
 

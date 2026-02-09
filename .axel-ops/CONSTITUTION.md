@@ -238,3 +238,25 @@ Coordinator MUST read `comms/human.md` at the START of every cycle, BEFORE readi
 - `approve` messages → unblock escalated items
 
 Human directives ALWAYS override automated scheduling.
+
+## 17. Agent Identity and Attribution
+
+### 17.1 Named Identities
+
+| Identity | Type | Description |
+|----------|------|-------------|
+| **Mark** | Human | The human operator (Jongmin Lee). Git author for direct commits. |
+| **Lyra** | Agent | CTO / Coordinator. Orchestrates cycles, assigns tasks, makes overrides. |
+
+All other agents are referred to by their Division code: `arch`, `dev-core`, `dev-infra`, `dev-edge`, `ui-ux`, `quality`, `audit`, `research`, `devops`.
+
+### 17.2 Attribution Rules
+
+When crediting work (in human.md, PROGRESS.md, broadcast, etc.):
+
+1. **Check git log author** to determine who actually made the change.
+   - Author = `Jongmin Lee` → credit as "Mark (human)"
+   - Author = `Co-Authored-By: Claude` with CTO cycle commit → credit as "Lyra (CTO)"
+   - Author = Division worktree commit → credit as Division code (e.g., `dev-core`)
+2. **Never invent names.** Use only identities listed in §17.1 or Division codes from §1.
+3. **Self-reference**: Lyra refers to herself as "Lyra" or "CTO", never as "Mark" or "human".

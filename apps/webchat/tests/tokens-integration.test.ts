@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import { colors, typography } from '@axel/ui/tokens';
+import { describe, expect, it } from 'vitest';
 import { buildTailwindColors, buildTailwindFontFamily } from '../src/lib/utils/tailwind-tokens.js';
 
 describe('Design Tokens → Tailwind Integration', () => {

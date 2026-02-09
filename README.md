@@ -39,7 +39,7 @@ tools/
 1. TypeScript single stack (ADR-001)
 2. PostgreSQL + pgvector single DB (ADR-002)
 3. Constructor-based dependency injection
-4. Test-driven development (975 tests, 84 files)
+4. Test-driven development (1000+ tests, 90 files)
 
 ---
 
@@ -107,7 +107,7 @@ pnpm format:check
 | `@axel/core` | Domain logic | 90%+ | `types`, `memory`, `decay`, `context`, `persona`, `orchestrator` |
 | `@axel/infra` | Infrastructure | 80%+ | Default export |
 | `@axel/channels` | Channel impls | 75%+ | `cli`, `discord`, `telegram` |
-| `@axel/gateway` | HTTP/WS server | 80%+ | `routes`, `middleware`, `websocket` |
+| `@axel/gateway` | HTTP/WS server | 80%+ | Default export |
 | `@axel/ui` | UI components | 80%+ | `cli`, `tokens` |
 
 ### Package-Specific Commands
@@ -127,34 +127,42 @@ pnpm --filter @axel/infra typecheck
 
 ## Environment Variables
 
-Required environment variables (create `.env` file):
+Create `.env` file from template:
+
+```bash
+cp .env.example .env
+```
+
+All application variables use the `AXEL_` prefix (see `apps/axel/src/config.ts`):
 
 ```bash
 # Database (required)
-DATABASE_URL="postgresql://axel:password@localhost:5432/axel"
+AXEL_DB_URL="postgresql://axel:password@localhost:5432/axel"
 
-# LLM Providers (required)
-ANTHROPIC_API_KEY="sk-ant-..."
-GOOGLE_API_KEY="AI..."
+# LLM Providers (required — at least one)
+AXEL_ANTHROPIC_API_KEY="sk-ant-..."
+AXEL_GOOGLE_API_KEY="AI..."
 
 # Redis (optional, defaults to localhost:6379)
-REDIS_URL="redis://localhost:6379"
+AXEL_REDIS_URL="redis://localhost:6379"
 
-# Channels (optional, configure as needed)
-DISCORD_BOT_TOKEN="..."
-TELEGRAM_BOT_TOKEN="..."
+# Channels (optional)
+AXEL_DISCORD_BOT_TOKEN="..."
+AXEL_TELEGRAM_BOT_TOKEN="..."
 
 # Gateway (optional)
-GATEWAY_PORT=3000
-GATEWAY_AUTH_TOKEN="your-secret-token"
+AXEL_GATEWAY_AUTH_TOKEN="your-secret-token"
+AXEL_GATEWAY_CORS_ORIGINS="http://localhost:3000"
 ```
+
+> **Note:** The migration CLI (`tools/migrate`) uses standard `DATABASE_URL` (not `AXEL_DB_URL`).
 
 ---
 
 ## Testing
 
 ```bash
-# Run all tests (975 tests across 84 files)
+# Run all tests (1000+ tests across 90 files)
 pnpm test
 
 # Coverage report
@@ -175,7 +183,7 @@ pnpm test:watch
 
 ## Documentation
 
-- **Architecture Decision Records**: `docs/adr/` (23 ADRs)
+- **Architecture Decision Records**: `docs/adr/` (21 ADRs)
 - **Project Plan**: `docs/plan/axel-project-plan.md`
 - **Technical Research**: `docs/research/`
 - **Migration Strategy**: `docs/plan/migration-strategy.md`

@@ -81,7 +81,10 @@ class EntityExtractor {
 	private parseResponse(text: string): ExtractedEntities {
 		try {
 			// Strip markdown fences if present
-			const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+			const cleaned = text
+				.replace(/```json\n?/g, '')
+				.replace(/```\n?/g, '')
+				.trim();
 			const parsed = JSON.parse(cleaned) as Record<string, unknown>;
 
 			if (!Array.isArray(parsed['entities']) || !Array.isArray(parsed['relations'])) {

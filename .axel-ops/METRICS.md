@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 97
+## Current Cycle: 98
 
 ## Division Performance (Last 10 Cycles)
 
@@ -24,7 +24,7 @@
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
 | Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 2 | 0 | **WARN** (FIX-DOCS-001 4cy, QA-023 4cy) |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK (FIX-DOCS-001/QA-023 CTO override C98) |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -44,7 +44,7 @@
 | `apps/webchat/` | — | 68 tests (markdown 8 + enhanced-markdown 17 + chat-logic 14 + ws-auth 9 + session-api 13 + tokens-integration 7). Pure logic tests. | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 | `tools/migrate-axnmihn/` | — | TBD (MIGRATE-IMPL-001, newly merged) | — |
-| `packages/infra/src/memory/` | 80% | 100% stmt (SemanticMemoryWriter, 18 tests) | +20% over target |
+| `packages/infra/src/memory/` | 80% | SemanticMemoryWriter 100% (18 tests), **EntityExtractor 0% (NO TESTS — §8 위반)** | WARN: entity-extractor untested |
 
 ## Sprint Progress
 
@@ -73,3 +73,4 @@
 | 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. 1075 tests. 4 errors. |
 | 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건. 5 in progress (2cy). 1075 tests. 4 errors. |
 | 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |
+| 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 5aa814d M3-M5 activation (+497 lines, 14 files). 85f9b27 1536d fix. FIX-DOCS-001 .env.example 업데이트. QA-023 CTO 확인 완료. 5 new tasks queued (1 bug, 1 QA, 1 test, 1 filesize, 1 sync). 1075 tests. 0 errors. |

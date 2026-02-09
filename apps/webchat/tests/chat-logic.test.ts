@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
-	parseWsMessage,
+	type WsMessage,
 	applyChunk,
 	applyDone,
 	createUserMessage,
-	type WsMessage,
+	parseWsMessage,
 } from '../src/lib/stores/chat-logic.js';
 import type { ChatMessage } from '../src/lib/stores/chat.svelte';
 

@@ -42,6 +42,7 @@ describe('CLI Format', () => {
 		it('respects custom width', () => {
 			const result = formatDivider(20);
 			// The raw string inside (ignoring ANSI codes) should have 20 dashes
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence stripping
 			const stripped = result.replace(/\x1b\[[0-9;]*m/g, '');
 			expect(stripped.length).toBe(20);
 		});

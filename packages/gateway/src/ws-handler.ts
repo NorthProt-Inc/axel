@@ -65,6 +65,7 @@ function handleWsAuthMessage(
 	ws.authenticated = true;
 	if (ws.authTimer) {
 		clearTimeout(ws.authTimer);
+		// biome-ignore lint/performance/noDelete: exactOptionalPropertyTypes prevents undefined assignment
 		delete ws.authTimer;
 	}
 	ws.send(JSON.stringify({ type: 'auth_ok' }));

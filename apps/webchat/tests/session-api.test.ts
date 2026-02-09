@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-	parseSessionResponse,
-	parseSessionEndResponse,
-	buildSessionUrl,
-	buildSessionEndUrl,
-	type SessionInfo,
 	type SessionEndResult,
+	type SessionInfo,
+	buildSessionEndUrl,
+	buildSessionUrl,
+	parseSessionEndResponse,
+	parseSessionResponse,
 } from '../src/lib/stores/session-api.js';
 
 describe('WebChat Session API — URL builders', () => {
@@ -40,16 +40,16 @@ describe('WebChat Session API — Response parsers', () => {
 			};
 			const result = parseSessionResponse(JSON.stringify(body));
 			expect(result).not.toBeNull();
-			expect(result!.active).toBe(true);
-			expect(result!.session?.sessionId).toBe('abc-123');
+			expect(result?.active).toBe(true);
+			expect(result?.session?.sessionId).toBe('abc-123');
 		});
 
 		it('parses no active session', () => {
 			const body = { active: false, session: null, requestId: 'req-2' };
 			const result = parseSessionResponse(JSON.stringify(body));
 			expect(result).not.toBeNull();
-			expect(result!.active).toBe(false);
-			expect(result!.session).toBeNull();
+			expect(result?.active).toBe(false);
+			expect(result?.session).toBeNull();
 		});
 
 		it('returns null for invalid JSON', () => {
@@ -70,7 +70,7 @@ describe('WebChat Session API — Response parsers', () => {
 			};
 			const result = parseSessionEndResponse(JSON.stringify(body));
 			expect(result).not.toBeNull();
-			expect(result!.summary).toBe('Session ended successfully');
+			expect(result?.summary).toBe('Session ended successfully');
 		});
 
 		it('returns null for invalid JSON', () => {
@@ -98,7 +98,7 @@ describe('WebChat Session API — Session list management', () => {
 		};
 		const result = addSessionToList([], session);
 		expect(result).toHaveLength(1);
-		expect(result[0]!.id).toBe('new-1');
+		expect(result[0]?.id).toBe('new-1');
 	});
 
 	it('does not add duplicate session', async () => {
@@ -123,6 +123,6 @@ describe('WebChat Session API — Session list management', () => {
 		const existing = [{ id: 'keep-1', title: 'Keep', createdAt: new Date() }];
 		const result = addSessionToList(existing, session);
 		expect(result).toHaveLength(1);
-		expect(result[0]!.id).toBe('keep-1');
+		expect(result[0]?.id).toBe('keep-1');
 	});
 });

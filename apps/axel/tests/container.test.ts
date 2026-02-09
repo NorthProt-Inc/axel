@@ -54,8 +54,18 @@ function createMockDeps(): ContainerDeps {
 
 function createMockLlmConfig(): AxelConfig['llm'] {
 	return {
-		anthropic: { apiKey: 'test', model: 'claude-sonnet-4-5-20250929', thinkingBudget: 10000, maxTokens: 16384 },
-		google: { apiKey: 'test', flashModel: 'gemini-3-flash-preview', embeddingModel: 'gemini-embedding-001', embeddingDimension: 1536 },
+		anthropic: {
+			apiKey: 'test',
+			model: 'claude-sonnet-4-5-20250929',
+			thinkingBudget: 10000,
+			maxTokens: 16384,
+		},
+		google: {
+			apiKey: 'test',
+			flashModel: 'gemini-3-flash-preview',
+			embeddingModel: 'gemini-embedding-001',
+			embeddingDimension: 1536,
+		},
 		fallbackChain: ['anthropic', 'google'],
 	};
 }

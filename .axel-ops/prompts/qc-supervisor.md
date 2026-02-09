@@ -137,6 +137,8 @@ Rules for this section:
 - Mark escalated issues: `- [ ] **[QC-report]** [ESCALATED P1→P0] {desc} — ...`
 - List resolved fingerprints at the bottom for reference
 - This replaces the entire section between markers every cycle — it's not append-only
+- For resolved items (checked off `[x]`): do NOT include them in the active section. They are gone.
+- **Attribution**: When noting who resolved an issue, check git log. Mark = human, Lyra = CTO, or Division code. Never invent names.
 
 ### Step 7: Update known-issues.jsonl
 Write the complete updated known-issues.jsonl using the Write tool. Each line is one JSON object.

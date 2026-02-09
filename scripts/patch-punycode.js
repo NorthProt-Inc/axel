@@ -10,7 +10,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -33,7 +33,7 @@ for (const { name, path, replacement } of patches) {
 	const filePath = resolve(rootDir, path);
 
 	try {
-		let content = readFileSync(filePath, 'utf8');
+		const content = readFileSync(filePath, 'utf8');
 
 		// Check if already patched
 		if (content.includes(replacement)) {

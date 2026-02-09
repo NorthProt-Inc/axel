@@ -1,11 +1,11 @@
 import type {
-	AxnmihnSession,
 	AxnmihnMessage,
+	AxnmihnSession,
 	ChromaMemory,
 	KnowledgeGraphEntity,
 	KnowledgeGraphRelation,
-	ValidationResult,
 	ValidationError,
+	ValidationResult,
 } from './types.js';
 
 const VALID_MEMORY_TYPES = new Set(['fact', 'preference', 'insight', 'conversation']);

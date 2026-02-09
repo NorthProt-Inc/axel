@@ -22,9 +22,7 @@ interface GoogleGenerativeModel {
 	generateContentStream(
 		params: Record<string, unknown>,
 	): Promise<{ stream: AsyncIterable<GoogleStreamChunk> }>;
-	generateContent(
-		params: Record<string, unknown>,
-	): Promise<{ response: { text(): string } }>;
+	generateContent(params: Record<string, unknown>): Promise<{ response: { text(): string } }>;
 }
 
 /** Google GenAI client interface (subset) */

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
 	renderAssistantMessage,
-	renderStreamStart,
 	renderStreamChunk,
 	renderStreamEnd,
+	renderStreamStart,
+	renderThinking,
 	renderToolCall,
 	renderToolResult,
-	renderThinking,
 } from '../src/cli/output.js';
 
 describe('CLI Output — Assistant Message Rendering', () => {

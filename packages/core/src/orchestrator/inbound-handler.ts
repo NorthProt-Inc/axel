@@ -276,11 +276,14 @@ async function persistToMemory(
 
 		// M4: Conceptual Memory — entity extraction (fire-and-forget)
 		if (entityExtractor && conceptualMemory) {
-			extractAndStoreEntities(entityExtractor, conceptualMemory, userContent, assistantContent).catch(
-				() => {
-					// Silent — M4 persistence must not break the response flow
-				},
-			);
+			extractAndStoreEntities(
+				entityExtractor,
+				conceptualMemory,
+				userContent,
+				assistantContent,
+			).catch(() => {
+				// Silent — M4 persistence must not break the response flow
+			});
 		}
 	} catch {
 		// Memory persistence failure must not break the response flow.

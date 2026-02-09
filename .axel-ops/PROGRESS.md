@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation Maintenance.** typecheck+tests 복구 완료. P2 docs + P1 QA 잔여 태스크만 남음.
-- **Cycle**: 97
-- **Last Updated**: 2026-02-08C97
-- **STATUS**: **ALL P0 BLOCKERS RESOLVED.** Mark(Human) 직접 수정 4건 (ERR-087~090: decay/types.ts, container.ts, config.ts, cli.ts) + CTO override 추가 수정 (discord-channel.ts healthCheck+threadId, gateway ws-handler.ts+route-handlers.ts TS4111, infra llm+mcp TS4111+exactOptionalPropertyTypes). **typecheck PASSES. 1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** FIX-TYPECHECK-001/FIX-CONTAINER-001/FIX-MIGRATE-CLI-001 → DONE. FIX-DOCS-001 + QA-023 in progress (4 cycles stalled — CTO override next cycle). **0 errors open.**
+- **Phase**: **Post-Implementation — Active Development.** Mark(Human)이 M3-M5 memory layer 활성화 + webchat session persistence 직접 구현. 테스트 미비 영역 발견 → 신규 태스크 생성.
+- **Cycle**: 98
+- **Last Updated**: 2026-02-08C98
+- **STATUS**: **Mark 2건 커밋 처리 완료.** (1) `5aa814d`: M3-M5 activation + webchat session (14 files, +497 lines), (2) `85f9b27`: embedding 1536d fix. FIX-DOCS-001 + QA-023 CTO override 완료. **typecheck PASSES. 1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** 신규 발견: entity-extractor.ts 테스트 없음 (§8 위반), inbound-handler.ts 413 lines (§14 위반), recordAccess 논리 버그 (HIGH). 5 new tasks queued. **0 errors open.**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 0 |
-| In Progress | 2 (FIX-DOCS-001, QA-023) |
-| Done | 155 |
+| Queued | 5 |
+| In Progress | 0 |
+| Done | 161 (+6: FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX + 이전 FIX-TYPECHECK/CONTAINER/MIGRATE-CLI 포함) |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -87,21 +87,22 @@
 | 95 | 0208 | **QC C1854 reports 3건 추가 처리.** config.ts TS4111 (ERR-090) — Mark 커밋 `7df32f5` gateway wiring에서 도입. FIX-CONTAINER-001 scope 확장. Mark 커밋 3건 확인: `7df32f5` (gateway bootstrap), `6642fc6` (webchat WS), `b81f310` (WS protocol fix). 5 tasks in progress (변동 없음). **1075 tests, 0 FAIL, 90 files.** typecheck FAILS. 4 errors open (3C+1H). |
 | 96 | 0208 | **QC C1907 4건 처리.** (1) config.ts DUPLICATE, (2) .env DB vars → FIX-DOCS-001 P2, (3) .env API keys FALSE POSITIVE, (4) README → build cascade. 0 completions. 5 tasks in progress (2 cycles). FIX-TYPECHECK-001/FIX-CONTAINER-001 approaching stall. **1075 tests, 0 FAIL.** typecheck FAILS. 4 errors (3C+1H). |
 | 97 | 0208 | **ALL P0 BLOCKERS RESOLVED. 3 TASKS DONE.** Mark(Human) 직접 수정 4건 (ERR-087~090) + CTO override 추가 typecheck 수정 (discord-channel, gateway, infra — 30 TS4111+exactOptionalPropertyTypes errors). FIX-TYPECHECK-001/FIX-CONTAINER-001/FIX-MIGRATE-CLI-001 DONE. **typecheck PASSES. 1075 tests, 0 FAIL, 90 files.** 0 errors. FIX-DOCS-001+QA-023 stalled (4 cycles). |
+| 98 | 0208 | **Mark 2건 커밋 + CTO override 4건 완료.** Mark(Human) 5aa814d (M3-M5 activation, EntityExtractor, webchat session, gateway session list/messages API, 14 files +497 lines) + 85f9b27 (embedding 1536d fix). CTO override: FIX-DOCS-001 (.env.example AXEL_ prefix 업데이트), QA-023 (post-merge 리뷰 CTO 확인). 신규 발견: entity-extractor.ts 테스트 없음 (§8), inbound-handler.ts 413 lines (§14), recordAccess 논리 버그 (HIGH). 5 new tasks: FIX-BUG-001 (P1), QA-024 (P1), TEST-ENTITY-001 (P1), FIX-FILESIZE-001 (P2), SYNC-008 (P2). **1075 tests, 0 FAIL. typecheck PASSES.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C97 | Cycle 97 | Active |
-| Architecture | 0208C74 | — | Idle (23 cycles) |
-| Dev-Core | 0208C97 | — | Idle (FIX-TYPECHECK-001 DONE by Mark) |
-| Dev-Infra | 0208C93 | — | Idle (4 cycles) |
-| Dev-Edge | 0208C97 | — | Idle (FIX-CONTAINER-001 DONE by Mark+CTO) |
-| UI/UX | 0208C82 | — | Idle (15 cycles) |
-| Research | 0208C89 | — | Idle (8 cycles) |
-| Quality | 0208C94 | QA-023 | **STALLED (4 cycles — CTO override next cycle)** |
-| DevOps | 0208C94 | FIX-DOCS-001 | **STALLED (4 cycles — CTO override next cycle)** |
-| Audit | 0208C89 | — | Idle (8 cycles) |
+| Coordinator | 0208C98 | Cycle 98 | Active |
+| Architecture | 0208C74 | — | Idle (24 cycles). SYNC-008 queued. |
+| Dev-Core | 0208C97 | — | Idle. FIX-BUG-001 (P1) + FIX-FILESIZE-001 (P2) queued. |
+| Dev-Infra | 0208C93 | — | Idle (5 cycles). TEST-ENTITY-001 (P1) queued. |
+| Dev-Edge | 0208C97 | — | Idle |
+| UI/UX | 0208C82 | — | Idle (16 cycles) |
+| Research | 0208C89 | — | Idle (9 cycles) |
+| Quality | 0208C98 | — | QA-023 CTO override 완료. QA-024 (P1) queued. |
+| DevOps | 0208C98 | — | FIX-DOCS-001 CTO override 완료. |
+| Audit | 0208C89 | — | Idle (9 cycles) |
 
 ## Human Intervention Needed
 

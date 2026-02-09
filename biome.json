@@ -37,12 +37,16 @@
 			"recommended": true,
 			"complexity": {
 				"noExcessiveCognitiveComplexity": "warn",
-				"noForEach": "off"
+				"noForEach": "off",
+				"useLiteralKeys": "off"
 			},
 			"style": {
 				"useConst": "error",
 				"useTemplate": "warn",
 				"noNonNullAssertion": "warn"
+			},
+			"performance": {
+				"noDelete": "warn"
 			},
 			"suspicious": {
 				"noExplicitAny": "warn",
@@ -50,6 +54,18 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			"include": ["**/*.svelte"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off"
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "single",

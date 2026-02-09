@@ -4,8 +4,8 @@
  * Pure logic delegated to chat-logic.ts for testability.
  */
 
-import { parseWsMessage, applyChunk, applyDone, createUserMessage } from './chat-logic.js';
-import { createAuthMessage, parseAuthResponse, isAuthOk } from './ws-auth.js';
+import { applyChunk, applyDone, createUserMessage, parseWsMessage } from './chat-logic.js';
+import { createAuthMessage, isAuthOk, parseAuthResponse } from './ws-auth.js';
 
 export interface ChatMessage {
 	readonly id: string;

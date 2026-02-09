@@ -1,5 +1,5 @@
-import type { Config } from 'tailwindcss';
 import { colors, typography } from '@axel/ui/tokens';
+import type { Config } from 'tailwindcss';
 import { buildTailwindColors, buildTailwindFontFamily } from './src/lib/utils/tailwind-tokens.js';
 
 /**

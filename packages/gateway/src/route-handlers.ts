@@ -31,10 +31,18 @@ export function createResourceHandlers(deps: GatewayDeps): {
 		const result = await deps.searchMemory({
 			query: parsed['query'],
 			...(typeof parsed['limit'] === 'number' ? { limit: parsed['limit'] } : {}),
-			...(Array.isArray(parsed['memoryTypes']) ? { memoryTypes: parsed['memoryTypes'] as string[] } : {}),
-			...(typeof parsed['channelFilter'] === 'string' ? { channelFilter: parsed['channelFilter'] } : {}),
-			...(typeof parsed['minImportance'] === 'number' ? { minImportance: parsed['minImportance'] } : {}),
-			...(typeof parsed['hybridSearch'] === 'boolean' ? { hybridSearch: parsed['hybridSearch'] } : {}),
+			...(Array.isArray(parsed['memoryTypes'])
+				? { memoryTypes: parsed['memoryTypes'] as string[] }
+				: {}),
+			...(typeof parsed['channelFilter'] === 'string'
+				? { channelFilter: parsed['channelFilter'] }
+				: {}),
+			...(typeof parsed['minImportance'] === 'number'
+				? { minImportance: parsed['minImportance'] }
+				: {}),
+			...(typeof parsed['hybridSearch'] === 'boolean'
+				? { hybridSearch: parsed['hybridSearch'] }
+				: {}),
 		});
 		sendJson(res, 200, { results: result.results, totalMatches: result.totalMatches, requestId });
 	}

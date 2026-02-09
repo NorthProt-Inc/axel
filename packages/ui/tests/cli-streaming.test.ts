@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+	type StreamSession,
+	completeStream,
 	createStreamSession,
 	feedChunk,
-	completeStream,
 	getStreamOutput,
-	type StreamSession,
 } from '../src/cli/streaming.js';
 
 describe('CLI Streaming — StreamSession lifecycle', () => {

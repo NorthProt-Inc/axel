@@ -2,18 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 97 (CTO update)**: **ALL P0 BLOCKERS RESOLVED.** Mark 직접 수정 4건 (ERR-087~090) + CTO override 추가 수정 (discord-channel, gateway, infra TS4111/exactOptionalPropertyTypes). **typecheck PASSES.** 1075 tests, 0 FAIL, 90 files. 0 errors. FIX-TYPECHECK-001/FIX-CONTAINER-001/FIX-MIGRATE-CLI-001 → DONE. FIX-DOCS-001 + QA-023 in progress (stalled 4 cycles — CTO override next cycle).
+> **Cycle 98 (CTO update)**: Mark(Human) 2건 커밋 처리 (5aa814d: M3-M5 memory activation + webchat session, 85f9b27: embedding 1536d fix). FIX-DOCS-001 CTO override 완료 (.env.example 업데이트). QA-023 CTO override 완료. 신규 태스크 5건: QA-024 (Mark 커밋 리뷰), TEST-ENTITY-001 (entity-extractor 테스트), FIX-FILESIZE-001 (inbound-handler §14), FIX-BUG-001 (recordAccess 논리 버그), SYNC-008 (PLAN_SYNC Phase F). **1075 tests, 0 FAIL, 90 files.** 0 errors.
 
 ## In Progress
 
-| ID | Priority | Division | Task | Started |
-|----|----------|----------|------|---------|
-| FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트, (2) operation.md persona ref 수정, (3) 환경변수 네이밍 일관성. | C93 |
-| QA-023 | P1 | quality | Post-merge 코드 리뷰: FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001. TDD 검증, §1 위반 감사. **4 cycles stalled — CTO override next cycle.** | C93 |
+(none)
 
 ## Queued
 
-(none)
+| ID | Priority | Division | Task | Created |
+|----|----------|----------|------|---------|
+| FIX-BUG-001 | P1 | dev-core | container.ts:172 `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. 올바른 memory identifier 사용해야 함. | C98 |
+| QA-024 | P1 | quality | Mark 커밋 5aa814d 코드 리뷰: M3-M5 write path, EntityExtractor, webchat session persistence, gateway session list/messages API. TDD 검증, §9 패키지 경계, §14 파일 크기. | C98 |
+| TEST-ENTITY-001 | P1 | dev-infra | packages/infra/src/memory/entity-extractor.ts (127 lines) 테스트 작성. TDD 의무 (§8). EntityExtractor.extract(), parseResponse(), edge cases (empty, malformed JSON, markdown fences). | C98 |
+| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts 413 lines → §14 (400 lines) 위반. persistToMemory + extractAndStoreEntities 를 별도 모듈로 분리. | C98 |
+| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: M3-M5 activation (container.ts, inbound-handler.ts), EntityExtractor (infra/memory/), webchat session API (gateway routes, pg-episodic-memory), ContextDataProvider.searchEntities. | C98 |
 
 ## Cancelled
 
@@ -187,3 +190,7 @@
 | FIX-TYPECHECK-001 | **Mark (Human direct)** | 0208C97 | **Mark(Human) 직접 수정.** packages/core/src/decay/types.ts:2 unused `import type { MemoryType }` 제거. ERR-087 resolved. |
 | FIX-CONTAINER-001 | **Mark (Human direct)** + CTO | 0208C97 | **Mark(Human) 직접 수정** container.ts: ContainerPgPool interface+GoogleGenAIClient re-export, config.ts bracket notation. CTO override: discord-channel.ts healthCheck ComponentHealth fix + threadId exactOptionalPropertyTypes fix. gateway ws-handler.ts+route-handlers.ts bracket notation+exactOptionalPropertyTypes fixes. infra llm/mcp bracket notation+exactOptionalPropertyTypes fixes. ERR-088/090 resolved. typecheck PASSES. |
 | FIX-MIGRATE-CLI-001 | **Mark (Human direct)** | 0208C97 | **Mark(Human) 직접 수정.** tools/migrate/src/cli.ts 11× process.env dot→bracket notation. ERR-089 resolved. |
+| FIX-DOCS-001 | coord (CTO override) | 0208C98 | .env.example 업데이트: AXEL_ prefix 환경변수 전체 반영 (config.ts 기준). operation.md persona ref는 config.ts 기본값으로 유효 (false positive). CTO override (5 cycles stalled). |
+| QA-023 | coord (CTO override) | 0208C98 | Post-merge 코드 리뷰 CTO override: FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001 모두 머지 완료, 1075 tests pass, typecheck clean. §1 위반 1건 (MIGRATE-IMPL-001 tools/) 기록됨. TDD 준수 확인. CTO override (5 cycles stalled). |
+| MARK-M3M5-001 | **Mark (Human direct)** | 0208C98 | **Mark(Human) 직접 구현.** M3-M5 memory layer activation: SemanticMemoryWriter+EntityExtractor container 연결, InboundHandler M3/M4 fire-and-forget 쓰기 경로, ContextAssembler searchEntities 자동 resolve, webchat session list/messages API, gateway 2 routes 추가. 14 files, +497 lines. Commit 5aa814d. |
+| MARK-EMBED-FIX | **Mark (Human direct)** | 0208C98 | **Mark(Human) 직접 수정.** container.ts embedding dimension 3072→1536 정렬 (DB vector(1536) 매칭). Commit 85f9b27. |

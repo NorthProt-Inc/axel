@@ -10,14 +10,15 @@ import type {
 	WorkingMemory,
 } from '@axel/core/memory';
 import type { LlmProvider, SessionStore, ToolExecutor } from '@axel/core/orchestrator';
-import type { MemorySearchResult } from '@axel/core/types';
 import { SessionRouter } from '@axel/core/orchestrator';
+import type { MemorySearchResult } from '@axel/core/types';
 import {
 	AnthropicLlmProvider,
 	AxelPgPool,
+	EntityExtractor,
 	GeminiEmbeddingService,
-	GoogleLlmProvider,
 	type GoogleGenAIClient,
+	GoogleLlmProvider,
 	McpToolExecutor,
 	PgConceptualMemory,
 	PgEpisodicMemory,
@@ -28,7 +29,6 @@ import {
 	RedisStreamBuffer,
 	RedisWorkingMemory,
 	SemanticMemoryWriter,
-	EntityExtractor,
 	ToolRegistry,
 } from '@axel/infra';
 import type { AxelConfig } from './config.js';
