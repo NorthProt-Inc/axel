@@ -190,8 +190,6 @@ DATABASE_URL="postgresql://..." node tools/migrate/dist/cli.js up
 NODE_ENV=production node apps/axel/dist/main.js
 ```
 
-See `docs/plan/deployment-strategy.md` for detailed deployment guide.
-
 ---
 
 ## License
@@ -203,8 +201,6 @@ MIT License
 ## Contributing
 
 This project uses an autonomous agent development organization. See `.axel-ops/` for operational infrastructure.
-
-For human contributions, please see `CONTRIBUTING.md` (coming soon).
 
 ---
 

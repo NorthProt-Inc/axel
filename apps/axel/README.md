@@ -243,7 +243,7 @@ function wireChannels({ channels, inboundHandler }) {
 docker compose -f docker/docker-compose.dev.yml up
 
 # Terminal 2: Run migrations
-DATABASE_URL=postgresql://axel:axel_dev_password@localhost:5432/axel pnpm migrate up
+DATABASE_URL=postgresql://axel:your_secure_password@localhost:5432/axel pnpm migrate up
 
 # Terminal 3: Start agent
 cd apps/axel

@@ -9,10 +9,6 @@ packageExtensionsChecksum: 2d967b9e7b7b134dc873e4a8873728c9
 importers:
 
   .:
-    dependencies:
-      punycode:
-        specifier: ^2.3.1
-        version: 2.3.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -133,9 +129,6 @@ importers:
       grammy:
         specifier: ^1.39.3
         version: 1.39.3
-      punycode:
-        specifier: ^2.3.1
-        version: 2.3.1
     devDependencies:
       typescript:
         specifier: ^5.7.3
