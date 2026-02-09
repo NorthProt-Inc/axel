@@ -1,5 +1,10 @@
 import type { PersonaEngine } from '@axel/core/persona';
-import { createChannels, createHandleMessage, wireChannels } from './bootstrap-channels.js';
+import {
+	createActiveUserTracker,
+	createChannels,
+	createHandleMessage,
+	wireChannels,
+} from './bootstrap-channels.js';
 import { loadConfig } from './config.js';
 import { type ContainerDeps, createContainer } from './container.js';
 import { gracefulShutdown, startupHealthCheck } from './lifecycle.js';
@@ -49,8 +54,11 @@ export async function bootstrap(
 	// Create channels from config
 	const channels = createChannels(config);
 
+	// Active user tracking for graceful shutdown flush (FIX-MEMORY-002)
+	const activeUserTracker = createActiveUserTracker();
+
 	// Wire InboundHandler to channels
-	wireChannels(channels, container, personaEngine);
+	wireChannels(channels, container, personaEngine, activeUserTracker);
 
 	// Create gateway HandleMessage adapter (available for gateway wiring)
 	const _handleMessage = createHandleMessage(container, personaEngine);
@@ -76,6 +84,7 @@ export async function bootstrap(
 				workingMemory: container.workingMemory,
 				redis: deps.redis,
 				pgPool: container.pgPool,
+				getActiveUserIds: activeUserTracker.getActiveUserIds,
 			});
 		} finally {
 			clearTimeout(timer);

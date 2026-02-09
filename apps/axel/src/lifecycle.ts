@@ -18,6 +18,7 @@ export interface ShutdownableContainer {
 	readonly workingMemory: { flush(userId: string): Promise<void> };
 	readonly redis: { quit(): Promise<unknown> };
 	readonly pgPool: { end(): Promise<void> };
+	readonly getActiveUserIds: () => readonly string[];
 }
 
 /**
@@ -117,11 +118,14 @@ export async function gracefulShutdown(container: ShutdownableContainer): Promis
 		}
 	}
 
-	// Phase 3: Flush state
-	try {
-		await container.workingMemory.flush('*');
-	} catch (_err: unknown) {
-		// Continue shutdown even if flush fails
+	// Phase 3: Flush working memory for each active user (FIX-MEMORY-002)
+	const activeUserIds = container.getActiveUserIds();
+	for (const userId of activeUserIds) {
+		try {
+			await container.workingMemory.flush(userId);
+		} catch (_err: unknown) {
+			// Continue flushing remaining users even if one fails
+		}
 	}
 
 	// Phase 4: Close connections

@@ -3,10 +3,27 @@ import { DiscordChannel } from '@axel/channels/discord';
 import { TelegramChannel } from '@axel/channels/telegram';
 import { type SendCallback, createInboundHandler } from '@axel/core/orchestrator';
 import type { PersonaEngine } from '@axel/core/persona';
-import type { AxelChannel } from '@axel/core/types';
+import type { AxelChannel, InboundMessage } from '@axel/core/types';
 import type { HandleMessage, MessageResult } from '@axel/gateway';
 import type { AxelConfig } from './config.js';
 import type { Container } from './container.js';
+
+/** Tracks active user IDs for graceful shutdown flush (FIX-MEMORY-002) */
+export interface ActiveUserTracker {
+	readonly track: (userId: string) => void;
+	readonly getActiveUserIds: () => readonly string[];
+}
+
+/** Create an in-memory active user tracker */
+export function createActiveUserTracker(): ActiveUserTracker {
+	const activeUsers = new Set<string>();
+	return {
+		track: (userId: string) => {
+			activeUsers.add(userId);
+		},
+		getActiveUserIds: () => [...activeUsers],
+	};
+}
 
 /** Fallback error message for gateway HandleMessage */
 const GATEWAY_ERROR_MESSAGE =
@@ -40,7 +57,7 @@ export function createChannels(config: AxelConfig): AxelChannel[] {
 	return channels;
 }
 
-/** Build InboundHandler from container + persona engine */
+/** Build InboundHandler from container + persona engine (FIX-MEMORY-002) */
 function buildHandler(container: Container, personaEngine: PersonaEngine) {
 	return createInboundHandler({
 		sessionRouter: container.sessionRouter,
@@ -48,6 +65,8 @@ function buildHandler(container: Container, personaEngine: PersonaEngine) {
 		llmProvider: container.anthropicProvider,
 		toolExecutor: container.toolExecutor,
 		personaEngine,
+		workingMemory: container.workingMemory,
+		episodicMemory: container.episodicMemory,
 		toolDefinitions: container.toolRegistry.listAll(),
 	});
 }
@@ -58,18 +77,23 @@ function buildHandler(container: Container, personaEngine: PersonaEngine) {
  * For each channel, creates a send-bound InboundHandler that routes
  * the InboundMessage through the full processing pipeline:
  * SessionRouter → ContextAssembler → PersonaEngine → reactLoop → send
+ *
+ * If a tracker is provided, each incoming userId is recorded for
+ * graceful shutdown flush (FIX-MEMORY-002).
  */
 export function wireChannels(
 	channels: readonly AxelChannel[],
 	container: Container,
 	personaEngine: PersonaEngine,
+	tracker?: ActiveUserTracker,
 ): void {
 	const handler = buildHandler(container, personaEngine);
 
 	for (const channel of channels) {
 		const sendCallback: SendCallback = (target, msg) => channel.send(target, msg);
 
-		channel.onMessage(async (message) => {
+		channel.onMessage(async (message: InboundMessage) => {
+			tracker?.track(message.userId);
 			await handler(message, sendCallback);
 		});
 	}
