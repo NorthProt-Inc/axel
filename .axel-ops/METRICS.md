@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 99
+## Current Cycle: 100
 
 ## Division Performance (Last 10 Cycles)
 
@@ -28,8 +28,8 @@
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
-| Typecheck | **FAIL** | PASS | **WARN** (ERR-091: tools/data-quality @google/genai) |
-| Build | PASS | PASS | OK |
+| Typecheck | **FAIL** | PASS | **CRITICAL** (ERR-092: infra 23 errors — stale core/dist/) |
+| Build | FAIL (blocked by typecheck) | PASS | **CRITICAL** |
 
 ## Coverage Tracking
 
@@ -44,9 +44,13 @@
 | `apps/webchat/` | — | 68 tests (markdown 8 + enhanced-markdown 17 + chat-logic 14 + ws-auth 9 + session-api 13 + tokens-integration 7). Pure logic tests. | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 | `tools/migrate-axnmihn/` | — | TBD (MIGRATE-IMPL-001, newly merged) | — |
-| `packages/infra/src/memory/` | 80% | SemanticMemoryWriter 100% (18 tests), EntityExtractor tested (Mark, 783f5fd) | OK (§8 resolved) |
-| `packages/infra/src/persona/` | 80% | FilePersonaEngine (19 tests, untracked) | NEW (Mark) |
-| `tools/data-quality/` | — | 0 tests (utility tool, 10 src files, untracked) | NEW (Mark) |
+| `packages/infra/src/memory/` | 80% | SemanticMemoryWriter 100% (18 tests), EntityExtractor tested, ConsolidationService (156 tests, Mark b15044c) | OK |
+| `packages/infra/src/persona/` | 80% | FilePersonaEngine (19 tests, committed 9fb41b5) | OK (Mark) |
+| `packages/infra/src/context/` | 80% | AnthropicTokenCounter (77 tests, Mark 9063a63) | NEW (Mark) |
+| `packages/infra/src/llm/` (new) | 80% | FallbackLlmProvider (130 tests, Mark d0b42bf) | NEW (Mark) |
+| `packages/infra/src/db/` (new) | 80% | PgInteractionLogger (70 tests, Mark a3005ab), PgSemanticMemory batch decay (77 tests, Mark c83d5cb) | NEW (Mark) |
+| `packages/core/src/memory/` (new) | 90% | consolidation.ts (81 tests, Mark b15044c) | NEW (Mark) |
+| `tools/data-quality/` | — | 0 tests (utility tool, 10 src files) | Committed (Mark 9fb41b5) |
 
 ## Sprint Progress
 
@@ -74,4 +78,5 @@
 | 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건. 5 in progress (2cy). 1075 tests. 4 errors. |
 | 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |
 | 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 1075 tests. 0 errors. |
-| 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 783f5fd entity-extractor test + multi-fix. ec64cb5 config.llm refactor. e5ea290 session API wiring. ERR-091 data-quality typecheck. 3 tasks assigned. 1108 tests. 1 error. |
+| 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 1108 tests. 1 error. |
+| 100 | devops, quality, dev-core | 11 (10 Mark direct + FIX-TYPECHECK-002 Mark) | 1 (ERR-092) | **Mark 10건 대규모 기능 커밋 (+48 tests).** Logger, FallbackLLM, TokenCounter, InteractionLogger, Consolidation, Decay, WS events. ERR-091 RESOLVED, ERR-092 CRITICAL NEW (stale dist). 1156 tests, 99 files. 1 error. |

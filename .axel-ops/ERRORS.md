@@ -2,17 +2,19 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 99 (CTO update)**: **1 error open.** ERR-091 `tools/data-quality` typecheck failure (`@google/genai` missing). Mark 3건 커밋 처리 (783f5fd, ec64cb5, e5ea290). 1108 tests pass.
+> **Cycle 100 (CTO update)**: **1 error open.** ERR-092 (P0 CRITICAL): `packages/infra/` typecheck 23 errors — stale `packages/core/dist/` + unused import. ERR-091 RESOLVED (Mark 직접 해결, data-quality @google/genai 추가). Mark 10건 커밋 처리. 1156 tests pass. **FIX-BUG-001 미해결** (matchedMemoryIds 논리 버그).
 
 ## Open
 
 | ID | Severity | Description | Assigned | Created |
 |----|----------|-------------|----------|---------|
-| ERR-091 | MEDIUM | `tools/data-quality/src/backfill-ai.ts:1` — `Cannot find module '@google/genai'`. 패키지 dependency에 `@google/genai` 누락. `pnpm typecheck` 실패 원인. | FIX-TYPECHECK-002 (devops) | C99 |
+| ERR-092 | CRITICAL | `packages/infra/` typecheck 23 errors. ROOT CAUSE: stale `packages/core/dist/` — project references resolve to outdated dist missing `logging/`, `interaction-log.ts` exports, `consolidation.ts` exports. 추가: `fallback-provider.ts` unused import `CircuitOpenError`, `pg-semantic-memory.ts` `decayConfig` property stale resolution. FIX: `rm -rf packages/core/dist/` 또는 `pnpm build --filter @axel/core`. | FIX-TYPECHECK-003 (devops, P0) | C100 |
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
+|----|------------|-------------|------|
+| ERR-091 | `@google/genai` dependency 추가됨. data-quality typecheck 통과. | **Mark (Human)** 직접 수정 (9fb41b5) | 0209C100 |
 |----|------------|-------------|------|
 | ERR-087 | `import type { MemoryType }` 미사용 import 제거. typecheck 복구. | **Mark (Human)** 직접 수정 (uncommitted) | 0208C97 |
 | ERR-088 | container.ts PgPool+GoogleGenAIClient 타입 수정. ContainerPgPool interface 도입, GoogleGenAIClient re-export 사용. | **Mark (Human)** 직접 수정 (uncommitted) | 0208C97 |

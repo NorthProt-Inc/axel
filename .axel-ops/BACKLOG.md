@@ -2,23 +2,23 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 99 (CTO update)**: Mark 3건 추가 커밋 (783f5fd: entity-extractor test+claude_report+multi-fix, ec64cb5: config.llm refactor, e5ea290: session API wiring+memory failure isolation). TEST-ENTITY-001 해결 (Mark 직접 작성 198 lines, 783f5fd). **1108 tests (1108 pass, 36 skip), 91 files.** typecheck FAIL (ERR-091: data-quality @google/genai 누락). 신규: FilePersonaEngine (infra/persona/, untracked), tools/data-quality (untracked). QA-024 scope 확장 (3건 추가 커밋 포함).
+> **Cycle 100 (CTO update)**: Mark 10건 추가 커밋 (53fb1cf~2649093). 주요 기능: Logger interface+pino, AnthropicTokenCounter, FallbackLlmProvider, PgInteractionLogger, L2→L3 consolidation, batch decay scheduler, WS heartbeat/typing/session_end/tool forwarding, migration 009-011. **1156 tests (1156 pass, 36 skip), 99 files.** typecheck FAIL (ERR-092: infra 23 errors — stale core/dist/). ERR-091 RESOLVED. FIX-TYPECHECK-002 → DONE. QA-024 scope 확대 (10건 추가 커밋).
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-BUG-001 | P1 | dev-core | container.ts `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. | C99 |
-| QA-024 | P1 | quality | Mark 커밋 6건 종합 리뷰 (5aa814d, 85f9b27, 783f5fd, ec64cb5, e5ea290). M3-M5 write path, EntityExtractor, config.llm refactor, session API wiring, memory failure isolation, FilePersonaEngine. TDD §8, §9, §14 검증. | C99 |
-| FIX-TYPECHECK-002 | P1 | devops | tools/data-quality typecheck 실패: `@google/genai` dependency 누락. package.json에 추가 또는 tsconfig exclude. ERR-091. | C99 |
+| FIX-BUG-001 | P1 | dev-core | container.ts `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. **2 cycles.** | C99 |
+| QA-024 | P1 | quality | Mark 커밋 **16건** 종합 리뷰. 범위 확대: Logger+pino, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool forwarding, migration 009-011. TDD §8, §9, §14 검증. **2 cycles.** | C99 (scope 확대 C100) |
+| FIX-TYPECHECK-003 | P0 | devops | ERR-092: `packages/infra/` typecheck 23 errors. stale `packages/core/dist/` 삭제 필요 + `fallback-provider.ts` unused import `CircuitOpenError` 제거. | C100 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
 | FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts → §14 (400 lines) 위반 가능성. persistToMemory 분리. (e5ea290에서 추가 변경됨, 현재 line count 재확인 필요) | C98 |
-| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: M3-M5 activation, EntityExtractor, FilePersonaEngine (infra/persona/), webchat session API, config.llm refactor, session API wiring. | C98 (scope 확장 C99) |
-| MARK-PERSONA-001 | P2 | — | Mark(Human) 직접 구현: FilePersonaEngine (packages/infra/src/persona/, 168 lines, 19 tests). untracked 상태. git add + commit 필요. §1 소유권: infra → dev-infra. | C99 |
+| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: Logger, pino, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool, migration 009-011, FilePersonaEngine. | C98 (scope 확장 C100) |
+| MARK-PERSONA-001 | P2 | — | Mark(Human) 직접 구현: FilePersonaEngine (packages/infra/src/persona/, 168 lines, 19 tests). 커밋됨 (9fb41b5). §1 소유권: infra → dev-infra. | C99 |
 
 ## Cancelled
 
@@ -199,3 +199,13 @@
 | TEST-ENTITY-001 | **Mark (Human direct)** | 0209C99 | **Mark(Human) 직접 작성.** packages/infra/tests/memory/entity-extractor.test.ts (198 lines). extract(), parseResponse(), empty/malformed JSON, markdown fences. §8 TDD 위반 해소. Commit 783f5fd. |
 | MARK-CONFIG-001 | **Mark (Human direct)** | 0209C99 | **Mark(Human) 직접 리팩터.** config.llm as single source of truth. container.ts hardcoded DEFAULT_*_CONFIG → config.ts Zod schema → .env override → DI container. Commit ec64cb5. |
 | MARK-SESSION-001 | **Mark (Human direct)** | 0209C99 | **Mark(Human) 직접 수정.** (1) gateway session API wiring (listSessions/getSessionMessages/getSession/endSession), (2) persistToMemory M1-M4 독립 try-catch 격리, (3) PgEpisodicMemory turn_id auto-increment, (4) EpisodicMemory interface 확장 (getSessionMessages/listSessions), (5) bootstrap-channels M3/M4 DI wiring. Commit e5ea290. |
+| FIX-TYPECHECK-002 | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 해결.** tools/data-quality @google/genai dependency 추가됨. ERR-091 resolved. Commit 9fb41b5. |
+| MARK-TOKEN-FIX | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 수정.** token estimate divisor /4→/3 per ADR-018 정렬. context/types.ts + inbound-handler.ts + assembler tests. Commit 53fb1cf. |
+| MARK-LOGGER-001 | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** core/logging/ Logger interface + NoopLogger. infra/logging/ PinoLogger. config.ts logLevel. container.ts Logger DI. Commit 89b4190. |
+| MARK-SYNC-001 | **Mark (Human direct)** | 0209C100 | **Mark(Human) sync.** FilePersonaEngine, logging, migrations 009-010, ops C99, data-quality, webchat. 49 files. Commit 9fb41b5. |
+| MARK-TOKEN-COUNTER | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** AnthropicTokenCounter (infra/context/) + LRU cache. container.ts DI wiring. runtime-deps.ts adapter. Commit 9063a63. |
+| MARK-FALLBACK-LLM | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** FallbackLlmProvider (infra/llm/) — primary→fallback circuit breaker failover. 130 tests. container.ts DI. Commit d0b42bf. |
+| MARK-INTERACTION-LOG | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** InteractionLog/InteractionLogger interfaces (core/orchestrator/). PgInteractionLogger (infra/db/). InboundHandler telemetry wiring. container.ts DI. 70 tests. Commit a3005ab. |
+| MARK-CONSOLIDATION | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** L2→L3 consolidation: core/memory/consolidation.ts (pure functions), infra/memory/consolidation-service.ts (LLM extraction + dedup + storage), migration 011. main.ts scheduler. 237 tests (core 81 + infra 156). Commits b15044c + 16583e7. |
+| MARK-DECAY-BATCH | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** Batch decay scheduler — PgSemanticMemory.decay() ADR-015 8-step formula 구현, main.ts 6h interval scheduler. Commit c83d5cb. |
+| MARK-WS-EVENTS | **Mark (Human direct)** | 0209C100 | **Mark(Human) 직접 구현.** WS heartbeat (30s ping/pong), typing indicator, session_end, tool event forwarding. gateway ws-handler.ts 확장 + 87 tests. Commit 2649093. |
