@@ -2,22 +2,22 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 89
+## Current Cycle: 90
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 68 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 | 5 (all CTO override) | Idle |
-| dev-core | 1 cycle | 8 | 0 | Idle |
-| dev-infra | 1 cycle | 11 | 0 | Idle |
-| dev-edge | 1 cycle | 21 | 0 | Idle |
-| quality | 1 cycle | 10 (+2: QA-022, QA-PROACTIVE-C85) | 1 (QA-012, cancelled C39) | Idle |
-| research | 1 cycle | 3 (RES-006, RES-007, MIGRATE-PLAN-001) | 0 | Idle (MIGRATE-PLAN-001 done) |
-| devops | 1 cycle | 25 | 0 | Idle |
-| ui-ux | 1 cycle | 7 | 0 | Idle (all UI coding done) |
-| audit | 1 cycle | 5 (AUDIT-001~006) | 0 | Idle (AUDIT-006 done) |
+| coord | — | 69 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 | 5 (all CTO override) | Idle (29 cycles) |
+| dev-core | 1 cycle | 9 (+1: FIX-MEMORY-001) | 0 | Idle (FIX-MEMORY-001 done) |
+| dev-infra | 1 cycle | 11 | 0 | Idle (24 cycles) |
+| dev-edge | 1 cycle | 21 | 0 | Idle (20 cycles) |
+| quality | 1 cycle | 10 (+2: QA-022, QA-PROACTIVE-C85) | 1 (QA-012, cancelled C39) | Idle (5 cycles) |
+| research | 1 cycle | 3 (RES-006, RES-007, MIGRATE-PLAN-001) | 0 | Idle |
+| devops | 1 cycle | 28 (+3: FIX-OPSDOC/BIOME/README-002) | 0 | Idle |
+| ui-ux | 1 cycle | 7 | 0 | Idle (8 cycles) |
+| audit | 1 cycle | 5 (AUDIT-001~006) | 0 | Idle |
 
 ## Bottleneck Indicators
 
@@ -69,3 +69,4 @@
 | 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE (InboundHandler DI 누락). FIX-README-001: README 보안 수정. FIX-PUNYCODE-003: punycode 정리. Human directives 2건 → OPS-DOC-001 + DIAG-UNTRACK-001. 975 tests. 0 errors. |
 | 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** OPS-DOC-001 (operation.md 17KB). DIAG-UNTRACK-001 (ROOT CAUSE: patches/ 누락). Human directives 2건: MIGRATE-PLAN-001 (P0 마이그레이션), AUDIT-006 (P1 유휴 Division 분석). 975 tests. 0 errors. |
 | 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** MIGRATE-PLAN-001 (마이그레이션 계획 12섹션). AUDIT-006 (14 findings 4H7M3L). Human directive 1건 (human.md 재구성). QC reports 5건. 5 new fix tasks. 975 tests. 0 errors. |
+| 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC-001, FIX-BIOME-001, FIX-README-002) | 0 | **4 TASKS DONE.** FIX-MEMORY-001 (InboundHandler memory DI, +10 tests). 3 devops fixes. 2 blocks processed. QC 7건 처리, FIX-BUILD-001(P2) 생성. **985 tests (+10).** 0 errors. |

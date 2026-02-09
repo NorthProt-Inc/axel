@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation Maintenance.** MIGRATE-PLAN-001 + AUDIT-006 완료. QC reports 5건 처리. 5 new fix tasks 생성.
-- **Cycle**: 89
-- **Last Updated**: 2026-02-08C89
-- **STATUS**: **2 TASKS COMPLETED.** MIGRATE-PLAN-001 (research: axnmihn→Axel 마이그레이션 계획 12개 섹션), AUDIT-006 (audit: 유휴 Division 활용 분석, 14 findings 4H 7M 3L). Human directive 1건 처리 (human.md 재구성: 완료 항목 삭제, 지속 참고 항목 분리). QC reports 5건 처리 (1 false positive, 2 acknowledged, 2 FIX 태스크 생성). Drift CLEAN. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 5 tasks queued.
+- **Phase**: **Post-Implementation Maintenance.** FIX-MEMORY-001 (dev-core) + 3 devops fix tasks 완료. Memory persistence 파이프라인 진행 중.
+- **Cycle**: 90
+- **Last Updated**: 2026-02-08C90
+- **STATUS**: **4 TASKS COMPLETED.** FIX-MEMORY-001 (dev-core: InboundHandler memory DI+persistToMemory, 387 tests +10), FIX-OPSDOC-001 (devops: operation.md commit), FIX-BIOME-001 (devops: svelte-kit biome ignore), FIX-README-002 (devops: dist path fix). 2 blocks: FIX-MEMORY-001 flush→FIX-MEMORY-002(dev-edge), FIX-CYCLESH-001→Human(Mark). QC reports 7건 처리 (C89 잔여 2 + C1735 신규 5). FIX-BUILD-001 (P2) 생성. Drift CLEAN. **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 4 tasks queued (1 human-blocked).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 5 |
+| Queued | 4 (1 human-blocked) |
 | In Progress | 0 |
-| Done | 142 |
+| Done | 146 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -79,24 +79,26 @@
 | 87 | 0208 | **3 TASKS COMPLETED.** RES-007 (CLI 기억 상실 ROOT CAUSE: InboundHandler 메모리 DI 누락 + flush 버그), FIX-README-001 (README 보안/참조 수정), FIX-PUNYCODE-003 (punycode 정리). Human directives 2건: OPS-DOC-001 (operation.md P1), DIAG-UNTRACK-001 (untracked WARNING P1). **975 tests, 0 FAIL.** 0 errors. |
 | 88 | 0208 | **2 TASKS COMPLETED.** OPS-DOC-001 (devops: operation.md 운영 매뉴얼 17KB, 756 lines), DIAG-UNTRACK-001 (devops: cycle.sh untracked WARNING ROOT CAUSE — patches/ 누락, FIX-CYCLESH-001 생성). Human directives 2건 처리: MIGRATE-PLAN-001 (P0 axnmihn→Axel 마이그레이션 계획, research), AUDIT-006 (P1 유휴 Division 활용 분석, audit). **975 tests, 0 FAIL, 85 files.** 0 errors. |
 | 89 | 0208 | **2 TASKS COMPLETED.** MIGRATE-PLAN-001 (research: axnmihn→Axel 마이그레이션 계획 12개 섹션), AUDIT-006 (audit: 유휴 Division 분석, 14 findings 4H 7M 3L). Human directive 1건: human.md 재구성 (완료 삭제, 지속 참고 분리). QC reports 5건: 1 false positive (.env), 2 acknowledged, 2 FIX 생성. 5 new tasks: FIX-MEMORY-001 (P1 dev-core), FIX-OPSDOC-001 (P1 devops), FIX-BIOME-001/README-002/CYCLESH-001 (P2 devops). **975 tests, 0 FAIL, 85 files.** 0 errors. |
+| 90 | 0208 | **4 TASKS COMPLETED.** FIX-MEMORY-001 (dev-core: InboundHandler memory DI+persistToMemory, 387 tests +10), FIX-OPSDOC-001 (devops: operation.md commit), FIX-BIOME-001 (devops: svelte-kit biome ignore), FIX-README-002 (devops: dist path fix). 2 blocks: flush scope→FIX-MEMORY-002(dev-edge), FIX-CYCLESH-001→Human(Mark). QC 7건 처리, FIX-BUILD-001(P2) 생성. **985 tests (+10), 0 FAIL, 85 files.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C89 | Cycle 89 | Active |
-| Architecture | 0208C74 | — | Idle (28 cycles) |
-| Dev-Core | 0208C61 | — | Idle (28 cycles) |
-| Dev-Infra | 0208C66 | — | Idle (23 cycles) |
-| Dev-Edge | 0208C70 | — | Idle (19 cycles) |
-| UI/UX | 0208C82 | — | Idle (7 cycles) |
-| Research | 0208C89 | — | Idle (MIGRATE-PLAN-001 done) |
-| Quality | 0208C85 | — | Idle (4 cycles) |
-| DevOps | 0208C88 | — | Idle |
-| Audit | 0208C89 | — | Idle (AUDIT-006 done) |
+| Coordinator | 0208C90 | Cycle 90 | Active |
+| Architecture | 0208C74 | — | Idle (29 cycles) |
+| Dev-Core | 0208C90 | — | Idle (FIX-MEMORY-001 done) |
+| Dev-Infra | 0208C66 | — | Idle (24 cycles) |
+| Dev-Edge | 0208C70 | — | Idle (20 cycles) |
+| UI/UX | 0208C82 | — | Idle (8 cycles) |
+| Research | 0208C89 | — | Idle |
+| Quality | 0208C85 | — | Idle (5 cycles) |
+| DevOps | 0208C90 | — | Idle (FIX-OPSDOC/BIOME/README done) |
+| Audit | 0208C89 | — | Idle |
 
 ## Human Intervention Needed
 
 - ~~**ERR-069 CRITICAL → FIX-DIMENSION-001**~~: **RESOLVED (0208C68)**. Mark(Human) approved 1536d Matryoshka strategy and directly applied changes across 16 files. 835 tests pass. Commits: `6120a90` + `228a146`.
 - ~~**CONST-AMEND-001**~~: **RESOLVED (0208C68)**. Mark(Human) approved §9 amendment and directly applied.
 - **GitHub account suspended**: `git push origin main` fails. Local development continues. Human (Mark) must resolve account status.
+- **FIX-CYCLESH-001**: cycle.sh:93 `get_owned_paths('devops')`에 `patches/` 추가 필요. `.axel-ops/launchers/` 소유자 미정의 — CONSTITUTION §1 위반 방지를 위해 Human(Mark) 직접 수정 요청.

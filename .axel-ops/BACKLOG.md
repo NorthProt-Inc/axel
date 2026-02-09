@@ -2,17 +2,16 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 89 (CTO update)**: 2 done (MIGRATE-PLAN-001, AUDIT-006). Human directive 1건 + QC reports 5건 처리. 5 new tasks 생성. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+> **Cycle 90 (CTO update)**: 4 done (FIX-MEMORY-001, FIX-OPSDOC-001, FIX-BIOME-001, FIX-README-002). 2 blocks processed (FIX-CYCLESH-001 ownership, FIX-MEMORY-001 flush scope). 3 new tasks + 1 QC task. QC reports 7건 체크 완료 (2 C89 잔여 + 5 C1735 신규). **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| FIX-MEMORY-001 | P1 | dev-core | RES-007 ROOT CAUSE 수정: (1) InboundHandler에 WorkingMemory.pushTurn() + EpisodicMemory.addMessage() DI 추가, (2) gracefulShutdown flush('*') → flush(activeUserId) 수정, (3) M2/M3 영구 저장 write path 연결. AUD-108 지적. docs/research/RES-007 참조. | — |
-| FIX-OPSDOC-001 | P1 | devops | operation.md가 devops worktree에 untracked 상태. cycle.sh ownership gap으로 커밋 누락됨. git add + commit + merge 필요. | — |
-| FIX-BIOME-001 | P2 | devops | biome.json에 `apps/webchat/.svelte-kit/` ignore 추가. QC report: 56 errors 중 54건이 자동생성 파일. | — |
-| FIX-README-002 | P2 | devops | README dist/ 경로 참조 수정 (apps/axel/dist/main.js, tools/migrate/dist/cli.js). QC report. | FIX-OPSDOC-001 |
-| FIX-CYCLESH-001 | P2 | devops | cycle.sh:93 devops 소유 경로에 `patches/` 추가. DIAG-UNTRACK-001 ROOT CAUSE 수정. | — |
+| FIX-MEMORY-002 | P1 | dev-edge | RES-007 ROOT CAUSE #2: apps/axel/src/lifecycle.ts gracefulShutdown에서 flush('*') → flush(activeUserId) 수정. dev-core block 처리. | FIX-MEMORY-001 |
+| FIX-CYCLESH-001 | P2 | **Human (Mark)** | cycle.sh:93 devops 소유 경로에 `patches/` 추가. DIAG-UNTRACK-001 ROOT CAUSE 수정. **§1 위반으로 devops/coord 수정 불가 — .axel-ops/launchers/ 소유자 미정의.** | — |
+| FIX-MEMORY-003 | P2 | dev-infra | RES-007 ROOT CAUSE #3: M3 semantic store write path 연결 (embedding 의존성). InboundHandler → SemanticMemory.store() 호출 경로 구현. | FIX-MEMORY-001 |
+| FIX-BUILD-001 | P2 | devops | Production 빌드 파이프라인: (1) root package.json에 `build` 스크립트 추가 (tsc -b), (2) 각 workspace에 build config, (3) README `format --check` 문서 수정. QC report C1735 5건 근본 원인. | — |
 
 ## Cancelled
 
@@ -174,3 +173,7 @@
 | DIAG-UNTRACK-001 | devops | 0208C88 | cycle.sh untracked files WARNING 원인 분석 완료. ROOT CAUSE: get_owned_paths('devops')에 patches/ 디렉토리 누락. FIX-CYCLESH-001 생성. Human directive. |
 | MIGRATE-PLAN-001 | research | 0208C89 | axnmihn→Axel 데이터 마이그레이션 계획 완료. 1,736 msgs, 1,039 embeddings (3072d→1536d), 1,396 entities + 1,945 relations. 12개 섹션. docs/research/MIGRATE-001-axnmihn-migration-plan.md. |
 | AUDIT-006 | audit | 0208C89 | 유휴 Division 활용 분석 + 에이전트 운영 효율화 방안 감사 완료. 14 findings (4H 7M 3L). AUD-095~108. 개선 제안 7건. |
+| FIX-MEMORY-001 | dev-core | 0208C90 | RES-007 ROOT CAUSE #1 수정: InboundHandlerDeps에 WorkingMemory+EpisodicMemory DI 추가, persistToMemory() 구현 (pushTurn+addMessage). 387 tests (+10), 0 fail. TDD RED→GREEN→REFACTOR. dev-core scope 완료 (flush/M3는 별도 태스크). |
+| FIX-OPSDOC-001 | devops | 0208C90 | operation.md git add + commit 완료. 756 lines, 17KB 운영 매뉴얼. Commit 9cc9b32. |
+| FIX-BIOME-001 | devops | 0208C90 | biome.json apps/webchat/.svelte-kit/** ignore 추가. QC report 54/56 biome errors 해결. Commit 13c580c. |
+| FIX-README-002 | devops | 0208C90 | apps/axel/README.md dist/main.js 경로 수정. Commit de719c0. |
