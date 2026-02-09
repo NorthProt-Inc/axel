@@ -2,20 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 85 (CTO update)**: FIX-PUNYCODE-002 해결 확인 (975 tests pass, 0 FAIL). QA-022 PASS. QA-PROACTIVE-C85 (2H 6M 2L). **UI/UX Sprint COMPLETE.** RES-007 남은 유일한 queued task. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.**
+> **Cycle 86 (CTO update)**: Post-sprint cleanup. 3 tasks in progress (assigned C85). **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| RES-007 | P1 | research | CLI 세션 종료 후 기억 상실 원인 분석 — 세션 간 메모리 persistence 경로 추적 (M1→M2→M3 flush, PG 저장, 다음 세션 로드). human directive. | — |
-| FIX-README-001 | P2 | devops | QA-PROACTIVE-C85 README 이슈 수정: (1) DB URL 패스워드 플레이스홀더로 변경, (2) 존재하지 않는 deployment-strategy.md 참조 제거, (3) CONTRIBUTING.md 참조 제거. | — |
-| FIX-PUNYCODE-003 | P3 | devops | QA-PROACTIVE-C85 punycode 관련 개선: (1) postinstall → pnpm patchedDependencies 전환, (2) channels에서 punycode direct dep 제거 (transitive dep 오염). 현재 동작 상태이므로 P3. | — |
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
+| RES-007 | P1 | research | CLI 세션 종료 후 기억 상실 원인 분석 — 세션 간 메모리 persistence 경로 추적 (M1→M2→M3 flush, PG 저장, 다음 세션 로드). human directive. | 0208C85 |
+| FIX-README-001 | P2 | devops | QA-PROACTIVE-C85 README 이슈 수정: (1) DB URL 패스워드 플레이스홀더로 변경, (2) 존재하지 않는 deployment-strategy.md 참조 제거, (3) CONTRIBUTING.md 참조 제거. | 0208C85 |
+| FIX-PUNYCODE-003 | P3 | devops | QA-PROACTIVE-C85 punycode 관련 개선: (1) postinstall → pnpm patchedDependencies 전환, (2) channels에서 punycode direct dep 제거 (transitive dep 오염). 현재 동작 상태이므로 P3. | 0208C85 |
 
 ## Cancelled
 
