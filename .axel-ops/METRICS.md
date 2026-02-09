@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 86
+## Current Cycle: 87
 
 ## Division Performance (Last 10 Cycles)
 
@@ -14,8 +14,8 @@
 | dev-infra | 1 cycle | 11 | 0 | Idle |
 | dev-edge | 1 cycle | 21 | 0 | Idle |
 | quality | 1 cycle | 10 (+2: QA-022, QA-PROACTIVE-C85) | 1 (QA-012, cancelled C39) | Idle |
-| research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 21 (+1: FIX-PUNYCODE-002) | 0 | Idle |
+| research | 1 cycle | 2 (RES-006, RES-007) | 0 | Idle (RES-007 done) |
+| devops | 1 cycle | 23 (+FIX-README-001, FIX-PUNYCODE-003) | 0 | Active (OPS-DOC-001, DIAG-UNTRACK-001) |
 | ui-ux | 1 cycle | 7 | 0 | Idle (all UI coding done) |
 | audit | 1 cycle | 4 | 0 | Idle |
 
@@ -71,3 +71,4 @@
 | 84 | devops, quality | 3 (FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 1 (ERR-086) | **3 DONE (1 불완전).** FIX-PUNYCODE-001 punycode override → 3 telegram test FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0. Human directives 3건: RES-007, push 비활성, §1 소유권. 969 tests (933p+36s), 3 suite FAIL, 85 files. |
 | 85 | devops, quality | 2 (FIX-PUNYCODE-002, QA-022) | 0 (1 resolved) | **UI/UX SPRINT COMPLETE.** ERR-086 resolved (975 tests pass). QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리. 3 cleanup tasks queued. 0 errors. |
 | 86 | research, devops | 0 | 0 | **Post-sprint cleanup.** RES-007, FIX-README-001, FIX-PUNYCODE-003 in progress (assigned C85). 975 tests. 0 errors. Drift CLEAN. |
+| 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE (InboundHandler DI 누락). FIX-README-001: README 보안 수정. FIX-PUNYCODE-003: punycode 정리. Human directives 2건 → OPS-DOC-001 + DIAG-UNTRACK-001. 975 tests. 0 errors. |

@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Sprint Cleanup.** RES-007 (P1), FIX-README-001 (P2), FIX-PUNYCODE-003 (P3) in progress.
-- **Cycle**: 86
-- **Last Updated**: 2026-02-08C86
-- **STATUS**: **Post-sprint cleanup cycle.** C85에서 배정한 RES-007 (research), FIX-README-001 + FIX-PUNYCODE-003 (devops) Division 실행 대기. 새 done 보고 없음. Drift CLEAN. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 3 tasks in progress.
+- **Phase**: **Post-Sprint Cleanup.** 3 done, 2 new human directives → OPS-DOC-001 + DIAG-UNTRACK-001 (devops P1).
+- **Cycle**: 87
+- **Last Updated**: 2026-02-08C87
+- **STATUS**: **3 TASKS COMPLETED.** RES-007 (research: CLI 기억 상실 ROOT CAUSE 발견), FIX-README-001 (devops: README 수정), FIX-PUNYCODE-003 (devops: punycode 정리). Human directives 2건 처리: OPS-DOC-001 (operation.md 작성), DIAG-UNTRACK-001 (untracked files WARNING 분석). Drift CLEAN. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 2 tasks in progress.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 3 |
-| Done | 135 |
+| In Progress | 2 |
+| Done | 138 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -76,20 +76,21 @@
 | 84 | 0208 | **3 TASKS DONE (FIX-PUNYCODE-001 불완전, README-001, FIX-UI-001).** FIX-PUNYCODE-001 punycode override로 3 telegram test files FAIL (ERR-086 HIGH) → FIX-PUNYCODE-002 P0 생성. Human directives 3건 처리: RES-007 (CLI 기억 분석), git push 비활성, §1 소유권 강제. **969 tests (933 pass, 36 skip, 3 suite FAIL), 85 files.** 1 error. |
 | 85 | 0208 | **UI/UX SPRINT COMPLETE.** FIX-PUNYCODE-002 확인 (ERR-086 resolved), QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리 (cycle.sh Mark 수정 확인). **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 3 cleanup tasks queued (P1/P2/P3). |
 | 86 | 0208 | **Post-sprint cleanup.** No completions. RES-007 (research), FIX-README-001 + FIX-PUNYCODE-003 (devops) in progress (assigned C85, 1 cycle). Drift CLEAN. 975 tests. 0 errors. |
+| 87 | 0208 | **3 TASKS COMPLETED.** RES-007 (CLI 기억 상실 ROOT CAUSE: InboundHandler 메모리 DI 누락 + flush 버그), FIX-README-001 (README 보안/참조 수정), FIX-PUNYCODE-003 (punycode 정리). Human directives 2건: OPS-DOC-001 (operation.md P1), DIAG-UNTRACK-001 (untracked WARNING P1). **975 tests, 0 FAIL.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C86 | Cycle 86 | Active |
+| Coordinator | 0208C87 | Cycle 87 | Active |
 | Architecture | 0208C74 | — | Idle |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C66 | — | Idle |
 | Dev-Edge | 0208C70 | — | Idle |
 | UI/UX | 0208C82 | — | Idle |
-| Research | 0208C86 | RES-007 | Active (assigned C85) |
+| Research | 0208C87 | — | Idle (RES-007 done) |
 | Quality | 0208C85 | — | Idle |
-| DevOps | 0208C86 | FIX-README-001, FIX-PUNYCODE-003 | Active (assigned C85) |
+| DevOps | 0208C87 | OPS-DOC-001, DIAG-UNTRACK-001 | Active (assigned C87) |
 | Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed

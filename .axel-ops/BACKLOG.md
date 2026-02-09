@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 86 (CTO update)**: Post-sprint cleanup. 3 tasks in progress (assigned C85). **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+> **Cycle 87 (CTO update)**: 3 done (RES-007, FIX-README-001, FIX-PUNYCODE-003). 2 human directives → 2 new tasks. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
 
 ## Queued
 
@@ -13,9 +13,8 @@
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| RES-007 | P1 | research | CLI 세션 종료 후 기억 상실 원인 분석 — 세션 간 메모리 persistence 경로 추적 (M1→M2→M3 flush, PG 저장, 다음 세션 로드). human directive. | 0208C85 |
-| FIX-README-001 | P2 | devops | QA-PROACTIVE-C85 README 이슈 수정: (1) DB URL 패스워드 플레이스홀더로 변경, (2) 존재하지 않는 deployment-strategy.md 참조 제거, (3) CONTRIBUTING.md 참조 제거. | 0208C85 |
-| FIX-PUNYCODE-003 | P3 | devops | QA-PROACTIVE-C85 punycode 관련 개선: (1) postinstall → pnpm patchedDependencies 전환, (2) channels에서 punycode direct dep 제거 (transitive dep 오염). 현재 동작 상태이므로 P3. | 0208C85 |
+| OPS-DOC-001 | P1 | devops | 사용자 친화적 운영 매뉴얼 operation.md 작성 (루트폴더). Human directive. 설치/설정/실행/디버깅/운영 가이드. | 0208C87 |
+| DIAG-UNTRACK-001 | P1 | devops | cycle.sh 내부 "untracked files after commit possible ownership gap" WARNING 원인 분석. Human directive. | 0208C87 |
 
 ## Cancelled
 
@@ -170,3 +169,6 @@
 | FIX-UI-001 | devops | 0208C84 | marked-terminal.d.ts 타입 선언 추가 (packages/ui/src/cli/). 커밋 96ec34f. §1 위반 기록 (packages/ui/ → ui-ux 소유). |
 | FIX-PUNYCODE-002 | devops | 0208C85 | ERR-086 해결 확인 — FIX-PUNYCODE-001 수정이 이미 작동중. 975 tests pass, 0 FAIL, telegram 25 tests pass. |
 | QA-022 | quality | 0208C85 | UI/UX Sprint 최종 리뷰 PASS. 0C 0H 6M 3L. TDD PASS. §9 PASS. §14 PASS. Coverage: ui 95.77% stmt. 975 tests. |
+| RES-007 | research | 0208C87 | CLI 기억 상실 원인 분석 완료. ROOT CAUSE: InboundHandler에서 pushTurn/addMessage 미호출, gracefulShutdown flush('*') 버그, M2/M3 영구 저장 경로 누락. docs/research/RES-007-cli-memory-persistence.md. |
+| FIX-README-001 | devops | 0208C87 | QA-PROACTIVE-C85 README 이슈 수정: DB URL 플레이스홀더, deployment-strategy.md/CONTRIBUTING.md 참조 제거. 커밋 1a85342. |
+| FIX-PUNYCODE-003 | devops | 0208C87 | punycode 정리: postinstall 스크립트 제거, root+channels punycode direct dep 제거. packageExtensions로 충분. 975 tests pass. 커밋 1a85342. |
