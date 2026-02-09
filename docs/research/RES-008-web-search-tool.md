@@ -1,6 +1,6 @@
 # RES-008: Web Search Tool 구현 리서치
 
-> Date: 2026-02-09
+> Date: 2026-02-09 (Updated: 2026-02-09)
 > Author: Research Division
 > Related: FEAT-TOOL-001, C107 Feature Sprint
 
@@ -10,10 +10,27 @@ Axel의 Web Search Tool 구현을 위해 어떤 API를 선택해야 하는가? T
 
 ## Methodology
 
-1. Web search를 통한 각 API의 최신 정보 수집 (2026년 기준)
-2. 가격, 성능, 기능, 유지보수성 비교
+1. Web search를 통한 각 API의 최신 정보 수집 (2026년 2월 9일 기준)
+   - Tavily API: endpoints, pricing, rate limits, JSON schema, TypeScript SDK
+   - Brave Search API: endpoints, pricing, rate limits, response format, privacy features
+   - SearXNG: API documentation, self-hosting requirements, configuration, performance
+2. 각 옵션의 장단점 상세 분석
+   - 검색 품질 및 정확도 (benchmark 결과 포함)
+   - 응답 속도 및 성능
+   - 비용 효율성 (free tier, paid plans, PAYGO)
+   - TypeScript 통합 용이성 (official/community SDKs)
+   - Privacy 및 보안 특성
 3. OpenClaw 코드베이스 분석 (`/home/northprot/projects/openclaw`)
+   - Tool definition pattern (TypeBox/Zod schemas)
+   - Multi-provider support architecture
+   - Caching layer implementation
+   - Security measures (external content wrapping)
 4. Axel의 제약사항과 요구사항 매핑
+   - Single-user phase 요구사항
+   - Cost-consciousness (초기 단계)
+   - Self-hosted preference (장기 목표)
+   - TypeScript single-stack 일관성
+   - Security-first design (ADR-019)
 
 ## Findings
 
@@ -22,87 +39,220 @@ Axel의 Web Search Tool 구현을 위해 어떤 API를 선택해야 하는가? T
 - **Description**: AI agents 전용 설계 검색 API. LLM 친화적 결과 포맷 제공.
 - **Pricing (2026)**:
   - Free tier: 1,000 API credits/month
-  - Paid: $0.008/request (~125 requests per $1)
-  - Batch processing: 50% 할인
+  - Paid Plans: Project ($16/mo, 2K credits), Bootstrap ($80/mo, 12K credits), Startup ($240/mo, 40K credits), Growth ($500/mo, 100K credits)
+  - PAYGO: $0.008/request after plan credits exhausted
+  - Credit costs: Basic search (1 credit), Advanced search (2 credits), Crawl/Extract (varies)
+- **Rate Limits**:
+  - Development: Standard rate limits
+  - Production: 1,000 requests/minute (requires Paid Plan or PAYGO enabled)
+  - Crawl endpoint: Separate rate limit applies to both dev and prod keys
+- **API Endpoints**:
+  - `/search`: Discovering relevant pages (LLM-optimized results)
+  - `/extract`: Pulling content from specific URLs (up to 20 URLs per request)
+  - `/map`: Understanding website structure
+  - `/crawl`: Navigating and extracting from entire sites (breadth-first, agent-first explorer)
+- **Response Format (JSON)**:
+  ```json
+  {
+    "query": "string",
+    "answer": "AI-generated summary",
+    "results": [
+      {
+        "title": "Page title",
+        "url": "https://...",
+        "content": "Extracted snippet",
+        "score": 0.95,
+        "raw_content": "Full page text"
+      }
+    ],
+    "images": ["url1", "url2"],
+    "follow_up_questions": ["Q1", "Q2"],
+    "response_time": 0.485
+  }
+  ```
+- **TypeScript SDK**: Official `@tavily/core` npm package (CommonJS + ES Module support)
+  - Installation: `npm i @tavily/core`
+  - Features: API authentication, request serialization, response parsing, error handling, proxy config
+  - Repository: [github.com/tavily-ai/tavily-js](https://github.com/tavily-ai/tavily-js)
 - **Pros**:
-  - AI agent에 최적화된 응답 (요약, 인용, 구조화된 데이터)
-  - 빠른 응답 속도 (<500ms 목표)
-  - JSON API 간편한 통합
-  - 최신 정보 (2026년 현재 활발히 개발 중)
+  - LLM-optimized design: Returns clean, structured results tailored for AI agents and RAG systems
+  - Strong accuracy: 93.3% accuracy on GPT-4.1 (SimpleQA benchmark)
+  - Sub-200ms average response time (ideal for real-time applications)
+  - Cost-effective at scale: Volume discounts make it 3-4x cheaper than competitors
+  - Structured output format: Pre-processed for LLM context windows with summary fields, citations, content highlights
+  - Search + Extract + Crawl + Map in single API suite
+  - Official TypeScript SDK with full async support
 - **Cons**:
-  - 비용이 가장 높음 (1,000 검색 시 $8)
-  - 상용 서비스 의존성 (SLA 없는 스타트업)
+  - Dead links and 404s: Like most web search APIs, doesn't guarantee live links (pulls from cached/indexed sources)
+  - Link freshness issues: Optimized for semantic search, not strict link freshness (some stale URLs expected)
+  - Slightly lower accuracy than Exa (93.3% vs 94.9% on SimpleQA)
+  - Longer response times: 1.885s average (third among tested APIs, slower due to multi-source aggregation)
+  - Two-step process for deep extraction: Search-first design requires separate extraction calls (vs Firecrawl's one-call approach)
   - Self-hosted 불가능
-- **Performance**: 응답 시간 <500ms (fast 모드), 시맨틱 관련도 높음
-- **Source**:
-  - [Tavily - AI Agent Reviews](https://aiagentsdirectory.com/agent/tavily)
-  - [What We Shipped: January 2026](https://www.tavily.com/blog/what-tavily-shipped-in-january-26)
-  - [9 top AI Search Engine tools in 2026](https://composio.dev/blog/9-top-ai-search-engine-tools)
+  - Vendor lock-in (commercial SaaS dependency)
+- **Performance**: Sub-200ms average (fast mode), 1.885s average (standard), 93.3% accuracy
+- **Sources**:
+  - [Tavily Documentation](https://docs.tavily.com/)
+  - [Tavily Pricing](https://www.tavily.com/pricing)
+  - [Rate Limits - Tavily Docs](https://docs.tavily.com/documentation/rate-limits)
+  - [Tavily Pricing: Complete Breakdown](https://www.firecrawl.dev/blog/tavily-pricing)
+  - [AI Search APIs Compared: Tavily vs Exa vs Perplexity](https://www.humai.blog/ai-search-apis-compared-tavily-vs-exa-vs-perplexity/)
+  - [5 Tavily Alternatives for Better Pricing](https://www.firecrawl.dev/blog/tavily-alternatives)
+  - [Tavily TypeScript SDK](https://github.com/tavily-ai/tavily-js)
 
 ### Option B: Brave Search API
 
-- **Description**: 35+ billion pages 독립 인덱스. 프라이버시 중심 검색 API.
+- **Description**: 35+ billion pages 독립 인덱스. 프라이버시 중심 검색 API. Brave's own independent index with ranking models.
 - **Pricing (2026)**:
-  - Free tier: 2,000 searches/month
-  - Base AI: $5/1,000 requests ($0.005/request)
-  - Pro AI: $9/1,000 requests (unlimited queries/month, 50 QPS)
-  - AI Grounding: $4/1,000 web searches + $5/million tokens
+  - Free tier: Up to 2,000 queries/month + 1 query/second
+  - Base AI: $5.00/1,000 requests (up to 20 queries/second, 20M queries/month max)
+  - Pro AI: $9.00/1,000 requests (up to 50 queries/second, unlimited queries/month)
+  - AI Grounding: $4/1,000 web searches + $5/million tokens (AI-optimized plan)
+- **Rate Limits**:
+  - Free tier: ~1 query/second
+  - Base AI: Up to 20 queries/second
+  - Pro AI: Up to 50 queries/second
+  - Overall: ~50 requests/second maximum
+- **Index Size**: 30+ billion pages (independent index, not Bing/Google reskin)
+  - Powered by anonymous, user-contributed Web Discovery Project
+  - "Intentionally smaller than Google or Bing" to avoid spam/low-quality content
+- **Response Format (JSON)**:
+  - Web results: `{ "web": { "results": [{ "title": "...", "url": "...", "description": "...", "age": "1 day ago" }] } }`
+  - Locations: `{ "locations": { "results": [{ "id": "...", "title": "..." }] } }`
+  - Summarizer (AI-eligible queries): `{ "summarizer": { "type": "summarizer", "key": "{...}" } }`
+  - Request example: `curl -H "X-Subscription-Token: <API_KEY>" "https://api.search.brave.com/res/v1/web/search?q=query"`
+- **TypeScript SDK Options**:
+  - Native fetch API (official examples in Node.js)
+  - Community packages: `@microfox/brave` (typed SDK with env var support), `brave-search` (Erik Balfe, fully typed wrapper)
+  - Recent: `brave-search-mcp-server` (type-safe MCP integration, Feb 2026)
+- **Privacy Features**:
+  - **Zero Data Retention**: Only search API with true zero data retention policy
+  - No user profiling or tracking
+  - Data Processing Addendum for compliance
+  - Users can request personal info removal from index
 - **Pros**:
-  - 가장 저렴한 유료 옵션 (1,000 검색 시 $5)
-  - Free tier가 Tavily보다 2배 많음
-  - Rich search responses (계산기, 스포츠 점수, 위젯)
-  - Goggles 기능 (도메인 필터링/재순위화)
-  - Claude MCP 공식 지원
-  - No ads in results
+  - Cost-effectiveness: Cheapest paid option ($5/1K vs Tavily $8/1K), significantly lower cost than other search APIs
+  - Free tier 2x larger than Tavily (2,000 vs 1,000 searches/month)
+  - Independent index: Not dependent on Bing or Google (30B+ pages, own ranking models)
+  - Privacy protection: Only API with true Zero Data Retention, no user profiling
+  - Rich search responses: Calculators, sports scores, widgets, entity search, news, video results
+  - Goggles feature: Domain filtering and re-ranking capabilities
+  - Claude MCP official support: Well-documented integration examples
+  - Search quality competitive with Google and Bing (surpasses Bing in US, per automated assessments)
   - Real-time indexing
+  - No ads in results
+  - Brave Search API brings privacy protections to end users' apps
 - **Cons**:
-  - AI 최적화는 Tavily보다 약함 (범용 검색 API)
-  - Self-hosted 불가능
-  - Free tier quota 초과 시 과금
-- **Performance**: 저지연 (<1s), 20-50 QPS (tier별)
-- **Source**:
-  - [Brave Search API Plans](https://api-dashboard.search.brave.com/app/plans)
+  - AI optimization weaker than Tavily (general-purpose search API, not LLM-specific)
+  - Index size limitations: "Not yet as good as Google in recovering long-tail queries" (trade-off for spam reduction)
+  - Self-hosted impossible (commercial SaaS only)
+  - Free tier quota enforcement (auto-billing after 2K/month)
+  - No native LLM-optimized response formatting (raw search results require more post-processing)
+- **Performance**: Low latency (<1s), 20-50 QPS (tier-dependent), competitive search quality
+- **Sources**:
+  - [Brave Search API](https://brave.com/search/api/)
+  - [Brave API Plans](https://api-dashboard.search.brave.com/app/plans)
   - [What Sets Brave Search API Apart](https://brave.com/search/api/guides/what-sets-brave-search-api-apart/)
+  - [Brave Search API vs Bing API](https://brave.com/search/api/guides/brave-search-api-vs-bing-api/)
+  - [Brave Zero Data Retention](https://brave.com/blog/search-api-zero-data-retention/)
   - [Cheapest Web Search APIs 2026](https://medium.com/@RonaldMike/cheapest-web-search-apis-for-production-use-2026-real-costs-hidden-fees-and-what-actually-90f2e7643243)
+  - [Brave TypeScript SDK (erik-balfe)](https://github.com/erik-balfe/brave-search)
+  - [Brave Search Wikipedia](https://en.wikipedia.org/wiki/Brave_Search)
 
 ### Option C: SearXNG (Self-hosted)
 
-- **Description**: 메타 검색 엔진. 246개 검색 서비스 집계. 완전 오픈소스.
+- **Description**: 메타 검색 엔진. 70+ 검색 엔진 집계 (Google, Bing, DuckDuckGo, Qwant 등). 완전 오픈소스. Privacy-respecting metasearch engine.
 - **Pricing (2026)**: **무료** (self-hosted, 운영 비용만 발생)
+- **API Endpoints**:
+  - `/` and `/search`: Supported for both GET and POST methods
+  - GET method: Expects parameters as URL query parameters
+  - POST method: Expects parameters as form data
+  - **Format parameter required**: `format=json` to consume JSON results (default is HTML)
+- **Configuration Requirements**:
+  - JSON format NOT enabled by default (must explicitly enable in `settings.yml`)
+  - Add to config: `search: formats: - html - json`, then restart SearXNG
+  - Test with: `curl -s "https://your-instance.com/search?q=test&format=json"`
+- **Response Format (JSON)**:
+  ```json
+  {
+    "object": "search",
+    "results": [
+      {
+        "title": "Example Result",
+        "url": "https://example.com",
+        "snippet": "Content snippet...",
+        "date": "2024-01-15",
+        "last_updated": null
+      }
+    ]
+  }
+  ```
+- **Docker Self-Hosting**:
+  - Official Docker image available
+  - Pre-configured deployment: [github.com/BerriAI/serxng-deployment](https://github.com/BerriAI/serxng-deployment) (JSON API pre-configured)
+  - Requirements: Set secret key, reverse proxy with HTTPS, edit `settings.yml` for engines/privacy
+  - Minimum: 512MB RAM
+- **TypeScript Integration**:
+  - No official TypeScript SDK
+  - Community packages: TypeScript service for SearXNG API (npm available)
+  - LangChain integration: `SearxngSearch` tool wrapper (from `@langchain/community`)
+  - MCP server: TypeScript SearXNG MCP server (enables AI assistant web search, setup: `npm install && npm run build`)
+  - n8n node: Community node for workflows
 - **Pros**:
-  - **완전 무료** (API quota 제한 없음)
-  - 프라이버시 보장 (사용자 추적 없음)
-  - 246개 검색 엔진 통합 (Google, Bing, DuckDuckGo 등)
+  - **완전 무료** (API quota 제한 없음, unlimited searches)
+  - True anonymous search: No search tracking, no user profiling (privacy by design)
+  - 70+ search engines supported (Google, Bing, DuckDuckGo, Qwant, etc.)
+  - High customization: Filter sources, exclude specific engines, fine-tune search experience
   - JSON/CSV/RSS API 지원
   - Axel의 self-hosted 철학과 일치
-  - 결과 품질 조정 가능 (엔진별 가중치)
+  - Privacy control: No logging of IPs or queries by default (you control config)
+  - Reliability and control: Queries come directly from your machine, no third-party server host
+  - Result quality adjustable: Engine-specific weights, rate limit tuning
+  - Removes tracking scripts and analytics from engine websites
 - **Cons**:
-  - 운영 부담 (Docker/VM 관리)
-  - 초기 설정 복잡도
-  - AI 최적화 없음 (raw HTML/JSON)
-  - 외부 엔진 Rate limit 관리 필요
-  - 응답 속도 보장 어려움 (외부 엔진 의존)
-- **Performance**: 가변적 (외부 엔진 속도에 의존), 최소 512MB RAM
-- **Source**:
-  - [SearXNG Documentation 2026.2.6](https://docs.searxng.org/)
+  - Operating burden: Docker/VM management, maintenance overhead
+  - Initial setup complexity: Steep learning curve for extensive customization
+  - AI optimization absent: No native Knowledge Graph or deep integrations (raw search results)
+  - Metasearch dependency: Result quality depends on configured engines and rate limits
+  - External engine rate limit management required: Upstream engines may flag automated traffic (CAPTCHAs)
+  - Performance variability: Searches can take longer (must query multiple engines, process, combine, rank results)
+  - Public instances inconsistent: Speed and reliability vary (self-host recommended for consistency)
+  - Feature limitations: Limited image/video search compared to major search engines
+  - Long-tail query handling weaker than direct engines
+- **Performance Issues & Optimization**:
+  - 가변적 (외부 엔진 속도에 의존), typically 1-3s
+  - Performance tuning: Disable slow engines (check engine stats page), enable only needed engines
+  - Public instances fine for testing but inconsistent (self-host for consistent performance)
+  - CAPTCHA mitigation: Tune rate limits, rotate sources, self-host to reduce flags
+- **Sources**:
+  - [SearXNG Documentation (2026.2.6)](https://docs.searxng.org/)
   - [Search API Documentation](https://docs.searxng.org/dev/search_api.html)
+  - [SearXNG Review: Best Private Metasearch](https://sider.ai/blog/ai-tools/searxng-review-is-this-the-best-private-metasearch-you-can-actually-trust)
   - [How to Use SearXNG: Self-Hosting Mastery](https://sider.ai/blog/ai-tools/how-to-use-searxng-from-first-search-to-self-hosting-mastery)
+  - [Selfhosting SearXNG](https://medium.com/@rosgluk/selfhosting-searxng-a3cb66a196e9)
+  - [SearXNG vs Google Search 2025](https://sider.ai/blog/ai-tools/searxng-vs-google-search-which-one-should-you-trust-in-2025)
+  - [SearXNG Overview 2025](https://best-of-web.builder.io/library/searxng/searxng)
+  - [SearXNG LangChain Integration](https://js.langchain.com/docs/integrations/tools/searxng)
 
 ## Comparison Matrix
 
 | Criterion | Tavily | Brave Search API | SearXNG |
 |-----------|--------|------------------|---------|
-| **Cost (1K searches)** | $8 | $5 (Base AI) | $0 (운영비만) |
-| **Free tier** | 1,000/mo | 2,000/mo | ∞ (self-hosted) |
-| **AI Optimization** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
-| **Response Time** | <500ms | <1s | 1-3s (가변) |
+| **Cost (1K searches)** | $16 (Project plan) or $0.008 PAYGO | $5 (Base AI) | $0 (운영비만) |
+| **Free tier** | 1,000 credits/mo | 2,000 searches/mo | ∞ (self-hosted) |
+| **Rate Limits** | 1,000 req/min (prod) | 1-50 QPS (tier) | No API limits (upstream engines vary) |
+| **AI Optimization** | ⭐⭐⭐⭐⭐ (LLM-first design) | ⭐⭐⭐ (general search) | ⭐ (raw results) |
+| **Response Time** | Sub-200ms (fast), 1.9s (standard) | <1s | 1-3s (가변, 외부 의존) |
+| **Accuracy** | 93.3% (SimpleQA) | Competitive with Google/Bing | Varies (metasearch) |
 | **Self-hosted** | ❌ | ❌ | ✅ |
-| **Integration Complexity** | 낮음 | 낮음 | 중간 |
-| **Index Size** | 미공개 | 35B+ pages | 246 engines |
-| **Privacy** | 중간 | 높음 | 최상 |
-| **Maintenance** | 없음 | 없음 | 높음 |
+| **Integration Complexity** | 낮음 (official SDK) | 낮음 (REST + community SDKs) | 중간 (config-heavy) |
+| **Index Size** | 미공개 | 30B+ pages (independent) | 70+ engines (aggregate) |
+| **Privacy** | 중간 (commercial SaaS) | 높음 (Zero Data Retention) | 최상 (self-hosted, no tracking) |
+| **Maintenance** | 없음 | 없음 | 높음 (Docker, config, monitoring) |
 | **Vendor Lock-in** | 높음 | 중간 | 없음 |
-| **Result Quality** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Result Quality** | ⭐⭐⭐⭐⭐ (clean, structured) | ⭐⭐⭐⭐ (rich widgets) | ⭐⭐⭐ (depends on engines) |
+| **TypeScript Support** | ✅ (official `@tavily/core`) | ✅ (community packages) | ⚠️ (community, no official SDK) |
+| **Special Features** | Extract, Crawl, Map | Goggles, Summarizer, Zero Data | Full customization, 70+ engines |
 
 ## OpenClaw Implementation Patterns
 
@@ -336,19 +486,47 @@ const results = braveResponse.web?.results?.map(r => ({
 ## References
 
 ### API Documentation
-- [Brave Search API Docs](https://brave.com/search/api/)
+- [Tavily Documentation](https://docs.tavily.com/)
+- [Tavily SDK Reference (JavaScript)](https://docs.tavily.com/sdk/javascript/reference)
+- [Tavily Rate Limits](https://docs.tavily.com/documentation/rate-limits)
+- [Brave Search API](https://brave.com/search/api/)
 - [Brave API Dashboard](https://api-dashboard.search.brave.com/)
-- [SearXNG API Docs](https://docs.searxng.org/dev/search_api.html)
-- [Tavily API Docs](https://www.tavily.com/)
+- [Brave Web Search API Docs](https://api.search.brave.com/app/documentation/web-search/get-started)
+- [SearXNG Documentation (2026.2.6)](https://docs.searxng.org/)
+- [SearXNG Search API](https://docs.searxng.org/dev/search_api.html)
+- [SearXNG JSON Engine](https://docs.searxng.org/dev/engines/json_engine.html)
 
 ### Implementation Examples
 - OpenClaw: `/home/northprot/projects/openclaw/src/agents/tools/web-search.ts`
 - OpenClaw config: `/home/northprot/projects/openclaw/src/config/zod-schema.agent-runtime.ts` (lines 171-189)
+- [Tavily TypeScript SDK (Official)](https://github.com/tavily-ai/tavily-js)
+- [Brave TypeScript SDK (Community - Erik Balfe)](https://github.com/erik-balfe/brave-search)
+- [SearXNG MCP Server (TypeScript)](https://skywork.ai/skypage/en/searxng-mcp-server-ai-guide-private-search/1979100863515971584)
+- [SearXNG Pre-configured Deployment](https://github.com/BerriAI/serxng-deployment)
 
-### Pricing Sources
+### Pricing & Comparison Sources
 - [Brave API Pricing](https://api-dashboard.search.brave.com/app/plans)
-- [Tavily Pricing (MetaCTO)](https://www.metacto.com/blogs/anthropic-api-pricing-a-full-breakdown-of-costs-and-integration)
+- [Tavily Pricing](https://www.tavily.com/pricing)
+- [Tavily Pricing: Complete Breakdown](https://www.firecrawl.dev/blog/tavily-pricing)
 - [Cheapest Web Search APIs 2026](https://medium.com/@RonaldMike/cheapest-web-search-apis-for-production-use-2026-real-costs-hidden-fees-and-what-actually-90f2e7643243)
+- [AI Search APIs Compared: Tavily vs Exa vs Perplexity](https://www.humai.blog/ai-search-apis-compared-tavily-vs-exa-vs-perplexity/)
+- [Perplexity vs Tavily vs Exa vs You.com: Complete Comparison 2026](https://www.humai.blog/perplexity-vs-tavily-vs-exa-vs-you-com-the-complete-ai-search-engine-comparison-2026/)
+- [5 Tavily Alternatives for Better Pricing](https://www.firecrawl.dev/blog/tavily-alternatives)
+- [Brave Search API vs Bing API](https://brave.com/search/api/guides/brave-search-api-vs-bing-api/)
+- [Brave Zero Data Retention](https://brave.com/blog/search-api-zero-data-retention/)
+
+### Privacy & Quality
+- [Brave Search Wikipedia](https://en.wikipedia.org/wiki/Brave_Search)
+- [What Sets Brave Search API Apart](https://brave.com/search/api/guides/what-sets-brave-search-api-apart/)
+- [SearXNG Review: Best Private Metasearch](https://sider.ai/blog/ai-tools/searxng-review-is-this-the-best-private-metasearch-you-can-actually-trust)
+- [SearXNG vs Google Search 2025](https://sider.ai/blog/ai-tools/searxng-vs-google-search-which-one-should-you-trust-in-2025)
+- [How to Use SearXNG: Self-Hosting Mastery](https://sider.ai/blog/ai-tools/how-to-use-searxng-from-first-search-to-self-hosting-mastery)
+
+### Integration Resources
+- [LangChain SearXNG Integration](https://js.langchain.com/docs/integrations/tools/searxng)
+- [SearXNG LangChain Docs](https://docs.langchain.com/oss/python/integrations/providers/searx)
+- [Brave Search MCP Server (AI Engineer Guide)](https://skywork.ai/skypage/en/ai-engineer-brave-search-mcp/1977576226687086592)
+- [n8n SearXNG Tool](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.toolsearxng/)
 
 ### Security
 - ADR-019: Auth Strategy (external content wrapping)
