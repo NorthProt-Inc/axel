@@ -324,13 +324,15 @@ describe('bootstrap-channels', () => {
 			const pushTurn = vi.fn().mockResolvedValue(undefined);
 			const addMessage = vi.fn().mockResolvedValue(undefined);
 			(container.workingMemory as { pushTurn: ReturnType<typeof vi.fn> }).pushTurn = pushTurn;
-			(container.episodicMemory as { addMessage: ReturnType<typeof vi.fn> }).addMessage = addMessage;
+			(container.episodicMemory as { addMessage: ReturnType<typeof vi.fn> }).addMessage =
+				addMessage;
 
 			wireChannels([mockChannel], container, personaEngine);
 			expect(capturedHandler).toBeDefined();
+			if (!capturedHandler) return;
 
 			// Trigger the handler
-			await capturedHandler!({
+			await capturedHandler({
 				userId: 'user-1',
 				channelId: 'cli',
 				content: 'Hello Axel',

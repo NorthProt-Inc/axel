@@ -258,10 +258,7 @@ describe('gracefulShutdown', () => {
 
 	it('continues flushing remaining users when one flush fails', async () => {
 		const container = createMockContainer();
-		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue([
-			'user-1',
-			'user-2',
-		]);
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue(['user-1', 'user-2']);
 
 		let callCount = 0;
 		(container.workingMemory.flush as ReturnType<typeof vi.fn>).mockImplementation(async () => {
