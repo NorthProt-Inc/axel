@@ -4,7 +4,9 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"typecheck": "tsc -b --noEmit",
+		"build": "tsc -b",
+		"build:clean": "tsc -b --clean",
+		"typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
 		"test": "vitest run --passWithNoTests",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",

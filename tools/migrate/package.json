@@ -8,6 +8,7 @@
 		"axel-migrate": "./src/cli.ts"
 	},
 	"scripts": {
+		"build": "tsc",
 		"test": "vitest",
 		"typecheck": "tsc --noEmit"
 	},

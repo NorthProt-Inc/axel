@@ -1,4 +1,13 @@
 {
-	"include": [],
-	"references": []
+	"files": [],
+	"references": [
+		{ "path": "./packages/core" },
+		{ "path": "./packages/infra" },
+		{ "path": "./packages/channels" },
+		{ "path": "./packages/gateway" },
+		{ "path": "./packages/ui" },
+		{ "path": "./apps/axel" },
+		{ "path": "./apps/webchat" },
+		{ "path": "./tools/migrate" }
+	]
 }

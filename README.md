@@ -80,6 +80,9 @@ pnpm --filter axel dev
 ### Workspace Commands
 
 ```bash
+# Build all packages
+pnpm build
+
 # Type check all packages
 pnpm typecheck
 
@@ -180,8 +183,7 @@ pnpm test:watch
 
 ```bash
 # Build all packages
-pnpm --filter @axel/core... build
-pnpm --filter axel build
+pnpm build
 
 # Run migrations
 DATABASE_URL="postgresql://..." node tools/migrate/dist/cli.js up

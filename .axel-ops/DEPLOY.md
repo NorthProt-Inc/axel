@@ -38,6 +38,46 @@
 
 File: `docker/docker-compose.dev.yml`
 
+## Production Build Pipeline
+
+| Component | Command | Status | Notes |
+|-----------|---------|--------|-------|
+| Root Build Script | `pnpm build` | ✅ CONFIGURED | TypeScript project references (`tsc -b`) |
+| Package Build Scripts | Individual `pnpm build` | ✅ CONFIGURED | All packages/apps/tools have build scripts |
+| TypeScript References | `tsconfig.json` | ✅ CONFIGURED | 8 project references configured |
+| Clean Build | `pnpm build:clean` | ✅ CONFIGURED | Cleans all build artifacts |
+
+### Build Configuration
+
+**Root TypeScript Config** (`tsconfig.json`):
+- 8 project references: core, infra, channels, gateway, ui, axel, webchat, migrate
+- Uses `tsc -b` for incremental builds
+- Dependency graph automatically resolved
+
+**Package Build Scripts**:
+- `packages/core`: `tsc` → `dist/`
+- `packages/infra`: `tsc` → `dist/`
+- `packages/channels`: `tsc` → `dist/`
+- `packages/gateway`: `tsc` → `dist/`
+- `packages/ui`: `tsc` → `dist/`
+- `apps/axel`: `tsc` → `dist/`
+- `apps/webchat`: `vite build` (Svelte SPA)
+- `tools/migrate`: `tsc` → `dist/`
+
+### Known Build Issues
+
+**Status**: Build pipeline configured, type errors remain in source code.
+
+Type errors encountered during `pnpm build`:
+- `noPropertyAccessFromIndexSignature` violations (process.env access patterns)
+- `exactOptionalPropertyTypes` violations (optional property handling)
+- Unused variables/imports
+- Type mismatches in external SDK type definitions
+
+**Impact**: Development workflow unaffected (dev mode uses `tsx`), tests pass (985 tests).
+
+**Resolution**: Requires separate FIX task to address source code type issues.
+
 ## CI/CD Pipeline
 
 | Workflow | Trigger | Steps | Status |
