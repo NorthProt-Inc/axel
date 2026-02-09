@@ -27,3 +27,6 @@ export {
 	type InboundHandlerDeps,
 	type SendCallback,
 } from './inbound-handler.js';
+
+// Interaction logging
+export type { InteractionLog, InteractionLogger } from './interaction-log.js';

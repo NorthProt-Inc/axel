@@ -6,6 +6,7 @@ export {
 	PgConceptualMemory,
 	PgMetaMemory,
 	PgSessionStore,
+	PgInteractionLogger,
 } from './db/index.js';
 export { GeminiEmbeddingService } from './embedding/index.js';
 export {

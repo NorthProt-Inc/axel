@@ -70,6 +70,7 @@ function buildHandler(container: Container, personaEngine: PersonaEngine) {
 		semanticMemoryWriter: container.semanticMemoryWriter,
 		entityExtractor: container.entityExtractor,
 		conceptualMemory: container.conceptualMemory,
+		interactionLogger: container.interactionLogger,
 		toolDefinitions: container.toolRegistry.listAll(),
 	});
 }

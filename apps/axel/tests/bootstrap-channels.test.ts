@@ -46,6 +46,9 @@ function createMockContainer(): Container {
 			count: vi.fn().mockResolvedValue(10),
 			estimate: vi.fn().mockReturnValue(10),
 		} as unknown as Container['tokenCounter'],
+		interactionLogger: {
+			log: vi.fn().mockResolvedValue(undefined),
+		} as unknown as Container['interactionLogger'],
 		healthCheckTargets: [],
 	};
 }

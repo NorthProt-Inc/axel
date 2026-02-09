@@ -11,6 +11,7 @@ import type {
 	StreamBuffer,
 	WorkingMemory,
 } from '@axel/core/memory';
+import type { InteractionLogger } from '@axel/core/orchestrator';
 import type { LlmProvider, SessionStore, ToolExecutor } from '@axel/core/orchestrator';
 import { SessionRouter } from '@axel/core/orchestrator';
 import type { MemorySearchResult } from '@axel/core/types';
@@ -26,6 +27,7 @@ import {
 	McpToolExecutor,
 	PgConceptualMemory,
 	PgEpisodicMemory,
+	PgInteractionLogger,
 	PgMetaMemory,
 	type PgPoolDriver,
 	PgSemanticMemory,
@@ -131,6 +133,7 @@ export interface Container {
 	readonly toolExecutor: ToolExecutor;
 	readonly contextAssembler: ContextAssembler;
 	readonly tokenCounter: TokenCounter;
+	readonly interactionLogger: InteractionLogger;
 	readonly healthCheckTargets: readonly HealthCheckTarget[];
 }
 
@@ -313,6 +316,9 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 	);
 	const contextAssembler = new ContextAssembler(contextDataProvider, tokenCounter);
 
+	// Interaction logger (GAP-09)
+	const interactionLogger = new PgInteractionLogger(deps.pgPool, logger);
+
 	// Health check targets
 	const healthCheckTargets: HealthCheckTarget[] = [
 		{ name: 'postgresql', check: () => pgPool.healthCheck() },
@@ -346,6 +352,7 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 		toolExecutor,
 		contextAssembler,
 		tokenCounter,
+		interactionLogger,
 		healthCheckTargets,
 	};
 }

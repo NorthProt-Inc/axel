@@ -6,6 +6,7 @@ import type { InboundMessage, OutboundMessage } from '../types/channel.js';
 import type { Message } from '../types/message.js';
 import type { ReActEvent } from '../types/react.js';
 import type { ToolDefinition } from '../types/tool.js';
+import type { InteractionLogger } from './interaction-log.js';
 import { reactLoop } from './react-loop.js';
 import type { SessionRouter } from './session-router.js';
 import type { LlmProvider, ReActConfig, ToolExecutor } from './types.js';
@@ -87,6 +88,7 @@ export interface InboundHandlerDeps {
 	readonly conceptualMemory?: ConceptualMemoryLike;
 	readonly toolDefinitions?: readonly ToolDefinition[];
 	readonly config?: ReActConfig;
+	readonly interactionLogger?: InteractionLogger;
 	readonly onError?: (info: ErrorInfo) => void;
 }
 
@@ -123,11 +125,13 @@ export function createInboundHandler(
 		conceptualMemory,
 		toolDefinitions = [],
 		config = DEFAULT_REACT_CONFIG,
+		interactionLogger,
 		onError,
 	} = deps;
 
 	return async (message: InboundMessage, send: SendCallback): Promise<void> => {
 		const { userId, channelId, content } = message;
+		const startTime = Date.now();
 
 		try {
 			// 1. Resolve session
@@ -184,6 +188,26 @@ export function createInboundHandler(
 				entityExtractor,
 				conceptualMemory,
 			);
+
+			// 9. Telemetry — fire-and-forget (GAP-09)
+			if (interactionLogger) {
+				interactionLogger
+					.log({
+						sessionId: resolved.session.sessionId,
+						channelId,
+						effectiveModel: 'primary',
+						tier: 'primary',
+						routerReason: 'default',
+						latencyMs: Date.now() - startTime,
+						tokensIn: null,
+						tokensOut: null,
+						toolCalls: [],
+						error: null,
+					})
+					.catch(() => {
+						// Silent — telemetry must not break the response flow
+					});
+			}
 		} catch (err: unknown) {
 			// AUD-081: Report error details for observability
 			if (onError) {

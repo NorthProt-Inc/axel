@@ -4,3 +4,4 @@ export { PgSemanticMemory } from './pg-semantic-memory.js';
 export { PgConceptualMemory } from './pg-conceptual-memory.js';
 export { PgMetaMemory } from './pg-meta-memory.js';
 export { PgSessionStore } from './pg-session-store.js';
+export { PgInteractionLogger } from './pg-interaction-logger.js';
