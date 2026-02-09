@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Sprint Cleanup.** 3 done, 2 new human directives → OPS-DOC-001 + DIAG-UNTRACK-001 (devops P1).
-- **Cycle**: 87
-- **Last Updated**: 2026-02-08C87
-- **STATUS**: **3 TASKS COMPLETED.** RES-007 (research: CLI 기억 상실 ROOT CAUSE 발견), FIX-README-001 (devops: README 수정), FIX-PUNYCODE-003 (devops: punycode 정리). Human directives 2건 처리: OPS-DOC-001 (operation.md 작성), DIAG-UNTRACK-001 (untracked files WARNING 분석). Drift CLEAN. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 2 tasks in progress.
+- **Phase**: **Data Migration Planning.** 2 done (OPS-DOC-001, DIAG-UNTRACK-001), 2 new human directives → MIGRATE-PLAN-001 (P0) + AUDIT-006 (P1).
+- **Cycle**: 88
+- **Last Updated**: 2026-02-08C88
+- **STATUS**: **2 TASKS COMPLETED.** OPS-DOC-001 (devops: operation.md 운영 매뉴얼 17KB), DIAG-UNTRACK-001 (devops: cycle.sh untracked WARNING ROOT CAUSE — patches/ 누락). Human directives 2건 처리: MIGRATE-PLAN-001 (P0 axnmihn→Axel 데이터 마이그레이션 계획), AUDIT-006 (P1 유휴 Division 활용 분석). Drift CLEAN. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 2 tasks in progress + 1 queued.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 0 |
+| Queued | 1 |
 | In Progress | 2 |
-| Done | 138 |
+| Done | 140 |
 | Cancelled | 14 |
 
 ## Open Errors: 0
@@ -77,21 +77,22 @@
 | 85 | 0208 | **UI/UX SPRINT COMPLETE.** FIX-PUNYCODE-002 확인 (ERR-086 resolved), QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리 (cycle.sh Mark 수정 확인). **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 3 cleanup tasks queued (P1/P2/P3). |
 | 86 | 0208 | **Post-sprint cleanup.** No completions. RES-007 (research), FIX-README-001 + FIX-PUNYCODE-003 (devops) in progress (assigned C85, 1 cycle). Drift CLEAN. 975 tests. 0 errors. |
 | 87 | 0208 | **3 TASKS COMPLETED.** RES-007 (CLI 기억 상실 ROOT CAUSE: InboundHandler 메모리 DI 누락 + flush 버그), FIX-README-001 (README 보안/참조 수정), FIX-PUNYCODE-003 (punycode 정리). Human directives 2건: OPS-DOC-001 (operation.md P1), DIAG-UNTRACK-001 (untracked WARNING P1). **975 tests, 0 FAIL.** 0 errors. |
+| 88 | 0208 | **2 TASKS COMPLETED.** OPS-DOC-001 (devops: operation.md 운영 매뉴얼 17KB, 756 lines), DIAG-UNTRACK-001 (devops: cycle.sh untracked WARNING ROOT CAUSE — patches/ 누락, FIX-CYCLESH-001 생성). Human directives 2건 처리: MIGRATE-PLAN-001 (P0 axnmihn→Axel 마이그레이션 계획, research), AUDIT-006 (P1 유휴 Division 활용 분석, audit). **975 tests, 0 FAIL, 85 files.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C87 | Cycle 87 | Active |
+| Coordinator | 0208C88 | Cycle 88 | Active |
 | Architecture | 0208C74 | — | Idle |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C66 | — | Idle |
 | Dev-Edge | 0208C70 | — | Idle |
 | UI/UX | 0208C82 | — | Idle |
-| Research | 0208C87 | — | Idle (RES-007 done) |
+| Research | 0208C88 | MIGRATE-PLAN-001 | Active (assigned C88) |
 | Quality | 0208C85 | — | Idle |
-| DevOps | 0208C87 | OPS-DOC-001, DIAG-UNTRACK-001 | Active (assigned C87) |
-| Audit | 0208C59 | — | Idle |
+| DevOps | 0208C88 | — | Idle (OPS-DOC-001 + DIAG-UNTRACK-001 done) |
+| Audit | 0208C88 | AUDIT-006 | Active (assigned C88) |
 
 ## Human Intervention Needed
 
