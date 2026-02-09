@@ -1,8 +1,9 @@
 # ADR-016: Embedding Model Selection
 
-> Status: AMENDED
+> Status: ACCEPTED
 > Date: 2026-02-07
 > Amended: 2026-02-08 (ERR-069: 3072d → 1536d Matryoshka truncation)
+> Accepted: 2026-02-09 (FIX-DIMENSION-001 + INFRA-004 GeminiEmbeddingService implementation verified)
 > Author: Architecture Division
 
 ## Context

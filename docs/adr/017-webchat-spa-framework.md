@@ -1,7 +1,8 @@
 # ADR-017: WebChat SPA Framework — Svelte 5
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-08
+> Accepted: 2026-02-09 (QA-009 plan finalization + UI-001~007 Svelte WebChat implementation verified)
 > Author: Architecture Division
 > Supersedes: PLAN-001 Item #2 (React decision)
 

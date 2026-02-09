@@ -1,7 +1,8 @@
 # ADR-014: Cross-Channel Session Router
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-07
+> Accepted: 2026-02-09 (QA-009 plan finalization + CORE-006 SessionRouter implementation verified)
 > Author: Architecture Division
 
 ## Context

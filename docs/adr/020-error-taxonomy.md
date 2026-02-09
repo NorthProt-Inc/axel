@@ -1,7 +1,8 @@
 # ADR-020: Error Taxonomy and Classification
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-08
+> Accepted: 2026-02-09 (CORE-006 error recovery paths + FIX-AUDIT-E-002 ErrorInfo implementation verified)
 > Author: Architecture Division
 
 ## Context

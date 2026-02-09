@@ -1,7 +1,8 @@
 # ADR-015: Adaptive Decay v2
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-07
+> Accepted: 2026-02-09 (QA-009 plan finalization + CORE-002/MARK-DECAY-BATCH implementation verified)
 > Author: Architecture Division
 
 ## Context

@@ -1,7 +1,8 @@
 # ADR-013: 6-Layer Memory Architecture
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-07
+> Accepted: 2026-02-09 (QA-009 plan finalization + CORE-003/INFRA-001 implementation verified)
 > Author: Architecture Division
 
 ## Context
