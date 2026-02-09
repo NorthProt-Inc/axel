@@ -95,6 +95,9 @@ pnpm test:coverage
 # Lint + format
 pnpm lint
 pnpm format
+
+# Check formatting (CI)
+pnpm format:check
 ```
 
 ### Package Structure

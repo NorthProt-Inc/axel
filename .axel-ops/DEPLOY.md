@@ -46,6 +46,7 @@ File: `docker/docker-compose.dev.yml`
 | Package Build Scripts | Individual `pnpm build` | ⚠️ CONFIGURED (type errors) | All packages/apps/tools have build scripts |
 | TypeScript References | `tsconfig.json` | ✅ CONFIGURED | 8 project references configured |
 | Clean Build | `pnpm build:clean` | ✅ CONFIGURED | Cleans all build artifacts |
+| Format Check | `pnpm format:check` | ✅ CONFIGURED | Biome format validation (CI-ready) |
 
 ### Build Configuration
 
