@@ -320,8 +320,11 @@ log "PUSH SKIPPED — GitHub suspended (human directive)"
 # ── Phase 5: QC (Quality Control) ──
 # Runs 3 workers (parallel, haiku) → supervisor (sonnet) to test build/runtime/docs
 # Workers are read-only observers that execute commands as a real user would.
+# Set AXEL_SKIP_QC=1 to skip QC phase (e.g., when running cycle without QC).
 QC_SCRIPT="$OPS/launchers/qc-cycle.sh"
-if [ -x "$QC_SCRIPT" ]; then
+if [ "${AXEL_SKIP_QC:-0}" = "1" ]; then
+    log "QC PHASE SKIP — AXEL_SKIP_QC=1"
+elif [ -x "$QC_SCRIPT" ]; then
     log "QC PHASE START"
     AXEL_QC_FROM_CYCLE=1 bash "$QC_SCRIPT" 2>>"$OPS/logs/cycle.log" || log "QC PHASE FAILED (exit $?)"
     log "QC PHASE DONE"
