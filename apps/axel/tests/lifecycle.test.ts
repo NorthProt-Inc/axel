@@ -136,12 +136,15 @@ describe('gracefulShutdown', () => {
 			pgPool: {
 				end: vi.fn().mockResolvedValue(undefined),
 			},
+			getActiveUserIds: vi.fn().mockReturnValue([]),
 		};
 	}
 
 	it('executes 4-phase shutdown in order', async () => {
 		const container = createMockContainer();
 		const order: string[] = [];
+
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue(['user-1']);
 
 		for (const ch of container.channels) {
 			(ch.stop as ReturnType<typeof vi.fn>).mockImplementation(async () => {
@@ -174,6 +177,7 @@ describe('gracefulShutdown', () => {
 
 	it('handles channel stop errors gracefully', async () => {
 		const container = createMockContainer();
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue(['user-1']);
 		(container.channels[0]?.stop as ReturnType<typeof vi.fn>).mockRejectedValue(
 			new Error('disconnect failed'),
 		);
@@ -189,6 +193,7 @@ describe('gracefulShutdown', () => {
 
 	it('handles flush errors gracefully', async () => {
 		const container = createMockContainer();
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue(['user-1']);
 		(container.workingMemory.flush as ReturnType<typeof vi.fn>).mockRejectedValue(
 			new Error('flush failed'),
 		);
@@ -207,6 +212,73 @@ describe('gracefulShutdown', () => {
 		await expect(gracefulShutdown(container)).resolves.not.toThrow();
 
 		// PG pool should still be closed
+		expect(container.pgPool.end).toHaveBeenCalled();
+	});
+
+	it('flushes each active userId instead of literal "*" (FIX-MEMORY-002)', async () => {
+		const container = createMockContainer();
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue([
+			'user-1',
+			'user-2',
+			'user-3',
+		]);
+
+		await gracefulShutdown(container);
+
+		// Should call flush once per active user
+		expect(container.workingMemory.flush).toHaveBeenCalledTimes(3);
+		expect(container.workingMemory.flush).toHaveBeenCalledWith('user-1');
+		expect(container.workingMemory.flush).toHaveBeenCalledWith('user-2');
+		expect(container.workingMemory.flush).toHaveBeenCalledWith('user-3');
+	});
+
+	it('never calls flush with literal "*" wildcard', async () => {
+		const container = createMockContainer();
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue(['user-1']);
+
+		await gracefulShutdown(container);
+
+		// Must NOT flush with '*' — it's a literal string, not a wildcard
+		expect(container.workingMemory.flush).not.toHaveBeenCalledWith('*');
+	});
+
+	it('skips flush when no active sessions exist', async () => {
+		const container = createMockContainer();
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue([]);
+
+		await gracefulShutdown(container);
+
+		// No active sessions — no flush calls
+		expect(container.workingMemory.flush).not.toHaveBeenCalled();
+
+		// Should still close connections
+		expect(container.redis.quit).toHaveBeenCalled();
+		expect(container.pgPool.end).toHaveBeenCalled();
+	});
+
+	it('continues flushing remaining users when one flush fails', async () => {
+		const container = createMockContainer();
+		(container.getActiveUserIds as ReturnType<typeof vi.fn>).mockReturnValue([
+			'user-1',
+			'user-2',
+		]);
+
+		let callCount = 0;
+		(container.workingMemory.flush as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+			callCount++;
+			if (callCount === 1) {
+				throw new Error('flush failed for user-1');
+			}
+		});
+
+		await expect(gracefulShutdown(container)).resolves.not.toThrow();
+
+		// Should attempt flush for both users despite first failure
+		expect(container.workingMemory.flush).toHaveBeenCalledWith('user-1');
+		expect(container.workingMemory.flush).toHaveBeenCalledWith('user-2');
+
+		// Should still close connections
+		expect(container.redis.quit).toHaveBeenCalled();
 		expect(container.pgPool.end).toHaveBeenCalled();
 	});
 });

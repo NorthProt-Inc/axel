@@ -284,6 +284,75 @@ describe('bootstrap-channels', () => {
 			// Should not throw
 			wireChannels([], container, personaEngine);
 		});
+
+		it('passes workingMemory and episodicMemory to InboundHandler (FIX-MEMORY-002)', async () => {
+			let capturedHandler: ((msg: unknown) => Promise<void>) | undefined;
+			const mockChannel = {
+				id: 'test',
+				onMessage: vi.fn((handler: (msg: unknown) => Promise<void>) => {
+					capturedHandler = handler;
+				}),
+				start: vi.fn(),
+				stop: vi.fn(),
+				send: vi.fn().mockResolvedValue(undefined),
+				healthCheck: vi.fn(),
+				capabilities: {} as never,
+			};
+
+			const container = createMockContainer();
+			const personaEngine = createMockPersonaEngine();
+
+			// Set up working mock chain for full pipeline
+			(container.sessionRouter as { resolveSession: ReturnType<typeof vi.fn> }).resolveSession = vi
+				.fn()
+				.mockResolvedValue({
+					session: { sessionId: 's-1', turnCount: 0 },
+					channelSwitched: false,
+					isNew: true,
+					previousSession: null,
+				});
+			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
+				.fn()
+				.mockReturnValue(
+					(async function* () {
+						yield { type: 'message_delta' as const, content: 'Hi' };
+						yield { type: 'message_complete' as const, content: '' };
+					})(),
+				);
+
+			// Mock memory methods to track calls
+			const pushTurn = vi.fn().mockResolvedValue(undefined);
+			const addMessage = vi.fn().mockResolvedValue(undefined);
+			(container.workingMemory as { pushTurn: ReturnType<typeof vi.fn> }).pushTurn = pushTurn;
+			(container.episodicMemory as { addMessage: ReturnType<typeof vi.fn> }).addMessage = addMessage;
+
+			wireChannels([mockChannel], container, personaEngine);
+			expect(capturedHandler).toBeDefined();
+
+			// Trigger the handler
+			await capturedHandler!({
+				userId: 'user-1',
+				channelId: 'cli',
+				content: 'Hello Axel',
+				timestamp: new Date(),
+			});
+
+			// workingMemory.pushTurn should have been called (user + assistant = 2 calls)
+			expect(pushTurn).toHaveBeenCalledTimes(2);
+			expect(pushTurn).toHaveBeenCalledWith('user-1', expect.objectContaining({ role: 'user' }));
+			expect(pushTurn).toHaveBeenCalledWith(
+				'user-1',
+				expect.objectContaining({ role: 'assistant' }),
+			);
+
+			// episodicMemory.addMessage should have been called (user + assistant = 2 calls)
+			expect(addMessage).toHaveBeenCalledTimes(2);
+			expect(addMessage).toHaveBeenCalledWith('s-1', expect.objectContaining({ role: 'user' }));
+			expect(addMessage).toHaveBeenCalledWith(
+				's-1',
+				expect.objectContaining({ role: 'assistant' }),
+			);
+		});
 	});
 
 	describe('createHandleMessage', () => {
