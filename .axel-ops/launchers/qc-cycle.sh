@@ -10,8 +10,8 @@ CLAUDE="/home/northprot/.local/bin/claude"
 CYCLE_ID=$(date +"%Y%m%d_%H%M")
 QC_LOCKFILE="/tmp/axel-qc-cycle.lock"
 MAIN_LOCKFILE="/tmp/axel-cycle.lock"
-WORKER_TIMEOUT=300    # 5min/worker
-SUPERVISOR_TIMEOUT=180 # 3min
+WORKER_TIMEOUT=600    # 10min/worker (opus is 2-3x slower than haiku)
+SUPERVISOR_TIMEOUT=480 # 8min (opus is slower than sonnet)
 
 export PATH="/home/northprot/local/node/bin:/home/northprot/.local/bin:$PATH"
 
@@ -63,7 +63,7 @@ run_worker() {
 
     timeout "$WORKER_TIMEOUT" \
         $CLAUDE -p \
-            --model haiku \
+            --model opus \
             --dangerously-skip-permissions \
             --allowed-tools "Read,Glob,Grep,Bash" \
             --no-session-persistence \
@@ -106,7 +106,7 @@ unset ANTHROPIC_API_KEY
 
 timeout "$SUPERVISOR_TIMEOUT" \
     $CLAUDE -p \
-        --model sonnet \
+        --model opus \
         --dangerously-skip-permissions \
         --allowed-tools "Read,Glob,Grep,Write,Edit,Bash" \
         --no-session-persistence \
