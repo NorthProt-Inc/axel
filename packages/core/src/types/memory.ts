@@ -3,6 +3,8 @@ export type MemoryType = 'fact' | 'preference' | 'insight' | 'conversation';
 
 /** Semantic Memory unit (Layer 3) */
 export interface Memory {
+	/** Database integer PK. null when not yet persisted to PostgreSQL. */
+	readonly id: number | null;
 	readonly uuid: string;
 	readonly content: string;
 	readonly memoryType: MemoryType;

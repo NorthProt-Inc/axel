@@ -16,9 +16,11 @@ export class InMemorySemanticMemory implements SemanticMemory {
 	private nextId = 0;
 
 	async store(newMemory: NewMemory): Promise<string> {
-		const uuid = `mem-${++this.nextId}`;
+		const id = ++this.nextId;
+		const uuid = `mem-${id}`;
 		const now = new Date();
 		const memory: Memory = {
+			id,
 			uuid,
 			content: newMemory.content,
 			memoryType: newMemory.memoryType,
