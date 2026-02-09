@@ -2,11 +2,15 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 85 (CTO update)**: 0 errors open. ERR-086 resolved (FIX-PUNYCODE-002, 975 tests pass).
+> **Cycle 94 (CTO update)**: 3 errors open (2 CRITICAL, 1 HIGH). QC 시스템이 발견한 build/typecheck 실패.
 
 ## Open
 
-(none)
+| ID | Severity | Description | Reported | Assigned To |
+|----|----------|-------------|----------|-------------|
+| ERR-087 | CRITICAL | `pnpm typecheck` FAILS — packages/core/src/decay/types.ts:2 unused `import type { MemoryType }`. CI pipeline broken. | C94 | FIX-TYPECHECK-001 (dev-core) |
+| ERR-088 | CRITICAL | `pnpm build` FAILS — apps/axel/src/container.ts:229 PgPool type mismatch (rows: unknown[] vs T[]), :244 GoogleGenAIClient exactOptionalPropertyTypes incompatible. Production build blocked. | C94 | FIX-CONTAINER-001 (dev-edge) |
+| ERR-089 | HIGH | tools/migrate/src/cli.ts:12+ — 11× TS4111 errors. `noUncheckedIndexedAccess` requires bracket notation for process.env access. Build pipeline includes this package. | C94 | FIX-MIGRATE-CLI-001 (devops) |
 
 ## Resolved
 

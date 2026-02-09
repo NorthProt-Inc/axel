@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation Maintenance.** Memory persistence 파이프라인 완성. 마이그레이션 스크립트 구현 완료.
-- **Cycle**: 93
-- **Last Updated**: 2026-02-08C93
-- **STATUS**: **4 TASKS COMPLETED.** FIX-MEMORY-002 (graceful shutdown flush fix), FIX-MEMORY-003 (SemanticMemoryWriter M3 write path), MIGRATE-IMPL-001 (axnmihn→Axel migration scripts), FIX-BUILD-001 (production build pipeline). 3 Division branches merged (dev-edge, dev-infra, devops). §1 위반 1건 기록 (MIGRATE-IMPL-001 tools/ → dev-infra, CTO 배정 오류). QA-023 + FIX-DOCS-001 assigned. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** 0 errors.
+- **Phase**: **Post-Implementation Maintenance.** Build/typecheck 깨짐 발견 — QC 시스템 보고. P0 수정 배정.
+- **Cycle**: 94
+- **Last Updated**: 2026-02-08C94
+- **STATUS**: **QC reports 4건 처리.** P0 build blockers 2건 발견: (1) container.ts PgPool/GoogleGenAIClient type mismatch (ERR-088), (2) core/decay/types.ts MemoryType unused import (ERR-087). P1 migrate CLI bracket notation (ERR-089). 3 fix tasks 생성 + 할당. QA-023 + FIX-DOCS-001 계속 in progress. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files. typecheck FAILS.** 3 errors open.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 2 |
-| Done | 152 (+4: FIX-MEMORY-002, FIX-BUILD-001, FIX-MEMORY-003, MIGRATE-IMPL-001) |
+| In Progress | 5 (+3: FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) |
+| Done | 152 |
 | Cancelled | 14 |
 
-## Open Errors: 0
+## Open Errors: 3 (2 CRITICAL, 1 HIGH)
 
 ## Cycle History
 
@@ -83,21 +83,22 @@
 | 91 | 0208 | **No completions.** 3 tasks in progress: FIX-MEMORY-002 (dev-edge, 1 cycle), FIX-BUILD-001 (devops, 1 cycle), FIX-MEMORY-003 (dev-infra, assigned C91). FIX-MEMORY-003 dependency unblocked. Drift CLEAN. 985 tests. 0 errors. |
 | 92 | 0208 | **Human directives 2건 처리.** (1) cycle.sh patches/ 확인 ✅ (Mark 커밋 0966063), FIX-CYCLESH-001 DONE. (2) 리서치→구현: MIGRATE-IMPL-001 P1 생성 (axnmihn→Axel 마이그레이션 스크립트). QC 13건 → FIX-DOCS-001 P2 생성. 3 tasks in progress (FIX-MEMORY-002/FIX-BUILD-001/FIX-MEMORY-003, 2 cycles). 985 tests. 0 errors. |
 | 93 | 0208 | **4 TASKS COMPLETED.** FIX-MEMORY-002 (dev-edge: graceful shutdown per-user flush, 5 tests), FIX-MEMORY-003 (dev-infra: SemanticMemoryWriter, 18 tests), MIGRATE-IMPL-001 (dev-infra: axnmihn→Axel migration scripts, TDD), FIX-BUILD-001 (devops: production build pipeline, tsc -b, 8 workspace scripts). 3 branches merged. §1 위반 1건 (MIGRATE-IMPL-001). **1075 tests (+90), 0 FAIL, 90 files.** QA-023 + FIX-DOCS-001 assigned. |
+| 94 | 0208 | **QC reports 처리 — P0 BUILD BLOCKERS 발견.** QC 시스템 보고 4건 중 P0 ×2 (container.ts type mismatch ERR-088, MemoryType unused ERR-087), P1 ×1 (migrate CLI bracket notation ERR-089), P1 ×1 false positive (pnpm test --run). 3 fix tasks 생성: FIX-TYPECHECK-001 (dev-core), FIX-CONTAINER-001 (dev-edge), FIX-MIGRATE-CLI-001 (devops). **1075 tests, 0 FAIL.** typecheck FAILS. 3 errors open. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C93 | Cycle 93 | Active |
-| Architecture | 0208C74 | — | Idle (32 cycles) |
-| Dev-Core | 0208C90 | — | Idle (3 cycles) |
-| Dev-Infra | 0208C93 | — | Idle (completed FIX-MEMORY-003 + MIGRATE-IMPL-001) |
-| Dev-Edge | 0208C93 | — | Idle (completed FIX-MEMORY-002) |
-| UI/UX | 0208C82 | — | Idle (11 cycles) |
-| Research | 0208C89 | — | Idle (4 cycles) |
-| Quality | 0208C93 | QA-023 | Active (assigned) |
-| DevOps | 0208C93 | FIX-DOCS-001 | Active (assigned) |
-| Audit | 0208C89 | — | Idle (4 cycles) |
+| Coordinator | 0208C94 | Cycle 94 | Active |
+| Architecture | 0208C74 | — | Idle (33 cycles) |
+| Dev-Core | 0208C94 | FIX-TYPECHECK-001 | Active (assigned P0) |
+| Dev-Infra | 0208C93 | — | Idle (1 cycle) |
+| Dev-Edge | 0208C94 | FIX-CONTAINER-001 | Active (assigned P0) |
+| UI/UX | 0208C82 | — | Idle (12 cycles) |
+| Research | 0208C89 | — | Idle (5 cycles) |
+| Quality | 0208C94 | QA-023 | Active (in progress, 2 cycles) |
+| DevOps | 0208C94 | FIX-DOCS-001 + FIX-MIGRATE-CLI-001 | Active (FIX-DOCS-001 C93, FIX-MIGRATE-CLI-001 C94) |
+| Audit | 0208C89 | — | Idle (5 cycles) |
 
 ## Human Intervention Needed
 

@@ -1,87 +1,81 @@
 # QC Worker: Runtime Execution
-## Cycle: 20260208_1735
+## Cycle: 20260208_1834
 
 ### Infrastructure
 | Service | Can Connect? | Details |
 |---------|-------------|---------|
-| Docker | YES | docker compose ps: axel-postgres (healthy, 8h), axel-redis (healthy, 8h) |
+| Docker | YES | Both PostgreSQL and Redis containers running and healthy (9 hours uptime) |
 | PostgreSQL | YES | pg_isready: accepting connections on port 5432 |
-| pgvector | YES | SELECT extname: 'vector' extension installed and loaded |
-| Redis | YES | redis-cli ping: PONG |
+| pgvector | YES | Extension installed and verified (SELECT confirmed vector extname) |
+| Redis | YES | redis-cli ping: PONG response |
 
 ### Service Startup
 | Step | Status | Details |
 |------|--------|---------|
-| migrations | FAIL | TypeScript compilation error: noUncheckedIndexedAccess strict mode violations in tools/migrate/src/cli.ts |
-| app start | FAIL | Dependency chain broken: packages not compiled, app depends on dist files from channels/core/gateway/infra packages |
-| health check | SKIP | App did not start, no health endpoint reachable |
-| channels test | PASS | @axel/channels: 80 tests passed, 5 test files passed |
+| migrations | PASS | Environment variables set (PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD), migrations ran without error output |
+| app start | FAIL | TypeScript compilation errors prevent build |
+| health check | SKIP | App did not start due to build failures |
+| channels test | PASS | 80 tests passed across 5 test files (515ms) |
 
 ### Findings
 
-**[FINDING-R1] TypeScript noUncheckedIndexedAccess Violations in Migrate Tool**
-- Severity: P1
-- Location: tools/migrate/src/cli.ts lines 12-41
-- Issue: Environment variables accessed via dot notation (e.g., `process.env.DATABASE_URL`) but tsconfig has `noUncheckedIndexedAccess: true`, requires bracket notation (e.g., `process.env['DATABASE_URL']`)
-- Prevents database migrations from running
+#### [FINDING-R1] TypeScript Compilation Errors (Severity: P1)
+App build fails with 4 critical TypeScript errors:
 
-**[FINDING-R2] Dependency Graph Build Failure - Missing Package Compilation**
-- Severity: P1  
-- Location: apps/axel and all transitive dependencies
-- Issue: When attempting to compile app, TypeScript reports output files not built:
-  - packages/channels/dist/* not built from src
-  - packages/core/dist/* not built from src  
-  - packages/gateway/dist/* not built from src
-  - packages/infra/dist/* not built from src
-- Root cause: No build script in root package.json or workspace-level build orchestration
-- Need to compile all packages in dependency order before app can compile
+1. **src/config.ts:212** — Property access error with index signature
+   - Issue: `telegram` property accessed directly instead of `['telegram']`
+   - Fix: Use bracket notation for index signature access
 
-**[FINDING-R3] Missing Type Annotations in App Source**
-- Severity: P1
-- Location: apps/axel/src (bootstrap-channels.ts, lifecycle.ts)
-- Issue: Strict mode errors for implicit `any` types and unsafe object access with noUncheckedIndexedAccess
-- Examples:
-  - bootstrap-channels.ts(70,39): Parameter 'target' implicitly has 'any' type
-  - config.ts(211,22): Cannot access `['discord']` via dot notation under noUncheckedIndexedAccess
+2. **src/container.ts:229** — PgPool type mismatch
+   - Issue: Query return type `Promise<{ rows: unknown[] }>` incompatible with `Promise<{ rows: T[] }>`
+   - Root cause: Type definitions too loose; need stricter typing
 
-**[FINDING-R4] Channels Package Tests Passing**
-- Severity: INFO
-- Status: ✓ All 80 tests in 5 files passed (501ms)
-- Files: split-message, telegram-userid-guard, cli-channel, telegram-channel, discord-channel
-- This indicates at least the channels package has correct implementations and tests
+3. **src/container.ts:244** — GoogleGenAIClient type mismatch
+   - Issue: Google Generative AI SDK return types don't match strict `exactOptionalPropertyTypes` config
+   - Root cause: SDK types have optional properties not marked as `undefined`
+
+4. **src/main.ts:64** — Unused variable
+   - Issue: `_handleMessage` declared but never used
+   - Fix: Remove unused variable or implement usage
+
+#### [FINDING-R2] Environment Variable Configuration (Severity: P2)
+- `.env` file exists with credentials, but uses non-standard DB URL format
+- Current: `AXEL_DB_URL=postgresql://axel:axel_dev_password@localhost:5432/axel`
+- Migration tool expects: `DATABASE_URL` or individual `PG*` variables
+- Workaround: Manually export `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` before running migrations
+
+#### [FINDING-R3] Database and Redis Ready (Severity: P0 - Not an issue, status OK)
+- PostgreSQL 17.7 running with pgvector extension
+- Redis 7 running
+- Both services healthy and accepting connections
+- Migrations can execute successfully when env vars are set
 
 ### Output (failed steps only)
 
-#### Step 6: Migrate Build Failure
+#### App Build Error
 ```
-❯ pnpm --filter "@axel/migrate" exec tsc
-src/cli.ts(12,50): error TS4111: Property 'DATABASE_URL' comes from an index signature, so it must be accessed with ['DATABASE_URL'].
-src/cli.ts(14,23): error TS4111: Property 'PGHOST' comes from an index signature, so it must be accessed with ['PGHOST'].
-...
- ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 2: tsc
-```
-
-#### Step 7: App Compilation Failure
-```
-❯ pnpm --filter "axel" exec tsc
-src/bootstrap-channels.ts(1,28): error TS6305: Output file '/home/northprot/projects/axel/packages/channels/dist/cli/index.d.ts' has not been built from source file '/home/northprot/projects/axel/packages/channels/src/cli/index.ts'.
-src/bootstrap-channels.ts(70,39): error TS7006: Parameter 'target' implicitly has an 'any' type.
-...
-src/config.ts(211,22): error TS4111: Property 'discord' comes from an index signature, so it must be accessed with ['discord'].
+src/config.ts(212,23): error TS4111: Property 'telegram' comes from an index signature, so it must be accessed with ['telegram'].
+src/container.ts(229,59): error TS2345: Argument of type '{ query(text: string, params?: readonly unknown[] | undefined): Promise<{ rows: unknown[]; rowCount: number | null; }>; connect(): Promise<{ query(text: string, params?: readonly unknown[] | undefined): Promise<{ rows: unknown[]; rowCount: number | null; }>; release(): void; }>; end(): Promise<...>; }' is not assignable to parameter of type 'PgPool'.
+  The types returned by 'query(...)' are incompatible between these types.
+    Type 'Promise<{ rows: unknown[]; rowCount: number | null; }>' is not assignable to type 'Promise<{ rows: T[]; }>'.
+src/container.ts(244,47): error TS2345: Argument of type '{ getGenerativeModel(config: { model: string; }): { generateContentStream(params: Record<string, unknown>): Promise<{ stream: AsyncIterable<{ readonly candidates?: readonly { readonly content: { readonly parts: readonly Record<string, unknown>[]; readonly role: string; }; readonly finishReason?: string; }[]; }>; }>;...' is not assignable to parameter of type 'GoogleGenAIClient'.
+src/main.ts(64,8): error TS6133: '_handleMessage' is declared but its value is never read.
 ```
 
-### Summary
+#### Channels Package Tests ✓
+```
+Test Files  5 passed (5)
+      Tests  80 passed (80)
+   Start at  18:34:52
+   Duration  515ms (transform 142ms, setup 40ms, collect 450ms, tests 315ms, environment 1ms, prepare 262ms)
+```
 
-**Cannot start service.** Two blockers prevent execution:
+### Blockers Summary
+1. **Cannot start app** — TypeScript compilation must be fixed before runtime testing
+2. **Type system too strict** — `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` catching legitimate SDK types
+3. **No build products** — dist/ folders empty because build fails
 
-1. **Immediate blocker (P1)**: TypeScript strict mode violations prevent compilation of app and migrate packages. The codebase enables `noUncheckedIndexedAccess: true` but violates this rule throughout.
-
-2. **Build orchestration (P1)**: No root-level build script to compile packages in dependency order. Each package must be compiled before consumers can import its dist outputs.
-
-**Next steps to unblock:**
-1. Fix `noUncheckedIndexedAccess` violations in tools/migrate/src/cli.ts (6-12 violations)
-2. Fix `noUncheckedIndexedAccess` violations in apps/axel/src/config.ts (2 violations)  
-3. Fix implicit `any` type violations in apps/axel/src/bootstrap-channels.ts and apps/axel/src/lifecycle.ts
-4. Create root-level build script or ensure all packages are compiled before app build
-5. Then retry database migrations and app startup
-
+### Recommendations
+- Fix the 4 TypeScript errors in src/config.ts, src/container.ts, src/main.ts
+- Consider loosening type strictness temporarily if library types don't match (use `as` casts with comments)
+- Ensure DATABASE_URL env var is set before running migrations in CI/CD

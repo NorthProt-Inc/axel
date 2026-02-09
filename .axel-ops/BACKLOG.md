@@ -2,12 +2,15 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 93 (CTO update)**: 3 Division branches merged. **4 tasks completed**: FIX-MEMORY-002 (dev-edge), FIX-MEMORY-003 (dev-infra), MIGRATE-IMPL-001 (dev-infra, §1 위반 기록), FIX-BUILD-001 (devops). Dependencies unblocked: FIX-DOCS-001 할당. Quality 활성화 (5 cycles since last review + new code). **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** 0 errors.
+> **Cycle 94 (CTO update)**: QC reports 4건 처리 (P0 ×2, P1 ×1 false positive, P2 ×1 FIX-DOCS-001에 포함). **P0 build blockers 2건 발견**: (1) container.ts type mismatch, (2) MemoryType unused import. FIX-CONTAINER-001 + FIX-TYPECHECK-001 + FIX-MIGRATE-CLI-001 생성. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** typecheck FAILS (2 errors). 3 errors open.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
+| FIX-TYPECHECK-001 | P0 | dev-core | packages/core/src/decay/types.ts:2 — `import type { MemoryType }` 미사용 import 제거. `pnpm typecheck` 복구 필수. | C94 |
+| FIX-CONTAINER-001 | P0 | dev-edge | apps/axel/src/container.ts type mismatch 해결: (1) line 229 PgPool query return type `{ rows: unknown[] }` → generic `{ rows: T[] }` 불일치, (2) line 244 GoogleGenAIClient exactOptionalPropertyTypes 호환. `pnpm build` 복구 필수. | C94 |
+| FIX-MIGRATE-CLI-001 | P1 | devops | tools/migrate/src/cli.ts `noUncheckedIndexedAccess` 위반 11건. `process.env.DATABASE_URL` → `process.env['DATABASE_URL']` bracket notation 변경. | C94 |
 | FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트 (Axel 환경변수 반영), (2) operation.md 불필요 build step 제거, (3) README에 operation.md 언급 추가, (4) 환경변수 네이밍 일관성 확인. | C93 |
 | QA-023 | P1 | quality | Post-merge 코드 리뷰: FIX-MEMORY-002 (lifecycle flush), FIX-MEMORY-003 (SemanticMemoryWriter), MIGRATE-IMPL-001 (migrate-axnmihn), FIX-BUILD-001 (build pipeline). TDD 검증, §1 소유권 위반 감사 (MIGRATE-IMPL-001 tools/ dev-infra 작성), §9 패키지 경계 확인. | C93 |
 

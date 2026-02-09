@@ -30,6 +30,9 @@ __pycache__/
 # Human directives (local only, never committed)
 .axel-ops/comms/human.md
 
+# Runtime logs
+logs/
+
 # Coverage
 coverage/
 

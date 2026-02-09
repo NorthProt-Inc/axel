@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 93
+## Current Cycle: 94
 
 ## Division Performance (Last 10 Cycles)
 
@@ -23,11 +23,13 @@
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 0 | 5 | OK |
+| Open Errors | 3 | 5 | **WARN** (2 CRITICAL + 1 HIGH) |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
+| Typecheck | FAIL | PASS | **CRITICAL** (ERR-087, ERR-088) |
+| Build | FAIL | PASS | **CRITICAL** (ERR-088, ERR-089) |
 
 ## Coverage Tracking
 
@@ -71,3 +73,4 @@
 | 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 tasks in progress (FIX-MEMORY-002, FIX-BUILD-001, FIX-MEMORY-003). FIX-MEMORY-003 unblocked → dev-infra assigned. Drift CLEAN. 985 tests. 0 errors. |
 | 92 | dev-edge, devops, dev-infra | 0 (+1 FIX-CYCLESH-001 human) | 0 | Human directives 2건. FIX-CYCLESH-001 DONE (Mark). MIGRATE-IMPL-001 + FIX-DOCS-001 queued. QC 13건 분류. 3 tasks in progress (2 cycles). 985 tests. 0 errors. |
 | 93 | devops, quality | 4 (FIX-MEMORY-002, FIX-MEMORY-003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 branches merged. 1075 tests (+90), 90 files. §1 위반 1건 (MIGRATE-IMPL-001). QA-023 + FIX-DOCS-001 assigned. 0 errors. |
+| 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC REPORTS → P0 BLOCKERS.** QC 4건 처리. build/typecheck FAILS. 3 fix tasks 생성+할당: FIX-TYPECHECK-001 (P0 dev-core), FIX-CONTAINER-001 (P0 dev-edge), FIX-MIGRATE-CLI-001 (P1 devops). 1075 tests, 0 FAIL. 3 errors open. |
