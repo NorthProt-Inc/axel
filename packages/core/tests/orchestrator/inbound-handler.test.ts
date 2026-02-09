@@ -5,6 +5,7 @@ import type {
 	ContextDataProvider,
 	TokenCounter,
 } from '../../src/context/types.js';
+import type { EpisodicMemory, MessageRecord, Turn, WorkingMemory } from '../../src/memory/types.js';
 import {
 	type ErrorInfo,
 	type InboundHandlerDeps,
@@ -136,6 +137,42 @@ function makePersonaEngine(): PersonaEngine {
 	};
 }
 
+function makeWorkingMemory(): WorkingMemory {
+	return {
+		layerName: 'M1:working',
+		pushTurn: vi.fn().mockResolvedValue(undefined),
+		getTurns: vi.fn().mockResolvedValue([]),
+		getSummary: vi.fn().mockResolvedValue(null),
+		compress: vi.fn().mockResolvedValue(undefined),
+		flush: vi.fn().mockResolvedValue(undefined),
+		clear: vi.fn().mockResolvedValue(undefined),
+		healthCheck: vi.fn().mockResolvedValue({
+			state: 'healthy',
+			latencyMs: 0,
+			message: null,
+			lastChecked: new Date(),
+		}),
+	};
+}
+
+function makeEpisodicMemory(): EpisodicMemory {
+	return {
+		layerName: 'M2:episodic',
+		createSession: vi.fn().mockResolvedValue('session-1'),
+		endSession: vi.fn().mockResolvedValue(undefined),
+		addMessage: vi.fn().mockResolvedValue(undefined),
+		getRecentSessions: vi.fn().mockResolvedValue([]),
+		searchByTopic: vi.fn().mockResolvedValue([]),
+		searchByContent: vi.fn().mockResolvedValue([]),
+		healthCheck: vi.fn().mockResolvedValue({
+			state: 'healthy',
+			latencyMs: 0,
+			message: null,
+			lastChecked: new Date(),
+		}),
+	};
+}
+
 function makeDepsSync(overrides?: Partial<InboundHandlerDeps>): InboundHandlerDeps {
 	const store = makeSessionStore();
 	const provider = makeContextDataProvider();
@@ -157,6 +194,8 @@ function makeDepsSync(overrides?: Partial<InboundHandlerDeps>): InboundHandlerDe
 		llmProvider: makeLlmProvider([{ type: 'text', content: 'Hello!' }]),
 		toolExecutor: makeToolExecutor(),
 		personaEngine: makePersonaEngine(),
+		workingMemory: makeWorkingMemory(),
+		episodicMemory: makeEpisodicMemory(),
 		config: {
 			maxIterations: 15,
 			toolTimeoutMs: 30_000,
@@ -851,6 +890,361 @@ describe('createInboundHandler', () => {
 			const errorInfo = onError.mock.calls[0]?.[0] as ErrorInfo;
 			expect(errorInfo.errorType).toBe('unknown');
 			expect(errorInfo.errorMessage).toBe('string error');
+		});
+	});
+
+	describe('memory persistence (FIX-MEMORY-001)', () => {
+		it('should call workingMemory.pushTurn for user message after successful response', async () => {
+			const store = makeSessionStore();
+			const workingMemory = makeWorkingMemory();
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				workingMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			const message = makeInboundMessage({
+				userId: 'user-1',
+				channelId: 'discord',
+				content: 'Hello Axel',
+				timestamp: new Date('2026-02-08T12:00:00Z'),
+			});
+			await handler(message, mockSend);
+
+			// pushTurn should be called at least twice (user message + assistant response)
+			expect(workingMemory.pushTurn).toHaveBeenCalledTimes(2);
+
+			// First call: user message
+			const userTurnCall = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock.calls[0];
+			expect(userTurnCall?.[0]).toBe('user-1');
+			const userTurn = userTurnCall?.[1] as Turn;
+			expect(userTurn.role).toBe('user');
+			expect(userTurn.content).toBe('Hello Axel');
+			expect(userTurn.channelId).toBe('discord');
+		});
+
+		it('should call workingMemory.pushTurn for assistant response after successful response', async () => {
+			const store = makeSessionStore();
+			const workingMemory = makeWorkingMemory();
+			const llmProvider = makeLlmProvider([
+				{ type: 'text', content: 'Hi ' },
+				{ type: 'text', content: 'there!' },
+			]);
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				workingMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			// Second call: assistant response with accumulated text
+			const assistantTurnCall = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock.calls[1];
+			expect(assistantTurnCall?.[0]).toBe('user-1');
+			const assistantTurn = assistantTurnCall?.[1] as Turn;
+			expect(assistantTurn.role).toBe('assistant');
+			expect(assistantTurn.content).toBe('Hi there!');
+			expect(assistantTurn.channelId).toBe('discord');
+		});
+
+		it('should call episodicMemory.addMessage for user message after successful response', async () => {
+			const store = makeSessionStore();
+			const episodicMemory = makeEpisodicMemory();
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				episodicMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(
+				makeInboundMessage({
+					userId: 'user-1',
+					channelId: 'discord',
+					content: 'Hello Axel',
+					timestamp: new Date('2026-02-08T12:00:00Z'),
+				}),
+				mockSend,
+			);
+
+			// addMessage should be called twice (user message + assistant response)
+			expect(episodicMemory.addMessage).toHaveBeenCalledTimes(2);
+
+			// First call: user message with correct sessionId
+			const userMsgCall = (episodicMemory.addMessage as ReturnType<typeof vi.fn>).mock.calls[0];
+			expect(userMsgCall?.[0]).toBe('sess-1'); // sessionId from resolved session
+			const userMsg = userMsgCall?.[1] as MessageRecord;
+			expect(userMsg.role).toBe('user');
+			expect(userMsg.content).toBe('Hello Axel');
+			expect(userMsg.channelId).toBe('discord');
+		});
+
+		it('should call episodicMemory.addMessage for assistant response with correct sessionId', async () => {
+			const store = makeSessionStore();
+			const episodicMemory = makeEpisodicMemory();
+			const llmProvider = makeLlmProvider([{ type: 'text', content: 'Response text' }]);
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				episodicMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			// Second call: assistant response
+			const assistantMsgCall = (episodicMemory.addMessage as ReturnType<typeof vi.fn>).mock
+				.calls[1];
+			expect(assistantMsgCall?.[0]).toBe('sess-1');
+			const assistantMsg = assistantMsgCall?.[1] as MessageRecord;
+			expect(assistantMsg.role).toBe('assistant');
+			expect(assistantMsg.content).toBe('Response text');
+		});
+
+		it('should not call memory persistence methods when an error occurs before reactLoop', async () => {
+			const store = makeSessionStore();
+			(store.resolve as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('DB down'));
+			const workingMemory = makeWorkingMemory();
+			const episodicMemory = makeEpisodicMemory();
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				workingMemory,
+				episodicMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			expect(workingMemory.pushTurn).not.toHaveBeenCalled();
+			expect(episodicMemory.addMessage).not.toHaveBeenCalled();
+		});
+
+		it('should still send response if workingMemory.pushTurn fails', async () => {
+			const store = makeSessionStore();
+			const workingMemory = makeWorkingMemory();
+			(workingMemory.pushTurn as ReturnType<typeof vi.fn>).mockRejectedValue(
+				new Error('PG write failed'),
+			);
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				workingMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			// Response should still be sent despite memory write failure
+			expect(mockSend).toHaveBeenCalledWith(
+				'user-1',
+				expect.objectContaining({ content: 'Hello!' }),
+			);
+		});
+
+		it('should still send response if episodicMemory.addMessage fails', async () => {
+			const store = makeSessionStore();
+			const episodicMemory = makeEpisodicMemory();
+			(episodicMemory.addMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+				new Error('PG write failed'),
+			);
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				episodicMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			// Response should still be sent despite memory write failure
+			expect(mockSend).toHaveBeenCalledWith(
+				'user-1',
+				expect.objectContaining({ content: 'Hello!' }),
+			);
+		});
+
+		it('should pass correct turnId values based on session turnCount', async () => {
+			const store = makeSessionStore(
+				makeResolvedSession({ session: makeSession({ turnCount: 5 }) }),
+			);
+			const workingMemory = makeWorkingMemory();
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				workingMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage(), mockSend);
+
+			const userTurn = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock
+				.calls[0]?.[1] as Turn;
+			const assistantTurn = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock
+				.calls[1]?.[1] as Turn;
+			expect(userTurn.turnId).toBe(6); // turnCount + 1
+			expect(assistantTurn.turnId).toBe(7); // turnCount + 2
+		});
+
+		it('should include tokenCount estimates in both pushTurn and addMessage', async () => {
+			const store = makeSessionStore();
+			const workingMemory = makeWorkingMemory();
+			const episodicMemory = makeEpisodicMemory();
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				workingMemory,
+				episodicMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage({ content: 'Hello Axel' }), mockSend);
+
+			// Token counts should be non-negative integers
+			const userTurn = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock
+				.calls[0]?.[1] as Turn;
+			expect(userTurn.tokenCount).toBeGreaterThanOrEqual(0);
+			expect(Number.isInteger(userTurn.tokenCount)).toBe(true);
+
+			const userMsg = (episodicMemory.addMessage as ReturnType<typeof vi.fn>).mock
+				.calls[0]?.[1] as MessageRecord;
+			expect(userMsg.tokenCount).toBeGreaterThanOrEqual(0);
+			expect(Number.isInteger(userMsg.tokenCount)).toBe(true);
+		});
+
+		it('should persist both user and assistant messages with tool call flow', async () => {
+			const store = makeSessionStore();
+			const workingMemory = makeWorkingMemory();
+			const episodicMemory = makeEpisodicMemory();
+			let callCount = 0;
+			const llmProvider: LlmProvider = {
+				async *chat() {
+					callCount++;
+					if (callCount === 1) {
+						yield {
+							type: 'tool_call' as const,
+							content: { toolName: 'search', args: { q: 'test' }, callId: 'c1' },
+						};
+					} else {
+						yield { type: 'text' as const, content: 'Found it.' };
+					}
+				},
+			};
+			const mockAssembler = {
+				assemble: vi.fn().mockResolvedValue({
+					systemPrompt: 'system',
+					sections: [],
+					totalTokens: 10,
+					budgetUtilization: {},
+				} satisfies AssembledContext),
+			} as unknown as ContextAssembler;
+			const mockSend = vi.fn().mockResolvedValue(undefined);
+
+			const deps = makeDepsSync({
+				sessionRouter: new SessionRouter(store),
+				contextAssembler: mockAssembler,
+				llmProvider,
+				workingMemory,
+				episodicMemory,
+			});
+
+			const handler = createInboundHandler(deps);
+			await handler(makeInboundMessage({ content: 'search something' }), mockSend);
+
+			// workingMemory should still record user message + final assistant response
+			expect(workingMemory.pushTurn).toHaveBeenCalledTimes(2);
+			const assistantTurn = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock
+				.calls[1]?.[1] as Turn;
+			expect(assistantTurn.role).toBe('assistant');
+			expect(assistantTurn.content).toBe('Found it.');
+
+			// episodicMemory should still record user message + final assistant response
+			expect(episodicMemory.addMessage).toHaveBeenCalledTimes(2);
 		});
 	});
 });

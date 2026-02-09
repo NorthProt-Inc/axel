@@ -1,5 +1,6 @@
 import type { ContextAssembler } from '../context/assembler.js';
 import type { ContextSection } from '../context/types.js';
+import type { EpisodicMemory, WorkingMemory } from '../memory/types.js';
 import type { PersonaEngine } from '../persona/engine.js';
 import type { InboundMessage, OutboundMessage } from '../types/channel.js';
 import type { Message } from '../types/message.js';
@@ -33,6 +34,8 @@ export interface InboundHandlerDeps {
 	readonly llmProvider: LlmProvider;
 	readonly toolExecutor: ToolExecutor;
 	readonly personaEngine: PersonaEngine;
+	readonly workingMemory: WorkingMemory;
+	readonly episodicMemory: EpisodicMemory;
 	readonly toolDefinitions?: readonly ToolDefinition[];
 	readonly config?: ReActConfig;
 	readonly onError?: (info: ErrorInfo) => void;
@@ -64,6 +67,8 @@ export function createInboundHandler(
 		llmProvider,
 		toolExecutor,
 		personaEngine,
+		workingMemory,
+		episodicMemory,
 		toolDefinitions = [],
 		config = DEFAULT_REACT_CONFIG,
 		onError,
@@ -108,6 +113,22 @@ export function createInboundHandler(
 
 			// 7. Update session activity
 			await sessionRouter.updateActivity(resolved.session.sessionId);
+
+			// 8. Persist to memory layers (FIX-MEMORY-001)
+			const now = new Date();
+			const baseTurnId = resolved.session.turnCount;
+			await persistToMemory(
+				workingMemory,
+				episodicMemory,
+				userId,
+				resolved.session.sessionId,
+				channelId,
+				content,
+				message.timestamp,
+				responseText,
+				now,
+				baseTurnId,
+			);
 		} catch (err: unknown) {
 			// AUD-081: Report error details for observability
 			if (onError) {
@@ -127,6 +148,72 @@ export function createInboundHandler(
 }
 
 // ─── Internal Helpers ───
+
+/**
+ * Persist user message and assistant response to M1 (WorkingMemory) and M2 (EpisodicMemory).
+ *
+ * Failures are silently caught — memory persistence must not break the response flow.
+ * The response has already been sent to the user at this point.
+ */
+async function persistToMemory(
+	workingMemory: WorkingMemory,
+	episodicMemory: EpisodicMemory,
+	userId: string,
+	sessionId: string,
+	channelId: string,
+	userContent: string,
+	userTimestamp: Date,
+	assistantContent: string,
+	assistantTimestamp: Date,
+	baseTurnId: number,
+): Promise<void> {
+	try {
+		const userTokenCount = estimateTokenCount(userContent);
+		const assistantTokenCount = estimateTokenCount(assistantContent);
+
+		await workingMemory.pushTurn(userId, {
+			turnId: baseTurnId + 1,
+			role: 'user',
+			content: userContent,
+			channelId,
+			timestamp: userTimestamp,
+			tokenCount: userTokenCount,
+		});
+
+		await workingMemory.pushTurn(userId, {
+			turnId: baseTurnId + 2,
+			role: 'assistant',
+			content: assistantContent,
+			channelId,
+			timestamp: assistantTimestamp,
+			tokenCount: assistantTokenCount,
+		});
+
+		await episodicMemory.addMessage(sessionId, {
+			role: 'user',
+			content: userContent,
+			channelId,
+			timestamp: userTimestamp,
+			tokenCount: userTokenCount,
+		});
+
+		await episodicMemory.addMessage(sessionId, {
+			role: 'assistant',
+			content: assistantContent,
+			channelId,
+			timestamp: assistantTimestamp,
+			tokenCount: assistantTokenCount,
+		});
+	} catch {
+		// Memory persistence failure must not break the response flow.
+		// The response has already been sent successfully.
+	}
+}
+
+/** Estimate token count for a string (~4 chars per token, common heuristic) */
+function estimateTokenCount(text: string): number {
+	return Math.ceil(text.length / 4);
+}
 
 /** Extract structured error info from an unknown thrown value */
 function buildErrorInfo(err: unknown, userId: string, channelId: string): ErrorInfo {
