@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **Phase 1: Channels + Cross-Channel + Feature Expansion** (openclaw 참조)
-- **Cycle**: 199
-- **Last Updated**: 2026-02-09C199
-- **STATUS**: **IMPROVEMENT MODE → PHASE 1 LAUNCH.** 10-cycle STEADY STATE anti-pattern 해소. human.md P1 "기능 추가 집중" 실행. Research Division 3건 병렬 착수 (RES-010/011/012). 12 BACKLOG tasks 생성. git push disabled per Mark directive.
+- **Cycle**: 200
+- **Last Updated**: 2026-02-09C200
+- **STATUS**: **PHASE 1 ACTIVE.** Research 3건 완료 (RES-010/011/012). dev-core 활성화 (FEAT-LINK-001, FEAT-INTENT-001 병렬). 1636 tests (verified C200). 0 errors. git push disabled per Mark directive.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 12 |
-| In Progress | 3 |
-| Done | 204 |
+| Queued | 10 |
+| In Progress | 2 |
+| Done | 207 |
 | Cancelled | 15 |
 
 ## Open Errors: 0
@@ -27,19 +27,20 @@
 | Cycle | Date | Summary |
 |-------|------|---------|
 | 189–198 | 0209 | **STEADY STATE.** 1534 tests, typecheck PASSES, 0 errors, 0 new commits. Roadmap exhausted. |
-| 199 | 0209 | **IMPROVEMENT MODE → PHASE 1 LAUNCH.** 10-cycle STEADY STATE 해소. Research 3건 병렬 (RES-010/011/012). BACKLOG 12 tasks 생성. openclaw 분석 완료. |
+| 199 | 0209 | **IMPROVEMENT MODE → PHASE 1 LAUNCH.** 10-cycle STEADY STATE 해소. Research 3건 병렬 (RES-010/011/012). BACKLOG 15 tasks 생성. |
+| 200 | 0209 | **PHASE 1 ACTIVE.** Research 3건 완료 (RES-010/011/012). dev-core 활성화 (FEAT-LINK-001, FEAT-INTENT-001). 1636 tests. 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C199 | Cycle 199 — Phase 1 Launch | Active |
-| Architecture | 0209C103 | — | Idle (pending research completion). |
-| Dev-Core | 0209C111 | — | Idle (pending FEAT-LINK-001, FEAT-INTENT-001). |
+| Coordinator | 0209C200 | Cycle 200 | Active |
+| Architecture | 0209C103 | — | Idle. |
+| Dev-Core | 0209C200 | FEAT-LINK-001 + FEAT-INTENT-001 (병렬) | **Active** |
 | Dev-Infra | 0209C112 | — | Idle (pending FEAT-LINK-002, FEAT-INTENT-002). |
 | Dev-Edge | 0209C111 | — | Idle (pending FEAT-LINK-003, FEAT-INTENT-003). |
 | UI/UX | 0209C112 | — | Idle (FEAT-CANVAS-001 queued). |
-| Research | 0209C199 | RES-010/011/012 (3건 병렬) | **Active** |
+| Research | 0209C200 | — | **DONE** (RES-010/011/012 all completed). |
 | Quality | 0209C112 | — | Idle (QA-027 queued). |
 | DevOps | 0209C111 | — | Idle. |
 | Audit | 0208C89 | — | Idle. |
