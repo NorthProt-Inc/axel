@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 96
+## Current Cycle: 97
 
 ## Division Performance (Last 10 Cycles)
 
@@ -23,13 +23,13 @@
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 4 | 5 | **WARN** (3 CRITICAL + 1 HIGH) |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
+| Open Errors | 0 | 5 | OK |
+| Stalled Tasks (3+ cycles) | 2 | 0 | **WARN** (FIX-DOCS-001 4cy, QA-023 4cy) |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
-| Typecheck | FAIL | PASS | **CRITICAL** (ERR-087, ERR-088, ERR-090) |
-| Build | FAIL | PASS | **CRITICAL** (ERR-088, ERR-089, ERR-090) |
+| Typecheck | PASS | PASS | OK |
+| Build | PASS | PASS | OK |
 
 ## Coverage Tracking
 
@@ -63,7 +63,6 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE. 975 tests. 0 errors. |
 | 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
 | 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
 | 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC/BIOME/README-002) | 0 | **4 TASKS DONE.** 985 tests (+10). 0 errors. |
@@ -71,5 +70,6 @@
 | 92 | dev-edge, devops, dev-infra | 0 (+1 human) | 0 | FIX-CYCLESH-001 DONE (Mark). 985 tests. 0 errors. |
 | 93 | devops, quality | 4 (FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 merges. 1075 tests (+90). 0 errors. |
 | 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC → P0 BLOCKERS.** typecheck+build FAILS. 3 fix tasks. 1075 tests. 3 errors. |
-| 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. Mark 커밋 3건 확인. 1075 tests. 4 errors. |
-| 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건: 1 DUPLICATE, 1 scope, 1 FALSE POSITIVE, 1 cascade. 5 in progress (2cy). 1075 tests. 4 errors. |
+| 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. 1075 tests. 4 errors. |
+| 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건. 5 in progress (2cy). 1075 tests. 4 errors. |
+| 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |

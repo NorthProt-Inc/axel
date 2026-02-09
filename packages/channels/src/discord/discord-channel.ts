@@ -110,10 +110,16 @@ export class DiscordChannel implements AxelChannel {
 
 		const state = this.started ? (this.reconnecting ? 'degraded' : 'healthy') : 'unhealthy';
 
+		const wsPing = this.client?.ws?.ping ?? -1;
 		return {
 			state,
 			checks: {
-				wsPing: this.client?.ws?.ping ?? -1,
+				wsPing: {
+					state,
+					latencyMs: wsPing >= 0 ? wsPing : null,
+					message: wsPing < 0 ? 'WebSocket not connected' : null,
+					lastChecked: now,
+				},
 			},
 			timestamp: now,
 			uptime,
@@ -261,11 +267,12 @@ export class DiscordChannel implements AxelChannel {
 		// Cache the channel for outbound messages
 		this.channelCache.set(message.channelId, message.channel as SendableChannel);
 
+		const isThread = message.channel.isThread?.();
 		const inbound: InboundMessage = {
 			userId: message.author.id,
 			channelId: message.channelId,
 			content: trimmed,
-			threadId: message.channel.isThread?.() ? message.channelId : undefined,
+			...(isThread ? { threadId: message.channelId } : {}),
 			timestamp: message.createdAt,
 			rawEvent: message,
 		};

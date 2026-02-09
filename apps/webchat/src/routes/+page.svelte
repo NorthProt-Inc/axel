@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { PUBLIC_WS_URL, PUBLIC_API_TOKEN } from '$env/static/public';
-	import MessageList from '$lib/components/MessageList.svelte';
-	import MessageInput from '$lib/components/MessageInput.svelte';
-	import ChatSidebar from '$lib/components/ChatSidebar.svelte';
-	import { messages, sendMessage, connectWebSocket } from '$lib/stores/chat.svelte';
+import { onMount } from 'svelte';
+import { PUBLIC_WS_URL, PUBLIC_API_TOKEN } from '$env/static/public';
+import MessageList from '$lib/components/MessageList.svelte';
+import MessageInput from '$lib/components/MessageInput.svelte';
+import ChatSidebar from '$lib/components/ChatSidebar.svelte';
+import { messages, sendMessage, connectWebSocket } from '$lib/stores/chat.svelte';
 
-	let sidebarOpen = $state(false);
+let sidebarOpen = $state(false);
 
-	onMount(() => {
-		connectWebSocket(PUBLIC_WS_URL, PUBLIC_API_TOKEN);
-	});
+onMount(() => {
+	connectWebSocket(PUBLIC_WS_URL, PUBLIC_API_TOKEN);
+});
 
-	function handleSend(content: string) {
-		sendMessage(content);
-	}
+function handleSend(content: string) {
+	sendMessage(content);
+}
 </script>
 
 <svelte:head>

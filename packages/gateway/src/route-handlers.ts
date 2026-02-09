@@ -22,17 +22,17 @@ export function createResourceHandlers(deps: GatewayDeps): {
 			return;
 		}
 		const parsed = parseJsonBody(body);
-		if (!parsed || typeof parsed.query !== 'string' || parsed.query.length === 0) {
+		if (!parsed || typeof parsed['query'] !== 'string' || parsed['query'].length === 0) {
 			sendError(res, 400, 'Invalid request: query required', requestId);
 			return;
 		}
 		const result = await deps.searchMemory({
-			query: parsed.query,
-			limit: typeof parsed.limit === 'number' ? parsed.limit : undefined,
-			memoryTypes: Array.isArray(parsed.memoryTypes) ? (parsed.memoryTypes as string[]) : undefined,
-			channelFilter: typeof parsed.channelFilter === 'string' ? parsed.channelFilter : undefined,
-			minImportance: typeof parsed.minImportance === 'number' ? parsed.minImportance : undefined,
-			hybridSearch: typeof parsed.hybridSearch === 'boolean' ? parsed.hybridSearch : undefined,
+			query: parsed['query'],
+			...(typeof parsed['limit'] === 'number' ? { limit: parsed['limit'] } : {}),
+			...(Array.isArray(parsed['memoryTypes']) ? { memoryTypes: parsed['memoryTypes'] as string[] } : {}),
+			...(typeof parsed['channelFilter'] === 'string' ? { channelFilter: parsed['channelFilter'] } : {}),
+			...(typeof parsed['minImportance'] === 'number' ? { minImportance: parsed['minImportance'] } : {}),
+			...(typeof parsed['hybridSearch'] === 'boolean' ? { hybridSearch: parsed['hybridSearch'] } : {}),
 		});
 		sendJson(res, 200, { results: result.results, totalMatches: result.totalMatches, requestId });
 	}
@@ -77,7 +77,7 @@ export function createResourceHandlers(deps: GatewayDeps): {
 			sendError(res, 404, 'No active session', requestId);
 			return;
 		}
-		const sessionId = session.sessionId;
+		const sessionId = session['sessionId'];
 		if (typeof sessionId !== 'string' || sessionId.length === 0) {
 			sendError(res, 500, 'Internal error', requestId);
 			return;
@@ -107,20 +107,20 @@ export function createResourceHandlers(deps: GatewayDeps): {
 			return;
 		}
 		const parsed = parseJsonBody(body);
-		if (!parsed || typeof parsed.name !== 'string' || parsed.name.length === 0) {
+		if (!parsed || typeof parsed['name'] !== 'string' || parsed['name'].length === 0) {
 			sendError(res, 400, 'Invalid request: name required', requestId);
 			return;
 		}
-		if (!parsed.args || typeof parsed.args !== 'object' || Array.isArray(parsed.args)) {
+		if (!parsed['args'] || typeof parsed['args'] !== 'object' || Array.isArray(parsed['args'])) {
 			sendError(res, 400, 'Invalid request: args required', requestId);
 			return;
 		}
 		const result = await deps.executeTool({
-			name: parsed.name,
-			args: parsed.args as Record<string, unknown>,
+			name: parsed['name'],
+			args: parsed['args'] as Record<string, unknown>,
 		});
 		sendJson(res, 200, {
-			name: parsed.name,
+			name: parsed['name'],
 			success: result.success,
 			result: result.content,
 			error: result.error,

@@ -29,15 +29,21 @@ let wsConnection = $state<WebSocket | null>(null);
 let wsAuthenticated = $state(false);
 
 export const messages = {
-	get value() { return messageList; },
+	get value() {
+		return messageList;
+	},
 };
 
 export const sessions = {
-	get value() { return sessionList; },
+	get value() {
+		return sessionList;
+	},
 };
 
 export const streaming = {
-	get value() { return isStreaming; },
+	get value() {
+		return isStreaming;
+	},
 };
 
 export function sendMessage(content: string): void {
@@ -45,12 +51,14 @@ export function sendMessage(content: string): void {
 	messageList = [...messageList, userMsg];
 
 	if (wsConnection?.readyState === WebSocket.OPEN && wsAuthenticated) {
-		wsConnection.send(JSON.stringify({
-			type: 'chat',
-			content,
-			channelId: 'webchat',
-			sessionId: currentSessionId,
-		}));
+		wsConnection.send(
+			JSON.stringify({
+				type: 'chat',
+				content,
+				channelId: 'webchat',
+				sessionId: currentSessionId,
+			}),
+		);
 		isStreaming = true;
 	}
 }

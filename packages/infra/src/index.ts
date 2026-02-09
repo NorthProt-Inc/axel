@@ -1,5 +1,6 @@
 export {
 	AxelPgPool,
+	type PgPoolDriver,
 	PgEpisodicMemory,
 	PgSemanticMemory,
 	PgConceptualMemory,
@@ -14,6 +15,6 @@ export {
 export { RedisWorkingMemory } from './cache/redis-working-memory.js';
 export { RedisStreamBuffer } from './cache/redis-stream-buffer.js';
 export { AnthropicLlmProvider } from './llm/anthropic-provider.js';
-export { GoogleLlmProvider } from './llm/google-provider.js';
+export { GoogleLlmProvider, type GoogleGenAIClient } from './llm/google-provider.js';
 export { defineTool, ToolRegistry, McpToolExecutor, validatePath } from './mcp/tool-registry.js';
 export { SemanticMemoryWriter } from './memory/semantic-memory-writer.js';

@@ -52,12 +52,12 @@ function handleWsAuthMessage(
 		return;
 	}
 
-	if (parsed.type !== 'auth' || typeof parsed.token !== 'string') {
+	if (parsed['type'] !== 'auth' || typeof parsed['token'] !== 'string') {
 		ws.close(4001, 'Unauthorized');
 		return;
 	}
 
-	if (!timingSafeEqual(parsed.token, config.authToken)) {
+	if (!timingSafeEqual(parsed['token'], config.authToken)) {
 		ws.close(4001, 'Unauthorized');
 		return;
 	}
@@ -65,7 +65,7 @@ function handleWsAuthMessage(
 	ws.authenticated = true;
 	if (ws.authTimer) {
 		clearTimeout(ws.authTimer);
-		ws.authTimer = undefined;
+		delete ws.authTimer;
 	}
 	ws.send(JSON.stringify({ type: 'auth_ok' }));
 }
@@ -86,12 +86,12 @@ function handleWsMessage(
 		return;
 	}
 
-	if (parsed.type === 'session_info_request') {
+	if (parsed['type'] === 'session_info_request') {
 		ws.send(JSON.stringify({ type: 'session_info', session: null }));
 		return;
 	}
 
-	if (parsed.type === 'chat') {
+	if (parsed['type'] === 'chat') {
 		handleWsChatMessage(ws, parsed, config, deps);
 		return;
 	}
@@ -99,7 +99,7 @@ function handleWsMessage(
 	ws.send(
 		JSON.stringify({
 			type: 'error',
-			error: `Unknown message type: ${String(parsed.type)}`,
+			error: `Unknown message type: ${String(parsed['type'])}`,
 			requestId: generateRequestId(),
 		}),
 	);
@@ -112,8 +112,8 @@ function handleWsChatMessage(
 	deps: GatewayDeps,
 ): void {
 	const requestId = generateRequestId();
-	const content = parsed.content;
-	const channelId = parsed.channelId;
+	const content = parsed['content'];
+	const channelId = parsed['channelId'];
 
 	if (typeof content !== 'string' || content.length === 0) {
 		ws.send(JSON.stringify({ type: 'error', error: 'Missing content', requestId }));

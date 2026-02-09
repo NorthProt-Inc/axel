@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation Maintenance.** Build/typecheck 깨짐 — P0 수정 진행 중 (2 cycles). QC C1907 4건 처리.
-- **Cycle**: 96
-- **Last Updated**: 2026-02-08C96
-- **STATUS**: **QC C1907 reports 4건 처리.** (1) config.ts TS4111 DUPLICATE (C95 ERR-090), (2) .env DB vars → FIX-DOCS-001 scope (P2), (3) .env API keys FALSE POSITIVE (.gitignore 포함), (4) README Quick Start → build 실패 cascade + FIX-DOCS-001. **5 tasks in progress, 0 completions (2 cycles).** FIX-TYPECHECK-001 + FIX-CONTAINER-001 approaching stall (trivial fixes, 2 cycles). **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files. typecheck FAILS.** 4 errors open (3 CRITICAL, 1 HIGH).
+- **Phase**: **Post-Implementation Maintenance.** typecheck+tests 복구 완료. P2 docs + P1 QA 잔여 태스크만 남음.
+- **Cycle**: 97
+- **Last Updated**: 2026-02-08C97
+- **STATUS**: **ALL P0 BLOCKERS RESOLVED.** Mark(Human) 직접 수정 4건 (ERR-087~090: decay/types.ts, container.ts, config.ts, cli.ts) + CTO override 추가 수정 (discord-channel.ts healthCheck+threadId, gateway ws-handler.ts+route-handlers.ts TS4111, infra llm+mcp TS4111+exactOptionalPropertyTypes). **typecheck PASSES. 1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** FIX-TYPECHECK-001/FIX-CONTAINER-001/FIX-MIGRATE-CLI-001 → DONE. FIX-DOCS-001 + QA-023 in progress (4 cycles stalled — CTO override next cycle). **0 errors open.**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 5 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001, FIX-DOCS-001, QA-023) |
-| Done | 152 |
+| In Progress | 2 (FIX-DOCS-001, QA-023) |
+| Done | 155 |
 | Cancelled | 14 |
 
-## Open Errors: 4 (3 CRITICAL, 1 HIGH)
+## Open Errors: 0
 
 ## Cycle History
 
@@ -86,21 +86,22 @@
 | 94 | 0208 | **QC reports 처리 — P0 BUILD BLOCKERS 발견.** QC 시스템 보고 4건 중 P0 ×2 (container.ts type mismatch ERR-088, MemoryType unused ERR-087), P1 ×1 (migrate CLI bracket notation ERR-089), P1 ×1 false positive (pnpm test --run). 3 fix tasks 생성: FIX-TYPECHECK-001 (dev-core), FIX-CONTAINER-001 (dev-edge), FIX-MIGRATE-CLI-001 (devops). **1075 tests, 0 FAIL.** typecheck FAILS. 3 errors open. |
 | 95 | 0208 | **QC C1854 reports 3건 추가 처리.** config.ts TS4111 (ERR-090) — Mark 커밋 `7df32f5` gateway wiring에서 도입. FIX-CONTAINER-001 scope 확장. Mark 커밋 3건 확인: `7df32f5` (gateway bootstrap), `6642fc6` (webchat WS), `b81f310` (WS protocol fix). 5 tasks in progress (변동 없음). **1075 tests, 0 FAIL, 90 files.** typecheck FAILS. 4 errors open (3C+1H). |
 | 96 | 0208 | **QC C1907 4건 처리.** (1) config.ts DUPLICATE, (2) .env DB vars → FIX-DOCS-001 P2, (3) .env API keys FALSE POSITIVE, (4) README → build cascade. 0 completions. 5 tasks in progress (2 cycles). FIX-TYPECHECK-001/FIX-CONTAINER-001 approaching stall. **1075 tests, 0 FAIL.** typecheck FAILS. 4 errors (3C+1H). |
+| 97 | 0208 | **ALL P0 BLOCKERS RESOLVED. 3 TASKS DONE.** Mark(Human) 직접 수정 4건 (ERR-087~090) + CTO override 추가 typecheck 수정 (discord-channel, gateway, infra — 30 TS4111+exactOptionalPropertyTypes errors). FIX-TYPECHECK-001/FIX-CONTAINER-001/FIX-MIGRATE-CLI-001 DONE. **typecheck PASSES. 1075 tests, 0 FAIL, 90 files.** 0 errors. FIX-DOCS-001+QA-023 stalled (4 cycles). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C96 | Cycle 96 | Active |
-| Architecture | 0208C74 | — | Idle (22 cycles) |
-| Dev-Core | 0208C94 | FIX-TYPECHECK-001 | Active (P0, 2 cycles — approaching stall) |
-| Dev-Infra | 0208C93 | — | Idle (3 cycles) |
-| Dev-Edge | 0208C94 | FIX-CONTAINER-001 | Active (P0, scope expanded, 2 cycles — approaching stall) |
-| UI/UX | 0208C82 | — | Idle (14 cycles) |
-| Research | 0208C89 | — | Idle (7 cycles) |
-| Quality | 0208C94 | QA-023 | Active (P1, 3 cycles — stall threshold) |
-| DevOps | 0208C94 | FIX-DOCS-001 + FIX-MIGRATE-CLI-001 | Active (FIX-DOCS-001 C93 3cy, FIX-MIGRATE-CLI-001 C94 2cy) |
-| Audit | 0208C89 | — | Idle (7 cycles) |
+| Coordinator | 0208C97 | Cycle 97 | Active |
+| Architecture | 0208C74 | — | Idle (23 cycles) |
+| Dev-Core | 0208C97 | — | Idle (FIX-TYPECHECK-001 DONE by Mark) |
+| Dev-Infra | 0208C93 | — | Idle (4 cycles) |
+| Dev-Edge | 0208C97 | — | Idle (FIX-CONTAINER-001 DONE by Mark+CTO) |
+| UI/UX | 0208C82 | — | Idle (15 cycles) |
+| Research | 0208C89 | — | Idle (8 cycles) |
+| Quality | 0208C94 | QA-023 | **STALLED (4 cycles — CTO override next cycle)** |
+| DevOps | 0208C94 | FIX-DOCS-001 | **STALLED (4 cycles — CTO override next cycle)** |
+| Audit | 0208C89 | — | Idle (8 cycles) |
 
 ## Human Intervention Needed
 

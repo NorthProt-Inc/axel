@@ -111,6 +111,33 @@ For escalated issues:
 - [ ] **[QC-report]** [ESCALATED P1→P0] {description} — stuck for {count} cycles since {first}
 ```
 
+### Step 6.5: Update Active QC Issues Section in human.md
+
+Every cycle, update the active issues section in HUMAN_MD_FILE between the markers `<!-- QC-ACTIVE-START -->` and `<!-- QC-ACTIVE-END -->`. This section is a living document — replace its entire content each cycle with the current state.
+
+Use the Edit tool to replace everything between (and including) the markers with:
+
+```
+<!-- QC-ACTIVE-START -->
+## QC Active Issues (Cycle {CYCLE_ID})
+
+- [ ] **[QC-report]** [P{sev}] {desc} — Worker: {worker}, {count} cycles since {first}
+- [ ] **[QC-report]** [P{sev}] {desc} — Worker: {worker}, {count} cycles since {first}
+...
+
+Resolved this cycle: {comma-separated list of resolved fingerprints, or "none"}
+<!-- QC-ACTIVE-END -->
+```
+
+Rules for this section:
+- Include ALL issues with `status: "FAIL"` from known-issues.jsonl (after this cycle's updates)
+- Exclude cascade findings (those with `root_fp`) — they are listed under their root cause
+- Sort by severity (P0 first → P1 → P2 → P3)
+- Use the standard `- [ ] **[QC-report]** [P{sev}]` format for every item
+- Mark escalated issues: `- [ ] **[QC-report]** [ESCALATED P1→P0] {desc} — ...`
+- List resolved fingerprints at the bottom for reference
+- This replaces the entire section between markers every cycle — it's not append-only
+
 ### Step 7: Update known-issues.jsonl
 Write the complete updated known-issues.jsonl using the Write tool. Each line is one JSON object.
 

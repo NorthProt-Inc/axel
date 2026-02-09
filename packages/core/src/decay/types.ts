@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { MemoryType } from '../types/memory.js';
 
 /** Zod schema for decay calculation input (ADR-015) */
 export const DecayInputSchema = z.object({

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatDivider, formatHelp, formatSessionInfo, formatTimestamp } from '../src/cli/format.js';
+import {
+	formatDivider,
+	formatHelp,
+	formatSessionInfo,
+	formatTimestamp,
+} from '../src/cli/format.js';
 
 describe('CLI Format', () => {
 	describe('formatSessionInfo', () => {

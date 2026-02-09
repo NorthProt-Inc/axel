@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { renderError, renderMarkdown, renderSystemMessage, renderUserPrompt } from '../src/cli/renderer.js';
+import {
+	renderError,
+	renderMarkdown,
+	renderSystemMessage,
+	renderUserPrompt,
+} from '../src/cli/renderer.js';
 
 describe('CLI Renderer', () => {
 	describe('renderMarkdown', () => {

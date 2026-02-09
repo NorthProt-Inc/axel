@@ -2,21 +2,20 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 96 (CTO update)**: 4 errors open (3 CRITICAL, 1 HIGH). 변동 없음. QC C1907 4건 처리: 1 DUPLICATE, 1 FIX-DOCS-001 scope, 1 FALSE POSITIVE (.env API keys), 1 cascade. 5 fix tasks in progress (2 cycles).
+> **Cycle 97 (CTO update)**: **0 errors open.** ERR-087~090 모두 해결 (Mark 직접 수정 + CTO override 추가 수정). typecheck PASSES. 1075 tests, 0 FAIL.
 
 ## Open
 
-| ID | Severity | Description | Reported | Assigned To |
-|----|----------|-------------|----------|-------------|
-| ERR-087 | CRITICAL | `pnpm typecheck` FAILS — packages/core/src/decay/types.ts:2 unused `import type { MemoryType }`. CI pipeline broken. | C94 | FIX-TYPECHECK-001 (dev-core) |
-| ERR-088 | CRITICAL | `pnpm build` FAILS — apps/axel/src/container.ts:229 PgPool type mismatch (rows: unknown[] vs T[]), :244 GoogleGenAIClient exactOptionalPropertyTypes incompatible. Production build blocked. | C94 | FIX-CONTAINER-001 (dev-edge) |
-| ERR-089 | HIGH | tools/migrate/src/cli.ts:12+ — 11× TS4111 errors. `noUncheckedIndexedAccess` requires bracket notation for process.env access. Build pipeline includes this package. | C94 | FIX-MIGRATE-CLI-001 (devops) |
-| ERR-090 | CRITICAL | apps/axel/src/config.ts:219,233,234 — 3× TS4111 errors. `Record<string, unknown>` dot notation access requires bracket notation. Mark 커밋 `7df32f5` (gateway wiring)에서 도입. | C95 | FIX-CONTAINER-001 (dev-edge, scope 확장) |
+(none)
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
 |----|------------|-------------|------|
+| ERR-087 | `import type { MemoryType }` 미사용 import 제거. typecheck 복구. | **Mark (Human)** 직접 수정 (uncommitted) | 0208C97 |
+| ERR-088 | container.ts PgPool+GoogleGenAIClient 타입 수정. ContainerPgPool interface 도입, GoogleGenAIClient re-export 사용. | **Mark (Human)** 직접 수정 (uncommitted) | 0208C97 |
+| ERR-089 | cli.ts process.env dot notation → bracket notation 11건 수정. | **Mark (Human)** 직접 수정 (uncommitted) | 0208C97 |
+| ERR-090 | config.ts Record<string,unknown> dot notation → bracket notation 3건 수정. | **Mark (Human)** 직접 수정 (uncommitted) | 0208C97 |
 | ERR-086 | FIX-PUNYCODE-001 수정(packageExtensions + postinstall script)이 이미 정상 작동중. 975 tests pass, 0 FAIL. telegram 25 tests pass. Mark가 cycle.sh 소유범위 수정(7718b97) + 유실 산출물 복구(217cdc8)로 해결. | FIX-PUNYCODE-002 (devops) + Mark (Human) | 0208C85 |
 |----|------------|-------------|------|
 | ERR-085 | `migration-strategy.md` 업데이트: 디렉토리 구조, messages 컬럼, 007/008 migration, Execution Order 반영. | FIX-MIGRATION-002 (coord CTO override) | 0208C77 |

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { ChatMessage } from '$lib/stores/chat.svelte';
-	import StreamingIndicator from './StreamingIndicator.svelte';
+import type { ChatMessage } from '$lib/stores/chat.svelte';
+import StreamingIndicator from './StreamingIndicator.svelte';
 
-	let { messages }: { messages: { value: ChatMessage[] } } = $props();
+let { messages }: { messages: { value: ChatMessage[] } } = $props();
 
-	let containerEl: HTMLDivElement;
+let containerEl: HTMLDivElement;
 
-	$effect(() => {
-		if (messages.value.length > 0 && containerEl) {
-			containerEl.scrollTop = containerEl.scrollHeight;
-		}
-	});
+$effect(() => {
+	if (messages.value.length > 0 && containerEl) {
+		containerEl.scrollTop = containerEl.scrollHeight;
+	}
+});
 </script>
 
 <div bind:this={containerEl} class="flex-1 overflow-y-auto px-4 py-6 space-y-4">

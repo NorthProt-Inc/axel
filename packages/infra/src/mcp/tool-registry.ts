@@ -177,7 +177,7 @@ class McpToolExecutor implements ToolExecutor {
 
 		// Command allowlist enforcement (ADR-010)
 		if (this.options.commandAllowlist && call.toolName === 'execute_command') {
-			const command = (call.args as Record<string, unknown>).command;
+			const command = (call.args as Record<string, unknown>)['command'];
 			if (typeof command === 'string' && !this.options.commandAllowlist.includes(command)) {
 				return {
 					callId: call.callId,

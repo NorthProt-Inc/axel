@@ -1,25 +1,25 @@
 <script lang="ts">
-	let { onSend }: { onSend: (content: string) => void } = $props();
+let { onSend }: { onSend: (content: string) => void } = $props();
 
-	let input = $state('');
+let input = $state('');
 
-	function handleSubmit(e: SubmitEvent) {
+function handleSubmit(e: SubmitEvent) {
+	e.preventDefault();
+	const trimmed = input.trim();
+	if (trimmed.length === 0) return;
+	onSend(trimmed);
+	input = '';
+}
+
+function handleKeyDown(e: KeyboardEvent) {
+	if (e.key === 'Enter' && !e.shiftKey) {
 		e.preventDefault();
 		const trimmed = input.trim();
 		if (trimmed.length === 0) return;
 		onSend(trimmed);
 		input = '';
 	}
-
-	function handleKeyDown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault();
-			const trimmed = input.trim();
-			if (trimmed.length === 0) return;
-			onSend(trimmed);
-			input = '';
-		}
-	}
+}
 </script>
 
 <form onsubmit={handleSubmit} class="border-t border-navy-mid px-4 py-3">

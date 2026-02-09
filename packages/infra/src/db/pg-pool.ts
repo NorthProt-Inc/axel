@@ -36,11 +36,10 @@ interface PgPoolDriver {
  */
 class AxelPgPool {
 	private readonly pool: PgPoolDriver;
-	private readonly config: PgPoolConfig;
 
-	constructor(pool: PgPoolDriver, config: PgPoolConfig) {
+	constructor(pool: PgPoolDriver, _config: PgPoolConfig) {
 		this.pool = pool;
-		this.config = config;
+		// _config parameter intentionally unused but required by interface
 	}
 
 	async query<T extends Record<string, unknown>>(

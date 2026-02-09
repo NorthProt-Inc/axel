@@ -1,64 +1,56 @@
 # QC Worker: Runtime Execution
-## Cycle: 20260208_1907
+## Cycle: 20260208_1921
+
+### Pre-flight
+- .env: EXISTS
+- Connection variables found: AXEL_DB_URL, AXEL_REDIS_URL (note: prefixed with `AXEL_`, not standard `DATABASE_URL`/`PG*`)
+- Docker compose file: EXISTS
 
 ### Infrastructure
 | Service | Can Connect? | Details |
 |---------|-------------|---------|
-| Docker | YES | Both postgres and redis containers running and healthy for 9 hours |
-| PostgreSQL | YES | pg_isready: accepting connections |
-| pgvector | YES | Extension installed and available |
-| Redis | YES | redis-cli ping: PONG |
+| Docker | YES | Both containers Up 9 hours (healthy) |
+| PostgreSQL | YES | pg_isready: accepting connections. PostgreSQL 17.7 (pgvector/pgvector:pg17) |
+| pgvector | YES | Extension `vector` installed and active |
+| Redis | YES | redis-cli PONG. Redis 7 (alpine) |
 
 ### Service Startup
 | Step | Status | Details |
 |------|--------|---------|
-| migrations | PASS | 8 migrations applied successfully (last 2 applied today at 21:48 and 21:49) |
-| app start | FAIL | TypeScript compilation errors in axel app (see findings) |
-| health check | SKIP | Could not test (app failed to start) |
-| channels test | PASS | 80 tests passed across 5 test files (488ms) |
+| migrations | FAIL | migrate CLI requires `DATABASE_URL` or `PG*` env vars; project uses `AXEL_DB_URL` instead |
+| app start | FAIL | ERR_UNKNOWN_FILE_EXTENSION: dist/main.js tries to import `.ts` file from packages/gateway/src/index.ts |
+| health check | SKIP | Port 3000 is occupied by `open-webui` (pid 2382630), not Axel. Health response `{"status":true}` is from open-webui. |
+| channels test | PASS | 80/80 tests passed across 5 test files (537ms) |
 
 ### Findings
+- [FINDING-R1] severity: P2. Migration CLI env var mismatch — `tools/migrate/dist/cli.js` expects `DATABASE_URL` or `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD`, but `.env` defines `AXEL_DB_URL`. Migrations cannot run without manual env var mapping.
+- [FINDING-R2] severity: P1. App startup crash — `apps/axel/dist/main.js` fails with `ERR_UNKNOWN_FILE_EXTENSION ".ts"` when attempting to import `packages/gateway/src/index.ts`. The compiled output references source `.ts` files instead of compiled `.js` files, causing Node.js to refuse loading.
 
-- **[FINDING-R1]** severity: **P1**. TypeScript build failures in main application.
-  - App: `apps/axel` fails with multiple `TS4111` errors about index signature access (`noUncheckedIndexedAccess` strictness)
-  - Migrate: `tools/migrate` also has build failures with same TS4111 errors
-  - Root cause: Code uses property access (e.g., `process.env.DATABASE_URL`) instead of bracket notation (e.g., `process.env['DATABASE_URL']`) which is required by TypeScript strict mode.
-  - Impact: Cannot start the main application. The dist files exist (from previous builds at 17:35 and 18:30), but rebuilding fails.
+### Self-Verification Notes
 
-- **[FINDING-R2]** severity: **P0**. Environment variables not configured in .env for database.
-  - `.env` file exists but missing DATABASE_URL and PG* environment variables
-  - Workaround: Used explicit PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD shell vars to run migrations successfully
-  - The docker-compose.dev.yml defines credentials (user: axel, password: axel_dev_password, db: axel) but they're not exported to .env
-  - Migrations worked with environment variables passed on CLI, so database is accessible
+- Step 6 (migrations): FAIL. Self-check: (1) Build cascade? No — `tools/migrate/dist/cli.js` exists and executes, fails on env vars (2) Correct credentials? The tool never got to auth — env var names don't match (3) Correct container name? N/A (4) Infra vs code? Code configuration issue — migrate CLI hardcodes `DATABASE_URL`/`PG*` but project convention uses `AXEL_DB_URL` (5) Correct command? Yes — `node tools/migrate/dist/cli.js up` per instructions
+  - Verdict: **REAL ISSUE** — env var naming mismatch between migrate tool and project convention
 
-- **[FINDING-R3]** severity: **P0 (Security)**.  .env file contains plaintext API keys (ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY, GITHUB_TOKEN).
-  - These should not be present in the repository or should be revoked immediately if this is a real environment
-  - Recommendation: Revoke all exposed tokens and regenerate
+- Step 7 (app start): FAIL. Self-check: (1) Build cascade? Partially — `dist/main.js` exists and runs, but it tries to import an uncompiled `.ts` file from a dependency package. This is a build output issue where path mappings resolve to source instead of dist. (2) Correct credentials? N/A — crash before any connection attempt (3) Correct container name? N/A (4) Infra vs code? Code issue — compiled JS references `.ts` source (5) Correct command? Yes — `node apps/axel/dist/main.js` per instructions
+  - Verdict: **REAL ISSUE** — compiled output has incorrect import paths pointing to `.ts` source files
 
-### Output (failed steps)
+- Step 8 (health check): SKIP. Port 3000 occupied by open-webui, not Axel. Cannot meaningfully test Axel health endpoint.
 
-#### Build Error Output (apps/axel)
+### Output (failed steps only)
+
+**Step 6 — Migration:**
 ```
-src/config.ts(219,26): error TS4111: Property 'corsOrigins' comes from an index signature, so it must be accessed with ['corsOrigins'].
-src/config.ts(233,22): error TS4111: Property 'discord' comes from an index signature, so it must be accessed with ['discord'].
-src/config.ts(234,23): error TS4111: Property 'telegram' comes from an index signature, so it must be accessed with ['telegram'].
-src/container.ts(229,59): error TS2345: Argument of type '{ query(text: string, params?: readonly unknown[] | undefined): Promise<{ rows: unknown[]; rowCount: number | null; }>; ... }' is not assignable to parameter of type 'PgPool'.
-...
+Migration error: Error: DATABASE_URL or individual PG* environment variables (PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD) must be set
+    at validateEnvironment (file:///home/northprot/projects/axel/tools/migrate/dist/cli.js:18:15)
+    at main (file:///home/northprot/projects/axel/tools/migrate/dist/cli.js:25:5)
+    at file:///home/northprot/projects/axel/tools/migrate/dist/cli.js:90:5
 ```
 
-#### App Start Error
+**Step 7 — App Start:**
 ```
 TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for /home/northprot/projects/axel/packages/gateway/src/index.ts
     at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:219:9)
+    at defaultGetFormat (node:internal/modules/esm/get_format:245:36)
+    at defaultLoad (node:internal/modules/esm/load:120:22)
+    at async ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:483:32)
 ```
-
-#### Migration Build Error
-```
-src/cli.ts(12,50): error TS4111: Property 'DATABASE_URL' comes from an index signature, so it must be accessed with ['DATABASE_URL'].
-src/cli.ts(14,23): error TS4111: Property 'PGHOST' comes from an index signature, so it must be accessed with ['PGHOST'].
-...
-```
-
-### Summary
-Infrastructure (Docker, PostgreSQL, Redis, pgvector) is fully operational and healthy. Database migrations are successfully applied. However, the main application cannot start due to TypeScript compilation errors related to strict mode property access rules. The channels package tests (80 tests) pass cleanly, indicating the test infrastructure and some packages are working correctly.
-

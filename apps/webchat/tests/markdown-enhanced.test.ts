@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	renderMarkdownWithHighlight,
-	sanitizeHtml,
-} from '../src/lib/utils/markdown.js';
+import { renderMarkdownWithHighlight, sanitizeHtml } from '../src/lib/utils/markdown.js';
 
 describe('WebChat Enhanced Markdown — Shiki Code Highlighting', () => {
 	it('highlights TypeScript code blocks', async () => {

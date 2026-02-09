@@ -69,14 +69,8 @@ export function transformSession(session: AxnmihnSession): AxelSession {
 }
 
 /** Extract session summary if any summary data exists. Returns null if no data. */
-export function transformSessionSummary(
-	session: AxnmihnSession,
-): AxelSessionSummary | null {
-	if (
-		session.summary === null &&
-		session.key_topics === null &&
-		session.emotional_tone === null
-	) {
+export function transformSessionSummary(session: AxnmihnSession): AxelSessionSummary | null {
+	if (session.summary === null && session.key_topics === null && session.emotional_tone === null) {
 		return null;
 	}
 	return {
@@ -105,9 +99,7 @@ export function transformMessage(message: AxnmihnMessage): AxelMessage {
 }
 
 /** Transform a source interaction log to Axel PG schema. */
-export function transformInteractionLog(
-	log: AxnmihnInteractionLog,
-): AxelInteractionLog {
+export function transformInteractionLog(log: AxnmihnInteractionLog): AxelInteractionLog {
 	let toolCalls: unknown[] = [];
 	if (log.tool_calls_json !== null && log.tool_calls_json !== '') {
 		try {
@@ -138,10 +130,7 @@ export function transformInteractionLog(
 }
 
 /** Transform a ChromaDB memory + new embedding to Axel PG schema. */
-export function transformMemory(
-	memory: ChromaMemory,
-	embedding: Float32Array,
-): AxelMemory {
+export function transformMemory(memory: ChromaMemory, embedding: Float32Array): AxelMemory {
 	const memoryType = memory.metadata.memory_type;
 	return {
 		content: memory.content,

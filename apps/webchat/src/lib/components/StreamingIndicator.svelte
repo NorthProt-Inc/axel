@@ -1,5 +1,5 @@
 <script lang="ts">
-	// Animated dots streaming indicator
+// Animated dots streaming indicator
 </script>
 
 <span class="inline-flex items-center gap-0.5 ml-1">

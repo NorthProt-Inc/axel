@@ -9,13 +9,13 @@ import { Migrator } from './migrator.js';
  * @throws {Error} If neither DATABASE_URL nor all individual PG* variables are provided.
  */
 export function validateEnvironment(): void {
-	const hasConnectionString = Boolean(process.env.DATABASE_URL);
+	const hasConnectionString = Boolean(process.env['DATABASE_URL']);
 	const hasIndividualVars =
-		Boolean(process.env.PGHOST) &&
-		Boolean(process.env.PGPORT) &&
-		Boolean(process.env.PGDATABASE) &&
-		Boolean(process.env.PGUSER) &&
-		Boolean(process.env.PGPASSWORD);
+		Boolean(process.env['PGHOST']) &&
+		Boolean(process.env['PGPORT']) &&
+		Boolean(process.env['PGDATABASE']) &&
+		Boolean(process.env['PGUSER']) &&
+		Boolean(process.env['PGPASSWORD']);
 
 	if (!hasConnectionString && !hasIndividualVars) {
 		throw new Error(
@@ -31,14 +31,14 @@ async function main() {
 	// Validate environment before attempting connection
 	validateEnvironment();
 
-	const client = process.env.DATABASE_URL
-		? new Client({ connectionString: process.env.DATABASE_URL })
+	const client = process.env['DATABASE_URL']
+		? new Client({ connectionString: process.env['DATABASE_URL'] })
 		: new Client({
-				host: process.env.PGHOST,
-				port: Number.parseInt(process.env.PGPORT ?? '5432', 10),
-				database: process.env.PGDATABASE,
-				user: process.env.PGUSER,
-				password: process.env.PGPASSWORD,
+				host: process.env['PGHOST'],
+				port: Number.parseInt(process.env['PGPORT'] ?? '5432', 10),
+				database: process.env['PGDATABASE'],
+				user: process.env['PGUSER'],
+				password: process.env['PGPASSWORD'],
 			});
 
 	await client.connect();

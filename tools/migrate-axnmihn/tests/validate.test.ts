@@ -83,9 +83,7 @@ describe('validate', () => {
 			];
 			const result = validateSourceSessions(sessions);
 			expect(result.valid).toBe(false);
-			expect(result.errors).toContainEqual(
-				expect.objectContaining({ type: 'empty_session_id' }),
-			);
+			expect(result.errors).toContainEqual(expect.objectContaining({ type: 'empty_session_id' }));
 		});
 	});
 
@@ -123,9 +121,7 @@ describe('validate', () => {
 			];
 			const result = validateSourceMessages(messages, sessionIds);
 			expect(result.valid).toBe(false);
-			expect(result.errors).toContainEqual(
-				expect.objectContaining({ type: 'orphaned_message' }),
-			);
+			expect(result.errors).toContainEqual(expect.objectContaining({ type: 'orphaned_message' }));
 		});
 
 		it('should detect empty content', () => {
@@ -143,9 +139,7 @@ describe('validate', () => {
 			];
 			const result = validateSourceMessages(messages, sessionIds);
 			expect(result.valid).toBe(false);
-			expect(result.errors).toContainEqual(
-				expect.objectContaining({ type: 'empty_content' }),
-			);
+			expect(result.errors).toContainEqual(expect.objectContaining({ type: 'empty_content' }));
 		});
 	});
 

@@ -216,7 +216,7 @@ function buildGatewayConfig(
 	const corsOrigins = corsRaw ? corsRaw.split(',').map((s) => s.trim()) : undefined;
 
 	const result: Record<string, unknown> = { authToken };
-	if (corsOrigins) result.corsOrigins = corsOrigins;
+	if (corsOrigins) result['corsOrigins'] = corsOrigins;
 	return result;
 }
 
@@ -230,8 +230,8 @@ function buildChannelConfig(
 
 	if (discord === undefined && telegram === undefined) return undefined;
 	const result: Record<string, unknown> = {};
-	if (discord) result.discord = discord;
-	if (telegram) result.telegram = telegram;
+	if (discord) result['discord'] = discord;
+	if (telegram) result['telegram'] = telegram;
 	return result;
 }
 

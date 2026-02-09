@@ -87,13 +87,13 @@ class GoogleLlmProvider implements LlmProvider {
 		const requestParams: Record<string, unknown> = { contents };
 
 		if (systemMessages.length > 0) {
-			requestParams.systemInstruction = {
+			requestParams['systemInstruction'] = {
 				parts: [{ text: systemMessages.map((m) => m.content).join('\n') }],
 			};
 		}
 
 		if (tools.length > 0) {
-			requestParams.tools = [
+			requestParams['tools'] = [
 				{
 					functionDeclarations: tools.map((t) => ({
 						name: t.name,
@@ -145,8 +145,9 @@ class GoogleLlmProvider implements LlmProvider {
 	private wrapError(error: unknown): ProviderError {
 		const retryable = isRetryableStatus(error);
 		const message = error instanceof Error ? error.message : String(error);
+		const cause = error instanceof Error ? error : undefined;
 		return new ProviderError(message, 'google', retryable, {
-			cause: error instanceof Error ? error : undefined,
+			...(cause ? { cause } : {}),
 		});
 	}
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { sessions, createSession, switchSession } from '$lib/stores/chat.svelte';
+import { sessions, createSession, switchSession } from '$lib/stores/chat.svelte';
 
-	let { open = $bindable(false) }: { open: boolean } = $props();
+let { open = $bindable(false) }: { open: boolean } = $props();
 </script>
 
 <!-- Overlay for mobile -->

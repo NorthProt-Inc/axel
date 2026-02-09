@@ -11,9 +11,7 @@ import type {
 const VALID_MEMORY_TYPES = new Set(['fact', 'preference', 'insight', 'conversation']);
 
 /** Validate source sessions for duplicates and empty IDs. */
-export function validateSourceSessions(
-	sessions: readonly AxnmihnSession[],
-): ValidationResult {
+export function validateSourceSessions(sessions: readonly AxnmihnSession[]): ValidationResult {
 	const errors: ValidationError[] = [];
 	const seenIds = new Set<string>();
 
@@ -105,9 +103,7 @@ export function filterOrphanedRelations(
 	relations: readonly KnowledgeGraphRelation[],
 	entityIds: ReadonlySet<string>,
 ): readonly KnowledgeGraphRelation[] {
-	return relations.filter(
-		(r) => entityIds.has(r.source_id) && entityIds.has(r.target_id),
-	);
+	return relations.filter((r) => entityIds.has(r.source_id) && entityIds.has(r.target_id));
 }
 
 interface ChromaValidation {
@@ -118,9 +114,7 @@ interface ChromaValidation {
 }
 
 /** Validate ChromaDB memories for data quality. */
-export function validateChromaMemories(
-	memories: readonly ChromaMemory[],
-): ChromaValidation {
+export function validateChromaMemories(memories: readonly ChromaMemory[]): ChromaValidation {
 	let emptyContent = 0;
 	let invalidImportance = 0;
 	let invalidType = 0;

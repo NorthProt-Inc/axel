@@ -15,10 +15,12 @@ import {
 	AxelPgPool,
 	GeminiEmbeddingService,
 	GoogleLlmProvider,
+	type GoogleGenAIClient,
 	McpToolExecutor,
 	PgConceptualMemory,
 	PgEpisodicMemory,
 	PgMetaMemory,
+	type PgPoolDriver,
 	PgSemanticMemory,
 	PgSessionStore,
 	RedisStreamBuffer,
@@ -29,22 +31,21 @@ import type { HealthCheckTarget } from './lifecycle.js';
 
 export type { HealthCheckTarget };
 
+/**
+ * PG pool interface compatible with both PgPoolDriver (AxelPgPool, Pg* adapters)
+ * and RedisWorkingMemory's generic PgPool interface.
+ * pg.Pool natively supports generic query<T>, so real pg.Pool satisfies this.
+ */
+interface ContainerPgPool extends PgPoolDriver {
+	query<T = Record<string, unknown>>(
+		text: string,
+		params?: readonly unknown[],
+	): Promise<{ rows: T[]; rowCount: number | null }>;
+}
+
 /** External dependencies injected into the container builder */
 export interface ContainerDeps {
-	readonly pgPool: {
-		query(
-			text: string,
-			params?: readonly unknown[],
-		): Promise<{ rows: unknown[]; rowCount: number | null }>;
-		connect(): Promise<{
-			query(
-				text: string,
-				params?: readonly unknown[],
-			): Promise<{ rows: unknown[]; rowCount: number | null }>;
-			release(): void;
-		}>;
-		end(): Promise<void>;
-	};
+	readonly pgPool: ContainerPgPool;
 	readonly redis: {
 		rpush(key: string, value: string): Promise<number>;
 		ltrim(key: string, start: number, stop: number): Promise<string>;
@@ -83,21 +84,7 @@ export interface ContainerDeps {
 			}>;
 		};
 	};
-	readonly googleClient: {
-		getGenerativeModel(config: { model: string }): {
-			generateContentStream(params: Record<string, unknown>): Promise<{
-				stream: AsyncIterable<{
-					readonly candidates?: readonly {
-						readonly content: {
-							readonly parts: readonly Record<string, unknown>[];
-							readonly role: string;
-						};
-						readonly finishReason?: string;
-					}[];
-				}>;
-			}>;
-		};
-	};
+	readonly googleClient: GoogleGenAIClient;
 	readonly embeddingClient: {
 		embedContent(params: { content: { parts: { text: string }[] }; taskType: string }): Promise<{
 			embedding: { values: readonly number[] };

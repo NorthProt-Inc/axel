@@ -92,11 +92,11 @@ class AnthropicLlmProvider implements LlmProvider {
 		};
 
 		if (systemMessages.length > 0) {
-			result.system = systemMessages.map((m) => m.content).join('\n');
+			result['system'] = systemMessages.map((m) => m.content).join('\n');
 		}
 
 		if (tools.length > 0) {
-			result.tools = tools.map((t) => ({
+			result['tools'] = tools.map((t) => ({
 				name: t.name,
 				description: t.description,
 				input_schema: t.inputSchema,
@@ -193,8 +193,9 @@ class AnthropicLlmProvider implements LlmProvider {
 	private wrapError(error: unknown): ProviderError {
 		const retryable = isRetryableStatus(error);
 		const message = error instanceof Error ? error.message : String(error);
+		const cause = error instanceof Error ? error : undefined;
 		return new ProviderError(message, 'anthropic', retryable, {
-			cause: error instanceof Error ? error : undefined,
+			...(cause ? { cause } : {}),
 		});
 	}
 }

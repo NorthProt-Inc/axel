@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import {
-	createMigrator,
-	type MigratorDeps,
-	type MigrationResult,
-} from '../src/migrate.js';
+import { createMigrator, type MigratorDeps, type MigrationResult } from '../src/migrate.js';
 import type {
 	AxnmihnSession,
 	AxnmihnMessage,

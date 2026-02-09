@@ -11,9 +11,7 @@ const REQUIRED_ENV_VARS = [
 export function validateEnvironment(): void {
 	for (const envVar of REQUIRED_ENV_VARS) {
 		if (!process.env[envVar]) {
-			throw new Error(
-				`Missing required environment variable: ${envVar}`,
-			);
+			throw new Error(`Missing required environment variable: ${envVar}`);
 		}
 	}
 }
@@ -22,9 +20,9 @@ export function validateEnvironment(): void {
 export function loadConfig(): MigrationConfig {
 	validateEnvironment();
 	return {
-		axnmihnDataPath: process.env.AXNMIHN_DATA_PATH!,
-		axnmihnDbPath: process.env.AXNMIHN_DB_PATH!,
-		axelDbUrl: process.env.AXEL_DB_URL!,
-		googleApiKey: process.env.GOOGLE_API_KEY!,
+		axnmihnDataPath: process.env['AXNMIHN_DATA_PATH']!,
+		axnmihnDbPath: process.env['AXNMIHN_DB_PATH']!,
+		axelDbUrl: process.env['AXEL_DB_URL']!,
+		googleApiKey: process.env['GOOGLE_API_KEY']!,
 	};
 }

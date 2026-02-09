@@ -36,12 +36,19 @@ for div in arch dev-core dev-infra dev-edge ui-ux quality audit research devops 
     rotate_division "$div" 3
 done
 
-# cycle.log: truncate if >500 lines
-CYCLE="$LOGS/cycle.log"
-if [ -f "$CYCLE" ]; then
-    lines=$(wc -l < "$CYCLE")
-    if [ "$lines" -gt 500 ]; then
-        tail -300 "$CYCLE" > "$CYCLE.tmp"
-        mv "$CYCLE.tmp" "$CYCLE"
+# QC logs: keep 3
+for div in qc-supervisor qc-worker-build qc-worker-docs qc-worker-runtime; do
+    rotate_division "$div" 3
+done
+
+# cycle.log & qc-cycle.log: truncate if >500 lines
+for logfile in cycle.log qc-cycle.log; do
+    target="$LOGS/$logfile"
+    if [ -f "$target" ]; then
+        lines=$(wc -l < "$target")
+        if [ "$lines" -gt 500 ]; then
+            tail -300 "$target" > "$target.tmp"
+            mv "$target.tmp" "$target"
+        fi
     fi
-fi
+done

@@ -2,17 +2,14 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 96 (CTO update)**: QC C1907 4건 처리 (1 DUPLICATE, 1 FIX-DOCS-001, 1 FALSE POSITIVE, 1 cascade). 0 completions. 5 tasks in progress (2 cycles). FIX-TYPECHECK-001/FIX-CONTAINER-001 approaching stall — next cycle CTO override if no completion. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files.** typecheck FAILS. 4 errors open (3C+1H).
+> **Cycle 97 (CTO update)**: **ALL P0 BLOCKERS RESOLVED.** Mark 직접 수정 4건 (ERR-087~090) + CTO override 추가 수정 (discord-channel, gateway, infra TS4111/exactOptionalPropertyTypes). **typecheck PASSES.** 1075 tests, 0 FAIL, 90 files. 0 errors. FIX-TYPECHECK-001/FIX-CONTAINER-001/FIX-MIGRATE-CLI-001 → DONE. FIX-DOCS-001 + QA-023 in progress (stalled 4 cycles — CTO override next cycle).
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-TYPECHECK-001 | P0 | dev-core | packages/core/src/decay/types.ts:2 — `import type { MemoryType }` 미사용 import 제거. `pnpm typecheck` 복구 필수. | C94 |
-| FIX-CONTAINER-001 | P0 | dev-edge | apps/axel/src/ typecheck+build 복구: (1) container.ts:229 PgPool query return type 불일치, (2) container.ts:244 GoogleGenAIClient exactOptionalPropertyTypes 호환, (3) **config.ts:219,233,234 TS4111** — `Record<string,unknown>` dot notation → bracket notation (ERR-090, Mark 커밋 `7df32f5`). `pnpm typecheck && pnpm build` 복구 필수. | C94 |
-| FIX-MIGRATE-CLI-001 | P1 | devops | tools/migrate/src/cli.ts `noUncheckedIndexedAccess` 위반 11건. `process.env.DATABASE_URL` → `process.env['DATABASE_URL']` bracket notation 변경. | C94 |
-| FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트 (Axel 환경변수 반영), (2) operation.md 불필요 build step 제거, (3) README에 operation.md 언급 추가, (4) 환경변수 네이밍 일관성 확인. | C93 |
-| QA-023 | P1 | quality | Post-merge 코드 리뷰: FIX-MEMORY-002 (lifecycle flush), FIX-MEMORY-003 (SemanticMemoryWriter), MIGRATE-IMPL-001 (migrate-axnmihn), FIX-BUILD-001 (build pipeline). TDD 검증, §1 소유권 위반 감사 (MIGRATE-IMPL-001 tools/ dev-infra 작성), §9 패키지 경계 확인. | C93 |
+| FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트, (2) operation.md persona ref 수정, (3) 환경변수 네이밍 일관성. | C93 |
+| QA-023 | P1 | quality | Post-merge 코드 리뷰: FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001. TDD 검증, §1 위반 감사. **4 cycles stalled — CTO override next cycle.** | C93 |
 
 ## Queued
 
@@ -187,3 +184,6 @@
 | FIX-BUILD-001 | devops | 0208C93 | Production build pipeline: root build script (tsc -b), 8 workspace build scripts, tsconfig.json 8 project references, format:check script, DEPLOY.md. 985 tests pass. |
 | FIX-MEMORY-003 | dev-infra | 0208C93 | RES-007 ROOT CAUSE #3: SemanticMemoryWriter 구현. EmbeddingProvider→SemanticMemory.store() 브릿지. Importance heuristic (length+keyword). 18 tests, 100% coverage. TDD RED→GREEN→REFACTOR. |
 | MIGRATE-IMPL-001 | dev-infra | 0208C93 | axnmihn→Axel 마이그레이션 스크립트 구현. tools/migrate-axnmihn/ (config, migrate, transform, validate, types). SQLite 추출, 3072d→1536d 재임베딩, PG 로드, 검증. TDD RED→GREEN. **§1 위반 기록**: tools/ 는 devops 소유이나 dev-infra가 작성. CTO 배정 오류. |
+| FIX-TYPECHECK-001 | **Mark (Human direct)** | 0208C97 | **Mark(Human) 직접 수정.** packages/core/src/decay/types.ts:2 unused `import type { MemoryType }` 제거. ERR-087 resolved. |
+| FIX-CONTAINER-001 | **Mark (Human direct)** + CTO | 0208C97 | **Mark(Human) 직접 수정** container.ts: ContainerPgPool interface+GoogleGenAIClient re-export, config.ts bracket notation. CTO override: discord-channel.ts healthCheck ComponentHealth fix + threadId exactOptionalPropertyTypes fix. gateway ws-handler.ts+route-handlers.ts bracket notation+exactOptionalPropertyTypes fixes. infra llm/mcp bracket notation+exactOptionalPropertyTypes fixes. ERR-088/090 resolved. typecheck PASSES. |
+| FIX-MIGRATE-CLI-001 | **Mark (Human direct)** | 0208C97 | **Mark(Human) 직접 수정.** tools/migrate/src/cli.ts 11× process.env dot→bracket notation. ERR-089 resolved. |

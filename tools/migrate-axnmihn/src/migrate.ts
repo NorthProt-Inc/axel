@@ -34,13 +34,9 @@ export interface MigratorDeps {
 		taskType: string,
 	) => Promise<readonly Float32Array[]>;
 	readonly insertSessions: (sessions: readonly AxelSession[]) => Promise<number>;
-	readonly insertSessionSummaries: (
-		summaries: readonly AxelSessionSummary[],
-	) => Promise<number>;
+	readonly insertSessionSummaries: (summaries: readonly AxelSessionSummary[]) => Promise<number>;
 	readonly insertMessages: (messages: readonly AxelMessage[]) => Promise<number>;
-	readonly insertInteractionLogs: (
-		logs: readonly AxelInteractionLog[],
-	) => Promise<number>;
+	readonly insertInteractionLogs: (logs: readonly AxelInteractionLog[]) => Promise<number>;
 	readonly insertMemories: (memories: readonly AxelMemory[]) => Promise<number>;
 	readonly insertEntities: (entities: readonly AxelEntity[]) => Promise<number>;
 	readonly insertRelations: (relations: readonly AxelRelation[]) => Promise<number>;
@@ -104,15 +100,9 @@ export function createMigrator(deps: MigratorDeps): Migrator {
 		const axelLogs = data.interactionLogs.map(transformInteractionLog);
 		const axelEntities = data.knowledgeGraph.entities.map(transformEntity);
 
-		const entityIds = new Set(
-			data.knowledgeGraph.entities.map((e) => e.entity_id),
-		);
-		const validRelations = filterOrphanedRelations(
-			data.knowledgeGraph.relations,
-			entityIds,
-		);
-		const orphanedCount =
-			data.knowledgeGraph.relations.length - validRelations.length;
+		const entityIds = new Set(data.knowledgeGraph.entities.map((e) => e.entity_id));
+		const validRelations = filterOrphanedRelations(data.knowledgeGraph.relations, entityIds);
+		const orphanedCount = data.knowledgeGraph.relations.length - validRelations.length;
 		const axelRelations = validRelations.map(transformRelation);
 
 		return {
@@ -134,9 +124,7 @@ export function createMigrator(deps: MigratorDeps): Migrator {
 			// Re-embed memories if any exist
 			let axelMemories: AxelMemory[] = [];
 			if (extracted.chromaMemories.length > 0) {
-				deps.log(
-					`[5/6] Re-embedding memories (${extracted.chromaMemories.length} x 1536d)...`,
-				);
+				deps.log(`[5/6] Re-embedding memories (${extracted.chromaMemories.length} x 1536d)...`);
 				const texts = extracted.chromaMemories.map((m) => m.content);
 				const embeddings = await deps.embedBatch(texts, 'RETRIEVAL_DOCUMENT');
 				axelMemories = extracted.chromaMemories.map((memory, i) =>
@@ -147,9 +135,7 @@ export function createMigrator(deps: MigratorDeps): Migrator {
 			// Insert in dependency order
 			deps.log('[4/6] Migrating sessions, messages, interaction_logs...');
 			const sessionsCount = await deps.insertSessions(transformed.axelSessions);
-			const summariesCount = await deps.insertSessionSummaries(
-				transformed.axelSummaries,
-			);
+			const summariesCount = await deps.insertSessionSummaries(transformed.axelSummaries);
 			const messagesCount = await deps.insertMessages(transformed.axelMessages);
 			const logsCount = await deps.insertInteractionLogs(transformed.axelLogs);
 
@@ -159,9 +145,7 @@ export function createMigrator(deps: MigratorDeps): Migrator {
 				`[6/6] Migrating Knowledge Graph (${transformed.axelEntities.length} entities + ${transformed.axelRelations.length} relations)...`,
 			);
 			const entitiesCount = await deps.insertEntities(transformed.axelEntities);
-			const relationsCount = await deps.insertRelations(
-				transformed.axelRelations,
-			);
+			const relationsCount = await deps.insertRelations(transformed.axelRelations);
 
 			return {
 				success: true,

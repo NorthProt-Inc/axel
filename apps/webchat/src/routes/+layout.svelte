@@ -1,7 +1,7 @@
 <script>
-	import '../app.css';
+import '../app.css';
 
-	let { children } = $props();
+let { children } = $props();
 </script>
 
 <div class="min-h-screen bg-navy text-white font-sans">

@@ -1,105 +1,87 @@
 # QC Worker: Build & Test
-## Cycle: 20260208_1907
+## Cycle: 20260208_1921
+
+### Pre-flight
+- package.json scripts found: `build`, `build:clean`, `typecheck`, `test`, `test:watch`, `test:coverage`, `lint`, `lint:fix`, `format`, `format:check`
 
 ### Results
 | Step | Command | Status | Exit Code |
 |------|---------|--------|-----------|
-| 1 | pnpm install | PASS | 0 |
+| 1 | pnpm install --frozen-lockfile | PASS | 0 |
 | 2 | pnpm build | FAIL | 2 |
 | 3 | pnpm typecheck | FAIL | 1 |
 | 4 | pnpm lint | FAIL | 1 |
-| 5 | pnpm test | FAIL | 1 |
-| 6 | node main.js | FAIL | 1 |
-| 7 | migrate --help | FAIL | 1 |
+| 5 | pnpm test | PASS | 0 |
+| 6 | node apps/axel/dist/main.js | FAIL | 1 |
+| 7 | node tools/migrate/dist/cli.js --help | FAIL | 1 |
 
 ### Findings
 
-#### [BUILD-ERR-001] — P0: Build step fails with TypeScript errors
-**Scope**: apps/axel, tools/migrate
-**Issue**: TypeScript strict mode errors in config.ts and container.ts prevent build
-- `config.ts:234` — index signature access: `telegram` must use bracket notation
-- `container.ts:229` — PgPool type mismatch: query() returns `unknown[]` instead of generic `T[]`
-- `container.ts:244` — GoogleGenAIClient type mismatch: stream chunk types incompatible
+- [FINDING-B1] severity: **P0**. `pnpm build` (`tsc -b`) fails with 14 TypeScript compilation errors across 2 files:
+  - `apps/axel/src/config.ts(234)`: TS4111 — index signature property `telegram` must use bracket notation
+  - `apps/axel/src/container.ts(229)`: TS2345 — PgPool type mismatch (`rows: unknown[]` vs `rows: T[]`, missing generic compatibility)
+  - `apps/axel/src/container.ts(244)`: TS2345 — GoogleGenAIClient type mismatch (deep generics incompatibility with `exactOptionalPropertyTypes`)
+  - `tools/migrate/src/cli.ts` (lines 12-41): 11× TS4111 — `process.env` index signature properties (`DATABASE_URL`, `PGHOST`, etc.) must use bracket notation
 
-**Impact**: Build fails at compile step. No dist/ artifacts generated for main app or migration tool.
+- [FINDING-B2] severity: **P2**. `pnpm typecheck` fails: `packages/core/src/decay/types.ts(2)`: TS6133 — unused import `MemoryType`. This blocks the recursive typecheck pipeline (workspace-concurrency=1 means first failure stops all).
 
-#### [TYPECHECK-ERR-002] — P1: Unused import in packages/core
-**Scope**: packages/core/src/decay/types.ts
-**Issue**: `MemoryType` declared but never used
-```
-src/decay/types.ts(2,1): error TS6133: 'MemoryType' is declared but its value is never read.
-```
-**Impact**: Blocks typecheck phase
+- [FINDING-B3] severity: **P2**. `pnpm lint` (biome check) reports 48 errors and 136 warnings across the codebase.
 
-#### [LINT-ERR-003] — P1: Biome lint failures with 48 errors, 136 warnings
-**Scope**: 239 files checked
-**Issue**: Biome found 48 errors and 136 warnings
-- Suggestion fixes suggest test format changes (e.g., chaining expect calls)
-- Total diagnostics exceed display threshold
+- [FINDING-B4] severity: **P2**. `tools/migrate/dist/cli.js --help` does not support `--help` flag — it always attempts DB connection and fails without env vars. Not a crash bug, but a UX issue.
 
-**Impact**: Lint check fails. Some issues marked as "unsafe" fixes
+### Self-Verification Notes
 
-#### [RUNTIME-ERR-004] — P1: Main app fails with TypeScript file extension error
-**Scope**: apps/axel/dist/main.js → packages/gateway/src/index.ts
-**Issue**: Node.js cannot load `.ts` file from built dist/ code
-```
-TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for /home/northprot/projects/axel/packages/gateway/src/index.ts
-  at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:219:9)
-```
-**Impact**: Main app crashes immediately. Build artifacts incomplete or misconfigured.
+- **Step 2 (pnpm build)**: Self-check: (1) Command correct? Yes — `pnpm build` runs `tsc -b` as defined in package.json, no extra flags added. (2) Known behavior? No — these are real TS compilation errors (TS4111, TS2345). (3) Cascade? No — these are root cause errors in source code. (4) Senior dev agrees? Yes — strict TS config (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`) is correctly catching real type issues.
+  - Verdict: **REAL ISSUE**
 
-#### [MIGRATE-ERR-005] — P1: Migration tool requires DATABASE_URL or PG* env vars
-**Scope**: tools/migrate/dist/cli.js
-**Issue**: Even though build succeeded, migration fails due to missing environment variables
-```
-Migration error: Error: DATABASE_URL or individual PG* environment variables (PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD) must be set
-```
-**Impact**: Migration tool cannot run without database configuration. Expected behavior but blocks full end-to-end test.
+- **Step 3 (pnpm typecheck)**: Self-check: (1) Command correct? Yes — `pnpm typecheck` as defined. (2) Known behavior? No — unused import is a real code issue. (3) Cascade? No — different package (`packages/core`) from build errors. (4) Senior dev agrees? Yes — unused import with strict TS config.
+  - Verdict: **REAL ISSUE**
 
-#### [TEST-ERR-006] — P1: pnpm test command unrecognized
-**Scope**: package.json test script
-**Issue**: Command `pnpm test --run` failed with:
-```
-ERROR  Unknown option: 'run'
-For help, run: pnpm help test
-```
-**Impact**: Test suite cannot be invoked. Correct flag likely `--`, not `--run`.
+- **Step 4 (pnpm lint)**: Self-check: (1) Command correct? Yes — `pnpm lint` runs `biome check .` as defined. (2) Known behavior? No — 48 errors are real lint violations. (3) Cascade? No — lint is independent of build. (4) Senior dev agrees? Yes.
+  - Verdict: **REAL ISSUE**
 
-### Output (failed commands)
+- **Step 5 (pnpm test)**: All 1075 tests passed, 36 skipped (integration tests requiring PG/Redis). No issues.
 
-**BUILD ERRORS (pnpm build)**
+- **Step 6 (node main.js)**: Self-check: (1) Command correct? Yes. (2) Known behavior? No. (3) **Cascade? YES** — build failed in Step 2, so `dist/` contains stale output. The `ERR_UNKNOWN_FILE_EXTENSION .ts` error means `dist/main.js` imports a `.ts` source file from a package that failed to compile properly. This is a direct consequence of FINDING-B1.
+  - Verdict: **DISCARDED** — cascade of FINDING-B1
+
+- **Step 7 (migrate --help)**: Self-check: (1) Command correct? Yes. (2) Known behavior? CLI tools that require env vars before parsing args is a design choice, not a crash bug. (3) Cascade? No — the migrate dist exists from a previous successful build. (4) Senior dev agrees? Debatable — it's a minor UX issue, not a bug per se.
+  - Verdict: **REAL ISSUE (P2)** — downgraded from P1 to P2 as it's a UX concern, not a code crash
+
+### Output (failed commands only)
+
+**Step 2 — pnpm build (last 15 lines of errors):**
 ```
 apps/axel/src/config.ts(234,23): error TS4111: Property 'telegram' comes from an index signature, so it must be accessed with ['telegram'].
-apps/axel/src/container.ts(229,59): error TS2345: Argument of type '{ query(...): Promise<...>; }' is not assignable to parameter of type 'PgPool'.
+apps/axel/src/container.ts(229,59): error TS2345: Argument of type '{ query(...): ... }' is not assignable to parameter of type 'PgPool'.
 apps/axel/src/container.ts(244,47): error TS2345: Argument of type '{ getGenerativeModel(...): ... }' is not assignable to parameter of type 'GoogleGenAIClient'.
 tools/migrate/src/cli.ts(12,50): error TS4111: Property 'DATABASE_URL' comes from an index signature, so it must be accessed with ['DATABASE_URL'].
-[... 6 more index signature errors in tools/migrate/src/cli.ts ...]
+tools/migrate/src/cli.ts(14-18): 5× error TS4111: PG* env vars must use bracket notation.
+tools/migrate/src/cli.ts(34-41): 5× error TS4111: PG* env vars must use bracket notation (second occurrence block).
  ELIFECYCLE  Command failed with exit code 2.
 ```
 
-**TYPECHECK ERRORS (pnpm typecheck)**
+**Step 3 — pnpm typecheck:**
 ```
 src/decay/types.ts(2,1): error TS6133: 'MemoryType' is declared but its value is never read.
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @axel/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 1
 ```
 
-**LINT ERRORS (pnpm lint)**
+**Step 4 — pnpm lint:**
 ```
 Found 48 errors.
 Found 136 warnings.
-  × Some errors were emitted while running checks.
+check × Some errors were emitted while running checks.
  ELIFECYCLE  Command failed with exit code 1.
 ```
 
-**RUNTIME ERROR (node main.js)**
+**Step 6 — node main.js (cascade, discarded):**
 ```
-TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for /home/northprot/projects/axel/packages/gateway/src/index.ts
-    at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:219:9)
+TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for packages/gateway/src/index.ts
 ```
 
-**MIGRATION TOOL ERROR (migrate --help)**
+**Step 7 — migrate --help:**
 ```
 Migration error: Error: DATABASE_URL or individual PG* environment variables must be set
 ```
-
-### Summary
-Repository in **broken state**. Build phase fails due to TypeScript strict mode violations in container and config files. Even if build were fixed, runtime would fail due to TypeScript file resolution issues in ESM context. Lint and test phases cannot be reached. Database environment variables needed for full integration test.
