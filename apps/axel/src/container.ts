@@ -130,7 +130,7 @@ class EstimateTokenCounter implements TokenCounter {
 	}
 
 	estimate(text: string): number {
-		return Math.ceil(text.length / 4);
+		return Math.ceil(text.length / 3);
 	}
 }
 

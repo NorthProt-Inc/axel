@@ -74,7 +74,7 @@ export interface ContextDataProvider {
  * Token counter interface (ADR-012).
  *
  * - `count()`: Accurate count via Anthropic SDK countTokens() — async API call
- * - `estimate()`: Fast local estimate (~text.length / 4) for pre-filtering
+ * - `estimate()`: Fast local estimate (~text.length / 3) for pre-filtering (ADR-018)
  */
 export interface TokenCounter {
 	count(text: string): Promise<number>;

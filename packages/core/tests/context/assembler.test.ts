@@ -115,8 +115,8 @@ function makeEmptyProvider(): ContextDataProvider {
 
 function makeEstimateCounter(): TokenCounter {
 	return {
-		count: async (text) => Math.ceil(text.length / 4),
-		estimate: (text) => Math.ceil(text.length / 4),
+		count: async (text) => Math.ceil(text.length / 3),
+		estimate: (text) => Math.ceil(text.length / 3),
 	};
 }
 

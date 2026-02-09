@@ -164,9 +164,9 @@ describe('ContextBudget', () => {
 		it('estimate returns a number synchronously', () => {
 			const counter: TokenCounter = {
 				count: async (_text) => 10,
-				estimate: (text) => Math.ceil(text.length / 4),
+				estimate: (text) => Math.ceil(text.length / 3),
 			};
-			expect(counter.estimate('hello world')).toBe(3);
+			expect(counter.estimate('hello world')).toBe(4);
 		});
 
 		it('count returns a promise', async () => {

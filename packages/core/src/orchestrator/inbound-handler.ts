@@ -281,14 +281,11 @@ async function persistToMemory(
 
 	// M4: Conceptual Memory — entity extraction (fire-and-forget)
 	if (entityExtractor && conceptualMemory) {
-		extractAndStoreEntities(
-			entityExtractor,
-			conceptualMemory,
-			userContent,
-			assistantContent,
-		).catch(() => {
-			// Silent — M4 persistence must not break the response flow
-		});
+		extractAndStoreEntities(entityExtractor, conceptualMemory, userContent, assistantContent).catch(
+			() => {
+				// Silent — M4 persistence must not break the response flow
+			},
+		);
 	}
 }
 
@@ -333,9 +330,9 @@ async function extractAndStoreEntities(
 	}
 }
 
-/** Estimate token count for a string (~4 chars per token, common heuristic) */
+/** Estimate token count for a string (~3 chars per token, conservative per ADR-018) */
 function estimateTokenCount(text: string): number {
-	return Math.ceil(text.length / 4);
+	return Math.ceil(text.length / 3);
 }
 
 /** Extract structured error info from an unknown thrown value */

@@ -109,8 +109,8 @@ function createMockContextDataProvider(): ContextDataProvider {
 
 function createMockTokenCounter(): TokenCounter {
 	return {
-		count: vi.fn().mockImplementation(async (text: string) => Math.ceil(text.length / 4)),
-		estimate: vi.fn().mockImplementation((text: string) => Math.ceil(text.length / 4)),
+		count: vi.fn().mockImplementation(async (text: string) => Math.ceil(text.length / 3)),
+		estimate: vi.fn().mockImplementation((text: string) => Math.ceil(text.length / 3)),
 	};
 }
 
