@@ -962,8 +962,7 @@ describe('createInboundHandler', () => {
 			await handler(makeInboundMessage(), mockSend);
 
 			// Second call: assistant response with accumulated text
-			const assistantTurnCall = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock
-				.calls[1];
+			const assistantTurnCall = (workingMemory.pushTurn as ReturnType<typeof vi.fn>).mock.calls[1];
 			expect(assistantTurnCall?.[0]).toBe('user-1');
 			const assistantTurn = assistantTurnCall?.[1] as Turn;
 			expect(assistantTurn.role).toBe('assistant');
@@ -1005,8 +1004,7 @@ describe('createInboundHandler', () => {
 			expect(episodicMemory.addMessage).toHaveBeenCalledTimes(2);
 
 			// First call: user message with correct sessionId
-			const userMsgCall = (episodicMemory.addMessage as ReturnType<typeof vi.fn>).mock
-				.calls[0];
+			const userMsgCall = (episodicMemory.addMessage as ReturnType<typeof vi.fn>).mock.calls[0];
 			expect(userMsgCall?.[0]).toBe('sess-1'); // sessionId from resolved session
 			const userMsg = userMsgCall?.[1] as MessageRecord;
 			expect(userMsg.role).toBe('user');
