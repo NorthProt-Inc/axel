@@ -181,12 +181,14 @@ node tools/migrate/dist/cli.js up
 
 | ID | Severity | Description | Status |
 |----|----------|-------------|--------|
-| ERR-069 | **CRITICAL P0 BLOCKER** | pgvector 0.8.1 has **HARD LIMIT of 2000 dimensions** for ALL index types (HNSW, IVFFlat). Plan specifies 3072d embeddings (ADR-016), which is **INCOMPATIBLE**. Options: (1) Downgrade to ≤2000d (requires ADR-016 amendment), (2) Wait for pgvector 0.9+, (3) Unindexed vector search (unacceptable), (4) Alternative vector DB (violates ADR-002). TEMPORARY: memories table created WITHOUT vector index. Vector search will use sequential scan. **Escalate to Coordinator immediately.** | ⚠️ OPEN |
+| — | — | No open issues | — |
 
 ## Known Issues (Resolved)
 
 | Issue | Cycle | Resolution |
 |-------|-------|-----------|
+| ERR-069 CRITICAL: pgvector 2000d dimension limit | C68 | **RESOLVED (C68, FIX-DIMENSION-001)**: Mark(Human) approved 1536d Matryoshka truncation. 16 files updated (source, tests, ADRs, plan docs, SQL migration). HNSW index activated. 835 tests pass. Commits: `6120a90` + `228a146`. |
+| ERR-086 HIGH: punycode DEP0040 + telegram test failures | C84 | **RESOLVED (C84, FIX-PUNYCODE-001+002)**: FIX-PUNYCODE-001의 packageExtensions + postinstall script가 정상 작동. whatwg-url@5.0.0 require('../punycode') 해결됨. **Result: 975 tests pass (0 FAIL), telegram 25 tests pass.** FIX-PUNYCODE-002는 재검증 결과 불필요 판정. |
 | ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
 | AUD-083 HIGH: Hardcoded DB credentials in migrate CLI (AUDIT-005) | C61 | **RESOLVED (C61, FIX-AUDIT-E-003)**: Removed hardcoded fallback credentials ('axel_dev_password') from tools/migrate/src/cli.ts. Added validateEnvironment() to enforce explicit env vars (DATABASE_URL or PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD). Updated DEPLOY.md with secure usage examples. **Result: 5 new tests, 806 tests pass.** Security compliance verified. |
 
