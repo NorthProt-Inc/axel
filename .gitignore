@@ -27,6 +27,9 @@ __pycache__/
 .axel-ops/logs/*.log
 .axel-ops/logs/*.tar.gz
 
+# Human directives (local only, never committed)
+.axel-ops/comms/human.md
+
 # Coverage
 coverage/
 
