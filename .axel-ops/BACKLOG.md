@@ -2,19 +2,31 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 106 (CTO override)**: All 6 P2 security hardening tasks DONE (CTO override C106). **1287 tests (+131), typecheck PASSES. 0 errors.**
+> **Cycle 107 (Feature Sprint Kickoff)**: Human directive P1 — 기능 추가 집중, openclaw 참조, UX 대폭 개선. 14 tasks created across 7 Divisions. **1287 tests (verified C107), typecheck PASSES. 0 errors.**
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| (none) | — | — | — | — |
+| RES-008 | P1 | research | Web search tool 구현 리서치: Tavily/Brave/SearXNG API 비교, MCP tool 패턴 조사, OpenClaw skill 구조 참조 | 0209C107 |
+| RES-009 | P1 | research | Multi-modal (vision) 구현 리서치: Anthropic Vision API + Google Gemini Vision, Message ContentBlock 설계, 파일 업로드 패턴 조사 | 0209C107 |
+| FEAT-TOOL-001 | P1 | dev-infra | Web Search Tool 구현: Tavily/Brave API adapter, ToolDefinition 등록, 결과 포맷팅. TDD. | 0209C107 |
+| FEAT-TOOL-002 | P1 | dev-infra | File Handler Tool 구현: 파일 읽기/쓰기, PDF 텍스트 추출, 파일 요약. path boundary 검증 필수. TDD. | 0209C107 |
+| FEAT-CORE-001 | P1 | dev-core | Multi-modal Message 지원: Message type ContentBlock 확장 (text/image/file), InboundHandler 멀티모달 파이프라인. TDD. | 0209C107 |
+| FEAT-CHAN-001 | P1 | dev-edge | Slack Channel 구현: @slack/bolt, AxelChannel impl, thread 지원, 4000 char 분할. OpenClaw Slack 참조. TDD. | 0209C107 |
+| QA-025 | P1 | quality | C106 CTO override 6건 리뷰 + Feature Sprint ADR 적합성 검토 | 0209C107 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
-| (none) | — | — | — | — |
+| FEAT-CORE-002 | P1 | dev-core | Proactive Notification 시스템: cron-like 스케줄러, 알림 전송 파이프라인. OpenClaw cron 패턴 참조. TDD. | 0209C107 |
+| FEAT-CHAN-002 | P1 | dev-edge | Voice I/O 기반: Whisper STT + ElevenLabs/OpenAI TTS, ChannelCapabilities voiceInput/voiceOutput 활성화. TDD. | 0209C107 |
+| FEAT-UI-001 | P1 | ui-ux | WebChat 대폭 개선: Mermaid 다이어그램, LaTeX 수식, 파일 업로드 UI, 대화 export (MD/JSON), 모바일 반응형. TDD. | 0209C107 |
+| FEAT-UI-002 | P1 | ui-ux | CLI 개선: 대화 히스토리 탐색, 세션 전환, 파일 드래그앤드롭 입력, 컬러 테마. TDD. | 0209C107 |
+| FEAT-INFRA-001 | P1 | dev-infra | Local LLM 지원: Ollama provider adapter (LlmProvider impl), FallbackLlmProvider 체인 통합. TDD. | 0209C107 |
+| FEAT-OPS-001 | P2 | devops | Observability 스택: Prometheus metrics exporter (/metrics endpoint), 주요 메트릭 (latency, tokens, errors, memory usage). TDD. | 0209C107 |
+| FEAT-OPS-002 | P2 | devops | Backup 자동화: pg_dump cron 스크립트, S3/로컬 저장, retention policy. | 0209C107 |
 
 ## Cancelled
 

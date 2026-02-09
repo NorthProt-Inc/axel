@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation — Security Hardening COMPLETE.** All 6 P2 GAP tasks resolved via CTO override C106.
-- **Cycle**: 106
-- **Last Updated**: 2026-02-09C106
-- **STATUS**: **ALL 6 SECURITY HARDENING TASKS DONE (CTO override).** FIX-FILESIZE-001 (§14 resolved, 439→267 lines), GAP-SESSION-001 (state machine validation), GAP-REDIS-CB-001 (CircuitBreaker applied), GAP-CMD-001 (shell metachar + cwd validation), GAP-PROMPT-001 (4-layer prompt defense), GAP-WEBHOOK-001 (signature verification tests). **1287 tests (+131 new, verified C106), typecheck PASSES. 0 errors.**
+- **Phase**: **Phase G: FEATURE SPRINT.** Human directive P1 — 기능 추가 집중, openclaw 참조, UX 대폭 개선.
+- **Cycle**: 107
+- **Last Updated**: 2026-02-09C107
+- **STATUS**: **FEATURE SPRINT KICKOFF.** OpenClaw 심층 분석 완료 (15개 아키텍처 패턴 식별: multi-channel routing, skills platform, cron, browser automation, session isolation, identity linking 등). Axel 갭 분석 완료 (53 gaps across 8 categories, 13 HIGH). 14 tasks 생성, 7 Divisions 활성화. 최우선: Web Search Tool + File Handler + Multi-modal + Slack Channel. **1287 tests (verified C107), typecheck PASSES. 0 errors.**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 0 |
-| In Progress | 0 |
-| Done | 188 (+6: FIX-FILESIZE-001, GAP-SESSION-001, GAP-REDIS-CB-001, GAP-CMD-001, GAP-PROMPT-001, GAP-WEBHOOK-001) |
+| Queued | 7 |
+| In Progress | 7 |
+| Done | 188 |
 | Cancelled | 15 |
 
 ## Open Errors: 0
@@ -96,21 +96,22 @@
 | 104 | 0209 | **Monitoring cycle.** No completions. 6 P2 security hardening tasks in progress (2 cycles, not stalled). No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified), typecheck PASSES.** |
 | 105 | 0209 | **3-cycle stall alert.** No completions. 6 P2 security hardening tasks (3 cycles — stall threshold). metric-alert issued. No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified C105), typecheck PASSES.** CTO override next cycle if no output. |
 | 106 | 0209 | **ALL 6 SECURITY HARDENING TASKS DONE (CTO override).** FIX-FILESIZE-001 (inbound-handler 439→267 lines, persistToMemory extracted to memory-persistence.ts), GAP-SESSION-001 (session-state.ts: state machine validation, 21 tests), GAP-REDIS-CB-001 (RedisWorkingMemory ad-hoc→CircuitBreaker, 12 tests), GAP-CMD-001 (shell metachar + cwd validation, 12 tests), GAP-PROMPT-001 (4-layer prompt injection defense, 18 tests), GAP-WEBHOOK-001 (Telegram+Discord signature verification tests, 8 tests). **1287 tests (+131), typecheck PASSES.** 0 errors. 0 queued, 0 in progress. |
+| 107 | 0209 | **FEATURE SPRINT KICKOFF (Phase G).** OpenClaw 심층 분석 + Axel 갭 분석 완료. 14 tasks 생성: RES-008/009 (web search + multi-modal 리서치), FEAT-TOOL-001/002 (web search + file handler 구현), FEAT-CORE-001 (multi-modal message), FEAT-CHAN-001 (Slack channel), QA-025 (C106 리뷰 + Feature Sprint 검토). 7 queued: FEAT-CORE-002 (notifications), FEAT-CHAN-002 (voice I/O), FEAT-UI-001/002 (WebChat+CLI 개선), FEAT-INFRA-001 (Ollama), FEAT-OPS-001/002 (observability+backup). **1287 tests (verified C107), typecheck PASSES.** 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C106 | Cycle 106 | Active |
-| Architecture | 0209C103 | — | Idle. |
-| Dev-Core | 0209C106 | — | Idle. FIX-FILESIZE-001 + GAP-SESSION-001 done (CTO override). |
-| Dev-Infra | 0209C106 | — | Idle. GAP-REDIS-CB-001 + GAP-CMD-001 done (CTO override). |
-| Dev-Edge | 0209C106 | — | Idle. GAP-PROMPT-001 + GAP-WEBHOOK-001 done (CTO override). |
-| UI/UX | 0208C82 | — | Idle (24 cycles). |
-| Research | 0208C89 | — | Idle (17 cycles). |
-| Quality | 0209C102 | — | Idle. Next: QA-025 review of 6 CTO overrides. |
-| DevOps | 0209C101 | — | Idle. |
-| Audit | 0208C89 | — | Idle (17 cycles). |
+| Coordinator | 0209C107 | Cycle 107 — Feature Sprint planning | Active |
+| Architecture | 0209C103 | — | Idle. Activate next cycle for FEAT ADR reviews. |
+| Dev-Core | 0209C107 | FEAT-CORE-001 (multi-modal message) | Assigned C107. |
+| Dev-Infra | 0209C107 | FEAT-TOOL-001 (web search) + FEAT-TOOL-002 (file handler) | Assigned C107. |
+| Dev-Edge | 0209C107 | FEAT-CHAN-001 (Slack channel) | Assigned C107. |
+| UI/UX | 0208C82 | — | Idle (25 cycles). FEAT-UI-001/002 queued (dep: FEAT-CORE-001). |
+| Research | 0209C107 | RES-008 (web search) + RES-009 (multi-modal) | Assigned C107. |
+| Quality | 0209C107 | QA-025 (C106 리뷰 + Feature Sprint) | Assigned C107. |
+| DevOps | 0209C101 | — | Idle. FEAT-OPS-001/002 queued (P2). |
+| Audit | 0208C89 | — | Idle (18 cycles). Activate at Feature Sprint milestone. |
 
 ## Human Intervention Needed
 

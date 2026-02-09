@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 106
+## Current Cycle: 107
 
 ## Division Performance (Last 10 Cycles)
 
@@ -64,6 +64,8 @@
 | E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
 | UI/UX Sprint | **DONE** | 79 | 85 | 100% (8/8 UI tasks + QA-022 PASS + FIX-PUNYCODE-002 resolved). 975 tests, 85 files. 0 errors. |
+| F: Production Hardening | **DONE** | 86 | 106 | 100% (Mark 10 커밋 + memory fixes + security hardening 6건). 1287 tests, 104 files. 0 errors. |
+| G: Feature Sprint | **ACTIVE** | 107 | — | 0% (7/14 assigned, 7 queued). Web search, file handler, multi-modal, Slack, voice, UI overhaul. |
 
 ## Cycle History (Last 10)
 
@@ -79,3 +81,4 @@
 | 104 | dev-core, dev-edge, dev-infra | 0 | 0 | **Monitoring.** 6 P2 tasks in progress (2 cycles). No completions. Drift CLEAN. 1156 tests. 0 errors. |
 | 105 | dev-core, dev-edge, dev-infra | 0 | 0 | **3cy stall alert.** 6 P2 tasks (3 cycles). metric-alert issued. CTO override C106. 1156 tests. 0 errors. |
 | 106 | coord (CTO override) | 6 (FIX-FILESIZE-001, GAP-SESSION-001, GAP-REDIS-CB-001, GAP-CMD-001, GAP-PROMPT-001, GAP-WEBHOOK-001) | 0 | **ALL 6 SECURITY HARDENING DONE (CTO override).** +131 tests. 1287 tests. 0 errors. All stalls resolved. |
+| 107 | research, dev-infra, dev-core, dev-edge, quality | 0 | 0 | **FEATURE SPRINT KICKOFF.** OpenClaw 분석 + 갭 분석. 14 tasks 생성. 7 Divisions activated. 1287 tests (verified). 0 errors. |
