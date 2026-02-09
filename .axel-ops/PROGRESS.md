@@ -4,17 +4,17 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation Maintenance.** Build/typecheck 깨짐 발견 — QC 시스템 보고. P0 수정 배정.
-- **Cycle**: 94
-- **Last Updated**: 2026-02-08C94
-- **STATUS**: **QC reports 4건 처리.** P0 build blockers 2건 발견: (1) container.ts PgPool/GoogleGenAIClient type mismatch (ERR-088), (2) core/decay/types.ts MemoryType unused import (ERR-087). P1 migrate CLI bracket notation (ERR-089). 3 fix tasks 생성 + 할당. QA-023 + FIX-DOCS-001 계속 in progress. **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files. typecheck FAILS.** 3 errors open.
+- **Phase**: **Post-Implementation Maintenance.** Build/typecheck 깨짐 — P0 수정 진행 중. Mark 커밋 3건 확인 (gateway wiring, webchat WS).
+- **Cycle**: 95
+- **Last Updated**: 2026-02-08C95
+- **STATUS**: **QC C1854 reports 3건 추가 처리.** config.ts TS4111 에러 (ERR-090) 추가 발견 — Mark 커밋 `7df32f5` gateway wiring에서 도입. FIX-CONTAINER-001 scope 확장. migrate CLI 보고는 FIX-MIGRATE-CLI-001 중복. Gateway dist는 build cascade. Mark 커밋 확인: `7df32f5` (gateway bootstrap), `6642fc6` (webchat WS), `b81f310` (WS protocol fix). **1075 tests (1075 pass, 36 skip), 0 FAIL, 90 files. typecheck FAILS.** 4 errors open (3 CRITICAL, 1 HIGH).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 5 (+3: FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) |
+| In Progress | 5 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001, FIX-DOCS-001, QA-023) |
 | Done | 152 |
 | Cancelled | 14 |
 
@@ -84,21 +84,22 @@
 | 92 | 0208 | **Human directives 2건 처리.** (1) cycle.sh patches/ 확인 ✅ (Mark 커밋 0966063), FIX-CYCLESH-001 DONE. (2) 리서치→구현: MIGRATE-IMPL-001 P1 생성 (axnmihn→Axel 마이그레이션 스크립트). QC 13건 → FIX-DOCS-001 P2 생성. 3 tasks in progress (FIX-MEMORY-002/FIX-BUILD-001/FIX-MEMORY-003, 2 cycles). 985 tests. 0 errors. |
 | 93 | 0208 | **4 TASKS COMPLETED.** FIX-MEMORY-002 (dev-edge: graceful shutdown per-user flush, 5 tests), FIX-MEMORY-003 (dev-infra: SemanticMemoryWriter, 18 tests), MIGRATE-IMPL-001 (dev-infra: axnmihn→Axel migration scripts, TDD), FIX-BUILD-001 (devops: production build pipeline, tsc -b, 8 workspace scripts). 3 branches merged. §1 위반 1건 (MIGRATE-IMPL-001). **1075 tests (+90), 0 FAIL, 90 files.** QA-023 + FIX-DOCS-001 assigned. |
 | 94 | 0208 | **QC reports 처리 — P0 BUILD BLOCKERS 발견.** QC 시스템 보고 4건 중 P0 ×2 (container.ts type mismatch ERR-088, MemoryType unused ERR-087), P1 ×1 (migrate CLI bracket notation ERR-089), P1 ×1 false positive (pnpm test --run). 3 fix tasks 생성: FIX-TYPECHECK-001 (dev-core), FIX-CONTAINER-001 (dev-edge), FIX-MIGRATE-CLI-001 (devops). **1075 tests, 0 FAIL.** typecheck FAILS. 3 errors open. |
+| 95 | 0208 | **QC C1854 reports 3건 추가 처리.** config.ts TS4111 (ERR-090) — Mark 커밋 `7df32f5` gateway wiring에서 도입. FIX-CONTAINER-001 scope 확장. Mark 커밋 3건 확인: `7df32f5` (gateway bootstrap), `6642fc6` (webchat WS), `b81f310` (WS protocol fix). 5 tasks in progress (변동 없음). **1075 tests, 0 FAIL, 90 files.** typecheck FAILS. 4 errors open (3C+1H). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C94 | Cycle 94 | Active |
-| Architecture | 0208C74 | — | Idle (33 cycles) |
-| Dev-Core | 0208C94 | FIX-TYPECHECK-001 | Active (assigned P0) |
-| Dev-Infra | 0208C93 | — | Idle (1 cycle) |
-| Dev-Edge | 0208C94 | FIX-CONTAINER-001 | Active (assigned P0) |
-| UI/UX | 0208C82 | — | Idle (12 cycles) |
-| Research | 0208C89 | — | Idle (5 cycles) |
+| Coordinator | 0208C95 | Cycle 95 | Active |
+| Architecture | 0208C74 | — | Idle (34 cycles) |
+| Dev-Core | 0208C94 | FIX-TYPECHECK-001 | Active (assigned P0, 1 cycle) |
+| Dev-Infra | 0208C93 | — | Idle (2 cycles) |
+| Dev-Edge | 0208C94 | FIX-CONTAINER-001 | Active (assigned P0, scope 확장, 1 cycle) |
+| UI/UX | 0208C82 | — | Idle (13 cycles) |
+| Research | 0208C89 | — | Idle (6 cycles) |
 | Quality | 0208C94 | QA-023 | Active (in progress, 2 cycles) |
 | DevOps | 0208C94 | FIX-DOCS-001 + FIX-MIGRATE-CLI-001 | Active (FIX-DOCS-001 C93, FIX-MIGRATE-CLI-001 C94) |
-| Audit | 0208C89 | — | Idle (5 cycles) |
+| Audit | 0208C89 | — | Idle (6 cycles) |
 
 ## Human Intervention Needed
 

@@ -2,7 +2,7 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 94 (CTO update)**: 3 errors open (2 CRITICAL, 1 HIGH). QC 시스템이 발견한 build/typecheck 실패.
+> **Cycle 95 (CTO update)**: 4 errors open (3 CRITICAL, 1 HIGH). QC C1854 보고서 3건 처리. config.ts TS4111 에러 추가 발견 (ERR-090, Mark 커밋 7df32f5). FIX-CONTAINER-001 scope 확장.
 
 ## Open
 
@@ -11,6 +11,7 @@
 | ERR-087 | CRITICAL | `pnpm typecheck` FAILS — packages/core/src/decay/types.ts:2 unused `import type { MemoryType }`. CI pipeline broken. | C94 | FIX-TYPECHECK-001 (dev-core) |
 | ERR-088 | CRITICAL | `pnpm build` FAILS — apps/axel/src/container.ts:229 PgPool type mismatch (rows: unknown[] vs T[]), :244 GoogleGenAIClient exactOptionalPropertyTypes incompatible. Production build blocked. | C94 | FIX-CONTAINER-001 (dev-edge) |
 | ERR-089 | HIGH | tools/migrate/src/cli.ts:12+ — 11× TS4111 errors. `noUncheckedIndexedAccess` requires bracket notation for process.env access. Build pipeline includes this package. | C94 | FIX-MIGRATE-CLI-001 (devops) |
+| ERR-090 | CRITICAL | apps/axel/src/config.ts:219,233,234 — 3× TS4111 errors. `Record<string, unknown>` dot notation access requires bracket notation. Mark 커밋 `7df32f5` (gateway wiring)에서 도입. | C95 | FIX-CONTAINER-001 (dev-edge, scope 확장) |
 
 ## Resolved
 

@@ -1,158 +1,178 @@
-# QC Worker: README Walkthrough
-## Cycle: 20260208_1834
+# QC Worker C: README Walkthrough
+## Cycle: 20260208_1854
 
 ### README Commands Tested
 
-| # | Documented Command | Worked? | Notes |
-|---|-------------------|---------|-------|
-| 1 | `pnpm install` | YES | 650ms, dependencies already up to date |
-| 2 | `docker compose -f docker/docker-compose.dev.yml up -d` | SKIPPED | Services already running (9h), health check OK |
-| 3 | `pnpm build` | NO | TypeScript compilation failures (see below) |
-| 4 | `pnpm typecheck` | NO | TypeScript errors in @axel/core package |
-| 5 | `pnpm test` | YES | 1075 tests passed, 36 skipped (5.39s) |
-| 6 | `pnpm test:coverage` | NOT TESTED | Skipped (time constraint) |
-| 7 | `pnpm lint` | NO | 48 errors, 136 warnings found |
-| 8 | `pnpm format:check` | NO | 17 formatting errors |
-| 9 | `pnpm format` | NOT TESTED | Not run due to existing format errors |
-| 10 | `docker compose ps` | YES | PostgreSQL & Redis running healthy |
-| 11 | Database migration tool (referenced) | NOT TESTED | Blocked by build failures |
+| # | Documented Command | Worked? | Actual Result |
+|---|-------------------|---------|---------------|
+| 1 | pnpm install | YES | Dependencies already up-to-date, completed in 633ms |
+| 2 | docker compose -f docker/docker-compose.dev.yml up -d | SKIPPED | Docker services not started per QC rules |
+| 3 | export DATABASE_URL=... && node tools/migrate/dist/cli.js up | SKIPPED | Requires Docker PostgreSQL |
+| 4 | cp .env.example .env | N/A | File exists; skipped to avoid overwriting |
+| 5 | pnpm --filter axel dev | SKIPPED | Development server requires full environment |
+| 6 | pnpm build | **FAILED** | Multiple TypeScript compilation errors (see details below) |
+| 7 | pnpm typecheck | **FAILED** | TypeScript errors in @axel/core and @axel/ui |
+| 8 | pnpm test | **PASSED** | 1075 tests passed, 36 skipped, 89 test files |
+| 9 | pnpm test:coverage | NOT TRIED | Depends on pnpm build working |
+| 10 | pnpm lint | **FAILED** | 48 errors, 136 warnings found |
+| 11 | pnpm format | NOT TRIED | Requires lint to pass first |
+| 12 | pnpm format:check | **FAILED** | 17 formatting errors found |
 
-### Referenced Files
-| Path in README | Exists? | Status |
-|---------------|---------|--------|
-| `docker/docker-compose.dev.yml` | YES | Valid, services running |
-| `docs/adr/` | YES | 23 ADRs documented |
-| `docs/plan/axel-project-plan.md` | YES | Exists |
-| `docs/plan/migration-strategy.md` | YES | Exists |
-| `tools/migrate/` | YES | Exists |
-| `apps/axel/` | YES | Exists |
-| `packages/core/` | YES | Exists |
-| `.env.example` | YES | Exists |
+### Referenced Files in README
+
+| Path in README | Exists? | Note |
+|---------------|---------|------|
+| docker/docker-compose.dev.yml | YES | Confirmed |
+| docs/adr/ | YES | 21 ADR files present |
+| docs/plan/axel-project-plan.md | YES | Confirmed |
+| docs/research/ | YES | 8 research files present |
+| docs/plan/migration-strategy.md | YES | Confirmed |
+| tools/migrate/ | YES | Confirmed |
+| .axel-ops/ | YES | Confirmed |
 
 ### Documentation Gaps
 
-- **operation.md**: EXISTS ✓
-  - Very comprehensive (757 lines)
-  - Covers all aspects: installation, configuration, deployment, troubleshooting
-  - Variables match README but use `AXEL_*` prefix (operation.md is more detailed)
+**operation.md Status**: EXISTS
 
-- **README.md vs operation.md discrepancy**:
-  - README uses `DATABASE_URL`, `REDIS_URL` format
-  - operation.md uses `AXEL_DB_URL`, `AXEL_REDIS_URL` format
-  - **This is confusing and needs clarification**
+**Critical Issues**:
+
+1. **README Environment Variables Mismatch**
+   - README section "Environment Variables" lists:
+     - `DATABASE_URL` (generic form)
+     - `ANTHROPIC_API_KEY`
+     - `GOOGLE_API_KEY`
+   
+   - `.env.example` contains:
+     - `ANTHROPIC_API_KEY` ✓ matches
+     - `GEMINI_API_KEY` ✗ README says `GOOGLE_API_KEY`
+     - `OPENAI_API_KEY` (not mentioned in README)
+     - `GITHUB_TOKEN` (not mentioned in README)
+   
+   - operation.md uses entirely different names:
+     - `AXEL_DB_URL` (not `DATABASE_URL`)
+     - `AXEL_REDIS_URL` (not mentioned in README)
+     - `AXEL_ANTHROPIC_API_KEY` (not `ANTHROPIC_API_KEY`)
+     - `AXEL_GOOGLE_API_KEY` (not `GOOGLE_API_KEY`)
+   
+   **Finding**: README and operation.md define conflicting environment variable names. Following README alone will not work; operation.md is required.
+
+2. **README Quick Start is Incomplete**
+   - README Quick Start references `node tools/migrate/dist/cli.js up` but does NOT mention:
+     - Building the migration tool first (`pnpm --filter @axel/migrate build`)
+     - This build step fails (TypeScript errors in tools/migrate/src/cli.ts)
+   
+   - README says "Edit .env with your API keys" but doesn't clarify which keys or format
+   - operation.md has detailed key setup instructions (lines 94-170) not mentioned in README
+
+3. **Build Failures Block All Setup**
+   - `pnpm build` fails with 31 TypeScript errors
+   - `pnpm typecheck` fails with unused variable and type mismatches
+   - These prevent migration tool from being built, blocking database setup
+   - README doesn't acknowledge these failures
 
 ### Findings
 
-#### [FINDING-D1] severity: P0 ✗ CRITICAL
-**Issue**: `pnpm build` fails with TypeScript compilation errors
+#### [FINDING-D1] severity: P0
+**README Quick Start is Broken**
 
-- **Location**: `apps/axel/src/container.ts` (lines 229, 244)
-- **Cause**: Type mismatches in dependency injection container:
-  1. `PgPool` type incompatibility (rows type inference)
-  2. `GoogleGenAIClient` streaming type incompatibility with `exactOptionalPropertyTypes: true`
-- **Impact**: Cannot build project at all
-- **Block**: Prevents production deployment and Docker image building
-- **Evidence**: 
-  ```
-  apps/axel/src/container.ts(229,59): error TS2345: Argument not assignable to parameter of type 'PgPool'
-  apps/axel/src/container.ts(244,47): error TS2345: Argument not assignable to parameter of type 'GoogleGenAIClient'
-  ```
+Following the README "Quick Start" section literally will fail:
+1. `pnpm build` fails with TypeScript errors
+2. Cannot build migration tool needed for `node tools/migrate/dist/cli.js up`
+3. Environment variable names in README don't match .env.example or operation.md
 
-#### [FINDING-D2] severity: P0 ✗ CRITICAL
-**Issue**: `pnpm typecheck` fails with 4 type errors in core package
+**Expected**: README should either:
+- Acknowledge that `pnpm build` currently fails
+- OR provide explicit instructions to fix TypeScript errors before proceeding
+- OR reference that operation.md must be read first (or merge the two documents)
 
-- **Location**: `packages/core/src/decay/types.ts` line 2
-- **Cause**: Unused import `MemoryType` (but also suggests broader type setup issues)
-- **Impact**: Type checking fails in CI/CD pipeline
-- **Evidence**:
-  ```
-  src/decay/types.ts(2,1): error TS6133: 'MemoryType' is declared but its value is never read.
-  ```
+---
 
-#### [FINDING-D3] severity: P1 ⚠ MAJOR
-**Issue**: `tools/migrate/src/cli.ts` has `noUncheckedIndexedAccess` violations
+#### [FINDING-D2] severity: P1
+**Environment Variables Documentation is Inconsistent**
 
-- **Cause**: Accessing `process.env['DATABASE_URL']` without proper bracket notation checks
-- **Lines**: 12, 14-18, 34-35, 37-41 (11 errors total)
-- **Impact**: Migration tool won't compile as part of build pipeline
-- **Evidence**:
-  ```
-  tools/migrate/src/cli.ts(12,50): error TS4111: Property 'DATABASE_URL' comes from 
-  an index signature, so it must be accessed with ['DATABASE_URL'].
-  ```
+Three different naming schemes exist:
+- **README** (line 128-150): `DATABASE_URL`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`
+- **.env.example**: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `GITHUB_TOKEN`
+- **operation.md** (line 82-170): `AXEL_DB_URL`, `AXEL_REDIS_URL`, `AXEL_ANTHROPIC_API_KEY`, `AXEL_GOOGLE_API_KEY`
 
-#### [FINDING-D4] severity: P1 ⚠ MAJOR
-**Issue**: `pnpm lint` fails with 48 errors, 136 warnings
+**Expected**: Single source of truth for environment variable names. Currently there are 3 different specs.
 
-- **Primary issues**:
-  1. Import statement organization (alphabetical sorting)
-  2. Unused variable `_handleMessage` in `apps/axel/src/main.ts:64`
-- **Impact**: Cannot merge PR (CI check fails)
-- **Evidence**: Mixed import order, unused exports detected
+---
 
-#### [FINDING-D5] severity: P2 ⚠ MODERATE
-**Issue**: `pnpm format:check` fails with 17 formatting errors
+#### [FINDING-D3] severity: P1
+**README Missing Key Setup Instructions**
 
-- **Issues**: 
-  1. Multi-line import formatting inconsistencies
-  2. Import type vs regular import ordering
-- **Impact**: Code doesn't match Biome formatter expectations
-- **Evidence**: Biome suggests unsafe fixes available
+README Quick Start omits:
+- Building the migration tool (`pnpm --filter @axel/migrate build`) before running migrations
+- Verification step for Docker services health (operation.md has this at lines 58-65)
+- `.env` file validation (operation.md explains all required keys at lines 78-170)
 
-#### [FINDING-D6] severity: P2 ⚠ MODERATE
-**Issue**: Environment variable name mismatch between README and operation.md
+**Expected**: Either add these to README or clearly state "See operation.md for detailed setup".
 
-- **README uses**: `DATABASE_URL`, `REDIS_URL` (no prefix)
-- **operation.md uses**: `AXEL_DB_URL`, `AXEL_REDIS_URL` (with AXEL_ prefix)
-- **Impact**: Users following README will use wrong variable names
-- **Recommendation**: Standardize across all documentation
+---
 
-#### [FINDING-D7] severity: P2 ⚠ MODERATE
-**Issue**: `.env.example` missing 4 variables that `.env` has
+#### [FINDING-D4] severity: P1
+**TypeScript Compilation Errors Block Development**
 
-- **Missing in .env.example**: `AXEL_ANTHROPIC_API_KEY`, `AXEL_DB_URL`, `AXEL_GOOGLE_API_KEY`, `AXEL_REDIS_URL`
-- **Impact**: Users copying .env.example won't have required variables
-- **Recommendation**: Ensure .env.example has all required variables with placeholder values
+`pnpm build` fails with 31 errors across:
+- apps/axel/src/config.ts (1 error)
+- apps/axel/src/container.ts (2 errors)
+- tools/migrate/src/cli.ts (6 errors)
+- (plus more from other packages)
 
-### Output (Failed Commands)
+README claims "Build all packages: `pnpm build`" but this command fails.
 
-#### Build Errors (pnpm build)
+**Expected**: Either fix TypeScript errors OR document the workaround.
+
+---
+
+#### [FINDING-D5] severity: P2
+**Linting and Formatting Issues Not Mentioned**
+
+README lists `pnpm lint` and `pnpm format` as development commands but doesn't mention:
+- Both currently fail (48 lint errors, 136 warnings; 17 format errors)
+- No mention of required fixes before committing
+
+**Expected**: Add note that code is not yet passing lint/format, or fix the issues.
+
+---
+
+#### [FINDING-D6] severity: P2
+**README Doesn't Mention operation.md Exists**
+
+README (line 207) only says: "This project uses an autonomous agent development organization. See `.axel-ops/` for operational infrastructure."
+
+But the comprehensive `operation.md` (755 lines) provides:
+- Detailed setup instructions (contradicting README)
+- Troubleshooting guide (lines 665-697)
+- Full environment variable reference (lines 726-753)
+- Channel-specific configuration (lines 299-417)
+
+**Expected**: README should reference operation.md early: "For detailed setup instructions, see operation.md".
+
+---
+
+### Test Results Summary
+
 ```
-apps/axel/src/container.ts(229,59): error TS2345: Argument of type '{ query(...): Promise<{ rows: unknown[]; rowCount: number | null; }>; ...' is not assignable to parameter of type 'PgPool'.
-  The types returned by 'query(...)' are incompatible between these types.
-
-apps/axel/src/container.ts(244,47): error TS2345: Argument of type '{ getGenerativeModel(...): { generateContentStream(...): Promise<{ stream: AsyncIterable<...>; }>;...' is not assignable to parameter of type 'GoogleGenAIClient'.
-```
-
-#### Typecheck Errors (pnpm typecheck)
-```
-packages/core:
-> @axel/core@0.0.0 typecheck /home/northprot/projects/axel/packages/core
-> tsc --noEmit
-
-src/decay/types.ts(2,1): error TS6133: 'MemoryType' is declared but its value is never read.
-```
-
-#### Migration Tool Errors (in build)
-```
-tools/migrate/src/cli.ts(12,50): error TS4111: Property 'DATABASE_URL' comes from an index signature, so it must be accessed with ['DATABASE_URL'].
-[... 10 more similar errors ...]
+✓ Tests: 1075 passed, 36 skipped (90 test files)
+✗ Build: Failed (31 TypeScript errors)
+✗ Typecheck: Failed (unused variables, type mismatches)
+✗ Lint: Failed (48 errors, 136 warnings)
+✗ Format: Failed (17 errors)
 ```
 
-#### Lint Errors (pnpm lint)
-```
-Found 48 errors, 136 warnings.
-Key issues:
-- Import statement organization (unsafe fixes available with --fix)
-- Unused variable _handleMessage in apps/axel/src/main.ts:64
-```
+### Next Steps for Project Team
 
-### Summary
-- **Total Critical Issues (P0)**: 2 (build failures)
-- **Total Major Issues (P1)**: 2 (lint failures, migration tool)
-- **Total Moderate Issues (P2)**: 2 (formatting, env variable mismatches)
+1. **Immediately**: Fix TypeScript compilation errors in apps/axel and tools/migrate
+2. **High Priority**: Unify environment variable naming across README, .env.example, and operation.md
+3. **High Priority**: Update README to reference operation.md or merge documentation
+4. **Medium Priority**: Fix lint and format issues before next QC cycle
+5. **Documentation**: Update README's "Quick Start" section with accurate steps
 
-**README Status**: Largely accurate but missing some environment variable details. operation.md is comprehensive but uses different variable naming convention.
+---
 
-**Project Build Status**: ❌ BROKEN — Cannot run `pnpm build` due to TypeScript errors. However, `pnpm test` passes successfully (1075 tests).
+**Report Generated**: 2026-02-08 18:54 UTC  
+**QC Cycle**: 20260208_1854  
+**Project**: Axel (main branch)
 

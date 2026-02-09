@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 94
+## Current Cycle: 95
 
 ## Division Performance (Last 10 Cycles)
 
@@ -23,13 +23,13 @@
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 3 | 5 | **WARN** (2 CRITICAL + 1 HIGH) |
+| Open Errors | 4 | 5 | **WARN** (3 CRITICAL + 1 HIGH) |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
-| Typecheck | FAIL | PASS | **CRITICAL** (ERR-087, ERR-088) |
-| Build | FAIL | PASS | **CRITICAL** (ERR-088, ERR-089) |
+| Typecheck | FAIL | PASS | **CRITICAL** (ERR-087, ERR-088, ERR-090) |
+| Build | FAIL | PASS | **CRITICAL** (ERR-088, ERR-089, ERR-090) |
 
 ## Coverage Tracking
 
@@ -63,14 +63,13 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 84 | devops, quality | 3 (FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 1 (ERR-086) | **3 DONE (1 불완전).** FIX-PUNYCODE-001 punycode override → 3 telegram test FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0. Human directives 3건: RES-007, push 비활성, §1 소유권. 969 tests (933p+36s), 3 suite FAIL, 85 files. |
-| 85 | devops, quality | 2 (FIX-PUNYCODE-002, QA-022) | 0 (1 resolved) | **UI/UX SPRINT COMPLETE.** ERR-086 resolved (975 tests pass). QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리. 3 cleanup tasks queued. 0 errors. |
-| 86 | research, devops | 0 | 0 | **Post-sprint cleanup.** RES-007, FIX-README-001, FIX-PUNYCODE-003 in progress (assigned C85). 975 tests. 0 errors. Drift CLEAN. |
-| 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE (InboundHandler DI 누락). FIX-README-001: README 보안 수정. FIX-PUNYCODE-003: punycode 정리. Human directives 2건 → OPS-DOC-001 + DIAG-UNTRACK-001. 975 tests. 0 errors. |
-| 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** OPS-DOC-001 (operation.md 17KB). DIAG-UNTRACK-001 (ROOT CAUSE: patches/ 누락). Human directives 2건: MIGRATE-PLAN-001 (P0 마이그레이션), AUDIT-006 (P1 유휴 Division 분석). 975 tests. 0 errors. |
-| 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** MIGRATE-PLAN-001 (마이그레이션 계획 12섹션). AUDIT-006 (14 findings 4H7M3L). Human directive 1건 (human.md 재구성). QC reports 5건. 5 new fix tasks. 975 tests. 0 errors. |
-| 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC-001, FIX-BIOME-001, FIX-README-002) | 0 | **4 TASKS DONE.** FIX-MEMORY-001 (InboundHandler memory DI, +10 tests). 3 devops fixes. 2 blocks processed. QC 7건 처리, FIX-BUILD-001(P2) 생성. **985 tests (+10).** 0 errors. |
-| 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 tasks in progress (FIX-MEMORY-002, FIX-BUILD-001, FIX-MEMORY-003). FIX-MEMORY-003 unblocked → dev-infra assigned. Drift CLEAN. 985 tests. 0 errors. |
-| 92 | dev-edge, devops, dev-infra | 0 (+1 FIX-CYCLESH-001 human) | 0 | Human directives 2건. FIX-CYCLESH-001 DONE (Mark). MIGRATE-IMPL-001 + FIX-DOCS-001 queued. QC 13건 분류. 3 tasks in progress (2 cycles). 985 tests. 0 errors. |
-| 93 | devops, quality | 4 (FIX-MEMORY-002, FIX-MEMORY-003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 branches merged. 1075 tests (+90), 90 files. §1 위반 1건 (MIGRATE-IMPL-001). QA-023 + FIX-DOCS-001 assigned. 0 errors. |
-| 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC REPORTS → P0 BLOCKERS.** QC 4건 처리. build/typecheck FAILS. 3 fix tasks 생성+할당: FIX-TYPECHECK-001 (P0 dev-core), FIX-CONTAINER-001 (P0 dev-edge), FIX-MIGRATE-CLI-001 (P1 devops). 1075 tests, 0 FAIL. 3 errors open. |
+| 86 | research, devops | 0 | 0 | **Post-sprint cleanup.** RES-007, FIX-README-001, FIX-PUNYCODE-003 in progress. 975 tests. 0 errors. |
+| 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE. 975 tests. 0 errors. |
+| 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
+| 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
+| 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC/BIOME/README-002) | 0 | **4 TASKS DONE.** 985 tests (+10). 0 errors. |
+| 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 in progress. 985 tests. 0 errors. |
+| 92 | dev-edge, devops, dev-infra | 0 (+1 human) | 0 | FIX-CYCLESH-001 DONE (Mark). 985 tests. 0 errors. |
+| 93 | devops, quality | 4 (FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001) | 0 | **4 TASKS DONE.** 3 merges. 1075 tests (+90). 0 errors. |
+| 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC → P0 BLOCKERS.** typecheck+build FAILS. 3 fix tasks. 1075 tests. 3 errors. |
+| 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. Mark 커밋 3건 확인. 1075 tests. 4 errors. |
