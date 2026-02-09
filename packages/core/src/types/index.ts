@@ -4,6 +4,25 @@ export type { MemoryType, Memory, MemorySearchResult } from './memory.js';
 // Message types
 export type { MessageRole, Message } from './message.js';
 
+// Content block types (multi-modal, RES-009)
+export {
+	TextBlockSchema,
+	ImageBlockSchema,
+	FileBlockSchema,
+	ContentBlockSchema,
+	isMultiModalContent,
+	extractTextContent,
+	IMAGE_MAX_SIZE_BYTES,
+	SUPPORTED_IMAGE_TYPES,
+} from './content-block.js';
+export type {
+	TextBlock,
+	ImageBlock,
+	FileBlock,
+	ContentBlock,
+	MessageContent,
+} from './content-block.js';
+
 // Session types
 export type { SessionState, SessionSummary } from './session.js';
 

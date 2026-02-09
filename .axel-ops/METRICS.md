@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 109
+## Current Cycle: 110
 
 ## Division Performance (Last 10 Cycles)
 
@@ -65,7 +65,7 @@
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
 | UI/UX Sprint | **DONE** | 79 | 85 | 100% (8/8 UI tasks + QA-022 PASS + FIX-PUNYCODE-002 resolved). 975 tests, 85 files. 0 errors. |
 | F: Production Hardening | **DONE** | 86 | 106 | 100% (Mark 10 커밋 + memory fixes + security hardening 6건). 1287 tests, 104 files. 0 errors. |
-| G: Feature Sprint | **ACTIVE** | 107 | — | 14% (2/14 done, 5 in progress, 7 queued). RES-008+009 done. Web search, file handler, multi-modal, Slack in progress. |
+| G: Feature Sprint | **ACTIVE** | 107 | — | 50% (7/14 done, 0 in progress, 7 queued). RES-008/009 + FEAT-CORE-001 + FEAT-TOOL-001/002 + FEAT-CHAN-001 + QA-025 done. |
 
 ## Cycle History (Last 10)
 
@@ -84,3 +84,4 @@
 | 107 | research, dev-infra, dev-core, dev-edge, quality | 0 | 0 | **FEATURE SPRINT KICKOFF.** OpenClaw 분석 + 갭 분석. 14 tasks 생성. 7 Divisions activated. 1287 tests (verified). 0 errors. |
 | 108 | research, dev-infra, dev-core, dev-edge, quality | 2 (RES-008, RES-009) | 0 | **2 RESEARCH DONE.** Brave API + Anthropic Vision 권장. rebase_fail 4건 (infra). 5 tasks in progress. 1287 tests (verified). 0 errors. |
 | 109 | dev-infra, dev-core, dev-edge, quality | 0 | 0 | **Monitoring.** 5 FEAT tasks in progress (2 cycles). rebase_fail 12건 누적. Division worktrees C107 이후 무출력. CTO override C110 예정. 1287 tests (verified C109). 0 errors. |
+| 110 | coord (CTO override) | 5 (FEAT-CORE-001, FEAT-TOOL-001, FEAT-TOOL-002, FEAT-CHAN-001, QA-025) | 0 | **5 FEAT DONE (CTO override).** 3cy stall rebase_fail → CTO 직접 구현. ContentBlock+WebSearch+FileHandler+SlackChannel. +69 tests. 1356 tests. 0 errors. Feature Sprint 50%. |

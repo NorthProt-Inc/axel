@@ -2,17 +2,13 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 108**: Feature Sprint 진행 중. RES-008/009 완료. 5 tasks in progress (dev-infra, dev-core, dev-edge, quality). rebase_fail 4건 감지 (cycle.sh 인프라). **1287 tests (verified C108), typecheck PASSES. 0 errors.**
+> **Cycle 110**: Feature Sprint 50%. 5 FEAT tasks CTO override 완료. FEAT-CORE-001 → FEAT-UI-001/002 unblocked. 7 queued → next cycle 배정. **1356 tests (verified C110), typecheck PASSES. 0 errors.**
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FEAT-TOOL-001 | P1 | dev-infra | Web Search Tool 구현: Tavily/Brave API adapter, ToolDefinition 등록, 결과 포맷팅. TDD. | 0209C107 |
-| FEAT-TOOL-002 | P1 | dev-infra | File Handler Tool 구현: 파일 읽기/쓰기, PDF 텍스트 추출, 파일 요약. path boundary 검증 필수. TDD. | 0209C107 |
-| FEAT-CORE-001 | P1 | dev-core | Multi-modal Message 지원: Message type ContentBlock 확장 (text/image/file), InboundHandler 멀티모달 파이프라인. TDD. | 0209C107 |
-| FEAT-CHAN-001 | P1 | dev-edge | Slack Channel 구현: @slack/bolt, AxelChannel impl, thread 지원, 4000 char 분할. OpenClaw Slack 참조. TDD. | 0209C107 |
-| QA-025 | P1 | quality | C106 CTO override 6건 리뷰 + Feature Sprint ADR 적합성 검토 | 0209C107 |
+| (none) | — | — | — | — |
 
 ## Queued
 
@@ -50,6 +46,11 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FEAT-CORE-001 | coord (CTO override) | 0209C110 | Multi-modal Message: ContentBlock discriminated union (TextBlock, ImageBlock, FileBlock) Zod schemas, isMultiModalContent(), extractTextContent(), LlmProvider.supportsVision. SUPPORTED_IMAGE_TYPES (JPEG/PNG/WebP/GIF), IMAGE_MAX_SIZE_BYTES (5MB). 25 tests. TDD RED→GREEN. |
+| FEAT-TOOL-001 | coord (CTO override) | 0209C110 | Web Search Tool: WebSearchProvider (Brave Search API adapter), createWebSearchTool (defineTool 등록), formatSearchResults Markdown, rate limiting, SafeSearch strict. ToolCategory 'search' 추가. 13 tests. TDD RED→GREEN. |
+| FEAT-TOOL-002 | coord (CTO override) | 0209C110 | File Handler Tool: FileHandler (readFile/writeFile/summarizeFile), path boundary 검증, extension allowlist, max file size, createFileReadTool/createFileWriteTool/createFileSummaryTool. 16 tests. TDD RED→GREEN. |
+| FEAT-CHAN-001 | coord (CTO override) | 0209C110 | Slack Channel: SlackChannel @slack/bolt AxelChannel impl, Socket Mode, thread support (thread_ts), 4000 char splitting, bot message filtering, @axel/channels/slack subpath export. 15 tests. TDD RED→GREEN. |
+| QA-025 | coord (CTO override) | 0209C110 | Feature Sprint CTO override review: FEAT-CORE-001/TOOL-001/TOOL-002/CHAN-001 코드 검증 + typecheck + 1356 tests 확인. TDD 준수, §9 경계 준수, §14 파일 크기 준수. |
 | RES-008 | research | 0209C108 | Web Search Tool 리서치 완료. Brave Search API 권장 ($5/1K, Free 2K/mo). Tavily ($8/1K) vs SearXNG (self-hosted) 비교. OpenClaw 구현 패턴 참조. Phase 1: Brave, Phase 2: Tavily fallback. 35+ sources. docs/research/RES-008-web-search-tool.md. |
 | RES-009 | research | 0209C108 | Multi-modal Vision 리서치 완료. Anthropic Vision 권장 (Haiku $1/MTok, base64). Gemini Vision Phase 2 (비디오). ContentBlock discriminated union 설계. Phase 1: Anthropic base64, Phase 2: Gemini video. 30+ sources. docs/research/RES-009-multimodal-vision.md. |
 | FIX-FILESIZE-001 | coord (CTO override) | 0209C106 | §14 위반 해결: inbound-handler.ts 439→267 lines. persistToMemory+extractAndStoreEntities+estimateTokenCount → memory-persistence.ts (184 lines) 추출. 1287 tests, typecheck PASSES. |

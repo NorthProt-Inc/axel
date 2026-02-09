@@ -6,7 +6,8 @@
 	"exports": {
 		"./cli": "./src/cli/index.ts",
 		"./discord": "./src/discord/index.ts",
-		"./telegram": "./src/telegram/index.ts"
+		"./telegram": "./src/telegram/index.ts",
+		"./slack": "./src/slack/index.ts"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -16,6 +17,7 @@
 	},
 	"dependencies": {
 		"@axel/core": "workspace:*",
+		"@slack/bolt": "^4.6.0",
 		"discord.js": "^14.25.1",
 		"grammy": "^1.39.3"
 	},

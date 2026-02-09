@@ -8,7 +8,7 @@ export interface ToolResult {
 }
 
 /** Tool category classification */
-export type ToolCategory = 'memory' | 'file' | 'iot' | 'research' | 'system' | 'agent';
+export type ToolCategory = 'memory' | 'file' | 'iot' | 'research' | 'system' | 'agent' | 'search';
 
 /** Tool definition (schema validated at runtime via Zod in infra layer) */
 export interface ToolDefinition {

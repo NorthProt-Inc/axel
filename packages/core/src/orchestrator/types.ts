@@ -85,6 +85,8 @@ export interface LlmChatParams {
  */
 export interface LlmProvider {
 	chat(params: LlmChatParams): AsyncIterable<LlmChatChunk>;
+	/** Whether this provider supports vision/image inputs (RES-009) */
+	readonly supportsVision?: boolean;
 }
 
 /**
