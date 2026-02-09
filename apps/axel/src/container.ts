@@ -221,7 +221,7 @@ const DEFAULT_PG_CONFIG = {
 
 const DEFAULT_EMBEDDING_CONFIG = {
 	model: 'gemini-embedding-001',
-	dimension: 3072,
+	dimension: 1536,
 	batchSize: 100,
 	maxRetries: 3,
 	retryBaseMs: 200,
