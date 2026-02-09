@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 88
+## Current Cycle: 89
 
 ## Division Performance (Last 10 Cycles)
 
@@ -14,10 +14,10 @@
 | dev-infra | 1 cycle | 11 | 0 | Idle |
 | dev-edge | 1 cycle | 21 | 0 | Idle |
 | quality | 1 cycle | 10 (+2: QA-022, QA-PROACTIVE-C85) | 1 (QA-012, cancelled C39) | Idle |
-| research | 1 cycle | 2 (RES-006, RES-007) | 0 | Active (MIGRATE-PLAN-001 P0) |
-| devops | 1 cycle | 25 (+OPS-DOC-001, DIAG-UNTRACK-001) | 0 | Idle (OPS-DOC-001 + DIAG-UNTRACK-001 done) |
+| research | 1 cycle | 3 (RES-006, RES-007, MIGRATE-PLAN-001) | 0 | Idle (MIGRATE-PLAN-001 done) |
+| devops | 1 cycle | 25 | 0 | Idle |
 | ui-ux | 1 cycle | 7 | 0 | Idle (all UI coding done) |
-| audit | 1 cycle | 4 | 0 | Active (AUDIT-006 P1) |
+| audit | 1 cycle | 5 (AUDIT-001~006) | 0 | Idle (AUDIT-006 done) |
 
 ## Bottleneck Indicators
 
@@ -59,7 +59,6 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 79 | ui-ux, quality | 0 | 0 | **UI/UX SPRINT KICKOFF.** Human directive P0. 8 tasks created. 880 tests (+35). packages/ui/ + apps/webchat/ scaffold confirmed. |
 | 80 | ui-ux, quality | 5 (UI-001/003/004/007, QA-021) | 0 | **5 TASKS DONE.** 933 tests (+53), 82 files. UI/UX Sprint **50%**. UI-002/005/006 assigned. FIX-UI-001 created. |
 | 81 | ui-ux | 0 | 0 | **No completions.** UI-002/005/006 in progress (1 cycle). FIX-UI-001 queued (P2). 933 tests, 82 files. Drift CLEAN. |
 | 82 | ui-ux, coord | 3 (UI-002/005/006) | 0 | **3 TASKS DONE.** 975 tests (+42), 84 files. Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1). UI/UX Sprint **88%**. DevOps + Quality activated next cycle. |
@@ -69,3 +68,4 @@
 | 86 | research, devops | 0 | 0 | **Post-sprint cleanup.** RES-007, FIX-README-001, FIX-PUNYCODE-003 in progress (assigned C85). 975 tests. 0 errors. Drift CLEAN. |
 | 87 | research, devops | 3 (RES-007, FIX-README-001, FIX-PUNYCODE-003) | 0 | **3 TASKS DONE.** RES-007: CLI memory ROOT CAUSE (InboundHandler DI 누락). FIX-README-001: README 보안 수정. FIX-PUNYCODE-003: punycode 정리. Human directives 2건 → OPS-DOC-001 + DIAG-UNTRACK-001. 975 tests. 0 errors. |
 | 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** OPS-DOC-001 (operation.md 17KB). DIAG-UNTRACK-001 (ROOT CAUSE: patches/ 누락). Human directives 2건: MIGRATE-PLAN-001 (P0 마이그레이션), AUDIT-006 (P1 유휴 Division 분석). 975 tests. 0 errors. |
+| 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** MIGRATE-PLAN-001 (마이그레이션 계획 12섹션). AUDIT-006 (14 findings 4H7M3L). Human directive 1건 (human.md 재구성). QC reports 5건. 5 new fix tasks. 975 tests. 0 errors. |

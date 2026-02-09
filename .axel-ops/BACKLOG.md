@@ -2,20 +2,17 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 88 (CTO update)**: 2 done (OPS-DOC-001, DIAG-UNTRACK-001). 2 human directives → 2 new tasks. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+> **Cycle 89 (CTO update)**: 2 done (MIGRATE-PLAN-001, AUDIT-006). Human directive 1건 + QC reports 5건 처리. 5 new tasks 생성. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
+| FIX-MEMORY-001 | P1 | dev-core | RES-007 ROOT CAUSE 수정: (1) InboundHandler에 WorkingMemory.pushTurn() + EpisodicMemory.addMessage() DI 추가, (2) gracefulShutdown flush('*') → flush(activeUserId) 수정, (3) M2/M3 영구 저장 write path 연결. AUD-108 지적. docs/research/RES-007 참조. | — |
+| FIX-OPSDOC-001 | P1 | devops | operation.md가 devops worktree에 untracked 상태. cycle.sh ownership gap으로 커밋 누락됨. git add + commit + merge 필요. | — |
+| FIX-BIOME-001 | P2 | devops | biome.json에 `apps/webchat/.svelte-kit/` ignore 추가. QC report: 56 errors 중 54건이 자동생성 파일. | — |
+| FIX-README-002 | P2 | devops | README dist/ 경로 참조 수정 (apps/axel/dist/main.js, tools/migrate/dist/cli.js). QC report. | FIX-OPSDOC-001 |
 | FIX-CYCLESH-001 | P2 | devops | cycle.sh:93 devops 소유 경로에 `patches/` 추가. DIAG-UNTRACK-001 ROOT CAUSE 수정. | — |
-
-## In Progress
-
-| ID | Priority | Division | Task | Started |
-|----|----------|----------|------|---------|
-| MIGRATE-PLAN-001 | P0 | research | axnmihn→Axel 데이터 마이그레이션 계획 문서 작성. Human directive. 소스: SQLite (1,736 msgs, 1,060 interaction logs, 3 sessions), ChromaDB (1,039 embeddings 3072d→1536d 재임베딩), knowledge_graph.json (1,396 entities + 1,945 relations), dynamic_persona.json (v26, 93 behaviors), hass_devices.yaml (IoT config), voice chunks (284 wav). 출력: docs/research/MIGRATE-001-axnmihn-migration-plan.md. 포함: 데이터 매핑, Axel PG 스키마 매핑, 재임베딩 전략, 마이그레이션 스크립트 설계, 검증 계획, 롤백 전략. | 0208C88 |
-| AUDIT-006 | P1 | audit | 유휴 Division 활용 분석 + 에이전트 운영 효율화 방안 감사. Human directive. 장기 유휴 Division (arch C74~, dev-core C61~, dev-infra C66~, dev-edge C70~) 분석. 현재 에이전트 조직 운영 효율성 평가. 결과: .axel-ops/comms/audit.jsonl + /home/northprot/.axel-ops/audit/ 2차 저장. | 0208C88 |
 
 ## Cancelled
 
@@ -175,3 +172,5 @@
 | FIX-PUNYCODE-003 | devops | 0208C87 | punycode 정리: postinstall 스크립트 제거, root+channels punycode direct dep 제거. packageExtensions로 충분. 975 tests pass. 커밋 1a85342. |
 | OPS-DOC-001 | devops | 0208C88 | 사용자 친화적 운영 매뉴얼 operation.md 작성 완료 (루트폴더, 17KB, 756 lines). 설치/설정/실행/채널/마이그레이션/트러블슈팅/운영 가이드. Human directive. |
 | DIAG-UNTRACK-001 | devops | 0208C88 | cycle.sh untracked files WARNING 원인 분석 완료. ROOT CAUSE: get_owned_paths('devops')에 patches/ 디렉토리 누락. FIX-CYCLESH-001 생성. Human directive. |
+| MIGRATE-PLAN-001 | research | 0208C89 | axnmihn→Axel 데이터 마이그레이션 계획 완료. 1,736 msgs, 1,039 embeddings (3072d→1536d), 1,396 entities + 1,945 relations. 12개 섹션. docs/research/MIGRATE-001-axnmihn-migration-plan.md. |
+| AUDIT-006 | audit | 0208C89 | 유휴 Division 활용 분석 + 에이전트 운영 효율화 방안 감사 완료. 14 findings (4H 7M 3L). AUD-095~108. 개선 제안 7건. |
