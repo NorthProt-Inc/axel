@@ -37,7 +37,6 @@ export interface UnifiedSession {
 	readonly startedAt: Date;
 	readonly lastActivityAt: Date;
 	readonly turnCount: number;
-	readonly state: SessionState;
 }
 
 /** Result of session resolution — new or existing */

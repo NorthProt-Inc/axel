@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-	renderMermaidBlock,
-	renderLatexInline,
-	renderLatexBlock,
 	renderExtendedMarkdown,
+	renderLatexBlock,
+	renderLatexInline,
+	renderMermaidBlock,
 } from '../src/lib/utils/markdown-extended.js';
 
 describe('WebChat Extended Markdown — Mermaid Diagrams', () => {
@@ -24,7 +24,8 @@ describe('WebChat Extended Markdown — Mermaid Diagrams', () => {
 	});
 
 	it('handles multiple mermaid blocks', () => {
-		const md = '```mermaid\ngraph TD\nA-->B\n```\n\ntext\n\n```mermaid\nsequenceDiagram\nA->>B: hi\n```';
+		const md =
+			'```mermaid\ngraph TD\nA-->B\n```\n\ntext\n\n```mermaid\nsequenceDiagram\nA->>B: hi\n```';
 		const result = renderMermaidBlock(md);
 		const matches = result.match(/class="mermaid"/g);
 		expect(matches).toHaveLength(2);

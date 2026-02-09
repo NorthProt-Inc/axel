@@ -1,9 +1,36 @@
-import type { ContentBlock, FileBlock, ImageBlock } from '@axel/core/types';
-
 /**
  * File upload utilities for WebChat.
  * Validates files and converts them to ContentBlock for multi-modal messages.
+ *
+ * Types mirrored from @axel/core/types/content-block to avoid cross-package dependency.
  */
+
+/** Image content block (base64 or URL) */
+interface ImageBlock {
+	readonly type: 'image';
+	readonly source: 'base64' | 'url';
+	readonly mediaType: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
+	readonly data?: string;
+	readonly url?: string;
+}
+
+/** File content block */
+interface FileBlock {
+	readonly type: 'file';
+	readonly fileName: string;
+	readonly mimeType: string;
+	readonly data: string;
+	readonly sizeBytes?: number;
+}
+
+/** Text content block */
+interface TextBlock {
+	readonly type: 'text';
+	readonly text: string;
+}
+
+/** Any content block type */
+type ContentBlock = TextBlock | ImageBlock | FileBlock;
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB (per FEAT-CORE-001)
 const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);

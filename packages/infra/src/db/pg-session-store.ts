@@ -4,6 +4,7 @@ import type {
 	SessionStore,
 	UnifiedSession,
 } from '@axel/core/orchestrator';
+import type { SessionState } from '@axel/core/types';
 import type { SessionSummary } from '@axel/core/types';
 import type { PgPoolDriver } from './pg-pool.js';
 
@@ -80,6 +81,13 @@ class PgSessionStore implements SessionStore {
 			 WHERE session_id = $1`,
 			[sessionId],
 		);
+	}
+
+	async updateState(sessionId: string, newState: SessionState): Promise<void> {
+		await this.pool.query('UPDATE sessions SET state = $2 WHERE session_id = $1', [
+			sessionId,
+			newState,
+		]);
 	}
 
 	async getActive(userId: string): Promise<UnifiedSession | null> {

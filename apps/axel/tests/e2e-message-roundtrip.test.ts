@@ -26,6 +26,7 @@ function createMockSessionStore(): SessionStore {
 		userId: 'cli-user',
 		activeChannelId: 'cli',
 		channelHistory: ['cli'],
+		state: 'initializing',
 		startedAt: new Date('2026-02-08T00:00:00Z'),
 		lastActivityAt: new Date('2026-02-08T00:00:00Z'),
 		turnCount: 0,
@@ -41,6 +42,7 @@ function createMockSessionStore(): SessionStore {
 	return {
 		resolve: vi.fn().mockResolvedValue(resolved),
 		updateActivity: vi.fn().mockResolvedValue(undefined),
+		updateState: vi.fn().mockResolvedValue(undefined),
 		getActive: vi.fn().mockResolvedValue(session),
 		getStats: vi.fn().mockResolvedValue({
 			totalTurns: 1,

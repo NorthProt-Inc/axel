@@ -29,7 +29,10 @@ interface LatexBlock {
 /**
  * Export chat messages to Markdown format.
  */
-export function exportToMarkdown(messages: readonly ExportableChatMessage[], title: string): string {
+export function exportToMarkdown(
+	messages: readonly ExportableChatMessage[],
+	title: string,
+): string {
 	const lines: string[] = [`# ${title}`, '', `*Exported: ${new Date().toISOString()}*`, ''];
 
 	for (const msg of messages) {

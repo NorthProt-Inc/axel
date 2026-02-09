@@ -98,7 +98,13 @@ class PgSemanticMemory implements SemanticMemory {
 			const deleteResult = await this.pool.query('DELETE FROM memories WHERE importance < $1', [
 				config.threshold,
 			]);
-			return { processed, deleted: deleteResult.rowCount ?? 0, minImportance: 0, maxImportance: 0, avgImportance: 0 };
+			return {
+				processed,
+				deleted: deleteResult.rowCount ?? 0,
+				minImportance: 0,
+				maxImportance: 0,
+				avgImportance: 0,
+			};
 		}
 
 		// Load all memories for decay calculation
@@ -245,6 +251,7 @@ interface MemoryRow {
 
 function toMemory(row: MemoryRow): Memory {
 	return {
+		id: row.id ?? null,
 		uuid: row.uuid,
 		content: row.content,
 		memoryType: row.memory_type as Memory['memoryType'],
