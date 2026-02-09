@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { SessionState } from '../../src/types/session.js';
 import {
 	type SessionTransitionError,
 	getValidTransitions,
 	isValidTransition,
 	transition,
 } from '../../src/orchestrator/session-state-machine.js';
+import type { SessionState } from '../../src/types/session.js';
 
 // ─── ADR-021 Session State Machine Tests ───
 // State transitions from ADR-021 Section 1:
