@@ -2,22 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 82 (CTO update)**: UI-002/005/006 done → UI/UX Sprint **88% (7/8)**. 975 tests (+42). Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1) created. FIX-UI-001 + QA-022 queued.
+> **Cycle 83 (CTO update)**: 4 tasks moved Queued → In Progress (assigned C82). DevOps + Quality active. 975 tests, 84 files.
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| FIX-PUNYCODE-001 | P0 | devops | punycode DeprecationWarning (DEP0040) 해결 — Node.js 내장 punycode 사용처 추적 후 userland alternative 전환 | — |
-| README-001 | P1 | devops | 프로젝트 전반 README 업데이트 — 기존 README 참고하지 말고 새롭게 분석 후 관례적 작성 (root + packages/* + apps/* + tools/*) | — |
-| FIX-UI-001 | P2 | devops | marked-terminal 타입 선언 추가 — .d.ts 작성 또는 @types/marked-terminal 설치 (TS7016 해결) | — |
-| QA-022 | P1 | quality | UI/UX Sprint 최종 리뷰 — UI-002/005/006 코드 검증, §8 TDD, §9 경계, §14 파일 크기, 커버리지 확인 | UI-002, UI-005, UI-006 |
+| (none) | — | — | — | — |
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| (none) | — | — | — | — |
+| FIX-PUNYCODE-001 | P0 | devops | punycode DeprecationWarning (DEP0040) 해결 — Node.js 내장 punycode 사용처 추적 후 userland alternative 전환 | 0208C82 |
+| README-001 | P1 | devops | 프로젝트 전반 README 업데이트 — 기존 README 참고하지 말고 새롭게 분석 후 관례적 작성 (root + packages/* + apps/* + tools/*) | 0208C82 |
+| QA-022 | P1 | quality | UI/UX Sprint 최종 리뷰 — UI-002/005/006 코드 검증, §8 TDD, §9 경계, §14 파일 크기, 커버리지 확인 | 0208C82 |
+| FIX-UI-001 | P2 | devops | marked-terminal 타입 선언 추가 — .d.ts 작성 또는 @types/marked-terminal 설치 (TS7016 해결) | 0208C82 |
 
 ## Cancelled
 
