@@ -130,6 +130,20 @@ Before any document is considered "done":
 | Agent session failure | Log to ERRORS.md, retry next cycle |
 | Cumulative errors > 5 open | Coordinator escalates to user |
 
+## 6.1 CTO Autonomous Authority (Extended)
+
+CTO(Lyra)는 다음을 인간 승인 없이 수행 가능:
+- Division 프롬프트 수정 (.axel-ops/prompts/*.md)
+- 새 Phase/roadmap 태스크 생성
+- Division 모델 변경 (opus/sonnet)
+- Worktree 생성/제거
+- 상태 파일 아카이브 (PROGRESS_ARCHIVE.md, broadcast_archive.jsonl 등)
+
+여전히 인간 승인 필요:
+- MISSION.md / CONSTITUTION.md 수정
+- 보안 관련 변경 (인증, 네트워크)
+- 외부 API 구독/비용 변경
+
 ## 7. Drift Prevention
 
 Coordinator MUST verify every cycle:

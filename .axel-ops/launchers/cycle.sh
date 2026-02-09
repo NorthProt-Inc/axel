@@ -28,6 +28,55 @@ mkdir -p "$OPS/logs"
 
 log() { echo "[$(date +%H:%M:%S)] $*" >> "$OPS/logs/cycle.log"; }
 
+# ── Pre-flight: Idle detection + Exponential backoff ──
+STATE_DIR="$OPS/state"
+mkdir -p "$STATE_DIR"
+
+IDLE_FILE="$STATE_DIR/idle_count"
+SKIP_FILE="$STATE_DIR/skip_count"
+HUMAN_MTIME_FILE="$STATE_DIR/last_human_md_mtime"
+LAST_SHA_FILE="$STATE_DIR/last_cycle_sha"
+
+IDLE_COUNT=$(cat "$IDLE_FILE" 2>/dev/null || echo 0)
+CURRENT_SHA=$(git -C "$MAIN_REPO" rev-parse HEAD 2>/dev/null)
+LAST_SHA=$(cat "$LAST_SHA_FILE" 2>/dev/null || echo "")
+HUMAN_MTIME=$(stat -c %Y "$OPS/comms/human.md" 2>/dev/null || echo 0)
+LAST_HUMAN_MTIME=$(cat "$HUMAN_MTIME_FILE" 2>/dev/null || echo 0)
+
+# human.md 변경 = 즉시 실행 (backoff 무시)
+if [ "$HUMAN_MTIME" != "$LAST_HUMAN_MTIME" ]; then
+    IDLE_COUNT=0
+    echo "$HUMAN_MTIME" > "$HUMAN_MTIME_FILE"
+# 새 커밋 = 즉시 실행
+elif [ "$CURRENT_SHA" != "$LAST_SHA" ] && [ -n "$LAST_SHA" ]; then
+    IDLE_COUNT=0
+# BACKLOG에 작업 존재 = 즉시 실행
+elif grep -qP '^\| [A-Z]' "$OPS/BACKLOG.md" 2>/dev/null; then
+    IDLE_COUNT=0
+else
+    # Idle — backoff 적용
+    # 0-2: 매번 실행, 3-10: 4번에 1번, 11-30: 20번에 1번, 31+: 60번에 1번
+    SKIP_THRESHOLD=0
+    if [ "$IDLE_COUNT" -ge 31 ]; then
+        SKIP_THRESHOLD=60
+    elif [ "$IDLE_COUNT" -ge 11 ]; then
+        SKIP_THRESHOLD=20
+    elif [ "$IDLE_COUNT" -ge 3 ]; then
+        SKIP_THRESHOLD=4
+    fi
+
+    if [ "$SKIP_THRESHOLD" -gt 0 ]; then
+        SKIP_COUNT=$(cat "$SKIP_FILE" 2>/dev/null || echo 0)
+        SKIP_COUNT=$((SKIP_COUNT + 1))
+        if [ "$SKIP_COUNT" -lt "$SKIP_THRESHOLD" ]; then
+            echo "$SKIP_COUNT" > "$SKIP_FILE"
+            log "BACKOFF SKIP ($SKIP_COUNT/$SKIP_THRESHOLD, idle=$IDLE_COUNT)"
+            exit 0
+        fi
+        echo 0 > "$SKIP_FILE"
+    fi
+fi
+
 # Division → worktree mapping
 get_worktree() {
     case "$1" in
@@ -107,8 +156,15 @@ run_division() {
     local prompt_file="$OPS/prompts/$(get_prompt "$div")"
 
     if [ ! -d "$worktree" ]; then
-        log "$div SKIP — worktree $worktree does not exist"
-        return 0
+        local branch
+        branch=$(get_branch "$div")
+        log "$div AUTO-CREATING worktree $worktree ($branch)"
+        cd "$MAIN_REPO"
+        git worktree add "$worktree" "$branch" 2>/dev/null || \
+        git worktree add -b "$branch" "$worktree" main 2>/dev/null || {
+            log "$div WORKTREE CREATION FAILED — skipping"
+            return 0
+        }
     fi
 
     if [ ! -f "$prompt_file" ]; then
@@ -119,14 +175,26 @@ run_division() {
     log "=== $div START (worktree: $worktree, model: $model) ==="
 
     cd "$worktree"
-    # Sync division branch with latest main (local, no network needed)
-    # If rebase fails, SKIP this cycle (preserve branch state for investigation)
-    git rebase main --quiet 2>&1 || {
-        git rebase --abort 2>/dev/null || true
-        log "$div REBASE FAILED — SKIPPING this cycle (preserving branch state)"
-        echo "{\"ts\":\"$(date -Iseconds)\",\"from\":\"cycle\",\"type\":\"rebase_fail\",\"div\":\"$div\",\"cycle\":\"$CYCLE_ID\"}" >> "$OPS/comms/broadcast.jsonl"
-        return 0
+    # Sync division branch with latest main (merge, not rebase — ADR: rebase causes permanent blocks)
+    git merge main --no-edit --quiet 2>&1 || {
+        git merge --abort 2>/dev/null || true
+        CONFLICT_FILE="$STATE_DIR/conflict_${div}"
+        PREV=$(cat "$CONFLICT_FILE" 2>/dev/null || echo 0)
+        NEW=$((PREV + 1))
+        echo "$NEW" > "$CONFLICT_FILE"
+
+        if [ "$NEW" -ge 3 ]; then
+            log "$div MERGE CONFLICT x${NEW} — resetting branch to main"
+            git reset --hard main
+            echo 0 > "$CONFLICT_FILE"
+            echo "{\"ts\":\"$(date -Iseconds)\",\"from\":\"cycle\",\"type\":\"branch_reset\",\"div\":\"$div\"}" \
+                >> "$OPS/comms/broadcast.jsonl"
+        else
+            log "$div MERGE CONFLICT ($NEW/3) — skip, retry next cycle"
+            return 0
+        fi
     }
+    echo 0 > "$STATE_DIR/conflict_${div}" 2>/dev/null || true
 
     set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
     unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
@@ -217,6 +285,28 @@ $CLAUDE -p \
     "$(cat "$OPS/prompts/coordinator-session.md")" \
     >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || log "coordinator FAILED"
 
+# ── Idle counter update (based on activation result) ──
+LATEST_ACTIVATION=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" | tail -1)
+if echo "$LATEST_ACTIVATION" | grep -q '"active":\[\]'; then
+    IDLE_COUNT=$((IDLE_COUNT + 1))
+else
+    IDLE_COUNT=0
+fi
+echo "$IDLE_COUNT" > "$IDLE_FILE"
+echo "$CURRENT_SHA" > "$LAST_SHA_FILE"
+
+# ── Phase 1.5: Escalation notification ──
+LATEST_ESC=$(grep '"type":"escalate"' "$OPS/comms/broadcast.jsonl" | tail -1)
+if [ -n "$LATEST_ESC" ]; then
+    LAST_NOTIFIED=$(cat "$STATE_DIR/last_esc_notified" 2>/dev/null || echo "")
+    ESC_TS=$(echo "$LATEST_ESC" | grep -oP '"ts":"[^"]*"')
+    if [ "$ESC_TS" != "$LAST_NOTIFIED" ]; then
+        MSG=$(echo "$LATEST_ESC" | grep -oP '"note":"[^"]*"' | sed 's/"note":"//;s/"$//')
+        notify-send -u critical "Axel Escalation" "$MSG" 2>/dev/null || true
+        echo "$ESC_TS" > "$STATE_DIR/last_esc_notified"
+    fi
+fi
+
 # Commit CTO output (CONSTITUTION §1 — only CTO-owned files)
 cd "$MAIN_REPO"
 CTO_OWNED=".axel-ops/PROGRESS.md .axel-ops/BACKLOG.md .axel-ops/ERRORS.md .axel-ops/METRICS.md .axel-ops/comms/broadcast.jsonl .axel-ops/launchers/ .axel-ops/qc/known-issues.jsonl"
@@ -230,20 +320,55 @@ EOF
 )" || true
 fi
 
-# ── Phase 2: Active Divisions (parallel, conditional) ──
+# ── Phase 2: Active Divisions (2-wave execution) ──
 ACTIVE_DIVS=$(get_active_divisions)
 log "ACTIVE DIVISIONS: $ACTIVE_DIVS"
 
-PIDS=()
+# Split into upstream (Wave 1) and downstream (Wave 2)
+WAVE1="" WAVE2=""
 for div in $ACTIVE_DIVS; do
-    run_division "$div" &
-    PIDS+=($!)
+    case "$div" in
+        arch|dev-core|dev-infra|research|devops) WAVE1="$WAVE1 $div" ;;
+        *) WAVE2="$WAVE2 $div" ;;
+    esac
 done
 
-# Wait for all active divisions to complete
-for pid in "${PIDS[@]}"; do
-    wait "$pid" || true
-done
+# Wave 1: upstream divisions (parallel)
+if [ -n "$WAVE1" ]; then
+    log "WAVE 1: $WAVE1"
+    PIDS=()
+    for div in $WAVE1; do
+        run_division "$div" &
+        PIDS+=($!)
+    done
+    for pid in "${PIDS[@]}"; do
+        wait "$pid" || true
+    done
+
+    # Mid-cycle merge: Wave 1 branches → main (so Wave 2 sees their output)
+    cd "$MAIN_REPO"
+    for div in $WAVE1; do
+        br=$(get_branch "$div")
+        [ "$br" = "main" ] && continue
+        git merge "$br" --no-ff --no-edit --quiet 2>/dev/null || {
+            git merge --abort 2>/dev/null || true
+            log "MID-CYCLE MERGE FAIL: $br — Wave 2 proceeds without"
+        }
+    done
+fi
+
+# Wave 2: downstream divisions (parallel, sees Wave 1 output)
+if [ -n "$WAVE2" ]; then
+    log "WAVE 2: $WAVE2"
+    PIDS=()
+    for div in $WAVE2; do
+        run_division "$div" &
+        PIDS+=($!)
+    done
+    for pid in "${PIDS[@]}"; do
+        wait "$pid" || true
+    done
+fi
 
 # ── Phase 3: Per-Division Merge + Smoke Test (sequential, main) ──
 cd "$MAIN_REPO"
@@ -312,10 +437,13 @@ if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
     fi
 fi
 
-# ── Phase 4: Push (CTO only) ──
-# DISABLED: GitHub account suspended. Re-enable when Mark confirms recovery.
-# git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
-log "PUSH SKIPPED — GitHub suspended (human directive)"
+# ── Phase 4: Conditional Push (CTO only) ──
+# Controlled by state file: echo 1 > .axel-ops/state/push_enabled
+if [ "$(cat "$STATE_DIR/push_enabled" 2>/dev/null)" = "1" ]; then
+    git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
+else
+    log "PUSH SKIP (push_enabled!=1)"
+fi
 
 # ── Phase 5: QC (Quality Control) ──
 # Runs 3 workers (parallel, haiku) → supervisor (sonnet) to test build/runtime/docs

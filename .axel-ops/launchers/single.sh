@@ -71,11 +71,11 @@ echo "  Log:      $OPS/logs/${DIV}_${TS}.log"
 echo ""
 
 cd "$WT"
-# Sync with main (for divisions only)
+# Sync with main (for divisions only — merge, not rebase)
 if [ "$DIV" != "coordinator" ]; then
-    git rebase main --quiet 2>&1 || {
-        git rebase --abort 2>/dev/null || true
-        echo "WARNING: rebase onto main failed, running with current state"
+    git merge main --no-edit --quiet 2>&1 || {
+        git merge --abort 2>/dev/null || true
+        echo "WARNING: merge from main failed, running with current state"
     }
 fi
 set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
