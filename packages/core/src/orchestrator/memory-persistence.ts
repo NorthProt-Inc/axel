@@ -1,11 +1,5 @@
 import type { EpisodicMemory, WorkingMemory } from '../memory/types.js';
 
-/**
- * Memory persistence module — extracted from inbound-handler.ts per FIX-FILESIZE-001.
- *
- * Handles writing to all memory layers (M1-M4) after a conversation turn completes.
- */
-
 /** Semantic memory writer interface for M3 write path */
 export interface SemanticMemoryWriterLike {
 	storeConversationMemory(params: {
@@ -52,27 +46,52 @@ export interface ConceptualMemoryLike {
 	incrementMentions(entityId: string): Promise<void>;
 }
 
+/** Parameters for persistToMemory */
+export interface MemoryPersistenceParams {
+	readonly workingMemory: WorkingMemory;
+	readonly episodicMemory: EpisodicMemory;
+	readonly userId: string;
+	readonly sessionId: string;
+	readonly channelId: string;
+	readonly userContent: string;
+	readonly userTimestamp: Date;
+	readonly assistantContent: string;
+	readonly assistantTimestamp: Date;
+	readonly baseTurnId: number;
+	readonly semanticMemoryWriter?: SemanticMemoryWriterLike | undefined;
+	readonly entityExtractor?: EntityExtractorLike | undefined;
+	readonly conceptualMemory?: ConceptualMemoryLike | undefined;
+}
+
+/** Estimate token count for a string (~3 chars per token, conservative per ADR-018) */
+export function estimateTokenCount(text: string): number {
+	return Math.ceil(text.length / 3);
+}
+
 /**
- * Persist user message and assistant response to M1 (WorkingMemory) and M2 (EpisodicMemory).
+ * Persist user message and assistant response to memory layers M1-M4.
  *
- * Failures are silently caught — memory persistence must not break the response flow.
+ * Each layer is independent — failure in one layer must not block others.
+ * M3/M4 are fire-and-forget (errors silently caught).
  * The response has already been sent to the user at this point.
  */
-export async function persistToMemory(
-	workingMemory: WorkingMemory,
-	episodicMemory: EpisodicMemory,
-	userId: string,
-	sessionId: string,
-	channelId: string,
-	userContent: string,
-	userTimestamp: Date,
-	assistantContent: string,
-	assistantTimestamp: Date,
-	baseTurnId: number,
-	semanticMemoryWriter?: SemanticMemoryWriterLike,
-	entityExtractor?: EntityExtractorLike,
-	conceptualMemory?: ConceptualMemoryLike,
-): Promise<void> {
+export async function persistToMemory(params: MemoryPersistenceParams): Promise<void> {
+	const {
+		workingMemory,
+		episodicMemory,
+		userId,
+		sessionId,
+		channelId,
+		userContent,
+		userTimestamp,
+		assistantContent,
+		assistantTimestamp,
+		baseTurnId,
+		semanticMemoryWriter,
+		entityExtractor,
+		conceptualMemory,
+	} = params;
+
 	const userTokenCount = estimateTokenCount(userContent);
 	const assistantTokenCount = estimateTokenCount(assistantContent);
 
@@ -176,9 +195,4 @@ async function extractAndStoreEntities(
 			});
 		}
 	}
-}
-
-/** Estimate token count for a string (~3 chars per token, conservative per ADR-018) */
-function estimateTokenCount(text: string): number {
-	return Math.ceil(text.length / 3);
 }

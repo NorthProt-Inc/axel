@@ -131,23 +131,21 @@ export function createInboundHandler(
 			await sessionRouter.updateActivity(resolved.session.sessionId);
 
 			// 8. Persist to memory layers (FIX-MEMORY-001)
-			const now = new Date();
-			const baseTurnId = resolved.session.turnCount;
-			await persistToMemory(
+			await persistToMemory({
 				workingMemory,
 				episodicMemory,
 				userId,
-				resolved.session.sessionId,
+				sessionId: resolved.session.sessionId,
 				channelId,
-				content,
-				message.timestamp,
-				responseText,
-				now,
-				baseTurnId,
+				userContent: content,
+				userTimestamp: message.timestamp,
+				assistantContent: responseText,
+				assistantTimestamp: new Date(),
+				baseTurnId: resolved.session.turnCount,
 				semanticMemoryWriter,
 				entityExtractor,
 				conceptualMemory,
-			);
+			});
 
 			// 9. Telemetry — fire-and-forget (GAP-09)
 			if (interactionLogger) {

@@ -23,6 +23,16 @@ export { SessionRouter } from './session-router.js';
 // Session state validation
 export { assertTransition, isValidTransition } from './session-state.js';
 
+// Memory persistence
+export {
+	estimateTokenCount,
+	persistToMemory,
+	type ConceptualMemoryLike,
+	type EntityExtractorLike,
+	type MemoryPersistenceParams,
+	type SemanticMemoryWriterLike,
+} from './memory-persistence.js';
+
 // Inbound handler
 export {
 	createInboundHandler,
@@ -30,14 +40,6 @@ export {
 	type InboundHandlerDeps,
 	type SendCallback,
 } from './inbound-handler.js';
-
-// Memory persistence
-export {
-	persistToMemory,
-	type ConceptualMemoryLike,
-	type EntityExtractorLike,
-	type SemanticMemoryWriterLike,
-} from './memory-persistence.js';
 
 // Interaction logging
 export type { InteractionLog, InteractionLogger } from './interaction-log.js';
