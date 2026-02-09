@@ -1,15 +1,15 @@
 # TEST REPORT
 
 > Maintained by Quality Division. Updated after each code review cycle.
-> Last Updated: 2026-02-08C82 (QA-022 UI/UX Sprint final review)
+> Last Updated: 2026-02-08C85 (QA-PROACTIVE-C85: DevOps C82-84 review)
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 975 (div/quality worktree: 975/975 pass, 84 test files) |
-| Passing | 975 (QA-022 independently verified) |
-| Failing | 0 |
+| Total Tests | 969 (div/quality worktree: 933 pass, 36 skip, 3 suite FAIL, 85 test files) |
+| Passing | 933 |
+| Failing | 3 suites (ERR-086: punycode — bootstrap-channels, telegram-channel, telegram-userid-guard) |
 | Skipped | 36 (pre-existing: testcontainers PG/Redis integration) |
 | Coverage (core) | 99.69% stmts / 95.2% branch / 100% funcs / 99.69% lines |
 | Coverage (infra, reported) | 95%+ stmts (cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42%) |
@@ -18,7 +18,14 @@
 | Coverage (apps/axel, reported) | 85%+ stmts (bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48%) |
 | Coverage (ui, verified) | 95.77% stmts / 92% branch / 95.83% funcs (62 tests) |
 | Coverage (webchat) | N/A — pure logic tests only (no @vitest/coverage-v8 in webchat) |
-| Phase | UI/UX Sprint — QA-022 PASS (7/8 tasks done) |
+| Phase | UI/UX Sprint — QA-022 PASS (8/8 tasks done). ERR-086 blocker (FIX-PUNYCODE-002 P0 pending). |
+
+## Active Blocker
+
+**ERR-086 (HIGH)**: FIX-PUNYCODE-001 punycode override가 whatwg-url@5.0.0의 `require('../punycode')` 미해결.
+- **Root cause**: postinstall script가 `require("punycode")` → `require("../../punycode")`로 교체했지만, pnpm strict isolation에서 `whatwg-url@5.0.0/node_modules/`에 punycode symlink가 생성되지 않음. packageExtensions 선언만으로는 부족.
+- **Impact**: grammy→node-fetch→whatwg-url 체인 사용하는 3 test files FAIL.
+- **Fix**: FIX-PUNYCODE-002 (P0, devops) — pnpm.patchedDependencies 또는 overrides 사용 필요.
 
 ## Per-Package Status
 
@@ -209,6 +216,7 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 
 | Cycle | Division | Package | Result | Duration | Notes |
 |-------|----------|---------|--------|----------|-------|
+| 85 | quality (PROACTIVE) | all | 933 pass, 3 suite FAIL, 36 skip | 5.37s | div/quality worktree. 85 test files. 3 FAIL: bootstrap-channels, telegram-channel, telegram-userid-guard (ERR-086 punycode). FIX-PUNYCODE-001 postinstall patch broken. |
 | 82 | quality (QA-022) | all | 975 pass, 0 fail | 5.37s | div/quality worktree. 84 test files. UI: 62 tests, streaming.ts 100% stmt. Biome: src 0 errors, tests 3 errors (import sort, format). tsc: clean. |
 | 65 | quality (QA-020) | all | 831 pass, 0 fail | 5.48s | div/quality worktree (post pnpm install). 66 test files. Gateway 111 tests independently verified. Coverage: gateway 95.28% stmt. Biome: 0 errors/118 warn. tsc: clean. |
 | 60 | CTO (C60) | all | 774 pass, 0 fail | — | Main branch verified. 62 test files. INTEG-007 E2E added. |
@@ -521,6 +529,7 @@ All Phase D EDGE tasks follow TDD protocol: test commits (RED) precede source co
 | **QA-020** | **65** | **Final Phase E review — INTEG-008 (webhook Telegram+Discord) + FIX-AUDIT-E-004 (security headers+unsafe cast)** | **0H 3M 4L** | **PASS** — ALL CONSTITUTION gates PASS. TDD PASS (RED→GREEN verified). §9 PASS. §10 PASS (831 tests). §14 PASS (max 354). Coverage: gateway 95.28%>80%. Phase E executable work verified complete. |
 | **QA-021** | **79** | **UI/UX scaffold review — packages/ui/ (11 src, 6 test) + apps/webchat/ (13 src, 0 test)** | **5H 7M 4L** | **CONDITIONAL PASS** — §9 PASS (no cross-package violations). §14 PASS (max 113 lines). §10 FAIL (1 tsc error: marked-terminal missing types; 3 biome errors: format+lint). Coverage: ui 94.96%>80%. HIGH: auth missing on chat proxy + WS, biome/tsc errors. |
 | **QA-022** | **82** | **UI/UX Sprint final review — UI-002 (CLI streaming) + UI-005 (WebChat markdown+XSS) + UI-006 (session API) (3 src, 3 test files)** | **0H 6M 3L** | **PASS** — TDD PASS (all 3 RED→GREEN). §9 PASS. §14 PASS (max 205). §10 CONDITIONAL (975 tests pass, tsc clean, biome 3 errors on test files only — src clean). Coverage: ui 95.77%>80%. Design quality excellent. |
+| **QA-PROACTIVE-C85** | **85** | **DevOps C82-84 proactive review — FIX-PUNYCODE-001 (postinstall patch) + README-001 (root README) + FIX-UI-001 (marked-terminal.d.ts)** | **2H 6M 2L** | **ERR-086 confirmed.** Punycode patch broken (pnpm symlink 미생성). replace() /g flag 누락. README에 존재하지 않는 파일 참조 2건. §1 ownership 위반 1건 (기록됨). FIX-PUNYCODE-002 P0으로 해결 예정. |
 
 ## QA-022: UI/UX Sprint Final Review Details (UI-002/005/006)
 
