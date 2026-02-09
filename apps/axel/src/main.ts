@@ -138,11 +138,23 @@ export async function bootstrap(
 		gateway: config.gateway ? 'on' : 'off',
 	});
 
+	// Memory consolidation scheduler (GAP-05)
+	const consolidationIntervalMs = config.memory.consolidationIntervalHours * 60 * 60 * 1000;
+	const consolidationTimer = setInterval(() => {
+		container.consolidationService.consolidate().catch((err: unknown) => {
+			container.logger.error('Consolidation failed', {
+				error: err instanceof Error ? err.message : String(err),
+			});
+		});
+	}, consolidationIntervalMs);
+
 	// Graceful shutdown handler (ADR-021)
 	let shutdownInProgress = false;
 	const shutdown = async () => {
 		if (shutdownInProgress) return;
 		shutdownInProgress = true;
+
+		clearInterval(consolidationTimer);
 
 		const timer = setTimeout(() => {
 			process.exit(1);

@@ -19,6 +19,7 @@ import {
 	AnthropicLlmProvider,
 	AnthropicTokenCounter,
 	AxelPgPool,
+	ConsolidationService,
 	EntityExtractor,
 	FallbackLlmProvider,
 	GeminiEmbeddingService,
@@ -134,6 +135,7 @@ export interface Container {
 	readonly contextAssembler: ContextAssembler;
 	readonly tokenCounter: TokenCounter;
 	readonly interactionLogger: InteractionLogger;
+	readonly consolidationService: ConsolidationService;
 	readonly healthCheckTargets: readonly HealthCheckTarget[];
 }
 
@@ -319,6 +321,16 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 	// Interaction logger (GAP-09)
 	const interactionLogger = new PgInteractionLogger(deps.pgPool, logger);
 
+	// Memory consolidation (GAP-05, ADR-021 §3)
+	const consolidationService = new ConsolidationService({
+		episodicMemory,
+		semanticMemory,
+		embeddingService: { embed: (text: string, taskType: string) => embeddingService.embed(text, taskType) },
+		llmClient: deps.googleClient,
+		model: llmConfig.google.flashModel,
+		logger,
+	});
+
 	// Health check targets
 	const healthCheckTargets: HealthCheckTarget[] = [
 		{ name: 'postgresql', check: () => pgPool.healthCheck() },
@@ -353,6 +365,7 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 		contextAssembler,
 		tokenCounter,
 		interactionLogger,
+		consolidationService,
 		healthCheckTargets,
 	};
 }

@@ -127,6 +127,33 @@ class PgEpisodicMemory implements EpisodicMemory {
 		}));
 	}
 
+	async findUnconsolidated(
+		limit: number,
+	): Promise<readonly { sessionId: string; userId: string; channelId: string }[]> {
+		const result = await this.pool.query(
+			`SELECT session_id, user_id, channel_id
+			 FROM sessions
+			 WHERE ended_at IS NOT NULL AND consolidated_at IS NULL
+			 ORDER BY ended_at ASC
+			 LIMIT $1`,
+			[limit],
+		);
+		return (result.rows as { session_id: string; user_id: string; channel_id: string }[]).map(
+			(r) => ({
+				sessionId: r.session_id,
+				userId: r.user_id,
+				channelId: r.channel_id,
+			}),
+		);
+	}
+
+	async markConsolidated(sessionId: string): Promise<void> {
+		await this.pool.query(
+			`UPDATE sessions SET consolidated_at = NOW() WHERE session_id = $1`,
+			[sessionId],
+		);
+	}
+
 	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {
 		const result = await this.pool.query(
 			`SELECT role, content, channel_id, timestamp, token_count

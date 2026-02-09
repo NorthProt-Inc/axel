@@ -27,6 +27,18 @@ export type {
 	MetaMemory,
 } from './types.js';
 
+// Consolidation (L2→L3)
+export {
+	DEFAULT_CONSOLIDATION_CONFIG,
+	EXTRACTION_PROMPT,
+	formatSessionForExtraction,
+	parseExtractedMemories,
+	shouldConsolidate,
+	type ConsolidationConfig,
+	type ExtractedMemory,
+	type ExtractedMemoryType,
+} from './consolidation.js';
+
 // In-memory stubs (test/dev use)
 export { InMemoryStreamBuffer } from './stream-buffer.js';
 export { InMemoryWorkingMemory } from './working-memory.js';

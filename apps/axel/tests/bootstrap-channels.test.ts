@@ -49,6 +49,9 @@ function createMockContainer(): Container {
 		interactionLogger: {
 			log: vi.fn().mockResolvedValue(undefined),
 		} as unknown as Container['interactionLogger'],
+		consolidationService: {
+			consolidate: vi.fn().mockResolvedValue({ sessionsProcessed: 0, memoriesExtracted: 0, memoriesStored: 0, memoriesUpdated: 0 }),
+		} as unknown as Container['consolidationService'],
 		healthCheckTargets: [],
 	};
 }

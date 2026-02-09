@@ -100,6 +100,18 @@ export class InMemoryEpisodicMemory implements EpisodicMemory {
 			}));
 	}
 
+	async findUnconsolidated(
+		_limit: number,
+	): Promise<readonly { sessionId: string; userId: string; channelId: string }[]> {
+		return [...this.sessions.values()]
+			.filter((s) => s.endedAt !== null)
+			.map((s) => ({ sessionId: s.sessionId, userId: s.userId, channelId: s.channelId }));
+	}
+
+	async markConsolidated(_sessionId: string): Promise<void> {
+		// No-op in memory implementation
+	}
+
 	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {
 		const lowerQuery = query.toLowerCase();
 		const results: MessageRecord[] = [];

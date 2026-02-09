@@ -21,6 +21,7 @@ export { FallbackLlmProvider } from './llm/fallback-provider.js';
 export { defineTool, ToolRegistry, McpToolExecutor, validatePath } from './mcp/tool-registry.js';
 export { SemanticMemoryWriter } from './memory/semantic-memory-writer.js';
 export { EntityExtractor } from './memory/entity-extractor.js';
+export { ConsolidationService } from './memory/consolidation-service.js';
 export { PinoLogger, type PinoLoggerConfig } from './logging/pino-logger.js';
 export {
 	AnthropicTokenCounter,
