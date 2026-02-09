@@ -261,7 +261,7 @@ EOF
 # Parse activation list from the latest broadcast.jsonl activation message
 get_active_divisions() {
     local activation_line
-    activation_line=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1)
+    activation_line=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1 || true)
 
     if [ -z "$activation_line" ]; then
         echo "arch dev-core dev-infra dev-edge quality research devops audit"
@@ -286,7 +286,7 @@ $CLAUDE -p \
     >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || log "coordinator FAILED"
 
 # ── Idle counter update (based on activation result) ──
-LATEST_ACTIVATION=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" | tail -1)
+LATEST_ACTIVATION=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1 || true)
 if echo "$LATEST_ACTIVATION" | grep -q '"active":\[\]'; then
     IDLE_COUNT=$((IDLE_COUNT + 1))
 else
@@ -296,7 +296,7 @@ echo "$IDLE_COUNT" > "$IDLE_FILE"
 echo "$CURRENT_SHA" > "$LAST_SHA_FILE"
 
 # ── Phase 1.5: Escalation notification ──
-LATEST_ESC=$(grep '"type":"escalate"' "$OPS/comms/broadcast.jsonl" | tail -1)
+LATEST_ESC=$(grep '"type":"escalate"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1 || true)
 if [ -n "$LATEST_ESC" ]; then
     LAST_NOTIFIED=$(cat "$STATE_DIR/last_esc_notified" 2>/dev/null || echo "")
     ESC_TS=$(echo "$LATEST_ESC" | grep -oP '"ts":"[^"]*"')
