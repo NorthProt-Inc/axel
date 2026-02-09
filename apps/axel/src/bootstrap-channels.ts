@@ -62,7 +62,7 @@ function buildHandler(container: Container, personaEngine: PersonaEngine) {
 	return createInboundHandler({
 		sessionRouter: container.sessionRouter,
 		contextAssembler: container.contextAssembler,
-		llmProvider: container.anthropicProvider,
+		llmProvider: container.llmProvider,
 		toolExecutor: container.toolExecutor,
 		personaEngine,
 		workingMemory: container.workingMemory,

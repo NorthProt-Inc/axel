@@ -19,6 +19,7 @@ import {
 	AnthropicTokenCounter,
 	AxelPgPool,
 	EntityExtractor,
+	FallbackLlmProvider,
 	GeminiEmbeddingService,
 	type GoogleGenAIClient,
 	GoogleLlmProvider,
@@ -122,6 +123,7 @@ export interface Container {
 	readonly entityExtractor: EntityExtractor;
 	readonly sessionStore: SessionStore;
 	readonly sessionRouter: SessionRouter;
+	readonly llmProvider: LlmProvider;
 	readonly anthropicProvider: LlmProvider;
 	readonly googleProvider: LlmProvider;
 	readonly embeddingService: GeminiEmbeddingService;
@@ -262,6 +264,18 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 		model: llmConfig.google.flashModel,
 	});
 
+	// LLM fallback chain (GAP-03)
+	const llmProvider = new FallbackLlmProvider(
+		llmConfig.fallbackChain
+			.map((name) => {
+				if (name === 'anthropic') return { name, provider: anthropicProvider };
+				if (name === 'google') return { name, provider: googleProvider };
+				return null;
+			})
+			.filter((p): p is { name: string; provider: LlmProvider } => p !== null),
+		logger,
+	);
+
 	// Embedding service (ADR-016)
 	const embeddingService = new GeminiEmbeddingService(deps.embeddingClient, {
 		...EMBEDDING_BASE_CONFIG,
@@ -324,6 +338,7 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 		entityExtractor,
 		sessionStore,
 		sessionRouter,
+		llmProvider,
 		anthropicProvider,
 		googleProvider,
 		embeddingService,

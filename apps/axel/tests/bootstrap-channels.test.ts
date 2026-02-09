@@ -6,7 +6,11 @@ import type { Container, ContainerDeps } from '../src/container.js';
 // ─── Mock Factories ───
 
 function createMockContainer(): Container {
+	const mockLlmProvider = {
+		chat: vi.fn(),
+	};
 	return {
+		logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: vi.fn().mockReturnThis() } as unknown as Container['logger'],
 		pgPool: { healthCheck: vi.fn() } as unknown as Container['pgPool'],
 		streamBuffer: { healthCheck: vi.fn() } as unknown as Container['streamBuffer'],
 		workingMemory: { healthCheck: vi.fn() } as unknown as Container['workingMemory'],
@@ -22,9 +26,8 @@ function createMockContainer(): Container {
 			}),
 			updateActivity: vi.fn().mockResolvedValue(undefined),
 		} as unknown as Container['sessionRouter'],
-		anthropicProvider: {
-			chat: vi.fn(),
-		} as unknown as Container['anthropicProvider'],
+		llmProvider: mockLlmProvider as unknown as Container['llmProvider'],
+		anthropicProvider: mockLlmProvider as unknown as Container['anthropicProvider'],
 		googleProvider: {} as unknown as Container['googleProvider'],
 		embeddingService: { healthCheck: vi.fn() } as unknown as Container['embeddingService'],
 		toolRegistry: {
@@ -110,6 +113,7 @@ function createMinimalConfig(overrides?: Partial<AxelConfig>): AxelConfig {
 			toolApprovalRequired: ['execute_command'],
 		},
 		persona: { path: './data/dynamic_persona.json', hotReload: true },
+		logging: { level: 'info', pretty: false },
 		...overrides,
 	};
 }
@@ -311,7 +315,7 @@ describe('bootstrap-channels', () => {
 					isNew: true,
 					previousSession: null,
 				});
-			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
+			(container.llmProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
 				.fn()
 				.mockReturnValue(
 					(async function* () {
@@ -377,7 +381,7 @@ describe('bootstrap-channels', () => {
 				yield { type: 'message_complete' as const, content: '' };
 			})();
 
-			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
+			(container.llmProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
 				.fn()
 				.mockReturnValue(mockStream);
 
@@ -430,7 +434,7 @@ describe('bootstrap-channels', () => {
 
 			// Mock the LLM provider to capture what tools it receives
 			let capturedTools: unknown;
-			(container.anthropicProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
+			(container.llmProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
 				.fn()
 				.mockImplementation((params: { tools: unknown }) => {
 					capturedTools = params.tools;
