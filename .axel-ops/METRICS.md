@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 111
+## Current Cycle: 112
 
 ## Division Performance (Last 10 Cycles)
 
@@ -65,18 +65,12 @@
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
 | UI/UX Sprint | **DONE** | 79 | 85 | 100% (8/8 UI tasks + QA-022 PASS + FIX-PUNYCODE-002 resolved). 975 tests, 85 files. 0 errors. |
 | F: Production Hardening | **DONE** | 86 | 106 | 100% (Mark 10 커밋 + memory fixes + security hardening 6건). 1287 tests, 104 files. 0 errors. |
-| G: Feature Sprint | **ACTIVE** | 107 | — | 86% (12/14 done, 0 in progress, 2 queued). C110: 5 FEAT (multi-modal+tools+Slack). C111: 5 FEAT (notifications+Ollama+metrics+voice+UI export). |
+| G: Feature Sprint | **DONE** | 107 | 112 | 100% (14/14 done, 0 queued). 1534 tests, 117 files. QA-026 PASS. |
 
 ## Cycle History (Last 10)
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |
-| 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 1075 tests. 0 errors. |
-| 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 1108 tests. 1 error. |
-| 100 | devops, quality, dev-core | 11 (10 Mark direct + FIX-TYPECHECK-002 Mark) | 1 (ERR-092) | **Mark 10건 대규모 기능 커밋 (+48 tests).** 1156 tests, 99 files. 1 error. |
-| 101 | coord (CTO override) | 1 (FIX-TYPECHECK-003) | 0 | **ERR-092 RESOLVED.** typecheck `tsc -b` 전환. 1156 tests. 0 errors. |
-| 102 | coord (CTO override) | 3 (FIX-BUG-001, QA-024, SYNC-008) | 0 | **3 STALL TASKS RESOLVED.** P2 GAP 6건 + P3 1건 생성. 1156 tests. 0 errors. |
 | 103 | arch, dev-core, dev-edge, dev-infra | 2 (FIX-MIGRATION-009, ADR-STATUS-001) | 0 | **Arch 2 DONE.** DRIFT-009 resolved, 21 ADRs ACCEPTED. 6 P2 security hardening tasks assigned (3 Divisions). 1156 tests. 0 errors. |
 | 104 | dev-core, dev-edge, dev-infra | 0 | 0 | **Monitoring.** 6 P2 tasks in progress (2 cycles). No completions. Drift CLEAN. 1156 tests. 0 errors. |
 | 105 | dev-core, dev-edge, dev-infra | 0 | 0 | **3cy stall alert.** 6 P2 tasks (3 cycles). metric-alert issued. CTO override C106. 1156 tests. 0 errors. |
@@ -86,3 +80,4 @@
 | 109 | dev-infra, dev-core, dev-edge, quality | 0 | 0 | **Monitoring.** 5 FEAT tasks in progress (2 cycles). rebase_fail 12건 누적. Division worktrees C107 이후 무출력. CTO override C110 예정. 1287 tests (verified C109). 0 errors. |
 | 110 | coord (CTO override) | 5 (FEAT-CORE-001, FEAT-TOOL-001, FEAT-TOOL-002, FEAT-CHAN-001, QA-025) | 0 | **5 FEAT DONE (CTO override).** 3cy stall rebase_fail → CTO 직접 구현. ContentBlock+WebSearch+FileHandler+SlackChannel. +69 tests. 1356 tests. 0 errors. Feature Sprint 50%. |
 | 111 | coord (CTO override) | 5 (FEAT-CORE-002, FEAT-INFRA-001, FEAT-OPS-001, FEAT-CHAN-002, FEAT-UI-001) | 0 | **5 FEAT DONE (CTO override).** Notification+Ollama+Prometheus+Voice+WebChat export. +100 tests. 1456 tests, 114 files. 0 errors. Feature Sprint 86%. |
+| 112 | coord (CTO override) | 3 (FEAT-UI-002, FEAT-OPS-002, QA-026) | 0 | **FEATURE SPRINT 100% COMPLETE.** CLI improvements (history+session+themes 38t) + Backup automation (Zod+pg_dump+retention 40t) + QA-026 PASS. +78 tests. 1534 tests, 117 files. 0 errors. **All phases complete.** |

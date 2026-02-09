@@ -27,3 +27,15 @@ export {
 	AnthropicTokenCounter,
 	type AnthropicCountTokensClient,
 } from './context/anthropic-token-counter.js';
+export {
+	BackupConfigSchema,
+	type BackupConfig,
+	type BackupFile,
+	type PgDumpCommandResult,
+	type RetentionResult,
+	type StorageUsage,
+	generatePgDumpCommand,
+	applyRetentionPolicy,
+	calculateStorageUsage,
+	generateCronEntry,
+} from './ops/index.js';

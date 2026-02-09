@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 111**: Feature Sprint 86%. 5 FEAT tasks CTO override 완료 (FEAT-CORE-002, FEAT-INFRA-001, FEAT-OPS-001, FEAT-CHAN-002, FEAT-UI-001). 2 queued (FEAT-UI-002, FEAT-OPS-002). **1456 tests (verified C111), typecheck PASSES. 0 errors.**
+> **Cycle 112**: **FEATURE SPRINT 100% COMPLETE.** FEAT-UI-002 + FEAT-OPS-002 CTO override 완료. QA-026 PASS. **1534 tests (+78, verified C112), typecheck PASSES. 0 errors.** 14/14 tasks done.
 
 ## In Progress
 
@@ -14,8 +14,7 @@
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
-| FEAT-UI-002 | P1 | ui-ux | CLI 개선: 대화 히스토리 탐색, 세션 전환, 파일 드래그앤드롭 입력, 컬러 테마. TDD. | 0209C107 |
-| FEAT-OPS-002 | P2 | devops | Backup 자동화: pg_dump cron 스크립트, S3/로컬 저장, retention policy. | 0209C107 |
+| (none) | — | — | — | — |
 
 ## Cancelled
 
@@ -41,6 +40,9 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FEAT-UI-002 | coord (CTO override) | 0209C112 | CLI Improvements: (1) browseHistory/searchHistory — HistoryEntry interface, timestamp+sessionId+preview formatting, case-insensitive search. 12 tests. (2) switchSession/listActiveSessions — SessionSwitchResult (success/notFound/alreadyActive), formatted session list. 11 tests. (3) Color Themes: light/dark/ocean presets, getTheme/applyTheme, ColorTheme→Partial<CliTheme>. 15 tests. TDD RED→GREEN. |
+| FEAT-OPS-002 | coord (CTO override) | 0209C112 | Backup Automation: BackupConfigSchema (Zod, schedule/retention/destination/compression), generatePgDumpCommand (--format=custom, timestamped filename), applyRetentionPolicy (age-based keep/remove), calculateStorageUsage (totalBytes/fileCount/oldest/newest), generateCronEntry (crontab format). 40 tests. TDD RED→GREEN. |
+| QA-026 | coord (CTO override) | 0209C112 | Feature Sprint final review: FEAT-UI-002 + FEAT-OPS-002 verified. 1534 tests, typecheck PASSES. §9 PASS, §14 PASS, TDD PASS. 0C 0H. Feature Sprint 14/14 = 100%. |
 | FEAT-CORE-002 | coord (CTO override) | 0209C111 | Proactive Notification: NotificationScheduler (cron-like rule engine), parseCronExpression (5-field cron: wildcards, ranges, steps, lists), shouldTrigger, NotificationRuleSchema (Zod), NotificationSender DI. 25 tests. TDD RED→GREEN. |
 | FEAT-INFRA-001 | coord (CTO override) | 0209C111 | Ollama LLM Provider: OllamaLlmProvider (LlmProvider impl), streaming chat, tool calling, ECONNREFUSED/500 retryable, supportsVision config. FallbackLlmProvider 체인 통합 가능. 13 tests. TDD RED→GREEN. |
 | FEAT-OPS-001 | coord (CTO override) | 0209C111 | Prometheus Metrics: Counter (labels), Gauge (inc/dec/set), Histogram (buckets), MetricsRegistry, formatPrometheus (exposition format). Zero external deps. 23 tests. TDD RED→GREEN. |

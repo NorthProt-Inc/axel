@@ -19,3 +19,16 @@ export {
 	getStreamOutput,
 	type StreamSession,
 } from './streaming.js';
+export { browseHistory, searchHistory, type HistoryEntry } from './history-browser.js';
+export {
+	switchSession,
+	listActiveSessions,
+	type SessionInfo,
+	type SessionSwitchResult,
+} from './session-switcher.js';
+export {
+	getTheme,
+	applyTheme,
+	type ColorTheme,
+	type ColorThemeName,
+} from './color-themes.js';
