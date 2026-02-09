@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 98
+## Current Cycle: 99
 
 ## Division Performance (Last 10 Cycles)
 
@@ -23,12 +23,12 @@
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK (FIX-DOCS-001/QA-023 CTO override C98) |
+| Open Errors | 1 | 5 | OK |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
-| Typecheck | PASS | PASS | OK |
+| Typecheck | **FAIL** | PASS | **WARN** (ERR-091: tools/data-quality @google/genai) |
 | Build | PASS | PASS | OK |
 
 ## Coverage Tracking
@@ -44,7 +44,9 @@
 | `apps/webchat/` | — | 68 tests (markdown 8 + enhanced-markdown 17 + chat-logic 14 + ws-auth 9 + session-api 13 + tokens-integration 7). Pure logic tests. | — |
 | `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
 | `tools/migrate-axnmihn/` | — | TBD (MIGRATE-IMPL-001, newly merged) | — |
-| `packages/infra/src/memory/` | 80% | SemanticMemoryWriter 100% (18 tests), **EntityExtractor 0% (NO TESTS — §8 위반)** | WARN: entity-extractor untested |
+| `packages/infra/src/memory/` | 80% | SemanticMemoryWriter 100% (18 tests), EntityExtractor tested (Mark, 783f5fd) | OK (§8 resolved) |
+| `packages/infra/src/persona/` | 80% | FilePersonaEngine (19 tests, untracked) | NEW (Mark) |
+| `tools/data-quality/` | — | 0 tests (utility tool, 10 src files, untracked) | NEW (Mark) |
 
 ## Sprint Progress
 
@@ -63,8 +65,6 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
-| 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** 975 tests. 0 errors. |
 | 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC/BIOME/README-002) | 0 | **4 TASKS DONE.** 985 tests (+10). 0 errors. |
 | 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 in progress. 985 tests. 0 errors. |
 | 92 | dev-edge, devops, dev-infra | 0 (+1 human) | 0 | FIX-CYCLESH-001 DONE (Mark). 985 tests. 0 errors. |
@@ -73,4 +73,5 @@
 | 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. 1075 tests. 4 errors. |
 | 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건. 5 in progress (2cy). 1075 tests. 4 errors. |
 | 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |
-| 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 5aa814d M3-M5 activation (+497 lines, 14 files). 85f9b27 1536d fix. FIX-DOCS-001 .env.example 업데이트. QA-023 CTO 확인 완료. 5 new tasks queued (1 bug, 1 QA, 1 test, 1 filesize, 1 sync). 1075 tests. 0 errors. |
+| 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 1075 tests. 0 errors. |
+| 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 783f5fd entity-extractor test + multi-fix. ec64cb5 config.llm refactor. e5ea290 session API wiring. ERR-091 data-quality typecheck. 3 tasks assigned. 1108 tests. 1 error. |

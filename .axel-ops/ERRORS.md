@@ -2,11 +2,13 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 97 (CTO update)**: **0 errors open.** ERR-087~090 모두 해결 (Mark 직접 수정 + CTO override 추가 수정). typecheck PASSES. 1075 tests, 0 FAIL.
+> **Cycle 99 (CTO update)**: **1 error open.** ERR-091 `tools/data-quality` typecheck failure (`@google/genai` missing). Mark 3건 커밋 처리 (783f5fd, ec64cb5, e5ea290). 1108 tests pass.
 
 ## Open
 
-(none)
+| ID | Severity | Description | Assigned | Created |
+|----|----------|-------------|----------|---------|
+| ERR-091 | MEDIUM | `tools/data-quality/src/backfill-ai.ts:1` — `Cannot find module '@google/genai'`. 패키지 dependency에 `@google/genai` 누락. `pnpm typecheck` 실패 원인. | FIX-TYPECHECK-002 (devops) | C99 |
 
 ## Resolved
 

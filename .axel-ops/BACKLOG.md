@@ -2,21 +2,23 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 98 (CTO update)**: Mark(Human) 2건 커밋 처리 (5aa814d: M3-M5 memory activation + webchat session, 85f9b27: embedding 1536d fix). FIX-DOCS-001 CTO override 완료 (.env.example 업데이트). QA-023 CTO override 완료. 신규 태스크 5건: QA-024 (Mark 커밋 리뷰), TEST-ENTITY-001 (entity-extractor 테스트), FIX-FILESIZE-001 (inbound-handler §14), FIX-BUG-001 (recordAccess 논리 버그), SYNC-008 (PLAN_SYNC Phase F). **1075 tests, 0 FAIL, 90 files.** 0 errors.
+> **Cycle 99 (CTO update)**: Mark 3건 추가 커밋 (783f5fd: entity-extractor test+claude_report+multi-fix, ec64cb5: config.llm refactor, e5ea290: session API wiring+memory failure isolation). TEST-ENTITY-001 해결 (Mark 직접 작성 198 lines, 783f5fd). **1108 tests (1108 pass, 36 skip), 91 files.** typecheck FAIL (ERR-091: data-quality @google/genai 누락). 신규: FilePersonaEngine (infra/persona/, untracked), tools/data-quality (untracked). QA-024 scope 확장 (3건 추가 커밋 포함).
 
 ## In Progress
 
-(none)
+| ID | Priority | Division | Task | Started |
+|----|----------|----------|------|---------|
+| FIX-BUG-001 | P1 | dev-core | container.ts `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. | C99 |
+| QA-024 | P1 | quality | Mark 커밋 6건 종합 리뷰 (5aa814d, 85f9b27, 783f5fd, ec64cb5, e5ea290). M3-M5 write path, EntityExtractor, config.llm refactor, session API wiring, memory failure isolation, FilePersonaEngine. TDD §8, §9, §14 검증. | C99 |
+| FIX-TYPECHECK-002 | P1 | devops | tools/data-quality typecheck 실패: `@google/genai` dependency 누락. package.json에 추가 또는 tsconfig exclude. ERR-091. | C99 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
-| FIX-BUG-001 | P1 | dev-core | container.ts:172 `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. 올바른 memory identifier 사용해야 함. | C98 |
-| QA-024 | P1 | quality | Mark 커밋 5aa814d 코드 리뷰: M3-M5 write path, EntityExtractor, webchat session persistence, gateway session list/messages API. TDD 검증, §9 패키지 경계, §14 파일 크기. | C98 |
-| TEST-ENTITY-001 | P1 | dev-infra | packages/infra/src/memory/entity-extractor.ts (127 lines) 테스트 작성. TDD 의무 (§8). EntityExtractor.extract(), parseResponse(), edge cases (empty, malformed JSON, markdown fences). | C98 |
-| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts 413 lines → §14 (400 lines) 위반. persistToMemory + extractAndStoreEntities 를 별도 모듈로 분리. | C98 |
-| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: M3-M5 activation (container.ts, inbound-handler.ts), EntityExtractor (infra/memory/), webchat session API (gateway routes, pg-episodic-memory), ContextDataProvider.searchEntities. | C98 |
+| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts → §14 (400 lines) 위반 가능성. persistToMemory 분리. (e5ea290에서 추가 변경됨, 현재 line count 재확인 필요) | C98 |
+| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: M3-M5 activation, EntityExtractor, FilePersonaEngine (infra/persona/), webchat session API, config.llm refactor, session API wiring. | C98 (scope 확장 C99) |
+| MARK-PERSONA-001 | P2 | — | Mark(Human) 직접 구현: FilePersonaEngine (packages/infra/src/persona/, 168 lines, 19 tests). untracked 상태. git add + commit 필요. §1 소유권: infra → dev-infra. | C99 |
 
 ## Cancelled
 
@@ -194,3 +196,6 @@
 | QA-023 | coord (CTO override) | 0208C98 | Post-merge 코드 리뷰 CTO override: FIX-MEMORY-002/003, MIGRATE-IMPL-001, FIX-BUILD-001 모두 머지 완료, 1075 tests pass, typecheck clean. §1 위반 1건 (MIGRATE-IMPL-001 tools/) 기록됨. TDD 준수 확인. CTO override (5 cycles stalled). |
 | MARK-M3M5-001 | **Mark (Human direct)** | 0208C98 | **Mark(Human) 직접 구현.** M3-M5 memory layer activation: SemanticMemoryWriter+EntityExtractor container 연결, InboundHandler M3/M4 fire-and-forget 쓰기 경로, ContextAssembler searchEntities 자동 resolve, webchat session list/messages API, gateway 2 routes 추가. 14 files, +497 lines. Commit 5aa814d. |
 | MARK-EMBED-FIX | **Mark (Human direct)** | 0208C98 | **Mark(Human) 직접 수정.** container.ts embedding dimension 3072→1536 정렬 (DB vector(1536) 매칭). Commit 85f9b27. |
+| TEST-ENTITY-001 | **Mark (Human direct)** | 0209C99 | **Mark(Human) 직접 작성.** packages/infra/tests/memory/entity-extractor.test.ts (198 lines). extract(), parseResponse(), empty/malformed JSON, markdown fences. §8 TDD 위반 해소. Commit 783f5fd. |
+| MARK-CONFIG-001 | **Mark (Human direct)** | 0209C99 | **Mark(Human) 직접 리팩터.** config.llm as single source of truth. container.ts hardcoded DEFAULT_*_CONFIG → config.ts Zod schema → .env override → DI container. Commit ec64cb5. |
+| MARK-SESSION-001 | **Mark (Human direct)** | 0209C99 | **Mark(Human) 직접 수정.** (1) gateway session API wiring (listSessions/getSessionMessages/getSession/endSession), (2) persistToMemory M1-M4 독립 try-catch 격리, (3) PgEpisodicMemory turn_id auto-increment, (4) EpisodicMemory interface 확장 (getSessionMessages/listSessions), (5) bootstrap-channels M3/M4 DI wiring. Commit e5ea290. |
