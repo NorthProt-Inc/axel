@@ -1,0 +1,29 @@
+{
+	"name": "@axel/migrate-axnmihn",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"description": "Data migration from axnmihn (SQLite/ChromaDB) to Axel (PostgreSQL/pgvector)",
+	"bin": {
+		"axel-migrate-axnmihn": "./src/cli.ts"
+	},
+	"scripts": {
+		"migrate": "tsx src/cli.ts migrate",
+		"dry-run": "tsx src/cli.ts dry-run",
+		"validate": "tsx src/cli.ts validate",
+		"test": "vitest",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@google/generative-ai": "^0.24.0",
+		"better-sqlite3": "^11.8.1",
+		"pg": "^8.18.0"
+	},
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/node": "^22.10.5",
+		"@types/pg": "^8.16.0",
+		"typescript": "~5.7.3",
+		"vitest": "^2.1.8"
+	}
+}
