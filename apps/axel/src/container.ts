@@ -31,6 +31,7 @@ import {
 	EntityExtractor,
 	ToolRegistry,
 } from '@axel/infra';
+import type { AxelConfig } from './config.js';
 import type { HealthCheckTarget } from './lifecycle.js';
 
 export type { HealthCheckTarget };
@@ -219,21 +220,13 @@ const DEFAULT_PG_CONFIG = {
 	connectionTimeoutMs: 5_000,
 } as const;
 
-const DEFAULT_EMBEDDING_CONFIG = {
-	model: 'gemini-embedding-001',
-	dimension: 1536,
+const EMBEDDING_BASE_CONFIG = {
 	batchSize: 100,
 	maxRetries: 3,
 	retryBaseMs: 200,
 } as const;
 
-const DEFAULT_ANTHROPIC_CONFIG = {
-	model: 'claude-sonnet-4-5-20250929',
-	maxTokens: 16384,
-} as const;
-
-const DEFAULT_GOOGLE_CONFIG = {
-	model: 'gemini-3-flash-preview',
+const GOOGLE_BASE_CONFIG = {
 	maxTokens: 8192,
 } as const;
 
@@ -243,7 +236,7 @@ const DEFAULT_GOOGLE_CONFIG = {
  * Follows plan lines 308-338: manual constructor injection, ~20 services.
  * No DI framework (ADR-006).
  */
-export function createContainer(deps: ContainerDeps): Container {
+export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm']): Container {
 	// Infrastructure layer
 	const pgPool = new AxelPgPool(deps.pgPool, DEFAULT_PG_CONFIG);
 	const streamBuffer = new RedisStreamBuffer(deps.redis);
@@ -258,17 +251,21 @@ export function createContainer(deps: ContainerDeps): Container {
 	const sessionRouter = new SessionRouter(sessionStore);
 
 	// LLM providers (ADR-020)
-	const anthropicProvider = new AnthropicLlmProvider(
-		deps.anthropicClient,
-		DEFAULT_ANTHROPIC_CONFIG,
-	);
-	const googleProvider = new GoogleLlmProvider(deps.googleClient, DEFAULT_GOOGLE_CONFIG);
+	const anthropicProvider = new AnthropicLlmProvider(deps.anthropicClient, {
+		model: llmConfig.anthropic.model,
+		maxTokens: llmConfig.anthropic.maxTokens,
+	});
+	const googleProvider = new GoogleLlmProvider(deps.googleClient, {
+		...GOOGLE_BASE_CONFIG,
+		model: llmConfig.google.flashModel,
+	});
 
 	// Embedding service (ADR-016)
-	const embeddingService = new GeminiEmbeddingService(
-		deps.embeddingClient,
-		DEFAULT_EMBEDDING_CONFIG,
-	);
+	const embeddingService = new GeminiEmbeddingService(deps.embeddingClient, {
+		...EMBEDDING_BASE_CONFIG,
+		model: llmConfig.google.embeddingModel,
+		dimension: llmConfig.google.embeddingDimension,
+	});
 
 	// Semantic Memory Writer (M3 write path)
 	const semanticMemoryWriter = new SemanticMemoryWriter(
@@ -277,7 +274,7 @@ export function createContainer(deps: ContainerDeps): Container {
 	);
 
 	// Entity Extractor (M4 write path)
-	const entityExtractor = new EntityExtractor(deps.googleClient);
+	const entityExtractor = new EntityExtractor(deps.googleClient, llmConfig.google.flashModel);
 
 	// Tool system (ADR-010)
 	const toolRegistry = new ToolRegistry();

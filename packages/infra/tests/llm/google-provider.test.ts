@@ -73,7 +73,7 @@ describe('GoogleLlmProvider', () => {
 		it('should yield text chunks from Google stream', async () => {
 			const { GoogleLlmProvider } = await importModule();
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			model.generateContentStream.mockResolvedValue(makeTextStreamResponse('Bonjour!'));
 
@@ -104,7 +104,7 @@ describe('GoogleLlmProvider', () => {
 		it('should yield tool_call chunks with function name and args', async () => {
 			const { GoogleLlmProvider } = await importModule();
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			model.generateContentStream.mockResolvedValue(
 				makeToolCallStreamResponse('search_web', { query: 'test' }),
@@ -152,11 +152,11 @@ describe('GoogleLlmProvider', () => {
 			// Create two separate provider instances
 			const model1: MockGoogleModel = { generateContentStream: vi.fn() };
 			const client1 = createMockGoogleClient(model1);
-			const provider1 = new GoogleLlmProvider(client1 as any, { model: 'gemini-2.0-flash' });
+			const provider1 = new GoogleLlmProvider(client1 as any, { model: 'gemini-3-flash-preview' });
 
 			const model2: MockGoogleModel = { generateContentStream: vi.fn() };
 			const client2 = createMockGoogleClient(model2);
-			const provider2 = new GoogleLlmProvider(client2 as any, { model: 'gemini-2.0-flash' });
+			const provider2 = new GoogleLlmProvider(client2 as any, { model: 'gemini-3-flash-preview' });
 
 			model1.generateContentStream.mockResolvedValue(
 				makeToolCallStreamResponse('tool_a', { x: 1 }),
@@ -240,7 +240,7 @@ describe('GoogleLlmProvider', () => {
 			const { GoogleLlmProvider } = await importModule();
 			const { ProviderError } = await import('@axel/core/types');
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			model.generateContentStream.mockRejectedValue(new Error('503 Server Error'));
 
@@ -272,7 +272,7 @@ describe('GoogleLlmProvider', () => {
 			const { GoogleLlmProvider } = await importModule();
 			const { ProviderError } = await import('@axel/core/types');
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			const err = new Error('Resource exhausted');
 			(err as any).status = 429;
@@ -307,7 +307,7 @@ describe('GoogleLlmProvider', () => {
 			const { GoogleLlmProvider } = await importModule();
 			const { ProviderError } = await import('@axel/core/types');
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			const err = new Error('Invalid argument');
 			(err as any).status = 400;
@@ -343,7 +343,7 @@ describe('GoogleLlmProvider', () => {
 		it('should convert Axel messages to Google Content format', async () => {
 			const { GoogleLlmProvider } = await importModule();
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			model.generateContentStream.mockResolvedValue(makeTextStreamResponse('Hi'));
 
@@ -383,7 +383,7 @@ describe('GoogleLlmProvider', () => {
 		it('should convert tools to Google function declarations', async () => {
 			const { GoogleLlmProvider } = await importModule();
 			const provider = new GoogleLlmProvider(client as any, {
-				model: 'gemini-2.0-flash',
+				model: 'gemini-3-flash-preview',
 			});
 			model.generateContentStream.mockResolvedValue(makeTextStreamResponse('OK'));
 

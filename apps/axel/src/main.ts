@@ -45,7 +45,7 @@ export async function bootstrap(
 	}
 
 	const deps = createDeps(config);
-	const container = createContainer(deps);
+	const container = createContainer(deps, config.llm);
 
 	// Startup health check
 	await startupHealthCheck(container.healthCheckTargets);

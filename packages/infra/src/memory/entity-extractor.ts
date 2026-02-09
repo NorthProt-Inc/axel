@@ -56,7 +56,7 @@ class EntityExtractor {
 	private readonly client: EntityExtractionLlm;
 	private readonly model: string;
 
-	constructor(client: EntityExtractionLlm, model = 'gemini-3-flash-preview') {
+	constructor(client: EntityExtractionLlm, model: string) {
 		this.client = client;
 		this.model = model;
 	}

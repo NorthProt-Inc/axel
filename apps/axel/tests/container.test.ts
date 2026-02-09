@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { AxelConfig } from '../src/config.js';
 import { type Container, type ContainerDeps, createContainer } from '../src/container.js';
 
 function createMockDeps(): ContainerDeps {
@@ -51,11 +52,19 @@ function createMockDeps(): ContainerDeps {
 	};
 }
 
+function createMockLlmConfig(): AxelConfig['llm'] {
+	return {
+		anthropic: { apiKey: 'test', model: 'claude-sonnet-4-5-20250929', thinkingBudget: 10000, maxTokens: 16384 },
+		google: { apiKey: 'test', flashModel: 'gemini-3-flash-preview', embeddingModel: 'gemini-embedding-001', embeddingDimension: 1536 },
+		fallbackChain: ['anthropic', 'google'],
+	};
+}
+
 describe('Container', () => {
 	describe('createContainer', () => {
 		it('creates a container with all required services', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container).toBeDefined();
 			expect(container.pgPool).toBeDefined();
@@ -67,7 +76,7 @@ describe('Container', () => {
 
 		it('provides all 6 memory layers', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container.streamBuffer).toBeDefined();
 			expect(container.workingMemory).toBeDefined();
@@ -79,7 +88,7 @@ describe('Container', () => {
 
 		it('provides LLM providers', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container.anthropicProvider).toBeDefined();
 			expect(container.googleProvider).toBeDefined();
@@ -87,14 +96,14 @@ describe('Container', () => {
 
 		it('provides embedding service', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container.embeddingService).toBeDefined();
 		});
 
 		it('provides session store and router', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container.sessionStore).toBeDefined();
 			expect(container.sessionRouter).toBeDefined();
@@ -102,7 +111,7 @@ describe('Container', () => {
 
 		it('provides context assembler with token counter', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container.contextAssembler).toBeDefined();
 			expect(container.tokenCounter).toBeDefined();
@@ -112,7 +121,7 @@ describe('Container', () => {
 	describe('Container type', () => {
 		it('exposes healthCheckable components', () => {
 			const deps = createMockDeps();
-			const container = createContainer(deps);
+			const container = createContainer(deps, createMockLlmConfig());
 
 			expect(container.healthCheckTargets).toBeDefined();
 			expect(Array.isArray(container.healthCheckTargets)).toBe(true);
