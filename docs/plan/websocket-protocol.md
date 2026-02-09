@@ -17,15 +17,22 @@ ws://localhost:8000/ws
 wss://axel.northprot.com/ws
 ```
 
-### Authentication
+### Authentication (ADR-019 First-Message Auth)
 
-JWT token sent as query parameter on connection:
+Authentication uses a first-message pattern (not query parameters):
 
+1. Client connects to `/ws` (no token in URL)
+2. Server accepts the WebSocket upgrade
+3. Client MUST send an auth message as the **first frame** within 5 seconds:
+
+```json
+{ "type": "auth", "token": "<Bearer token>" }
 ```
-wss://axel.northprot.com/ws?token=<JWT>
-```
 
-The server validates the token before upgrading the connection. Invalid tokens result in a 401 HTTP response (no WebSocket upgrade).
+4. Server validates the token using timing-safe comparison
+5. Server responds with `{ "type": "auth_result", "success": true }` or closes with code 4001
+
+If no auth message is received within 5 seconds, the server closes the connection with code 4001.
 
 ### Heartbeat
 
@@ -229,7 +236,7 @@ Max: 30 seconds
 ```
 
 On reconnection, the client should:
-1. Re-authenticate with the JWT token
+1. Re-authenticate via first-message auth pattern (send `{ "type": "auth", "token": "..." }`)
 2. Send `session_info_request` to restore session state
 3. The server will replay `session_info` with the current session (if still active)
 

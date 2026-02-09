@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 112**: **FEATURE SPRINT 100% COMPLETE.** FEAT-UI-002 + FEAT-OPS-002 CTO override 완료. QA-026 PASS. **1534 tests (+78, verified C112), typecheck PASSES. 0 errors.** 14/14 tasks done.
+> **Cycle 114**: **P2 PLAN DOC FIX.** INC-01/04 (PG 버전, WS auth) CTO override 완료. human.md P2 8건 전수 확인: GAP-07~12+INC-03 이미 완료(C103/C106), INC-01/04 C114 완료. **1534 tests (verified C114), typecheck PASSES. 0 errors.** All human.md P2 items RESOLVED.
 
 ## In Progress
 
@@ -40,6 +40,7 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FIX-PLANDOC-001 | coord (CTO override) | 0209C114 | INC-01/04 Plan 문서 불일치 수정: (1) axel-project-plan.md:705 PostgreSQL 16→17. (2) websocket-protocol.md:22-28 JWT query param→ADR-019 first-message auth 패턴. human.md P2 8건 전수 확인 완료 (GAP-07~12+INC-03 이미 C103/C106 해결). |
 | FEAT-UI-002 | coord (CTO override) | 0209C112 | CLI Improvements: (1) browseHistory/searchHistory — HistoryEntry interface, timestamp+sessionId+preview formatting, case-insensitive search. 12 tests. (2) switchSession/listActiveSessions — SessionSwitchResult (success/notFound/alreadyActive), formatted session list. 11 tests. (3) Color Themes: light/dark/ocean presets, getTheme/applyTheme, ColorTheme→Partial<CliTheme>. 15 tests. TDD RED→GREEN. |
 | FEAT-OPS-002 | coord (CTO override) | 0209C112 | Backup Automation: BackupConfigSchema (Zod, schedule/retention/destination/compression), generatePgDumpCommand (--format=custom, timestamped filename), applyRetentionPolicy (age-based keep/remove), calculateStorageUsage (totalBytes/fileCount/oldest/newest), generateCronEntry (crontab format). 40 tests. TDD RED→GREEN. |
 | QA-026 | coord (CTO override) | 0209C112 | Feature Sprint final review: FEAT-UI-002 + FEAT-OPS-002 verified. 1534 tests, typecheck PASSES. §9 PASS, §14 PASS, TDD PASS. 0C 0H. Feature Sprint 14/14 = 100%. |

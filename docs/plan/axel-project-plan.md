@@ -702,7 +702,7 @@ AXEL_PORT             → config.port
 ┌─────────────────────────────────────────────────┐
 │  Layer 2: Persistence                           │
 │                                                 │
-│  PostgreSQL 16 + pgvector 0.8 (영구 기억)       │
+│  PostgreSQL 17 + pgvector 0.8 (영구 기억)       │
 │  Redis 7 / Valkey (순간 기억)                    │
 │  Cloudflare R2 (미디어, 아티팩트)                 │
 └─────────────────────────────────────────────────┘
