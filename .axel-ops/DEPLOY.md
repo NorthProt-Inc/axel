@@ -42,8 +42,8 @@ File: `docker/docker-compose.dev.yml`
 
 | Component | Command | Status | Notes |
 |-----------|---------|--------|-------|
-| Root Build Script | `pnpm build` | ✅ CONFIGURED | TypeScript project references (`tsc -b`) |
-| Package Build Scripts | Individual `pnpm build` | ✅ CONFIGURED | All packages/apps/tools have build scripts |
+| Root Build Script | `pnpm build` | ⚠️ CONFIGURED (type errors) | TypeScript project references (`tsc -b`) |
+| Package Build Scripts | Individual `pnpm build` | ⚠️ CONFIGURED (type errors) | All packages/apps/tools have build scripts |
 | TypeScript References | `tsconfig.json` | ✅ CONFIGURED | 8 project references configured |
 | Clean Build | `pnpm build:clean` | ✅ CONFIGURED | Cleans all build artifacts |
 
@@ -66,13 +66,22 @@ File: `docker/docker-compose.dev.yml`
 
 ### Known Build Issues
 
-**Status**: Build pipeline configured, type errors remain in source code.
+**Status**: Build pipeline configured (C90, FIX-BUILD-001), type errors remain in source code.
 
 Type errors encountered during `pnpm build`:
-- `noPropertyAccessFromIndexSignature` violations (process.env access patterns)
+- `noPropertyAccessFromIndexSignature` violations (process.env, SDK property access)
 - `exactOptionalPropertyTypes` violations (optional property handling)
-- Unused variables/imports
-- Type mismatches in external SDK type definitions
+- Unused variables/imports (`MemoryType`, `config`)
+- Type mismatches in external SDK type definitions (Anthropic, Google AI)
+
+**Affected Files**:
+- `packages/core/src/decay/types.ts` (unused import)
+- `packages/infra/src/db/pg-pool.ts` (unused variable)
+- `packages/infra/src/llm/anthropic-provider.ts` (index signature, exactOptional)
+- `packages/infra/src/llm/google-provider.ts` (index signature, exactOptional)
+- `packages/infra/src/mcp/tool-registry.ts` (index signature)
+- `packages/channels/src/discord/discord-channel.ts` (type mismatch, exactOptional)
+- `packages/gateway/src/route-handlers.ts` (index signature, exactOptional)
 
 **Impact**: Development workflow unaffected (dev mode uses `tsx`), tests pass (985 tests).
 
