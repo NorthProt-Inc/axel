@@ -2,16 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 90 (CTO update)**: 4 done (FIX-MEMORY-001, FIX-OPSDOC-001, FIX-BIOME-001, FIX-README-002). 2 blocks processed (FIX-CYCLESH-001 ownership, FIX-MEMORY-001 flush scope). 3 new tasks + 1 QC task. QC reports 7건 체크 완료 (2 C89 잔여 + 5 C1735 신규). **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+> **Cycle 91 (CTO update)**: No new completions. FIX-MEMORY-002 (dev-edge) + FIX-BUILD-001 (devops) in progress (1 cycle). FIX-MEMORY-003 unblocked (FIX-MEMORY-001 done) → dev-infra 할당. **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+
+## In Progress
+
+| ID | Priority | Division | Task | Started |
+|----|----------|----------|------|---------|
+| FIX-MEMORY-002 | P1 | dev-edge | RES-007 ROOT CAUSE #2: apps/axel/src/lifecycle.ts gracefulShutdown에서 flush('*') → flush(activeUserId) 수정. | C90 |
+| FIX-BUILD-001 | P2 | devops | Production 빌드 파이프라인: (1) root package.json에 `build` 스크립트 추가 (tsc -b), (2) 각 workspace에 build config, (3) README `format --check` 문서 수정. | C90 |
+| FIX-MEMORY-003 | P2 | dev-infra | RES-007 ROOT CAUSE #3: M3 semantic store write path 연결 (embedding 의존성). InboundHandler → SemanticMemory.store() 호출 경로 구현. | C91 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| FIX-MEMORY-002 | P1 | dev-edge | RES-007 ROOT CAUSE #2: apps/axel/src/lifecycle.ts gracefulShutdown에서 flush('*') → flush(activeUserId) 수정. dev-core block 처리. | FIX-MEMORY-001 |
 | FIX-CYCLESH-001 | P2 | **Human (Mark)** | cycle.sh:93 devops 소유 경로에 `patches/` 추가. DIAG-UNTRACK-001 ROOT CAUSE 수정. **§1 위반으로 devops/coord 수정 불가 — .axel-ops/launchers/ 소유자 미정의.** | — |
-| FIX-MEMORY-003 | P2 | dev-infra | RES-007 ROOT CAUSE #3: M3 semantic store write path 연결 (embedding 의존성). InboundHandler → SemanticMemory.store() 호출 경로 구현. | FIX-MEMORY-001 |
-| FIX-BUILD-001 | P2 | devops | Production 빌드 파이프라인: (1) root package.json에 `build` 스크립트 추가 (tsc -b), (2) 각 workspace에 build config, (3) README `format --check` 문서 수정. QC report C1735 5건 근본 원인. | — |
 
 ## Cancelled
 

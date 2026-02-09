@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 90
+## Current Cycle: 91
 
 ## Division Performance (Last 10 Cycles)
 
@@ -70,3 +70,4 @@
 | 88 | research, audit | 2 (OPS-DOC-001, DIAG-UNTRACK-001) | 0 | **2 TASKS DONE.** OPS-DOC-001 (operation.md 17KB). DIAG-UNTRACK-001 (ROOT CAUSE: patches/ 누락). Human directives 2건: MIGRATE-PLAN-001 (P0 마이그레이션), AUDIT-006 (P1 유휴 Division 분석). 975 tests. 0 errors. |
 | 89 | research, audit | 2 (MIGRATE-PLAN-001, AUDIT-006) | 0 | **2 TASKS DONE.** MIGRATE-PLAN-001 (마이그레이션 계획 12섹션). AUDIT-006 (14 findings 4H7M3L). Human directive 1건 (human.md 재구성). QC reports 5건. 5 new fix tasks. 975 tests. 0 errors. |
 | 90 | dev-core, devops | 4 (FIX-MEMORY-001, FIX-OPSDOC-001, FIX-BIOME-001, FIX-README-002) | 0 | **4 TASKS DONE.** FIX-MEMORY-001 (InboundHandler memory DI, +10 tests). 3 devops fixes. 2 blocks processed. QC 7건 처리, FIX-BUILD-001(P2) 생성. **985 tests (+10).** 0 errors. |
+| 91 | dev-edge, devops, dev-infra | 0 | 0 | **No completions.** 3 tasks in progress (FIX-MEMORY-002, FIX-BUILD-001, FIX-MEMORY-003). FIX-MEMORY-003 unblocked → dev-infra assigned. Drift CLEAN. 985 tests. 0 errors. |

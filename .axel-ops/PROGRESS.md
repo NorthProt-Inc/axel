@@ -4,17 +4,17 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation Maintenance.** FIX-MEMORY-001 (dev-core) + 3 devops fix tasks 완료. Memory persistence 파이프라인 진행 중.
-- **Cycle**: 90
-- **Last Updated**: 2026-02-08C90
-- **STATUS**: **4 TASKS COMPLETED.** FIX-MEMORY-001 (dev-core: InboundHandler memory DI+persistToMemory, 387 tests +10), FIX-OPSDOC-001 (devops: operation.md commit), FIX-BIOME-001 (devops: svelte-kit biome ignore), FIX-README-002 (devops: dist path fix). 2 blocks: FIX-MEMORY-001 flush→FIX-MEMORY-002(dev-edge), FIX-CYCLESH-001→Human(Mark). QC reports 7건 처리 (C89 잔여 2 + C1735 신규 5). FIX-BUILD-001 (P2) 생성. Drift CLEAN. **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 4 tasks queued (1 human-blocked).
+- **Phase**: **Post-Implementation Maintenance.** Memory persistence pipeline 진행 중. 3 tasks in progress (dev-edge, devops, dev-infra).
+- **Cycle**: 91
+- **Last Updated**: 2026-02-08C91
+- **STATUS**: **No completions.** 3 tasks in progress: FIX-MEMORY-002 (dev-edge, flush fix, 1 cycle), FIX-BUILD-001 (devops, build pipeline, 1 cycle), FIX-MEMORY-003 (dev-infra, M3 semantic write path, assigned C91). FIX-MEMORY-003 unblocked (FIX-MEMORY-001 done). Drift CLEAN. **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 1 queued (human-blocked).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 4 (1 human-blocked) |
-| In Progress | 0 |
+| Queued | 1 (1 human-blocked) |
+| In Progress | 3 |
 | Done | 146 |
 | Cancelled | 14 |
 
@@ -80,21 +80,22 @@
 | 88 | 0208 | **2 TASKS COMPLETED.** OPS-DOC-001 (devops: operation.md 운영 매뉴얼 17KB, 756 lines), DIAG-UNTRACK-001 (devops: cycle.sh untracked WARNING ROOT CAUSE — patches/ 누락, FIX-CYCLESH-001 생성). Human directives 2건 처리: MIGRATE-PLAN-001 (P0 axnmihn→Axel 마이그레이션 계획, research), AUDIT-006 (P1 유휴 Division 활용 분석, audit). **975 tests, 0 FAIL, 85 files.** 0 errors. |
 | 89 | 0208 | **2 TASKS COMPLETED.** MIGRATE-PLAN-001 (research: axnmihn→Axel 마이그레이션 계획 12개 섹션), AUDIT-006 (audit: 유휴 Division 분석, 14 findings 4H 7M 3L). Human directive 1건: human.md 재구성 (완료 삭제, 지속 참고 분리). QC reports 5건: 1 false positive (.env), 2 acknowledged, 2 FIX 생성. 5 new tasks: FIX-MEMORY-001 (P1 dev-core), FIX-OPSDOC-001 (P1 devops), FIX-BIOME-001/README-002/CYCLESH-001 (P2 devops). **975 tests, 0 FAIL, 85 files.** 0 errors. |
 | 90 | 0208 | **4 TASKS COMPLETED.** FIX-MEMORY-001 (dev-core: InboundHandler memory DI+persistToMemory, 387 tests +10), FIX-OPSDOC-001 (devops: operation.md commit), FIX-BIOME-001 (devops: svelte-kit biome ignore), FIX-README-002 (devops: dist path fix). 2 blocks: flush scope→FIX-MEMORY-002(dev-edge), FIX-CYCLESH-001→Human(Mark). QC 7건 처리, FIX-BUILD-001(P2) 생성. **985 tests (+10), 0 FAIL, 85 files.** 0 errors. |
+| 91 | 0208 | **No completions.** 3 tasks in progress: FIX-MEMORY-002 (dev-edge, 1 cycle), FIX-BUILD-001 (devops, 1 cycle), FIX-MEMORY-003 (dev-infra, assigned C91). FIX-MEMORY-003 dependency unblocked. Drift CLEAN. 985 tests. 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C90 | Cycle 90 | Active |
-| Architecture | 0208C74 | — | Idle (29 cycles) |
-| Dev-Core | 0208C90 | — | Idle (FIX-MEMORY-001 done) |
-| Dev-Infra | 0208C66 | — | Idle (24 cycles) |
-| Dev-Edge | 0208C70 | — | Idle (20 cycles) |
-| UI/UX | 0208C82 | — | Idle (8 cycles) |
-| Research | 0208C89 | — | Idle |
-| Quality | 0208C85 | — | Idle (5 cycles) |
-| DevOps | 0208C90 | — | Idle (FIX-OPSDOC/BIOME/README done) |
-| Audit | 0208C89 | — | Idle |
+| Coordinator | 0208C91 | Cycle 91 | Active |
+| Architecture | 0208C74 | — | Idle (30 cycles) |
+| Dev-Core | 0208C90 | — | Idle (1 cycle) |
+| Dev-Infra | 0208C91 | FIX-MEMORY-003 | Active (assigned C91) |
+| Dev-Edge | 0208C91 | FIX-MEMORY-002 | Active (in progress, 1 cycle) |
+| UI/UX | 0208C82 | — | Idle (9 cycles) |
+| Research | 0208C89 | — | Idle (2 cycles) |
+| Quality | 0208C85 | — | Idle (6 cycles) |
+| DevOps | 0208C91 | FIX-BUILD-001 | Active (in progress, 1 cycle) |
+| Audit | 0208C89 | — | Idle (2 cycles) |
 
 ## Human Intervention Needed
 
