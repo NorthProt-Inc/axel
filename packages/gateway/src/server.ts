@@ -11,7 +11,12 @@ import {
 import { createResourceHandlers } from './route-handlers.js';
 import type { GatewayConfig, GatewayDeps, Route } from './types.js';
 import { createWebhookHandlers } from './webhook-handlers.js';
-import { type AuthenticatedWebSocket, setupWsAuth } from './ws-handler.js';
+import {
+	type AuthenticatedWebSocket,
+	cleanupWsTimers,
+	setupWsAuth,
+	setupWsHeartbeat,
+} from './ws-handler.js';
 
 const MAX_BODY_BYTES = 32_768; // 32KB
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -94,10 +99,11 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		wss.on('connection', (ws: AuthenticatedWebSocket) => {
 			connections.add(ws);
 			ws.on('close', () => {
-				if (ws.authTimer) clearTimeout(ws.authTimer);
+				cleanupWsTimers(ws);
 				connections.delete(ws);
 			});
 			setupWsAuth(ws, config, deps);
+			setupWsHeartbeat(ws);
 		});
 
 		return new Promise<http.Server>((resolve) => {
@@ -110,7 +116,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 
 	async function stop(): Promise<void> {
 		for (const ws of connections) {
-			if (ws.authTimer) clearTimeout(ws.authTimer);
+			cleanupWsTimers(ws);
 			ws.close(1001, 'Server shutting down');
 		}
 		connections.clear();

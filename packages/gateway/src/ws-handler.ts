@@ -5,10 +5,60 @@ import type { GatewayConfig, GatewayDeps } from './types.js';
 
 const WS_AUTH_TIMEOUT_MS = 5_000;
 const MAX_WS_MESSAGE_BYTES = 65_536; // 64KB
+const WS_PING_INTERVAL_MS = 30_000;
+const WS_PONG_TIMEOUT_MS = 10_000;
+const WS_MAX_MISSED_PONGS = 3;
 
 export interface AuthenticatedWebSocket extends WebSocket {
 	authenticated?: boolean;
 	authTimer?: ReturnType<typeof setTimeout>;
+	heartbeatInterval?: ReturnType<typeof setInterval>;
+	pongTimer?: ReturnType<typeof setTimeout>;
+	missedPongs?: number;
+}
+
+export function setupWsHeartbeat(ws: AuthenticatedWebSocket): void {
+	ws.missedPongs = 0;
+
+	ws.on('pong', () => {
+		ws.missedPongs = 0;
+		if (ws.pongTimer) {
+			clearTimeout(ws.pongTimer);
+			// biome-ignore lint/performance/noDelete: exactOptionalPropertyTypes prevents undefined assignment
+			delete ws.pongTimer;
+		}
+	});
+
+	ws.heartbeatInterval = setInterval(() => {
+		if ((ws.missedPongs ?? 0) >= WS_MAX_MISSED_PONGS) {
+			cleanupWsTimers(ws);
+			ws.close(1000, 'Heartbeat timeout');
+			return;
+		}
+
+		ws.ping();
+		ws.pongTimer = setTimeout(() => {
+			ws.missedPongs = (ws.missedPongs ?? 0) + 1;
+		}, WS_PONG_TIMEOUT_MS);
+	}, WS_PING_INTERVAL_MS);
+}
+
+export function cleanupWsTimers(ws: AuthenticatedWebSocket): void {
+	if (ws.authTimer) {
+		clearTimeout(ws.authTimer);
+		// biome-ignore lint/performance/noDelete: exactOptionalPropertyTypes prevents undefined assignment
+		delete ws.authTimer;
+	}
+	if (ws.heartbeatInterval) {
+		clearInterval(ws.heartbeatInterval);
+		// biome-ignore lint/performance/noDelete: exactOptionalPropertyTypes prevents undefined assignment
+		delete ws.heartbeatInterval;
+	}
+	if (ws.pongTimer) {
+		clearTimeout(ws.pongTimer);
+		// biome-ignore lint/performance/noDelete: exactOptionalPropertyTypes prevents undefined assignment
+		delete ws.pongTimer;
+	}
 }
 
 export function setupWsAuth(
@@ -97,6 +147,16 @@ function handleWsMessage(
 		return;
 	}
 
+	if (parsed['type'] === 'typing_start' || parsed['type'] === 'typing_stop') {
+		// Acknowledged — no-op for now (Phase 2: presence tracking)
+		return;
+	}
+
+	if (parsed['type'] === 'session_end') {
+		handleWsSessionEnd(ws, parsed, deps);
+		return;
+	}
+
 	ws.send(
 		JSON.stringify({
 			type: 'error',
@@ -154,6 +214,44 @@ function handleWsChatMessage(
 			if (ws.readyState === ws.OPEN) {
 				const classified = classifyError(err, config.env);
 				ws.send(JSON.stringify({ type: 'error', error: classified.message, requestId }));
+			}
+		});
+}
+
+function handleWsSessionEnd(
+	ws: WebSocket,
+	parsed: Record<string, unknown>,
+	deps: GatewayDeps,
+): void {
+	const requestId = generateRequestId();
+	const sessionId = parsed['sessionId'];
+
+	if (typeof sessionId !== 'string' || sessionId.length === 0) {
+		ws.send(JSON.stringify({ type: 'error', error: 'Missing sessionId', requestId }));
+		return;
+	}
+
+	if (!deps.endSession) {
+		ws.send(JSON.stringify({ type: 'error', error: 'Session management not configured', requestId }));
+		return;
+	}
+
+	deps
+		.endSession(sessionId)
+		.then((result) => {
+			if (ws.readyState === ws.OPEN) {
+				ws.send(JSON.stringify({ type: 'session_ended', ...result }));
+			}
+		})
+		.catch((err: unknown) => {
+			if (ws.readyState === ws.OPEN) {
+				ws.send(
+					JSON.stringify({
+						type: 'error',
+						error: err instanceof Error ? err.message : 'Session end failed',
+						requestId,
+					}),
+				);
 			}
 		});
 }

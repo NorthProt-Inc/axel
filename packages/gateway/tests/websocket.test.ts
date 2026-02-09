@@ -216,6 +216,93 @@ describe('Gateway WebSocket — First-Message Auth (ADR-019)', () => {
 		});
 	});
 
+	describe('typing messages', () => {
+		async function connectAndAuth(srv: http.Server): Promise<WebSocket> {
+			const ws = await connectWs(srv);
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+			return ws;
+		}
+
+		it('accepts typing_start without error', async () => {
+			const ws = await connectAndAuth(httpServer);
+
+			ws.send(JSON.stringify({ type: 'typing_start' }));
+
+			// Send a follow-up to verify connection is still alive
+			ws.send(JSON.stringify({ type: 'session_info_request' }));
+			const msg = await waitForMessage(ws);
+			expect(msg.type).toBe('session_info');
+			ws.close();
+		});
+
+		it('accepts typing_stop without error', async () => {
+			const ws = await connectAndAuth(httpServer);
+
+			ws.send(JSON.stringify({ type: 'typing_stop' }));
+
+			ws.send(JSON.stringify({ type: 'session_info_request' }));
+			const msg = await waitForMessage(ws);
+			expect(msg.type).toBe('session_info');
+			ws.close();
+		});
+	});
+
+	describe('session_end', () => {
+		it('calls endSession and returns session_ended', async () => {
+			const deps = createMockDeps();
+			(deps as Record<string, unknown>).endSession = vi
+				.fn()
+				.mockResolvedValue({ sessionId: 'sess-1', summary: 'Test', turnCount: 5 });
+
+			const config = createTestConfig();
+			await server.stop();
+			server = createGatewayServer(config, deps);
+			httpServer = await server.start();
+
+			const ws = await connectWs(httpServer);
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+
+			ws.send(JSON.stringify({ type: 'session_end', sessionId: 'sess-1' }));
+			const msg = await waitForMessage(ws);
+
+			expect(msg.type).toBe('session_ended');
+			expect(msg.sessionId).toBe('sess-1');
+			ws.close();
+		});
+
+		it('returns error when sessionId is missing', async () => {
+			const ws = await connectWs(httpServer);
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+
+			ws.send(JSON.stringify({ type: 'session_end' }));
+			const msg = await waitForMessage(ws);
+
+			expect(msg.type).toBe('error');
+			ws.close();
+		});
+	});
+
+	describe('heartbeat', () => {
+		it('receives ping from server after connection', async () => {
+			const ws = await connectWs(httpServer);
+
+			const pingReceived = new Promise<boolean>((resolve) => {
+				ws.on('ping', () => resolve(true));
+				setTimeout(() => resolve(false), 35_000);
+			});
+
+			ws.send(JSON.stringify({ type: 'auth', token: 'test-auth-token-12345' }));
+			await waitForMessage(ws); // consume auth_ok
+
+			const received = await pingReceived;
+			expect(received).toBe(true);
+			ws.close();
+		}, 40_000);
+	});
+
 	describe('close behavior', () => {
 		it('closes cleanly when server stops', async () => {
 			const ws = await connectWs(httpServer);
