@@ -2,11 +2,13 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 77 (CTO update)**: 0 errors open. ERR-085 resolved by FIX-MIGRATION-002 (CTO override).
+> **Cycle 84 (CTO update)**: 1 error open. ERR-086 (HIGH) punycode override 불완전 — 3 telegram test files FAIL.
 
 ## Open
 
-(none)
+| ID | Severity | Description | Assigned To | Since |
+|----|----------|-------------|-------------|-------|
+| ERR-086 | HIGH | FIX-PUNYCODE-001 punycode override가 whatwg-url@5.0.0의 `require('../punycode')` 미해결. grammy→node-fetch→whatwg-url 체인에서 3 test files FAIL (bootstrap-channels, telegram-channel, telegram-userid-guard). 933 pass + 36 skip but 3 suites fail. | FIX-PUNYCODE-002 (devops) | 0208C84 |
 
 ## Resolved
 

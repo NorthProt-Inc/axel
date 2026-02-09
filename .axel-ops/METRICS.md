@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 83
+## Current Cycle: 84
 
 ## Division Performance (Last 10 Cycles)
 
@@ -15,7 +15,7 @@
 | dev-edge | 1 cycle | 21 (+5: HARDEN-003/004/005/006/007) | 0 | Idle (all done) |
 | quality | 1 cycle | 8 (+1: QA-021) | 1 (QA-012, cancelled C39) | Idle (QA-021 done) |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 17 (+1: FIX-MIGRATION-001) | 0 | Idle |
+| devops | 1 cycle | 20 (+3: FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 0 | Active (FIX-PUNYCODE-002) |
 | **ui-ux** | 1 cycle | 7 (UI-001/002/003/004/005/006/007) | 0 | Idle (all UI coding done) |
 | audit | 1 cycle | 4 | 0 | Idle |
 
@@ -23,11 +23,11 @@
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 0 | 5 | OK |
+| Open Errors | 1 | 5 | OK |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
-| Test Failures | 0 | 0 | OK |
+| Test Failures | 3 suites | 0 | **BREACH** (ERR-086 punycode) |
 
 ## Coverage Tracking
 
@@ -53,7 +53,7 @@
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
 | E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
-| UI/UX Sprint | **ACTIVE** | 79 | — | 88% (7/8 tasks done, QA-022 remaining). 975 tests, 84 files. |
+| UI/UX Sprint | **ACTIVE** | 79 | — | 88% (7/8 UI tasks done, QA-022 in progress). FIX-PUNYCODE-002 P0 blocker. 969 tests (3 suite FAIL). |
 
 ## Cycle History (Last 10)
 
@@ -69,3 +69,4 @@
 | 81 | ui-ux | 0 | 0 | **No completions.** UI-002/005/006 in progress (1 cycle). FIX-UI-001 queued (P2). 933 tests, 82 files. Drift CLEAN. |
 | 82 | ui-ux, coord | 3 (UI-002/005/006) | 0 | **3 TASKS DONE.** 975 tests (+42), 84 files. Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1). UI/UX Sprint **88%**. DevOps + Quality activated next cycle. |
 | 83 | devops, quality | 0 | 0 | **No completions.** 4 tasks in progress (FIX-PUNYCODE-001, README-001, QA-022, FIX-UI-001). Assigned C82, 1 cycle. 975 tests. Drift CLEAN. |
+| 84 | devops, quality | 3 (FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 1 (ERR-086) | **3 DONE (1 불완전).** FIX-PUNYCODE-001 punycode override → 3 telegram test FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0. Human directives 3건: RES-007, push 비활성, §1 소유권. 969 tests (933p+36s), 3 suite FAIL, 85 files. |

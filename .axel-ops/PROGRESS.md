@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **UI/UX Sprint** (Human directive P0) → DevOps + Quality in progress
-- **Cycle**: 83
-- **Last Updated**: 2026-02-08C83
-- **STATUS**: **No completions.** 4 tasks in progress: FIX-PUNYCODE-001 (devops P0), README-001 (devops P1), QA-022 (quality P1), FIX-UI-001 (devops P2). All assigned C82, awaiting done reports. **975 tests, 84 files.** Drift CLEAN. 0 errors. ax CLI + log-gc ops tools added (human commits, no BACKLOG impact).
+- **Phase**: **UI/UX Sprint** (Human directive P0) → FIX-PUNYCODE-002 P0 blocker + QA-022 in progress
+- **Cycle**: 84
+- **Last Updated**: 2026-02-08C84
+- **STATUS**: **3 tasks done (FIX-PUNYCODE-001 불완전, README-001, FIX-UI-001).** FIX-PUNYCODE-001의 punycode override가 whatwg-url@5.0.0 require('../punycode')를 깨뜨림 → 3 telegram test files FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0 생성. Human directives 3개 처리: (1) RES-007 CLI 기억 분석 P1, (2) git push 비활성 유지, (3) §1 소유권 검증 즉시 적용. **969 tests (933 pass, 36 skip), 3 test files FAIL, 85 files.** 1 error open.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 0 |
-| In Progress | 4 |
-| Done | 130 |
+| Queued | 2 |
+| In Progress | 1 |
+| Done | 133 |
 | Cancelled | 14 |
 
-## Open Errors: 0
+## Open Errors: 1
 
 ## Cycle History
 
@@ -73,20 +73,21 @@
 | 81 | 0208 | **No completions.** UI-002/005/006 in progress (ui-ux, 1 cycle). FIX-UI-001 queued (devops P2). 933 tests, 82 files. 0 errors. Drift CLEAN. |
 | 82 | 0208 | **3 TASKS COMPLETED.** UI-002 (CLI streaming 12 tests), UI-005 (WebChat markdown+XSS 17 tests), UI-006 (session API 13 tests). **975 tests (+42), 84 files.** Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1) created. UI/UX Sprint **88% (7/8)**. QA-022 + devops tasks queued. |
 | 83 | 0208 | **No completions.** 4 tasks in progress: FIX-PUNYCODE-001 (devops P0), README-001 (devops P1), QA-022 (quality P1), FIX-UI-001 (devops P2). Assigned C82, 1 cycle. Drift CLEAN. 0 errors. 975 tests, 84 files. |
+| 84 | 0208 | **3 TASKS DONE (FIX-PUNYCODE-001 불완전, README-001, FIX-UI-001).** FIX-PUNYCODE-001 punycode override로 3 telegram test files FAIL (ERR-086 HIGH) → FIX-PUNYCODE-002 P0 생성. Human directives 3건 처리: RES-007 (CLI 기억 분석), git push 비활성, §1 소유권 강제. **969 tests (933 pass, 36 skip, 3 suite FAIL), 85 files.** 1 error. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C83 | Cycle 83 | Active |
+| Coordinator | 0208C84 | Cycle 84 | Active |
 | Architecture | 0208C74 | — | Idle |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C66 | — | Idle |
 | Dev-Edge | 0208C70 | — | Idle |
 | UI/UX | 0208C82 | — | Idle (all UI coding done) |
 | Research | 0208C58 | — | Idle |
-| **Quality** | 0208C83 | QA-022 | **Active** |
-| **DevOps** | 0208C83 | FIX-PUNYCODE-001, README-001, FIX-UI-001 | **Active** |
+| **Quality** | 0208C84 | QA-022 | **Active** |
+| **DevOps** | 0208C84 | FIX-PUNYCODE-002 | **Active** |
 | Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed

@@ -2,22 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 83 (CTO update)**: 4 tasks moved Queued → In Progress (assigned C82). DevOps + Quality active. 975 tests, 84 files.
+> **Cycle 84 (CTO update)**: FIX-PUNYCODE-001 불완전(테스트 3개 깨짐) — FIX-PUNYCODE-002 P0 생성. README-001/FIX-UI-001 done(커밋 확인). RES-007 (P1 human directive) 생성. **969 tests (933 pass, 36 skip), 3 FAIL, 85 files.**
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| (none) | — | — | — | — |
+| FIX-PUNYCODE-002 | P0 | devops | punycode override 수정 — whatwg-url@5.0.0의 require('../punycode') 해결. packageExtensions에 whatwg-url 추가 또는 grammy 업데이트. 3 telegram 관련 test files 복구 필수. | FIX-PUNYCODE-001 |
+| RES-007 | P1 | research | CLI 세션 종료 후 기억 상실 원인 분석 — 세션 간 메모리 persistence 경로 추적 (M1→M2→M3 flush, PG 저장, 다음 세션 로드). human directive. | — |
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-PUNYCODE-001 | P0 | devops | punycode DeprecationWarning (DEP0040) 해결 — Node.js 내장 punycode 사용처 추적 후 userland alternative 전환 | 0208C82 |
-| README-001 | P1 | devops | 프로젝트 전반 README 업데이트 — 기존 README 참고하지 말고 새롭게 분석 후 관례적 작성 (root + packages/* + apps/* + tools/*) | 0208C82 |
 | QA-022 | P1 | quality | UI/UX Sprint 최종 리뷰 — UI-002/005/006 코드 검증, §8 TDD, §9 경계, §14 파일 크기, 커버리지 확인 | 0208C82 |
-| FIX-UI-001 | P2 | devops | marked-terminal 타입 선언 추가 — .d.ts 작성 또는 @types/marked-terminal 설치 (TS7016 해결) | 0208C82 |
 
 ## Cancelled
 
@@ -167,3 +165,6 @@
 | UI-002 | ui-ux | 0208C82 | CLI streaming session: createStreamSession, feedChunk, completeStream, getStreamOutput. Immutable state, token accumulation, markdown render on completion. 12 tests, 100% stmt. TDD RED→GREEN→REFACTOR. |
 | UI-005 | ui-ux | 0208C82 | WebChat markdown enhanced: renderMarkdownWithHighlight (async marked + shiki github-dark, 8 langs), sanitizeHtml (allowlist-based XSS prevention). 17 tests. TDD RED→GREEN→REFACTOR. |
 | UI-006 | ui-ux | 0208C82 | WebChat session API client: buildSessionUrl, buildSessionEndUrl, parseSessionResponse, parseSessionEndResponse, addSessionToList. Gateway integration. 13 tests. TDD RED→GREEN→REFACTOR. |
+| FIX-PUNYCODE-001 | devops | 0208C84 | punycode override 시도 (bd84454) — pnpm packageExtensions + tr46 dependency. 단, whatwg-url require('../punycode') 미해결로 telegram 테스트 3개 FAIL. **불완전 — FIX-PUNYCODE-002로 후속.** |
+| README-001 | devops | 0208C84 | 8 README files (root 미포함, packages/core/channels/gateway/infra/ui, apps/axel/webchat). 커밋 96ec34f. §1 cross-ownership 위반 기록 (P0 directive 사후 확인). |
+| FIX-UI-001 | devops | 0208C84 | marked-terminal.d.ts 타입 선언 추가 (packages/ui/src/cli/). 커밋 96ec34f. §1 위반 기록 (packages/ui/ → ui-ux 소유). |
