@@ -1,0 +1,13 @@
+{"fp":"build-pnpm-notfound","worker":"build","status":"FAIL","sev":"P1","desc":"pnpm build command not found","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"build-lint-errors","worker":"build","status":"FAIL","sev":"P2","desc":"Lint errors and formatting issues detected","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"build-artifacts-missing","worker":"build","status":"FAIL","sev":"P1","desc":"Build artifacts missing — cannot run app","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"build-migrate-missing","worker":"build","status":"FAIL","sev":"P1","desc":"Migration tool build missing","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"runtime-migrate-uncheckedindex","worker":"runtime","status":"FAIL","sev":"P1","desc":"TypeScript noUncheckedIndexedAccess violations in migrate tool","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"runtime-deps-buildfail","worker":"runtime","status":"FAIL","sev":"P1","desc":"Dependency graph build failure — missing package compilation","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"runtime-app-implicitany","worker":"runtime","status":"FAIL","sev":"P1","desc":"Missing type annotations in app source","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"docs-format-check","worker":"docs","status":"FAIL","sev":"P1","desc":"Biome format command fails with --check flag","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"docs-envexample-outdated","worker":"docs","status":"FAIL","sev":"P1","desc":".env.example severely outdated","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"docs-migrate-buildstep","worker":"docs","status":"FAIL","sev":"P2","desc":"Unnecessary migration build step in operation.md","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"docs-envvar-naming","worker":"docs","status":"FAIL","sev":"P2","desc":"Inconsistent environment variable naming","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"docs-readme-opmd","worker":"docs","status":"FAIL","sev":"P2","desc":"README doesn't mention operation.md","first":"20260208_1735","last":"20260208_1735","count":1}
+{"fp":"docs-docker-ports","worker":"docs","status":"FAIL","sev":"P3","desc":"Docker Compose port mapping unclear","first":"20260208_1735","last":"20260208_1735","count":1}

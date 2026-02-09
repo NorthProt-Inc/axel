@@ -90,7 +90,7 @@ get_owned_paths() {
         research)
             echo "docs/research/ .axel-ops/comms/research.jsonl" ;;
         devops)
-            echo "package.json vitest.config.ts packages/*/package.json packages/*/tsconfig.json packages/*/vitest.config.ts apps/*/package.json apps/*/tsconfig.json apps/*/vitest.config.ts docker/ .github/ pnpm-workspace.yaml tsconfig.base.json biome.json .axel-ops/DEPLOY.md tools/ scripts/ pnpm-lock.yaml .axel-ops/comms/devops.jsonl" ;;
+            echo "package.json vitest.config.ts packages/*/package.json packages/*/tsconfig.json packages/*/vitest.config.ts apps/*/package.json apps/*/tsconfig.json apps/*/vitest.config.ts docker/ .github/ pnpm-workspace.yaml tsconfig.base.json biome.json .axel-ops/DEPLOY.md tools/ scripts/ patches/ pnpm-lock.yaml .axel-ops/comms/devops.jsonl" ;;
         *) echo "" ;;
     esac
 }
@@ -204,7 +204,7 @@ $CLAUDE -p \
 
 # Commit CTO output (CONSTITUTION §1 — only CTO-owned files)
 cd "$MAIN_REPO"
-CTO_OWNED=".axel-ops/PROGRESS.md .axel-ops/BACKLOG.md .axel-ops/ERRORS.md .axel-ops/METRICS.md .axel-ops/comms/broadcast.jsonl"
+CTO_OWNED=".axel-ops/PROGRESS.md .axel-ops/BACKLOG.md .axel-ops/ERRORS.md .axel-ops/METRICS.md .axel-ops/comms/broadcast.jsonl .axel-ops/launchers/ .axel-ops/qc/known-issues.jsonl"
 git add --ignore-errors -- $CTO_OWNED 2>/dev/null || true
 if ! git diff --cached --quiet 2>/dev/null; then
     git commit -m "$(cat <<EOF
@@ -289,5 +289,17 @@ fi
 # DISABLED: GitHub account suspended. Re-enable when Mark confirms recovery.
 # git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
 log "PUSH SKIPPED — GitHub suspended (human directive)"
+
+# ── Phase 5: QC (Quality Control) ──
+# Runs 3 workers (parallel, haiku) → supervisor (sonnet) to test build/runtime/docs
+# Workers are read-only observers that execute commands as a real user would.
+QC_SCRIPT="$OPS/launchers/qc-cycle.sh"
+if [ -x "$QC_SCRIPT" ]; then
+    log "QC PHASE START"
+    AXEL_QC_FROM_CYCLE=1 bash "$QC_SCRIPT" 2>>"$OPS/logs/cycle.log" || log "QC PHASE FAILED (exit $?)"
+    log "QC PHASE DONE"
+else
+    log "QC PHASE SKIP — qc-cycle.sh not found or not executable"
+fi
 
 log "CYCLE $CYCLE_ID COMPLETE"
