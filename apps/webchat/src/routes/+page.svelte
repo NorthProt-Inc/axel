@@ -3,7 +3,14 @@ import { PUBLIC_API_TOKEN, PUBLIC_WS_URL } from '$env/static/public';
 import ChatSidebar from '$lib/components/ChatSidebar.svelte';
 import MessageInput from '$lib/components/MessageInput.svelte';
 import MessageList from '$lib/components/MessageList.svelte';
-import { connectWebSocket, loadMessages, loadSessions, messages, sendMessage, sessions } from '$lib/stores/chat.svelte';
+import {
+	connectWebSocket,
+	loadMessages,
+	loadSessions,
+	messages,
+	sendMessage,
+	sessions,
+} from '$lib/stores/chat.svelte';
 import { onMount } from 'svelte';
 
 let sidebarOpen = $state(false);

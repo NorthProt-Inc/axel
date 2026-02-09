@@ -1,0 +1,29 @@
+{
+	"name": "@axel/data-quality",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"description": "Data quality diagnostics and cleaning for Axel PostgreSQL database",
+	"bin": {
+		"axel-data-quality": "./src/cli.ts"
+	},
+	"scripts": {
+		"report": "tsx src/cli.ts report",
+		"clean:dry-run": "tsx src/cli.ts clean --dry-run",
+		"clean": "tsx src/cli.ts clean",
+		"verify": "tsx src/cli.ts verify",
+		"backfill:dry-run": "tsx src/cli.ts backfill --dry-run",
+		"backfill": "tsx src/cli.ts backfill",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@google/generative-ai": "^0.24.1",
+		"pg": "^8.18.0"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.5",
+		"@types/pg": "^8.16.0",
+		"tsx": "^4.21.0",
+		"typescript": "~5.7.3"
+	}
+}

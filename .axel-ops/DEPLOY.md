@@ -8,7 +8,7 @@
 |-----------|--------|---------|-------|
 | Node.js | ✅ READY | 22.13.1 | Runtime — ready for Phase E |
 | pnpm | ✅ READY | 9.15.4 (via npx) | Package manager — functional |
-| PostgreSQL | ✅ READY | 17 + pgvector 0.8.1 | Docker Compose running, schema migrated (6 migrations applied) |
+| PostgreSQL | ✅ READY | 17 + pgvector 0.8.1 | Docker Compose running, schema migrated (10 migrations applied) |
 | Redis | ✅ READY | 7 Alpine | Docker Compose running |
 | Docker Compose | ✅ READY | — | Dev environment operational |
 | GitHub Actions | ✅ READY | — | CI workflow active |
@@ -42,8 +42,8 @@ File: `docker/docker-compose.dev.yml`
 
 | Component | Command | Status | Notes |
 |-----------|---------|--------|-------|
-| Root Build Script | `pnpm build` | ⚠️ CONFIGURED (type errors) | TypeScript project references (`tsc -b`) |
-| Package Build Scripts | Individual `pnpm build` | ⚠️ CONFIGURED (type errors) | All packages/apps/tools have build scripts |
+| Root Build Script | `pnpm build` | ⚠️ CONFIGURED (ERR-091) | TypeScript project references (`tsc -b`) |
+| Package Build Scripts | Individual `pnpm build` | ⚠️ CONFIGURED (ERR-091) | All packages/apps/tools have build scripts |
 | TypeScript References | `tsconfig.json` | ✅ CONFIGURED | 8 project references configured |
 | Clean Build | `pnpm build:clean` | ✅ CONFIGURED | Cleans all build artifacts |
 | Format Check | `pnpm format:check` | ✅ CONFIGURED | Biome format validation (CI-ready) |
@@ -64,29 +64,24 @@ File: `docker/docker-compose.dev.yml`
 - `apps/axel`: `tsc` → `dist/`
 - `apps/webchat`: `vite build` (Svelte SPA)
 - `tools/migrate`: `tsc` → `dist/`
+- `tools/migrate-axnmihn`: `tsc` → `dist/`
+- `tools/data-quality`: `tsc` → `dist/` (⚠️ ERR-091: @google/genai 누락)
 
 ### Known Build Issues
 
-**Status**: Build pipeline configured (C90, FIX-BUILD-001), type errors remain in source code.
+**Status**: Most type errors resolved (C97, Mark+CTO override). Remaining: ERR-091.
 
-Type errors encountered during `pnpm build`:
-- `noPropertyAccessFromIndexSignature` violations (process.env, SDK property access)
-- `exactOptionalPropertyTypes` violations (optional property handling)
-- Unused variables/imports (`MemoryType`, `config`)
-- Type mismatches in external SDK type definitions (Anthropic, Google AI)
+~~Previous issues (C90):~~ **RESOLVED (C97)**. Mark(Human) + CTO override로 30건 typecheck error 수정:
+- `noPropertyAccessFromIndexSignature` → bracket notation 변환
+- `exactOptionalPropertyTypes` → 명시적 undefined 처리
+- Unused imports/variables 제거
+- Commits: ERR-087~090 all resolved
 
-**Affected Files**:
-- `packages/core/src/decay/types.ts` (unused import)
-- `packages/infra/src/db/pg-pool.ts` (unused variable)
-- `packages/infra/src/llm/anthropic-provider.ts` (index signature, exactOptional)
-- `packages/infra/src/llm/google-provider.ts` (index signature, exactOptional)
-- `packages/infra/src/mcp/tool-registry.ts` (index signature)
-- `packages/channels/src/discord/discord-channel.ts` (type mismatch, exactOptional)
-- `packages/gateway/src/route-handlers.ts` (index signature, exactOptional)
+**Current Issue (C99)**:
+- `tools/data-quality/src/backfill-ai.ts`: `@google/genai` dependency 누락 (ERR-091)
+- FIX-TYPECHECK-002 (devops P1) 진행중
 
-**Impact**: Development workflow unaffected (dev mode uses `tsx`), tests pass (985 tests).
-
-**Resolution**: Requires separate FIX task to address source code type issues.
+**Impact**: Development workflow unaffected (dev mode uses `tsx`), tests pass (1108 tests). typecheck FAIL은 tools/data-quality만 영향.
 
 ## CI/CD Pipeline
 
@@ -170,9 +165,9 @@ File: `.github/workflows/ci.yml`
 | `@axel/migrate` | ✅ OPERATIONAL | TypeScript migration runner in tools/migrate/ |
 | Runner Implementation | ✅ COMPLETE | migrator.ts (sequential, transactional, idempotent) |
 | CLI | ✅ COMPLETE | cli.ts (up/down/status commands) |
-| SQL Migrations | ✅ COMPLETE | 8 migrations (001-008) with rollback support |
+| SQL Migrations | ✅ COMPLETE | 10 migrations (001-010) with rollback support |
 | Tests | ✅ PASS | 15 tests, testcontainers (PG17+pgvector) |
-| Docker Compose Integration | ✅ VERIFIED | All 8 migrations ready for deployment |
+| Docker Compose Integration | ✅ VERIFIED | All 10 migrations ready for deployment |
 
 ### Migrations Available
 
@@ -186,15 +181,19 @@ File: `.github/workflows/ci.yml`
 | 006 | interaction_logs | ✅ READY | interaction_logs table |
 | 007 | fix_sessions_schema | ✅ READY | last_activity_at column + channel_history JSONB→TEXT[] (conditional) |
 | 008 | session_summaries | ✅ READY | session_summaries table |
+| 009 | embedding_dimension_3072 | ✅ READY | memories vector column dimension alignment (1536d Matryoshka) |
+| 010 | add_missing_fk | ✅ READY | Foreign key constraints for referential integrity |
 
 ### Schema Coverage
 
 - ✅ pgvector extension 0.8.1 enabled
 - ✅ Tables: sessions, messages, memories, entities, relations, memory_access_patterns, interaction_logs, session_summaries
 - ✅ Materialized view: hot_memories
-- ✅ All indexes created (except memories vector index — see ERR-069)
+- ✅ HNSW vector index on memories table (1536d, ERR-069 resolved C68)
 - ✅ messages table columns: created_at, token_count (002)
 - ✅ sessions table: last_activity_at, channel_history TEXT[] (007)
+- ✅ Embedding dimension: vector(1536) — Matryoshka truncation (009)
+- ✅ Foreign key constraints (010)
 
 ### Usage
 
@@ -227,17 +226,27 @@ export $(grep -v '^#' .env | xargs)
 node tools/migrate/dist/cli.js up
 ```
 
+## Additional Tools
+
+| Tool | Location | Status | Notes |
+|------|----------|--------|-------|
+| `@axel/migrate-axnmihn` | `tools/migrate-axnmihn/` | ✅ IMPLEMENTED | axnmihn SQLite→Axel PostgreSQL data migration. Config, transform, validate, migrate. TDD. (C93, MIGRATE-IMPL-001) |
+| `data-quality` | `tools/data-quality/` | ⚠️ UNTRACKED | Data validation/backfill utilities. 10 src files. ERR-091: @google/genai missing. (Mark, C99) |
+
 ## Documentation
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| `operation.md` | ✅ CREATED | User-friendly operations manual (C87) — installation, configuration, execution, debugging, operations |
+| `operation.md` | ✅ UPDATED | Operations manual — updated C99 (gateway API, migrations 009/010, env vars) |
+| `README.md` | ✅ UPDATED | Project README — updated C99 (architecture tree, test stats, API endpoints) |
 
 ## Known Issues
 
 | ID | Severity | Description | Status |
 |----|----------|-------------|--------|
-| cycle.sh untracked files WARNING | INFO | patches/ directory not in devops owned paths | Diagnosed (C87, DIAG-UNTRACK-001) — requires cycle.sh:93 update |
+| ERR-091 | MEDIUM | tools/data-quality @google/genai dependency missing — typecheck fails | FIX-TYPECHECK-002 (devops P1) in progress |
+| Gateway exports | P1 | compiled dist/main.js imports .ts source files (ERR_UNKNOWN_FILE_EXTENSION) | QC-report C99, unresolved |
+| cycle.sh untracked files WARNING | INFO | patches/ directory not in devops owned paths | **RESOLVED** (C92, Mark 커밋 0966063) |
 
 ## Known Issues (Resolved)
 
