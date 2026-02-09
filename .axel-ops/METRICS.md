@@ -2,32 +2,32 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 84
+## Current Cycle: 85
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 67 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 | 5 (all CTO override) | Idle (FIX-MIGRATION-002 done by CTO C77) |
+| coord | — | 68 cycles | 0 | Active |
+| arch | 2.5 cycles | 5 | 5 (all CTO override) | Idle |
 | dev-core | 1 cycle | 8 | 0 | Idle |
-| dev-infra | 1 cycle | 11 (+1: FIX-HARDEN-001) | 0 | Idle |
-| dev-edge | 1 cycle | 21 (+5: HARDEN-003/004/005/006/007) | 0 | Idle (all done) |
-| quality | 1 cycle | 8 (+1: QA-021) | 1 (QA-012, cancelled C39) | Idle (QA-021 done) |
+| dev-infra | 1 cycle | 11 | 0 | Idle |
+| dev-edge | 1 cycle | 21 | 0 | Idle |
+| quality | 1 cycle | 10 (+2: QA-022, QA-PROACTIVE-C85) | 1 (QA-012, cancelled C39) | Idle |
 | research | 1 cycle | 1 (RES-006) | 0 | Idle |
-| devops | 1 cycle | 20 (+3: FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 0 | Active (FIX-PUNYCODE-002) |
-| **ui-ux** | 1 cycle | 7 (UI-001/002/003/004/005/006/007) | 0 | Idle (all UI coding done) |
+| devops | 1 cycle | 21 (+1: FIX-PUNYCODE-002) | 0 | Idle |
+| ui-ux | 1 cycle | 7 | 0 | Idle (all UI coding done) |
 | audit | 1 cycle | 4 | 0 | Idle |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 1 | 5 | OK |
+| Open Errors | 0 | 5 | OK |
 | Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
-| Test Failures | 3 suites | 0 | **BREACH** (ERR-086 punycode) |
+| Test Failures | 0 | 0 | OK |
 
 ## Coverage Tracking
 
@@ -53,13 +53,12 @@
 | D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
 | E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
 | Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
-| UI/UX Sprint | **ACTIVE** | 79 | — | 88% (7/8 UI tasks done, QA-022 in progress). FIX-PUNYCODE-002 P0 blocker. 969 tests (3 suite FAIL). |
+| UI/UX Sprint | **DONE** | 79 | 85 | 100% (8/8 UI tasks + QA-022 PASS + FIX-PUNYCODE-002 resolved). 975 tests, 85 files. 0 errors. |
 
 ## Cycle History (Last 10)
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 74 | devops, arch | 0 | 4 (ERR-082~085) | **RUNTIME BOOTSTRAP FIX.** 4 migration errors. FIX-MIGRATION-001 (devops), FIX-MIGRATION-002 (arch) assigned. |
 | 75 | devops, arch | 1 (FIX-MIGRATION-001) | 0 (3 resolved) | **1 TASK DONE.** Migration 002/007/008 repaired. 845 tests. ERR-082/083/084 resolved. Open errors 4→1. |
 | 76 | arch | 0 | 0 | **No completions.** FIX-MIGRATION-002 in progress (2 cycles). Drift CLEAN. |
 | 77 | coord | 1 (FIX-MIGRATION-002) | 0 (1 resolved) | **1 TASK DONE (CTO override).** migration-strategy.md updated. ERR-085 resolved. 0 errors. STEADY STATE restored. |
@@ -70,3 +69,4 @@
 | 82 | ui-ux, coord | 3 (UI-002/005/006) | 0 | **3 TASKS DONE.** 975 tests (+42), 84 files. Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1). UI/UX Sprint **88%**. DevOps + Quality activated next cycle. |
 | 83 | devops, quality | 0 | 0 | **No completions.** 4 tasks in progress (FIX-PUNYCODE-001, README-001, QA-022, FIX-UI-001). Assigned C82, 1 cycle. 975 tests. Drift CLEAN. |
 | 84 | devops, quality | 3 (FIX-PUNYCODE-001*, README-001, FIX-UI-001) | 1 (ERR-086) | **3 DONE (1 불완전).** FIX-PUNYCODE-001 punycode override → 3 telegram test FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0. Human directives 3건: RES-007, push 비활성, §1 소유권. 969 tests (933p+36s), 3 suite FAIL, 85 files. |
+| 85 | devops, quality | 2 (FIX-PUNYCODE-002, QA-022) | 0 (1 resolved) | **UI/UX SPRINT COMPLETE.** ERR-086 resolved (975 tests pass). QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리. 3 cleanup tasks queued. 0 errors. |

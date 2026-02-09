@@ -2,17 +2,17 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 84 (CTO update)**: 1 error open. ERR-086 (HIGH) punycode override 불완전 — 3 telegram test files FAIL.
+> **Cycle 85 (CTO update)**: 0 errors open. ERR-086 resolved (FIX-PUNYCODE-002, 975 tests pass).
 
 ## Open
 
-| ID | Severity | Description | Assigned To | Since |
-|----|----------|-------------|-------------|-------|
-| ERR-086 | HIGH | FIX-PUNYCODE-001 punycode override가 whatwg-url@5.0.0의 `require('../punycode')` 미해결. grammy→node-fetch→whatwg-url 체인에서 3 test files FAIL (bootstrap-channels, telegram-channel, telegram-userid-guard). 933 pass + 36 skip but 3 suites fail. | FIX-PUNYCODE-002 (devops) | 0208C84 |
+(none)
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
+|----|------------|-------------|------|
+| ERR-086 | FIX-PUNYCODE-001 수정(packageExtensions + postinstall script)이 이미 정상 작동중. 975 tests pass, 0 FAIL. telegram 25 tests pass. Mark가 cycle.sh 소유범위 수정(7718b97) + 유실 산출물 복구(217cdc8)로 해결. | FIX-PUNYCODE-002 (devops) + Mark (Human) | 0208C85 |
 |----|------------|-------------|------|
 | ERR-085 | `migration-strategy.md` 업데이트: 디렉토리 구조, messages 컬럼, 007/008 migration, Execution Order 반영. | FIX-MIGRATION-002 (coord CTO override) | 0208C77 |
 | ERR-082 | Migration 002 messages 테이블에 `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` + `token_count INTEGER NOT NULL DEFAULT 0` 컬럼 추가. | FIX-MIGRATION-001 (devops) | 0208C75 |

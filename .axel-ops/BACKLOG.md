@@ -2,20 +2,20 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 84 (CTO update)**: FIX-PUNYCODE-001 불완전(테스트 3개 깨짐) — FIX-PUNYCODE-002 P0 생성. README-001/FIX-UI-001 done(커밋 확인). RES-007 (P1 human directive) 생성. **969 tests (933 pass, 36 skip), 3 FAIL, 85 files.**
+> **Cycle 85 (CTO update)**: FIX-PUNYCODE-002 해결 확인 (975 tests pass, 0 FAIL). QA-022 PASS. QA-PROACTIVE-C85 (2H 6M 2L). **UI/UX Sprint COMPLETE.** RES-007 남은 유일한 queued task. **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.**
 
 ## Queued
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| FIX-PUNYCODE-002 | P0 | devops | punycode override 수정 — whatwg-url@5.0.0의 require('../punycode') 해결. packageExtensions에 whatwg-url 추가 또는 grammy 업데이트. 3 telegram 관련 test files 복구 필수. | FIX-PUNYCODE-001 |
 | RES-007 | P1 | research | CLI 세션 종료 후 기억 상실 원인 분석 — 세션 간 메모리 persistence 경로 추적 (M1→M2→M3 flush, PG 저장, 다음 세션 로드). human directive. | — |
+| FIX-README-001 | P2 | devops | QA-PROACTIVE-C85 README 이슈 수정: (1) DB URL 패스워드 플레이스홀더로 변경, (2) 존재하지 않는 deployment-strategy.md 참조 제거, (3) CONTRIBUTING.md 참조 제거. | — |
+| FIX-PUNYCODE-003 | P3 | devops | QA-PROACTIVE-C85 punycode 관련 개선: (1) postinstall → pnpm patchedDependencies 전환, (2) channels에서 punycode direct dep 제거 (transitive dep 오염). 현재 동작 상태이므로 P3. | — |
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| QA-022 | P1 | quality | UI/UX Sprint 최종 리뷰 — UI-002/005/006 코드 검증, §8 TDD, §9 경계, §14 파일 크기, 커버리지 확인 | 0208C82 |
 
 ## Cancelled
 
@@ -168,3 +168,5 @@
 | FIX-PUNYCODE-001 | devops | 0208C84 | punycode override 시도 (bd84454) — pnpm packageExtensions + tr46 dependency. 단, whatwg-url require('../punycode') 미해결로 telegram 테스트 3개 FAIL. **불완전 — FIX-PUNYCODE-002로 후속.** |
 | README-001 | devops | 0208C84 | 8 README files (root 미포함, packages/core/channels/gateway/infra/ui, apps/axel/webchat). 커밋 96ec34f. §1 cross-ownership 위반 기록 (P0 directive 사후 확인). |
 | FIX-UI-001 | devops | 0208C84 | marked-terminal.d.ts 타입 선언 추가 (packages/ui/src/cli/). 커밋 96ec34f. §1 위반 기록 (packages/ui/ → ui-ux 소유). |
+| FIX-PUNYCODE-002 | devops | 0208C85 | ERR-086 해결 확인 — FIX-PUNYCODE-001 수정이 이미 작동중. 975 tests pass, 0 FAIL, telegram 25 tests pass. |
+| QA-022 | quality | 0208C85 | UI/UX Sprint 최종 리뷰 PASS. 0C 0H 6M 3L. TDD PASS. §9 PASS. §14 PASS. Coverage: ui 95.77% stmt. 975 tests. |

@@ -4,21 +4,21 @@
 
 ## Status
 
-- **Phase**: **UI/UX Sprint** (Human directive P0) → FIX-PUNYCODE-002 P0 blocker + QA-022 in progress
-- **Cycle**: 84
-- **Last Updated**: 2026-02-08C84
-- **STATUS**: **3 tasks done (FIX-PUNYCODE-001 불완전, README-001, FIX-UI-001).** FIX-PUNYCODE-001의 punycode override가 whatwg-url@5.0.0 require('../punycode')를 깨뜨림 → 3 telegram test files FAIL (ERR-086 HIGH). FIX-PUNYCODE-002 P0 생성. Human directives 3개 처리: (1) RES-007 CLI 기억 분석 P1, (2) git push 비활성 유지, (3) §1 소유권 검증 즉시 적용. **969 tests (933 pass, 36 skip), 3 test files FAIL, 85 files.** 1 error open.
+- **Phase**: **UI/UX Sprint COMPLETE.** All 8 UI tasks done + QA-022 PASS. ERR-086 resolved. Post-sprint cleanup queued (P2/P3).
+- **Cycle**: 85
+- **Last Updated**: 2026-02-08C85
+- **STATUS**: **UI/UX Sprint COMPLETE.** FIX-PUNYCODE-002 확인 (ERR-086 resolved, 975 tests pass). QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L — README/punycode script 개선점). Human feedback 처리 (cycle.sh 수정은 Mark 직접). **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 3 tasks queued (RES-007 P1, FIX-README-001 P2, FIX-PUNYCODE-003 P3).
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 2 |
-| In Progress | 1 |
-| Done | 133 |
+| Queued | 3 |
+| In Progress | 0 |
+| Done | 135 |
 | Cancelled | 14 |
 
-## Open Errors: 1
+## Open Errors: 0
 
 ## Cycle History
 
@@ -74,20 +74,21 @@
 | 82 | 0208 | **3 TASKS COMPLETED.** UI-002 (CLI streaming 12 tests), UI-005 (WebChat markdown+XSS 17 tests), UI-006 (session API 13 tests). **975 tests (+42), 84 files.** Human directives: FIX-PUNYCODE-001 (P0), README-001 (P1) created. UI/UX Sprint **88% (7/8)**. QA-022 + devops tasks queued. |
 | 83 | 0208 | **No completions.** 4 tasks in progress: FIX-PUNYCODE-001 (devops P0), README-001 (devops P1), QA-022 (quality P1), FIX-UI-001 (devops P2). Assigned C82, 1 cycle. Drift CLEAN. 0 errors. 975 tests, 84 files. |
 | 84 | 0208 | **3 TASKS DONE (FIX-PUNYCODE-001 불완전, README-001, FIX-UI-001).** FIX-PUNYCODE-001 punycode override로 3 telegram test files FAIL (ERR-086 HIGH) → FIX-PUNYCODE-002 P0 생성. Human directives 3건 처리: RES-007 (CLI 기억 분석), git push 비활성, §1 소유권 강제. **969 tests (933 pass, 36 skip, 3 suite FAIL), 85 files.** 1 error. |
+| 85 | 0208 | **UI/UX SPRINT COMPLETE.** FIX-PUNYCODE-002 확인 (ERR-086 resolved), QA-022 PASS (0C 0H 6M 3L). QA-PROACTIVE-C85 (2H 6M 2L). Human feedback 처리 (cycle.sh Mark 수정 확인). **975 tests (975 pass, 36 skip), 0 FAIL, 85 files.** 0 errors. 3 cleanup tasks queued (P1/P2/P3). |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0208C84 | Cycle 84 | Active |
+| Coordinator | 0208C85 | Cycle 85 | Active |
 | Architecture | 0208C74 | — | Idle |
 | Dev-Core | 0208C61 | — | Idle |
 | Dev-Infra | 0208C66 | — | Idle |
 | Dev-Edge | 0208C70 | — | Idle |
 | UI/UX | 0208C82 | — | Idle (all UI coding done) |
 | Research | 0208C58 | — | Idle |
-| **Quality** | 0208C84 | QA-022 | **Active** |
-| **DevOps** | 0208C84 | FIX-PUNYCODE-002 | **Active** |
+| Quality | 0208C85 | — | Idle (QA-022 done, QA-PROACTIVE-C85 done) |
+| DevOps | 0208C85 | — | Idle (FIX-PUNYCODE-002 done) |
 | Audit | 0208C59 | — | Idle |
 
 ## Human Intervention Needed
