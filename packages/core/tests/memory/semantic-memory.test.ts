@@ -310,4 +310,41 @@ describe('InMemorySemanticMemory', () => {
 			expect(health.lastChecked).toBeInstanceOf(Date);
 		});
 	});
+
+	describe('Memory.id (FIX-BUG-001)', () => {
+		it('should assign a numeric id to stored memories', async () => {
+			const uuid = await semantic.store(makeNewMemory({ content: 'Has ID' }));
+			const memory = await semantic.getByUuid(uuid);
+			expect(memory).not.toBeNull();
+			expect(typeof memory?.id).toBe('number');
+			expect(memory?.id).toBeGreaterThan(0);
+		});
+
+		it('should assign unique sequential ids', async () => {
+			const uuid1 = await semantic.store(makeNewMemory({ content: 'First' }));
+			const uuid2 = await semantic.store(makeNewMemory({ content: 'Second' }));
+			const mem1 = await semantic.getByUuid(uuid1);
+			const mem2 = await semantic.getByUuid(uuid2);
+			expect(mem1?.id).not.toBe(mem2?.id);
+			expect(mem2!.id).toBeGreaterThan(mem1!.id);
+		});
+
+		it('should return id in search results for use as matchedMemoryIds', async () => {
+			await semantic.store(makeNewMemory({ content: 'Searchable memory' }));
+
+			const query: SemanticQuery = {
+				text: 'searchable',
+				embedding: makeEmbedding(0.9),
+				limit: 10,
+			};
+
+			const results = await semantic.search(query);
+			expect(results.length).toBeGreaterThan(0);
+
+			for (const r of results) {
+				expect(typeof r.memory.id).toBe('number');
+				expect(r.memory.id).toBeGreaterThan(0);
+			}
+		});
+	});
 });

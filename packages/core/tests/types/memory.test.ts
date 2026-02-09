@@ -12,6 +12,7 @@ describe('Memory types', () => {
 	describe('Memory', () => {
 		it('represents a complete semantic memory unit', () => {
 			const memory: Memory = {
+				id: 42,
 				uuid: '550e8400-e29b-41d4-a716-446655440000',
 				content: 'User prefers dark mode',
 				memoryType: 'preference',
@@ -27,6 +28,7 @@ describe('Memory types', () => {
 				lastDecayedAt: new Date('2025-06-01'),
 			};
 
+			expect(memory.id).toBe(42);
 			expect(memory.uuid).toBe('550e8400-e29b-41d4-a716-446655440000');
 			expect(memory.memoryType).toBe('preference');
 			expect(memory.importance).toBe(0.8);
@@ -35,8 +37,9 @@ describe('Memory types', () => {
 			expect(memory.channelMentions).toEqual({ discord: 3, telegram: 2 });
 		});
 
-		it('allows null for optional nullable fields', () => {
+		it('allows null id for memories not yet persisted to DB', () => {
 			const memory: Memory = {
+				id: null,
 				uuid: 'test-uuid',
 				content: 'test content',
 				memoryType: 'fact',
@@ -52,6 +55,7 @@ describe('Memory types', () => {
 				lastDecayedAt: null,
 			};
 
+			expect(memory.id).toBeNull();
 			expect(memory.sourceChannel).toBeNull();
 			expect(memory.sourceSession).toBeNull();
 			expect(memory.decayedImportance).toBeNull();
@@ -63,6 +67,7 @@ describe('Memory types', () => {
 		it('wraps a Memory with a relevance score and source', () => {
 			const result: MemorySearchResult = {
 				memory: {
+					id: 1,
 					uuid: 'test-uuid',
 					content: 'test',
 					memoryType: 'fact',
