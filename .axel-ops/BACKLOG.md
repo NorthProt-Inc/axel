@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 91 (CTO update)**: No new completions. FIX-MEMORY-002 (dev-edge) + FIX-BUILD-001 (devops) in progress (1 cycle). FIX-MEMORY-003 unblocked (FIX-MEMORY-001 done) → dev-infra 할당. **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
+> **Cycle 92 (CTO update)**: Human directives 2건 처리 (cycle.sh patches/ 확인 ✅, 리서치→구현 태스크 생성). FIX-CYCLESH-001 해결 (Mark 커밋 0966063). QC reports 13건 분류, FIX-DOCS-001 생성. MIGRATE-IMPL-001 생성 (human directive). 3 tasks in progress (2 cycles). **985 tests (985 pass, 36 skip), 0 FAIL, 85 files.** 0 errors.
 
 ## In Progress
 
@@ -16,7 +16,8 @@
 
 | ID | Priority | Division | Task | Dependencies |
 |----|----------|----------|------|-------------|
-| FIX-CYCLESH-001 | P2 | **Human (Mark)** | cycle.sh:93 devops 소유 경로에 `patches/` 추가. DIAG-UNTRACK-001 ROOT CAUSE 수정. **§1 위반으로 devops/coord 수정 불가 — .axel-ops/launchers/ 소유자 미정의.** | — |
+| MIGRATE-IMPL-001 | P1 | dev-infra | axnmihn→Axel 데이터 마이그레이션 스크립트 구현. MIGRATE-PLAN-001 리서치 기반. tools/migrate-axnmihn/ 디렉토리 생성, SQLite 추출, 3072d→1536d 재임베딩, PG 로드, 검증 SQL. docs/research/MIGRATE-001-axnmihn-migration-plan.md 참조. | FIX-MEMORY-003 |
+| FIX-DOCS-001 | P2 | devops | QC report docs 이슈 수정: (1) .env.example 업데이트 (Axel 환경변수 반영), (2) operation.md 불필요 build step 제거, (3) README에 operation.md 언급 추가, (4) 환경변수 네이밍 일관성 확인. | FIX-BUILD-001 |
 
 ## Cancelled
 
@@ -182,3 +183,4 @@
 | FIX-OPSDOC-001 | devops | 0208C90 | operation.md git add + commit 완료. 756 lines, 17KB 운영 매뉴얼. Commit 9cc9b32. |
 | FIX-BIOME-001 | devops | 0208C90 | biome.json apps/webchat/.svelte-kit/** ignore 추가. QC report 54/56 biome errors 해결. Commit 13c580c. |
 | FIX-README-002 | devops | 0208C90 | apps/axel/README.md dist/main.js 경로 수정. Commit de719c0. |
+| FIX-CYCLESH-001 | **Mark (Human direct)** | 0208C92 | **Mark(Human) 직접 수정** 커밋 `0966063`. cycle.sh:93 devops 소유 경로에 `patches/` 추가 완료. QC 시스템 추가와 함께 적용됨. |
