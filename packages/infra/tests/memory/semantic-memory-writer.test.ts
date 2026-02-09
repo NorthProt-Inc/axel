@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { SemanticMemory, NewMemory } from '@axel/core/memory';
+import type { NewMemory, SemanticMemory } from '@axel/core/memory';
 import type { ComponentHealth } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-	SemanticMemoryWriter,
 	type EmbeddingProvider,
 	type ImportanceConfig,
+	SemanticMemoryWriter,
 } from '../../src/memory/semantic-memory-writer.js';
 
 // ─── Test Doubles ───
@@ -37,6 +37,18 @@ function createMockSemanticMemory(): SemanticMemory {
 			lastChecked: new Date(),
 		} satisfies ComponentHealth),
 	};
+}
+
+function getStoredArg(mock: SemanticMemory): NewMemory {
+	const calls = (mock.store as ReturnType<typeof vi.fn>).mock.calls;
+	const firstCall = calls[0];
+	return (firstCall as [NewMemory])[0];
+}
+
+function getEmbedText(mock: EmbeddingProvider): string {
+	const calls = (mock.embed as ReturnType<typeof vi.fn>).mock.calls;
+	const firstCall = calls[0];
+	return (firstCall as [string])[0];
 }
 
 const DEFAULT_CONFIG: ImportanceConfig = {
@@ -73,8 +85,7 @@ describe('SemanticMemoryWriter', () => {
 			expect(mockEmbedding.embed).toHaveBeenCalledOnce();
 			expect(mockSemantic.store).toHaveBeenCalledOnce();
 
-			const storedArg = (mockSemantic.store as ReturnType<typeof vi.fn>).mock
-				.calls[0]![0] as NewMemory;
+			const storedArg = getStoredArg(mockSemantic);
 			expect(storedArg.memoryType).toBe('conversation');
 			expect(storedArg.sourceChannel).toBe('cli');
 			expect(storedArg.sourceSession).toBe('sess-1');
@@ -119,8 +130,7 @@ describe('SemanticMemoryWriter', () => {
 				sessionId: 'sess-4',
 			});
 
-			const embedCall = (mockEmbedding.embed as ReturnType<typeof vi.fn>).mock.calls[0]!;
-			const embeddedText = embedCall[0] as string;
+			const embeddedText = getEmbedText(mockEmbedding);
 			expect(embeddedText).toContain(content);
 			expect(embeddedText).toContain(response);
 		});
@@ -134,8 +144,7 @@ describe('SemanticMemoryWriter', () => {
 				sessionId: 'sess-5',
 			});
 
-			const storedArg = (mockSemantic.store as ReturnType<typeof vi.fn>).mock
-				.calls[0]![0] as NewMemory;
+			const storedArg = getStoredArg(mockSemantic);
 			// baseImportance (0.5) + keywordBoost (0.2) * 2 keywords = 0.9
 			expect(storedArg.importance).toBeGreaterThan(DEFAULT_CONFIG.baseImportance);
 		});
@@ -149,8 +158,7 @@ describe('SemanticMemoryWriter', () => {
 				sessionId: 'sess-6',
 			});
 
-			const storedArg = (mockSemantic.store as ReturnType<typeof vi.fn>).mock
-				.calls[0]![0] as NewMemory;
+			const storedArg = getStoredArg(mockSemantic);
 			// baseImportance (0.5) + lengthBoost (0.1) = 0.6
 			expect(storedArg.importance).toBeGreaterThanOrEqual(
 				DEFAULT_CONFIG.baseImportance + DEFAULT_CONFIG.lengthBoost,
@@ -167,8 +175,7 @@ describe('SemanticMemoryWriter', () => {
 				sessionId: 'sess-7',
 			});
 
-			const storedArg = (mockSemantic.store as ReturnType<typeof vi.fn>).mock
-				.calls[0]![0] as NewMemory;
+			const storedArg = getStoredArg(mockSemantic);
 			expect(storedArg.importance).toBeLessThanOrEqual(1.0);
 		});
 
@@ -272,9 +279,7 @@ describe('SemanticMemoryWriter', () => {
 				failingOnError,
 			);
 
-			(mockEmbedding.embed as ReturnType<typeof vi.fn>).mockRejectedValue(
-				new Error('API down'),
-			);
+			(mockEmbedding.embed as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('API down'));
 
 			const result = await writerWithBadCallback.storeConversationMemory({
 				userContent: 'remember this',
@@ -326,7 +331,6 @@ describe('SemanticMemoryWriter', () => {
 		it('should use default config when none provided', async () => {
 			const defaultWriter = new SemanticMemoryWriter(mockEmbedding, mockSemantic);
 
-			// Default config should also skip short non-keyword content
 			const result = await defaultWriter.storeConversationMemory({
 				userContent: 'hello',
 				assistantContent: 'hi',
