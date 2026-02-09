@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { Message } from '../types/message.js';
 import type { ToolCallRequest } from '../types/react.js';
-import type { SessionSummary } from '../types/session.js';
+import type { SessionState, SessionSummary } from '../types/session.js';
 import type { ToolDefinition, ToolResult } from '../types/tool.js';
 
 // ─── ReAct Configuration (plan §4.6 lines 1396-1401) ───
@@ -33,6 +33,7 @@ export interface UnifiedSession {
 	readonly userId: string;
 	readonly activeChannelId: string;
 	readonly channelHistory: readonly string[];
+	readonly state: SessionState;
 	readonly startedAt: Date;
 	readonly lastActivityAt: Date;
 	readonly turnCount: number;

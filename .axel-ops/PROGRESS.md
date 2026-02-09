@@ -4,18 +4,18 @@
 
 ## Status
 
-- **Phase**: **Post-Implementation — Security Hardening Sprint.** 6 P2 GAP 태스크 3 Division 진행 중 (3 cycles — stall threshold 도달).
-- **Cycle**: 105
-- **Last Updated**: 2026-02-09C105
-- **STATUS**: 3-cycle stall alert. 6 P2 security hardening tasks — no completions after 3 cycles (C103~C105). metric-alert issued. CTO override next cycle if no Division output. **1156 tests (verified C105), typecheck PASSES. 0 errors.**
+- **Phase**: **Post-Implementation — Security Hardening COMPLETE.** All 6 P2 GAP tasks resolved via CTO override C106.
+- **Cycle**: 106
+- **Last Updated**: 2026-02-09C106
+- **STATUS**: **ALL 6 SECURITY HARDENING TASKS DONE (CTO override).** FIX-FILESIZE-001 (§14 resolved, 439→267 lines), GAP-SESSION-001 (state machine validation), GAP-REDIS-CB-001 (CircuitBreaker applied), GAP-CMD-001 (shell metachar + cwd validation), GAP-PROMPT-001 (4-layer prompt defense), GAP-WEBHOOK-001 (signature verification tests). **1287 tests (+131 new, verified C106), typecheck PASSES. 0 errors.**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
 | Queued | 0 |
-| In Progress | 6 |
-| Done | 182 (+2: FIX-MIGRATION-009, ADR-STATUS-001) |
+| In Progress | 0 |
+| Done | 188 (+6: FIX-FILESIZE-001, GAP-SESSION-001, GAP-REDIS-CB-001, GAP-CMD-001, GAP-PROMPT-001, GAP-WEBHOOK-001) |
 | Cancelled | 15 |
 
 ## Open Errors: 0
@@ -95,21 +95,22 @@
 | 103 | 0209 | **2 ARCH TASKS DONE.** FIX-MIGRATION-009 (DRIFT-009 resolved, migration 009 DEPRECATED, 010-011 documented), ADR-STATUS-001 (9 ADRs PROPOSED→ACCEPTED, all 21 ADRs ACCEPTED). **6 P2 security hardening tasks assigned** to dev-core (FIX-FILESIZE-001+GAP-SESSION-001), dev-edge (GAP-PROMPT-001+GAP-WEBHOOK-001), dev-infra (GAP-REDIS-CB-001+GAP-CMD-001). **1156 tests (verified), typecheck PASSES.** 0 errors. |
 | 104 | 0209 | **Monitoring cycle.** No completions. 6 P2 security hardening tasks in progress (2 cycles, not stalled). No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified), typecheck PASSES.** |
 | 105 | 0209 | **3-cycle stall alert.** No completions. 6 P2 security hardening tasks (3 cycles — stall threshold). metric-alert issued. No new Mark commits. Drift CLEAN. 0 errors. **1156 tests (verified C105), typecheck PASSES.** CTO override next cycle if no output. |
+| 106 | 0209 | **ALL 6 SECURITY HARDENING TASKS DONE (CTO override).** FIX-FILESIZE-001 (inbound-handler 439→267 lines, persistToMemory extracted to memory-persistence.ts), GAP-SESSION-001 (session-state.ts: state machine validation, 21 tests), GAP-REDIS-CB-001 (RedisWorkingMemory ad-hoc→CircuitBreaker, 12 tests), GAP-CMD-001 (shell metachar + cwd validation, 12 tests), GAP-PROMPT-001 (4-layer prompt injection defense, 18 tests), GAP-WEBHOOK-001 (Telegram+Discord signature verification tests, 8 tests). **1287 tests (+131), typecheck PASSES.** 0 errors. 0 queued, 0 in progress. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C105 | Cycle 105 | Active |
+| Coordinator | 0209C106 | Cycle 106 | Active |
 | Architecture | 0209C103 | — | Idle. |
-| Dev-Core | 0209C103 | FIX-FILESIZE-001 + GAP-SESSION-001 | **3 cycles no output.** metric-alert. CTO override C106. |
-| Dev-Infra | 0209C103 | GAP-REDIS-CB-001 + GAP-CMD-001 | **3 cycles no output.** metric-alert. CTO override C106. |
-| Dev-Edge | 0209C103 | GAP-PROMPT-001 + GAP-WEBHOOK-001 | **3 cycles no output.** metric-alert. CTO override C106. |
-| UI/UX | 0208C82 | — | Idle (23 cycles). |
-| Research | 0208C89 | — | Idle (16 cycles). |
-| Quality | 0209C102 | — | Idle. Next: review after dev completions. |
+| Dev-Core | 0209C106 | — | Idle. FIX-FILESIZE-001 + GAP-SESSION-001 done (CTO override). |
+| Dev-Infra | 0209C106 | — | Idle. GAP-REDIS-CB-001 + GAP-CMD-001 done (CTO override). |
+| Dev-Edge | 0209C106 | — | Idle. GAP-PROMPT-001 + GAP-WEBHOOK-001 done (CTO override). |
+| UI/UX | 0208C82 | — | Idle (24 cycles). |
+| Research | 0208C89 | — | Idle (17 cycles). |
+| Quality | 0209C102 | — | Idle. Next: QA-025 review of 6 CTO overrides. |
 | DevOps | 0209C101 | — | Idle. |
-| Audit | 0208C89 | — | Idle (16 cycles). |
+| Audit | 0208C89 | — | Idle (17 cycles). |
 
 ## Human Intervention Needed
 

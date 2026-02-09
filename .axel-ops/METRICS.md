@@ -2,29 +2,29 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 105
+## Current Cycle: 106
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 73 cycles | 0 | Active |
-| arch | 1 cycle | 8 (+2: FIX-MIGRATION-009, ADR-STATUS-001) | 5 (all CTO override) | FIX-MIGRATION-009+ADR-STATUS-001 DONE C103. Idle. |
-| dev-core | 1 cycle | 9 | 2 (FIX-BUG-001 4cy CTO, current 3cy) | **3cy stall.** FIX-FILESIZE-001 + GAP-SESSION-001. CTO override C106. |
-| dev-infra | 1 cycle | 11 | 1 (current 3cy) | **3cy stall.** GAP-REDIS-CB-001 + GAP-CMD-001. CTO override C106. |
-| dev-edge | 1 cycle | 21 | 1 (current 3cy) | **3cy stall.** GAP-PROMPT-001 + GAP-WEBHOOK-001. CTO override C106. |
-| quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. Next: dev completion review. |
-| research | 1 cycle | 3 | 0 | Idle (14 cycles). |
+| coord | — | 74 cycles | 0 | Active |
+| arch | 1 cycle | 8 | 5 (all CTO override) | Idle. |
+| dev-core | 1 cycle | 9 | 2 (FIX-BUG-001 4cy CTO, FIX-FILESIZE+GAP-SESSION 4cy CTO) | Idle. CTO override C106 resolved stall. |
+| dev-infra | 1 cycle | 11 | 1 (GAP-REDIS-CB+GAP-CMD 4cy CTO) | Idle. CTO override C106 resolved stall. |
+| dev-edge | 1 cycle | 21 | 1 (GAP-PROMPT+GAP-WEBHOOK 4cy CTO) | Idle. CTO override C106 resolved stall. |
+| quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. Next: QA-025 review 6 CTO overrides. |
+| research | 1 cycle | 3 | 0 | Idle (17 cycles). |
 | devops | 1 cycle | 28 | 0 | Idle. |
-| ui-ux | 1 cycle | 7 | 0 | Idle (21 cycles). |
-| audit | 1 cycle | 5 | 0 | Idle (14 cycles). |
+| ui-ux | 1 cycle | 7 | 0 | Idle (24 cycles). |
+| audit | 1 cycle | 5 | 0 | Idle (17 cycles). |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
 | Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 6 | 0 | **ALERT** (3 Divisions × 2 tasks, C103→C105) |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK (resolved C106 CTO override) |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -69,9 +69,6 @@
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 94 | dev-core, dev-edge, devops, quality | 0 | 3 (ERR-087/088/089) | **QC → P0 BLOCKERS.** typecheck+build FAILS. 3 fix tasks. 1075 tests. 3 errors. |
-| 95 | dev-core, dev-edge, devops, quality | 0 | 1 (ERR-090) | **QC C1854 처리.** config.ts TS4111 (ERR-090). FIX-CONTAINER-001 scope 확장. 1075 tests. 4 errors. |
-| 96 | dev-core, dev-edge, devops, quality | 0 | 0 | **QC C1907 처리.** 4건. 5 in progress (2cy). 1075 tests. 4 errors. |
 | 97 | coord (CTO override) | 3 (FIX-TYPECHECK-001, FIX-CONTAINER-001, FIX-MIGRATE-CLI-001) | 0 | **ALL P0 RESOLVED.** Mark+CTO 30 typecheck fixes. typecheck PASSES. 1075 tests. 0 errors. |
 | 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 1075 tests. 0 errors. |
 | 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 1108 tests. 1 error. |
@@ -81,3 +78,4 @@
 | 103 | arch, dev-core, dev-edge, dev-infra | 2 (FIX-MIGRATION-009, ADR-STATUS-001) | 0 | **Arch 2 DONE.** DRIFT-009 resolved, 21 ADRs ACCEPTED. 6 P2 security hardening tasks assigned (3 Divisions). 1156 tests. 0 errors. |
 | 104 | dev-core, dev-edge, dev-infra | 0 | 0 | **Monitoring.** 6 P2 tasks in progress (2 cycles). No completions. Drift CLEAN. 1156 tests. 0 errors. |
 | 105 | dev-core, dev-edge, dev-infra | 0 | 0 | **3cy stall alert.** 6 P2 tasks (3 cycles). metric-alert issued. CTO override C106. 1156 tests. 0 errors. |
+| 106 | coord (CTO override) | 6 (FIX-FILESIZE-001, GAP-SESSION-001, GAP-REDIS-CB-001, GAP-CMD-001, GAP-PROMPT-001, GAP-WEBHOOK-001) | 0 | **ALL 6 SECURITY HARDENING DONE (CTO override).** +131 tests. 1287 tests. 0 errors. All stalls resolved. |

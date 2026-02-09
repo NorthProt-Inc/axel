@@ -2,18 +2,13 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 103 (CTO update)**: Arch FIX-MIGRATION-009 + ADR-STATUS-001 완료 (div/arch merge fabfc6d). 6 P2 태스크 3 Division 배정. **1156 tests, typecheck PASSES. 0 errors.**
+> **Cycle 106 (CTO override)**: All 6 P2 security hardening tasks DONE (CTO override C106). **1287 tests (+131), typecheck PASSES. 0 errors.**
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts 438 lines → §14 (400 lines) 위반. persistToMemory 분리. | C103 |
-| GAP-SESSION-001 | P2 | dev-core | GAP-11: Session state machine 런타임 검증 구현. 현재 타입만 존재, 전환 규칙 미적용. ADR-021. | C103 |
-| GAP-PROMPT-001 | P2 | dev-edge | GAP-08: Prompt injection defense 4-layer 구현 (input sanitization, system prompt isolation, output filtering, context boundary). ADR-019. | C103 |
-| GAP-WEBHOOK-001 | P2 | dev-edge | GAP-12: Webhook signature verification 강화 (Discord Ed25519 + Telegram secret_token — 기존 INTEG-008 구현 확인/보완). ADR-019. | C103 |
-| GAP-REDIS-CB-001 | P2 | dev-infra | GAP-10: Redis fallback circuit breaker 전면 적용. RedisWorkingMemory 8 bare catch → CircuitBreaker 클래스 사용. ADR-003. | C103 |
-| GAP-CMD-001 | P2 | dev-infra | GAP-07: Command arg/cwd 검증 강화. McpToolExecutor commandAllowlist + path traversal 보완. ADR-019. | C103 |
+| (none) | — | — | — | — |
 
 ## Queued
 
@@ -45,6 +40,12 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FIX-FILESIZE-001 | coord (CTO override) | 0209C106 | §14 위반 해결: inbound-handler.ts 439→267 lines. persistToMemory+extractAndStoreEntities+estimateTokenCount → memory-persistence.ts (184 lines) 추출. 1287 tests, typecheck PASSES. |
+| GAP-SESSION-001 | coord (CTO override) | 0209C106 | GAP-11: session-state.ts 생성. 7-state FSM transition validation (VALID_TRANSITIONS map, isValidTransition, assertTransition). UnifiedSession.state 필드 추가. 21 tests. ADR-021. |
+| GAP-REDIS-CB-001 | coord (CTO override) | 0209C106 | GAP-10: RedisWorkingMemory ad-hoc RedisState → CircuitBreaker (infra/common/) 적용. 8 bare catch → circuit.execute() 패턴. ADR-003. 12 tests. |
+| GAP-CMD-001 | coord (CTO override) | 0209C106 | GAP-07: McpToolExecutor 강화. validateCommandArgs (shell metachar 차단), validateCwd (path traversal 차단), basePath 옵션. ADR-019. 12 tests. |
+| GAP-PROMPT-001 | coord (CTO override) | 0209C106 | GAP-08: prompt-defense.ts 4-layer (sanitizeInput, isolateSystemPrompt, filterOutput, wrapUserInput). API key/email redaction, injection pattern 차단. ADR-019. 18 tests. |
+| GAP-WEBHOOK-001 | coord (CTO override) | 0209C106 | GAP-12: Telegram secret_token + Discord Ed25519 signature verification 테스트 커버리지. timing-safe comparison 확인. Ed25519 keypair 생성 테스트. 8 tests. |
 | FIX-MIGRATION-009 | arch | 0209C103 | DRIFT-009 RESOLVED. migration 009 DEPRECATED in migration-strategy.md (3072d conflicts with ADR-016 1536d). 010+011 documented. Execution order updated. |
 | ADR-STATUS-001 | arch | 0209C103 | 9 ADRs PROPOSED→ACCEPTED (ADR-013~021). All 21 ADRs now ACCEPTED. |
 | FIX-BUG-001 | coord (CTO override) | 0209C102 | matchedMemoryIds 논리 버그 수정. ScoredMemory.dbId 추가, PG search `id` SELECT, container.ts `scored.map(s => s.dbId ?? 0)`. 1156 tests, typecheck PASSES. |

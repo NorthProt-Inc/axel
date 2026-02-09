@@ -28,6 +28,7 @@ interface DefineToolConfig<T extends z.ZodSchema> {
 /** McpToolExecutor options */
 interface McpToolExecutorOptions {
 	readonly commandAllowlist?: readonly string[];
+	readonly basePath?: string;
 }
 
 /**
@@ -66,6 +67,44 @@ function getZodTypeName(schema: z.ZodTypeAny): string {
 	if (schema instanceof z.ZodDefault) return getZodTypeName(schema._def.innerType as z.ZodTypeAny);
 	if (schema instanceof z.ZodOptional) return getZodTypeName(schema._def.innerType as z.ZodTypeAny);
 	return 'string';
+}
+
+/** Dangerous shell metacharacters per ADR-019 */
+const SHELL_METACHARACTERS = /[;&|`$(){}[\]<>!#~]/;
+
+/**
+ * Validate command arguments for shell metacharacters.
+ *
+ * Security: prevents command injection via argument pollution (ADR-019).
+ * Recursively checks all string values in the args object.
+ */
+function validateCommandArgs(args: Record<string, unknown>): string | null {
+	for (const [key, value] of Object.entries(args)) {
+		if (typeof value === 'string' && SHELL_METACHARACTERS.test(value)) {
+			return `Argument '${key}' contains disallowed shell metacharacters`;
+		}
+		if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+			const nestedError = validateCommandArgs(value as Record<string, unknown>);
+			if (nestedError) return nestedError;
+		}
+	}
+	return null; // valid
+}
+
+/**
+ * Validate cwd parameter against a base path.
+ *
+ * Security: prevents directory traversal via cwd (ADR-019).
+ * Ensures the resolved cwd stays within the base directory boundary.
+ */
+function validateCwd(cwd: unknown, basePath: string): string | null {
+	if (cwd === undefined || cwd === null) return null;
+	if (typeof cwd !== 'string') return 'cwd must be a string';
+	const resolved = path.resolve(basePath, cwd);
+	if (!resolved.startsWith(basePath)) {
+		return `cwd '${cwd}' escapes base directory`;
+	}
+	return null; // valid
 }
 
 /**
@@ -199,6 +238,33 @@ class McpToolExecutor implements ToolExecutor {
 				error: `Validation failed: ${parsed.error.message}`,
 				durationMs: Date.now() - startTime,
 			};
+		}
+
+		// Validate command arguments for shell metacharacters (GAP-CMD-001)
+		const argsError = validateCommandArgs(parsed.data as Record<string, unknown>);
+		if (argsError) {
+			return {
+				callId: call.callId,
+				success: false,
+				content: null,
+				error: argsError,
+				durationMs: Date.now() - startTime,
+			};
+		}
+
+		// Validate cwd if basePath is set (GAP-CMD-001)
+		if (this.options.basePath) {
+			const cwdValue = (parsed.data as Record<string, unknown>)['cwd'];
+			const cwdError = validateCwd(cwdValue, this.options.basePath);
+			if (cwdError) {
+				return {
+					callId: call.callId,
+					success: false,
+					content: null,
+					error: cwdError,
+					durationMs: Date.now() - startTime,
+				};
+			}
 		}
 
 		// Execute with timeout

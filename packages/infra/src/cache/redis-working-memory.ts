@@ -1,5 +1,6 @@
 import type { Turn, WorkingMemory } from '@axel/core/memory';
 import type { ComponentHealth } from '@axel/core/types';
+import { CircuitBreaker } from '../common/circuit-breaker.js';
 
 /** Minimal Redis client interface (subset used by this adapter) */
 interface RedisClient {
@@ -23,12 +24,6 @@ interface PgPool {
 const MAX_TURNS = 20;
 const TTL_SECONDS = 3600;
 
-/** Track Redis failure state for circuit-breaker-like degradation */
-interface RedisState {
-	consecutiveFailures: number;
-	isOpen: boolean;
-}
-
 /**
  * Redis-backed Working Memory (ADR-003, ADR-013 M1).
  *
@@ -40,11 +35,15 @@ class RedisWorkingMemory implements WorkingMemory {
 
 	private readonly redis: RedisClient;
 	private readonly pg: PgPool;
-	private readonly redisState: RedisState = { consecutiveFailures: 0, isOpen: false };
+	private readonly redisCircuit: CircuitBreaker;
 
 	constructor(redis: RedisClient, pg: PgPool) {
 		this.redis = redis;
 		this.pg = pg;
+		this.redisCircuit = new CircuitBreaker({
+			failureThreshold: 5,
+			cooldownMs: 60_000,
+		});
 	}
 
 	async pushTurn(userId: string, turn: Turn): Promise<void> {
@@ -63,32 +62,33 @@ class RedisWorkingMemory implements WorkingMemory {
 		);
 
 		// Redis cache update (fire-and-forget on failure)
-		if (!this.redisState.isOpen) {
-			try {
+		try {
+			await this.redisCircuit.execute(async () => {
 				const key = `axel:working:${userId}:turns`;
 				await this.redis.rpush(key, JSON.stringify(turn));
 				await this.redis.ltrim(key, -MAX_TURNS, -1);
 				await this.redis.expire(key, TTL_SECONDS);
-				this.onRedisSuccess();
-			} catch (error: unknown) {
-				this.onRedisFailure();
-			}
+			});
+		} catch {
+			// CircuitBreaker already recorded the failure
+			// Fall through silently (PG write already succeeded)
 		}
 	}
 
 	async getTurns(userId: string, limit: number): Promise<readonly Turn[]> {
 		// Try Redis first
-		if (!this.redisState.isOpen) {
-			try {
+		try {
+			const cached = await this.redisCircuit.execute(async () => {
 				const key = `axel:working:${userId}:turns`;
-				const cached = await this.redis.lrange(key, -limit, -1);
-				if (cached.length > 0) {
-					this.onRedisSuccess();
-					return cached.map((s) => JSON.parse(s) as Turn);
-				}
-			} catch (error: unknown) {
-				this.onRedisFailure();
+				return await this.redis.lrange(key, -limit, -1);
+			});
+
+			if (cached.length > 0) {
+				return cached.map((s) => JSON.parse(s) as Turn);
 			}
+		} catch {
+			// CircuitBreaker already recorded the failure
+			// Fall through to PG
 		}
 
 		// PG fallback
@@ -115,15 +115,13 @@ class RedisWorkingMemory implements WorkingMemory {
 	}
 
 	async getSummary(userId: string): Promise<string | null> {
-		if (!this.redisState.isOpen) {
-			try {
-				const summary = await this.redis.get(`axel:working:${userId}:summary`);
-				this.onRedisSuccess();
-				return summary;
-			} catch (error: unknown) {
-				this.onRedisFailure();
-				// PG fallback — fall through to PG query below
-			}
+		try {
+			return await this.redisCircuit.execute(async () => {
+				return await this.redis.get(`axel:working:${userId}:summary`);
+			});
+		} catch {
+			// CircuitBreaker already recorded the failure
+			// Fall through to PG
 		}
 
 		// PG fallback
@@ -139,10 +137,12 @@ class RedisWorkingMemory implements WorkingMemory {
 		let turns: Turn[];
 
 		try {
-			const cached = await this.redis.lrange(key, 0, -1);
+			const cached = await this.redisCircuit.execute(async () => {
+				return await this.redis.lrange(key, 0, -1);
+			});
 			turns = cached.map((s) => JSON.parse(s) as Turn);
-		} catch (error: unknown) {
-			this.onRedisFailure();
+		} catch {
+			// CircuitBreaker already recorded the failure
 			// PG fallback — read turns from PG
 			const result = await this.pg.query<{
 				turn_id: number;
@@ -171,9 +171,12 @@ class RedisWorkingMemory implements WorkingMemory {
 		const summary = turns.map((t) => `${t.role}: ${t.content}`).join('\n');
 
 		try {
-			await this.redis.set(`axel:working:${userId}:summary`, summary, 'EX', TTL_SECONDS);
-		} catch (error: unknown) {
-			this.onRedisFailure();
+			await this.redisCircuit.execute(async () => {
+				await this.redis.set(`axel:working:${userId}:summary`, summary, 'EX', TTL_SECONDS);
+			});
+		} catch {
+			// CircuitBreaker already recorded the failure
+			// Fire-and-forget write failure
 		}
 	}
 
@@ -183,7 +186,10 @@ class RedisWorkingMemory implements WorkingMemory {
 		const summaryKey = `axel:working:${userId}:summary`;
 
 		try {
-			const cached = await this.redis.lrange(turnsKey, 0, -1);
+			const cached = await this.redisCircuit.execute(async () => {
+				return await this.redis.lrange(turnsKey, 0, -1);
+			});
+
 			if (cached.length > 0) {
 				// Batch insert to PG (idempotent — PG-first means most are already there)
 				for (const serialized of cached) {
@@ -202,47 +208,54 @@ class RedisWorkingMemory implements WorkingMemory {
 					);
 				}
 			}
-		} catch (error: unknown) {
+		} catch {
 			// If Redis read fails, data is already in PG (PG-first pattern)
-			this.onRedisFailure();
+			// CircuitBreaker already recorded the failure
 		}
 
 		try {
-			await this.redis.del(turnsKey);
-			await this.redis.del(summaryKey);
-		} catch (error: unknown) {
-			this.onRedisFailure();
+			await this.redisCircuit.execute(async () => {
+				await this.redis.del(turnsKey);
+				await this.redis.del(summaryKey);
+			});
+		} catch {
+			// CircuitBreaker already recorded the failure
+			// Fire-and-forget delete failure
 		}
 	}
 
 	async clear(userId: string): Promise<void> {
 		try {
-			await this.redis.del(`axel:working:${userId}:turns`);
-			await this.redis.del(`axel:working:${userId}:summary`);
-			this.onRedisSuccess();
-		} catch (error: unknown) {
-			this.onRedisFailure();
+			await this.redisCircuit.execute(async () => {
+				await this.redis.del(`axel:working:${userId}:turns`);
+				await this.redis.del(`axel:working:${userId}:summary`);
+			});
+		} catch {
+			// CircuitBreaker already recorded the failure
+			// Fire-and-forget clear failure
 		}
 	}
 
 	async healthCheck(): Promise<ComponentHealth> {
 		const now = new Date();
 
-		if (this.redisState.isOpen) {
+		if (this.redisCircuit.state === 'open') {
 			return {
 				state: 'degraded',
 				latencyMs: null,
-				message: 'Redis unavailable, using PG fallback',
+				message: 'Redis circuit breaker open, using PG fallback',
 				lastChecked: now,
 			};
 		}
 
 		try {
 			const start = Date.now();
-			await this.redis.get('axel:health:ping');
+			await this.redisCircuit.execute(async () => {
+				await this.redis.get('axel:health:ping');
+			});
 			const latencyMs = Date.now() - start;
 			return { state: 'healthy', latencyMs, message: null, lastChecked: now };
-		} catch (error: unknown) {
+		} catch {
 			return {
 				state: 'degraded',
 				latencyMs: null,
@@ -252,17 +265,6 @@ class RedisWorkingMemory implements WorkingMemory {
 		}
 	}
 
-	private onRedisSuccess(): void {
-		this.redisState.consecutiveFailures = 0;
-		this.redisState.isOpen = false;
-	}
-
-	private onRedisFailure(): void {
-		this.redisState.consecutiveFailures++;
-		if (this.redisState.consecutiveFailures >= 5) {
-			this.redisState.isOpen = true;
-		}
-	}
 }
 
 export { RedisWorkingMemory, type RedisClient, type PgPool };

@@ -208,6 +208,7 @@ function toUnifiedSession(row: SessionRow, activeChannelId: string): UnifiedSess
 		startedAt: row.started_at,
 		lastActivityAt: row.last_activity_at,
 		turnCount: row.turn_count,
+		state: 'active' as const,
 	};
 }
 
