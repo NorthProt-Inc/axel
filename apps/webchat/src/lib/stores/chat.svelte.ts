@@ -46,8 +46,9 @@ export function sendMessage(content: string): void {
 
 	if (wsConnection?.readyState === WebSocket.OPEN && wsAuthenticated) {
 		wsConnection.send(JSON.stringify({
-			type: 'message',
+			type: 'chat',
 			content,
+			channelId: 'webchat',
 			sessionId: currentSessionId,
 		}));
 		isStreaming = true;

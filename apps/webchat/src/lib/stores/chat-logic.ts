@@ -22,6 +22,9 @@ export function parseWsMessage(raw: string): WsMessage | null {
 		if (data.type === 'chunk' && typeof data.content === 'string') {
 			return { type: 'chunk', content: data.content };
 		}
+		if (data.type === 'message_complete' && typeof data.content === 'string') {
+			return { type: 'chunk', content: data.content };
+		}
 		if (data.type === 'done') {
 			return { type: 'done' };
 		}
