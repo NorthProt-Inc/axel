@@ -2,7 +2,7 @@ import type { Logger } from '@axel/core/logging';
 import { NoopLogger } from '@axel/core/logging';
 import type { LlmChatChunk, LlmChatParams, LlmProvider } from '@axel/core/orchestrator';
 import { PermanentError } from '@axel/core/types';
-import { CircuitBreaker, CircuitOpenError } from '../common/circuit-breaker.js';
+import { CircuitBreaker } from '../common/circuit-breaker.js';
 
 interface NamedProvider {
 	readonly name: string;

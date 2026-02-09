@@ -2,17 +2,17 @@
 
 > Managed by Coordinator. Divisions report errors via comms.
 >
-> **Cycle 100 (CTO update)**: **1 error open.** ERR-092 (P0 CRITICAL): `packages/infra/` typecheck 23 errors — stale `packages/core/dist/` + unused import. ERR-091 RESOLVED (Mark 직접 해결, data-quality @google/genai 추가). Mark 10건 커밋 처리. 1156 tests pass. **FIX-BUG-001 미해결** (matchedMemoryIds 논리 버그).
+> **Cycle 101 (CTO update)**: **0 errors open.** ERR-092 RESOLVED (CTO override): root typecheck `tsc -b` 전환으로 project references 정상 resolve, unused import 제거, container.ts type fixes. 1156 tests pass, typecheck PASSES.
 
 ## Open
 
-| ID | Severity | Description | Assigned | Created |
-|----|----------|-------------|----------|---------|
-| ERR-092 | CRITICAL | `packages/infra/` typecheck 23 errors. ROOT CAUSE: stale `packages/core/dist/` — project references resolve to outdated dist missing `logging/`, `interaction-log.ts` exports, `consolidation.ts` exports. 추가: `fallback-provider.ts` unused import `CircuitOpenError`, `pg-semantic-memory.ts` `decayConfig` property stale resolution. FIX: `rm -rf packages/core/dist/` 또는 `pnpm build --filter @axel/core`. | FIX-TYPECHECK-003 (devops, P0) | C100 |
+(none)
 
 ## Resolved
 
 | ID | Resolution | Resolved By | Date |
+|----|------------|-------------|------|
+| ERR-092 | ROOT CAUSE: `composite: true` + `references`에서 `tsc --noEmit`은 project reference dist를 생성하지 않음. FIX: (1) root typecheck `pnpm -r typecheck` → `tsc -b` 전환, (2) stale dist/ + tsbuildinfo 정리, (3) fallback-provider.ts unused `CircuitOpenError` import 제거, (4) container.ts FallbackLlmProvider type predicate 수정 + EmbeddingTaskType 수정. | Lyra (CTO override, FIX-TYPECHECK-003) | 0209C101 |
 |----|------------|-------------|------|
 | ERR-091 | `@google/genai` dependency 추가됨. data-quality typecheck 통과. | **Mark (Human)** 직접 수정 (9fb41b5) | 0209C100 |
 |----|------------|-------------|------|

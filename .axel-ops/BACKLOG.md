@@ -2,22 +2,21 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 100 (CTO update)**: Mark 10건 추가 커밋 (53fb1cf~2649093). 주요 기능: Logger interface+pino, AnthropicTokenCounter, FallbackLlmProvider, PgInteractionLogger, L2→L3 consolidation, batch decay scheduler, WS heartbeat/typing/session_end/tool forwarding, migration 009-011. **1156 tests (1156 pass, 36 skip), 99 files.** typecheck FAIL (ERR-092: infra 23 errors — stale core/dist/). ERR-091 RESOLVED. FIX-TYPECHECK-002 → DONE. QA-024 scope 확대 (10건 추가 커밋).
+> **Cycle 101 (CTO update)**: **ERR-092 RESOLVED (CTO override).** typecheck 스크립트 `pnpm -r typecheck` → `tsc -b` 전환 (project references 정상 resolve). fallback-provider.ts unused import 제거. container.ts type-safe FallbackLlmProvider 초기화 + EmbeddingTaskType 수정. **typecheck PASSES. 1156 tests (1156 pass, 36 skip), 99 files.** FIX-BUG-001 3cy stall → CTO override 예정. QA-024 3cy stall → scope 분할.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FIX-BUG-001 | P1 | dev-core | container.ts `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. **2 cycles.** | C99 |
-| QA-024 | P1 | quality | Mark 커밋 **16건** 종합 리뷰. 범위 확대: Logger+pino, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool forwarding, migration 009-011. TDD §8, §9, §14 검증. **2 cycles.** | C99 (scope 확대 C100) |
-| FIX-TYPECHECK-003 | P0 | devops | ERR-092: `packages/infra/` typecheck 23 errors. stale `packages/core/dist/` 삭제 필요 + `fallback-provider.ts` unused import `CircuitOpenError` 제거. | C100 |
+| FIX-BUG-001 | P1 | dev-core | container.ts `matchedMemoryIds: results.map(r => r.memory.accessCount)` — accessCount를 memoryId로 전달하는 논리 버그 수정. **3 cycles → CTO override next cycle.** | C99 |
+| QA-024 | P1 | quality | Mark 커밋 **16건** 종합 리뷰. **3 cycles → CTO override next cycle.** | C99 (scope 확대 C100) |
 
 ## Queued
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
-| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts → §14 (400 lines) 위반 가능성. persistToMemory 분리. (e5ea290에서 추가 변경됨, 현재 line count 재확인 필요) | C98 |
-| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: Logger, pino, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool, migration 009-011, FilePersonaEngine. | C98 (scope 확장 C100) |
+| FIX-FILESIZE-001 | P2 | dev-core | packages/core/src/orchestrator/inbound-handler.ts → §14 (400 lines) 위반 가능성. persistToMemory 분리. | C98 |
+| SYNC-008 | P2 | arch | PLAN_SYNC Phase F 매핑: Logger, pino, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool, migration 009-011, FilePersonaEngine. **4 cycles queued — Rule 11 경고.** | C98 (scope 확장 C100) |
 | MARK-PERSONA-001 | P2 | — | Mark(Human) 직접 구현: FilePersonaEngine (packages/infra/src/persona/, 168 lines, 19 tests). 커밋됨 (9fb41b5). §1 소유권: infra → dev-infra. | C99 |
 
 ## Cancelled
@@ -43,6 +42,7 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FIX-TYPECHECK-003 | coord (CTO override) | 0209C101 | ERR-092 RESOLVED. root typecheck `tsc -b` 전환, stale dist/ 정리, fallback-provider.ts unused import, container.ts type-safe fixes. 1156 tests, 0 errors. |
 | PLAN-001 | arch | 0207T2200 | docs/plan/v2-open-items-decisions.md |
 | ADR-013 | arch | 0207T2200 | docs/adr/013-six-layer-memory-architecture.md |
 | ADR-014 | arch | 0207T2200 | docs/adr/014-cross-channel-session-router.md |

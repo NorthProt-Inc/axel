@@ -139,7 +139,6 @@ export interface Container {
 	readonly healthCheckTargets: readonly HealthCheckTarget[];
 }
 
-
 /**
  * Minimal ContextDataProvider that delegates to memory layers.
  *
@@ -270,14 +269,18 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 	});
 
 	// LLM fallback chain (GAP-03)
+	const providers: Record<string, LlmProvider> = {
+		anthropic: anthropicProvider,
+		google: googleProvider,
+	};
 	const llmProvider = new FallbackLlmProvider(
 		llmConfig.fallbackChain
+			.filter((name) => name in providers)
 			.map((name) => {
-				if (name === 'anthropic') return { name, provider: anthropicProvider };
-				if (name === 'google') return { name, provider: googleProvider };
-				return null;
-			})
-			.filter((p): p is { name: string; provider: LlmProvider } => p !== null),
+				const provider = providers[name];
+				if (!provider) throw new Error(`Unknown LLM provider: ${name}`);
+				return { name, provider };
+			}),
 		logger,
 	);
 
@@ -325,7 +328,10 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 	const consolidationService = new ConsolidationService({
 		episodicMemory,
 		semanticMemory,
-		embeddingService: { embed: (text: string, taskType: string) => embeddingService.embed(text, taskType) },
+		embeddingService: {
+			embed: (text: string, taskType: 'RETRIEVAL_DOCUMENT' | 'RETRIEVAL_QUERY') =>
+				embeddingService.embed(text, taskType),
+		},
 		llmClient: deps.googleClient,
 		model: llmConfig.google.flashModel,
 		logger,

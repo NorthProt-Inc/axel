@@ -2,34 +2,34 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 100
+## Current Cycle: 101
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 69 cycles | 0 | Active |
-| arch | 2.5 cycles | 5 | 5 (all CTO override) | Idle (29 cycles) |
-| dev-core | 1 cycle | 9 (+1: FIX-MEMORY-001) | 0 | Idle (FIX-MEMORY-001 done) |
-| dev-infra | 1 cycle | 11 | 0 | Idle (24 cycles) |
-| dev-edge | 1 cycle | 21 | 0 | Idle (20 cycles) |
-| quality | 1 cycle | 10 (+2: QA-022, QA-PROACTIVE-C85) | 1 (QA-012, cancelled C39) | Idle (5 cycles) |
-| research | 1 cycle | 3 (RES-006, RES-007, MIGRATE-PLAN-001) | 0 | Idle |
-| devops | 1 cycle | 28 (+3: FIX-OPSDOC/BIOME/README-002) | 0 | Idle |
-| ui-ux | 1 cycle | 7 | 0 | Idle (8 cycles) |
-| audit | 1 cycle | 5 (AUDIT-001~006) | 0 | Idle |
+| coord | — | 70 cycles (+1: FIX-TYPECHECK-003 CTO override) | 0 | Active |
+| arch | 2.5 cycles | 5 | 5 (all CTO override) | Idle (27 cycles) |
+| dev-core | 1 cycle | 9 | 1 (FIX-BUG-001, 3cy) | Stalled |
+| dev-infra | 1 cycle | 11 | 0 | Idle (8 cycles) |
+| dev-edge | 1 cycle | 21 | 0 | Idle (4 cycles) |
+| quality | 1 cycle | 10 | 1 (QA-024, 3cy) | Stalled |
+| research | 1 cycle | 3 | 0 | Idle (12 cycles) |
+| devops | 1 cycle | 28 | 0 | Idle |
+| ui-ux | 1 cycle | 7 | 0 | Idle (19 cycles) |
+| audit | 1 cycle | 5 | 0 | Idle (12 cycles) |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
-| Open Errors | 1 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
+| Open Errors | 0 | 5 | OK |
+| Stalled Tasks (3+ cycles) | 2 (FIX-BUG-001, QA-024) | 0 | **WARNING** |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
-| Typecheck | **FAIL** | PASS | **CRITICAL** (ERR-092: infra 23 errors — stale core/dist/) |
-| Build | FAIL (blocked by typecheck) | PASS | **CRITICAL** |
+| Typecheck | PASS | PASS | OK (ERR-092 RESOLVED) |
+| Build | PASS | PASS | OK |
 
 ## Coverage Tracking
 
@@ -80,3 +80,4 @@
 | 98 | coord (CTO override) | 4 (FIX-DOCS-001, QA-023, MARK-M3M5-001, MARK-EMBED-FIX) | 0 | **Mark 2 커밋 처리 + CTO override 2건.** 1075 tests. 0 errors. |
 | 99 | dev-core, quality, devops | 3 (TEST-ENTITY-001 Mark, MARK-CONFIG-001, MARK-SESSION-001) | 1 (ERR-091) | **Mark 3 추가 커밋 (+33 tests).** 1108 tests. 1 error. |
 | 100 | devops, quality, dev-core | 11 (10 Mark direct + FIX-TYPECHECK-002 Mark) | 1 (ERR-092) | **Mark 10건 대규모 기능 커밋 (+48 tests).** Logger, FallbackLLM, TokenCounter, InteractionLogger, Consolidation, Decay, WS events. ERR-091 RESOLVED, ERR-092 CRITICAL NEW (stale dist). 1156 tests, 99 files. 1 error. |
+| 101 | coord (CTO override) | 1 (FIX-TYPECHECK-003) | 0 | **ERR-092 RESOLVED.** typecheck `tsc -b` 전환 + unused import + container.ts fixes. typecheck PASSES. 1156 tests. 0 errors. 2 stalled tasks (FIX-BUG-001, QA-024 3cy). |
