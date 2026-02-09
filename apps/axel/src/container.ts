@@ -1,5 +1,7 @@
 import type { ContextDataProvider, TokenCounter } from '@axel/core/context';
 import { ContextAssembler } from '@axel/core/context';
+import type { Logger } from '@axel/core/logging';
+import { NoopLogger } from '@axel/core/logging';
 import type {
 	ConceptualMemory,
 	Entity,
@@ -50,6 +52,7 @@ interface ContainerPgPool extends PgPoolDriver {
 
 /** External dependencies injected into the container builder */
 export interface ContainerDeps {
+	readonly logger?: Logger;
 	readonly pgPool: ContainerPgPool;
 	readonly redis: {
 		rpush(key: string, value: string): Promise<number>;
@@ -102,6 +105,7 @@ export interface ContainerDeps {
 
 /** Assembled DI container with all services */
 export interface Container {
+	readonly logger: Logger;
 	readonly pgPool: AxelPgPool;
 	readonly streamBuffer: StreamBuffer;
 	readonly workingMemory: WorkingMemory;
@@ -237,6 +241,9 @@ const GOOGLE_BASE_CONFIG = {
  * No DI framework (ADR-006).
  */
 export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm']): Container {
+	// Logger (fallback to NoopLogger if not provided)
+	const logger: Logger = deps.logger ?? new NoopLogger();
+
 	// Infrastructure layer
 	const pgPool = new AxelPgPool(deps.pgPool, DEFAULT_PG_CONFIG);
 	const streamBuffer = new RedisStreamBuffer(deps.redis);
@@ -306,6 +313,7 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 	];
 
 	return {
+		logger,
 		pgPool,
 		streamBuffer,
 		workingMemory,

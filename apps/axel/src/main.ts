@@ -124,7 +124,7 @@ export async function bootstrap(
 		);
 		await gateway.start();
 		gatewayStop = gateway.stop;
-		console.log(`Axel gateway listening on ${config.host}:${config.port}`);
+		container.logger.info('Axel gateway listening', { host: config.host, port: config.port });
 	}
 
 	// Start all channels
@@ -132,9 +132,11 @@ export async function bootstrap(
 		await channel.start();
 	}
 
-	console.log(
-		`Axel started (env=${config.env}, channels=${channels.length}, gateway=${config.gateway ? 'on' : 'off'})`,
-	);
+	container.logger.info('Axel started', {
+		env: config.env,
+		channels: channels.length,
+		gateway: config.gateway ? 'on' : 'off',
+	});
 
 	// Graceful shutdown handler (ADR-021)
 	let shutdownInProgress = false;
@@ -189,6 +191,8 @@ function createStubPersonaEngine(): PersonaEngine {
 import { createRuntimeDeps } from './runtime-deps.js';
 
 bootstrap(process.env, createRuntimeDeps).catch((err: unknown) => {
-	console.error('Fatal:', err);
+	// Logger may not be initialized at this point — use console as last resort
+	const msg = err instanceof Error ? err.message : String(err);
+	process.stderr.write(`Fatal: ${msg}\n`);
 	process.exit(1);
 });

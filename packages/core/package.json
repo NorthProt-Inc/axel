@@ -9,7 +9,8 @@
 		"./decay": "./src/decay/index.ts",
 		"./context": "./src/context/index.ts",
 		"./persona": "./src/persona/index.ts",
-		"./orchestrator": "./src/orchestrator/index.ts"
+		"./orchestrator": "./src/orchestrator/index.ts",
+		"./logging": "./src/logging/index.ts"
 	},
 	"scripts": {
 		"build": "tsc",

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { PinoLogger } from '@axel/infra';
 import { Redis } from 'ioredis';
 import pg from 'pg';
 
@@ -13,6 +14,11 @@ import type { ContainerDeps } from './container.js';
  * Tests inject mocks/fakes via the ContainerDeps interface instead.
  */
 export function createRuntimeDeps(config: AxelConfig): ContainerDeps {
+	const logger = new PinoLogger({
+		level: config.logging.level,
+		pretty: config.logging.pretty,
+	});
+
 	const pgPool = new pg.Pool({ connectionString: config.db.url });
 	const redis = new Redis(config.redis.url);
 
@@ -41,6 +47,7 @@ export function createRuntimeDeps(config: AxelConfig): ContainerDeps {
 	};
 
 	return {
+		logger,
 		pgPool: pgPool as unknown as ContainerDeps['pgPool'],
 		redis: redis as unknown as ContainerDeps['redis'],
 		anthropicClient,

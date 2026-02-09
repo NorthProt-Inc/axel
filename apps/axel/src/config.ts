@@ -109,6 +109,11 @@ const GatewayConfigSchema = z.object({
 	trustedProxies: z.array(z.string()).default([]),
 });
 
+const LoggingConfigSchema = z.object({
+	level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
+	pretty: z.boolean().default(false),
+});
+
 const PersonaConfigSchema = z.object({
 	path: z.string().default('./data/dynamic_persona.json'),
 	hotReload: z.boolean().default(true),
@@ -137,6 +142,7 @@ export const AxelConfigSchema = z.object({
 	gateway: GatewayConfigSchema.optional(),
 	security: SecurityConfigSchema.default(SecurityConfigSchema.parse({})),
 	persona: PersonaConfigSchema.default(PersonaConfigSchema.parse({})),
+	logging: LoggingConfigSchema.default(LoggingConfigSchema.parse({})),
 });
 
 export type AxelConfig = z.infer<typeof AxelConfigSchema>;
@@ -199,6 +205,10 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 		persona: {
 			path: getEnv(env, 'AXEL_PERSONA_PATH'),
 			hotReload: getEnv(env, 'AXEL_PERSONA_HOT_RELOAD') === 'false' ? false : undefined,
+		},
+		logging: {
+			level: getEnv(env, 'AXEL_LOG_LEVEL'),
+			pretty: getEnv(env, 'AXEL_LOG_PRETTY') === 'true' ? true : undefined,
 		},
 	};
 
