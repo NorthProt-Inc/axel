@@ -20,8 +20,8 @@ export { reactLoop, type ReActLoopParams } from './react-loop.js';
 // Session router
 export { SessionRouter } from './session-router.js';
 
-// Session state validation
-export { assertTransition, isValidTransition } from './session-state.js';
+// Session state validation (legacy — assertTransition only)
+export { assertTransition } from './session-state.js';
 
 // Memory persistence
 export {
@@ -55,3 +55,11 @@ export {
 	type NotificationSender,
 	type ParsedCron,
 } from './notification.js';
+
+// Session state machine (ADR-021)
+export {
+	SessionTransitionError,
+	getValidTransitions,
+	isValidTransition,
+	transition,
+} from './session-state-machine.js';
