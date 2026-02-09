@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
  */
 export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.json();
-	const gatewayUrl = process.env['GATEWAY_URL'] ?? 'http://localhost:3000';
+	const gatewayUrl = process.env['GATEWAY_URL'] ?? 'http://localhost:8000';
 
 	const response = await fetch(`${gatewayUrl}/api/chat`, {
 		method: 'POST',
