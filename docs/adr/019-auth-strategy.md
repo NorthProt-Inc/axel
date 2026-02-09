@@ -1,7 +1,8 @@
 # ADR-019: Authentication and Authorization Strategy
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-08
+> Accepted: 2026-02-09 (FIX-GATEWAY-001 WS auth + INTEG-008 webhook signature verification implemented)
 > Author: Architecture Division
 
 ## Context

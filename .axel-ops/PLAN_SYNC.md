@@ -453,9 +453,9 @@ Source: migration-strategy.md, ADR-016, ADR-021
 
 | Plan Section | Code Location | Status | Last Synced | Notes |
 |---|---|---|---|---|
-| Migration 009 | `tools/migrate/migrations/009_embedding_dimension_3072.sql` | DRIFT | C101 | **DRIFT**: Code restores 3072d native (reverting Matryoshka 1536d from FIX-DIMENSION-001). However, container.ts uses 1536d (MARK-EMBED-FIX). ADR-016 says 1536d Matryoshka. **migration-strategy.md에 009-011 미문서화.** Plan amendment needed to document 009-011 in migration-strategy.md. |
-| Migration 010 | `tools/migrate/migrations/010_add_missing_fk.sql` | IN_SYNC | C101 | FK constraints: interaction_logs.session_id→sessions, memories.source_session→sessions. ON DELETE SET NULL. Data integrity. 11 lines. **migration-strategy.md 미문서화.** |
-| Migration 011 | `tools/migrate/migrations/011_consolidation_tracking.sql` | IN_SYNC | C101 | sessions.consolidated_at + idx_sessions_unconsolidated. Supports L2→L3 consolidation. 9 lines. **migration-strategy.md 미문서화.** |
+| Migration 009 | `tools/migrate/migrations/009_embedding_dimension_3072.sql` | DEPRECATED | C103 | **RESOLVED (FIX-MIGRATION-009).** Migration 009 is DEPRECATED — conflicts with ADR-016 (1536d Matryoshka, Mark approved). Migration 003 already defines vector(1536). migration-strategy.md updated: deprecation notice + no-op replacement guidance for DevOps. |
+| Migration 010 | `tools/migrate/migrations/010_add_missing_fk.sql` | IN_SYNC | C103 | FK constraints: interaction_logs.session_id→sessions, memories.source_session→sessions. ON DELETE SET NULL. Data integrity. 11 lines. Documented in migration-strategy.md (FIX-MIGRATION-009). |
+| Migration 011 | `tools/migrate/migrations/011_consolidation_tracking.sql` | IN_SYNC | C103 | sessions.consolidated_at + idx_sessions_unconsolidated. Supports L2→L3 consolidation. 9 lines. Documented in migration-strategy.md (FIX-MIGRATION-009). |
 
 ### F.9 FilePersonaEngine (MARK-PERSONA-001)
 
@@ -489,8 +489,8 @@ Source: RES-007 (CLI 기억 상실 ROOT CAUSE)
 
 | ID | Severity | Location | Issue | Resolution |
 |---|---|---|---|---|
-| DRIFT-009 | MEDIUM | migration 009 vs ADR-016 / container.ts | 009 restores 3072d, but container.ts uses 1536d, ADR-016 says 1536d Matryoshka. Dimension inconsistency. | Plan amendment needed: clarify final dimension decision + update migration-strategy.md |
-| DRIFT-MIGDOC | MEDIUM | migration-strategy.md | Migrations 009-011 not documented in migration-strategy.md execution order or directory structure. | Plan amendment: add 009-011 documentation |
+| ~~DRIFT-009~~ | ~~MEDIUM~~ | ~~migration 009 vs ADR-016 / container.ts~~ | **RESOLVED C103 (FIX-MIGRATION-009).** Migration 009 marked DEPRECATED in migration-strategy.md. No-op replacement guidance written for DevOps. ADR-016 confirms 1536d. | arch (FIX-MIGRATION-009 C103). |
+| ~~DRIFT-MIGDOC~~ | ~~MEDIUM~~ | ~~migration-strategy.md~~ | **RESOLVED C103 (FIX-MIGRATION-009).** Migrations 009-011 fully documented in migration-strategy.md: directory structure, SQL, execution order, notes. | arch (FIX-MIGRATION-009 C103). |
 | ~~FIX-BUG-001~~ | ~~HIGH~~ | ~~container.ts matchedMemoryIds~~ | **RESOLVED C102.** ScoredMemory.dbId added (core/memory/types.ts), PG search returns id (infra/db/pg-semantic-memory.ts), container.ts uses `scored.map(s => s.dbId ?? 0)`. | Lyra (CTO override C102). |
 
 ## Drift Log
@@ -544,3 +544,5 @@ Source: RES-007 (CLI 기억 상실 ROOT CAUSE)
 | 101 | F.9 FilePersonaEngine | NOT_STARTED→IN_SYNC | MARK-PERSONA-001. infra/persona/file-persona-engine.ts (168 lines). Hot-reload + atomic write + Zod validation. 384-line test. ADR-013 L4. | arch (SYNC-008) |
 | 101 | F.10 Memory Persistence | NOT_STARTED→IN_SYNC | FIX-MEMORY-001/002/003. InboundHandler memory DI + persistToMemory(). Shutdown per-user flush. SemanticMemoryWriter M3 write path. RES-007 ROOT CAUSE resolved. | arch (SYNC-008) |
 | 101 | C.1 Semantic decay() | AUD-057 NOTE→RESOLVED | MARK-DECAY-BATCH. pg-semantic-memory.ts decay() now imports decayBatch() from @axel/core/decay. ADR-015 8-step formula implemented. | arch (SYNC-008) |
+| 103 | F.8 Migration 009 | DRIFT→DEPRECATED | Migration 009 (3072d) conflicts with ADR-016 (1536d). Marked DEPRECATED in migration-strategy.md. No-op replacement guidance for DevOps. Directory structure + execution order updated with 009-011. | arch (FIX-MIGRATION-009) |
+| 103 | F.8 Migrations 010-011 | undocumented→IN_SYNC | Migrations 010 (FK constraints) and 011 (consolidation tracking) fully documented in migration-strategy.md with SQL, notes. | arch (FIX-MIGRATION-009) |

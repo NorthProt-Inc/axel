@@ -1,7 +1,8 @@
 # ADR-018: Token Counting Strategy — Anthropic SDK countTokens
 
-> Status: PROPOSED
+> Status: ACCEPTED
 > Date: 2026-02-08
+> Accepted: 2026-02-09 (MARK-TOKEN-COUNTER AnthropicTokenCounter implementation verified)
 > Author: Architecture Division
 
 ## Context

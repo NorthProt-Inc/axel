@@ -38,6 +38,12 @@ tools/migrate/migrations/
 ├── 007_fix_sessions_schema.down.sql
 ├── 008_session_summaries.sql
 ├── 008_session_summaries.down.sql
+├── 009_embedding_dimension_3072.sql        ⚠ DEPRECATED — see note below
+├── 009_embedding_dimension_3072.down.sql
+├── 010_add_missing_fk.sql
+├── 010_add_missing_fk.down.sql
+├── 011_consolidation_tracking.sql
+├── 011_consolidation_tracking.down.sql
 └── README.md
 ```
 
@@ -465,6 +471,91 @@ DROP TABLE IF EXISTS session_summaries;
 > dedicated table with a 1:1 FK relationship, enabling independent lifecycle management
 > and efficient retrieval without loading full session data.
 
+### 009: Embedding Dimension 3072 — ⚠ DEPRECATED
+
+> **⚠ WARNING**: This migration is **DEPRECATED and MUST NOT be executed** on production databases.
+> It conflicts with ADR-016 (1536d Matryoshka truncation, Mark approved ERR-069) and
+> container.ts (`embeddingDimension: 1536`). See DRIFT-009 below for details.
+
+**`009_embedding_dimension_3072.sql` (up)** — DEPRECATED
+```sql
+-- ⚠ DEPRECATED: DO NOT EXECUTE. Conflicts with ADR-016 (1536d decision).
+-- Was created before FIX-DIMENSION-001 (Mark human direct, C68) finalized 1536d.
+-- Kept for migration version continuity (version 009 is reserved).
+
+-- Alters memories.embedding from vector(1536) to vector(3072)
+-- and rebuilds HNSW index using halfvec(3072) cast.
+```
+
+**`009_embedding_dimension_3072.down.sql`** — Reverts to 1536d with standard HNSW.
+
+**DRIFT-009 Resolution**: Migration 009 was authored when 3072d native + halfvec HNSW
+indexing was being explored. Subsequently, Mark(Human) approved and directly applied
+the 1536d Matryoshka truncation approach in FIX-DIMENSION-001 (C68), which updated
+migration 003 to `vector(1536)` with standard HNSW index. ADR-016 was amended to
+confirm 1536d. Migration 009 is now obsolete.
+
+**Action Required (DevOps)**: Replace migration 009 content with a no-op migration
+(comment-only SQL) to preserve version sequence. Example:
+```sql
+-- Migration 009: Reserved (originally embedding dimension change, now superseded)
+-- ADR-016 confirmed 1536d Matryoshka truncation (FIX-DIMENSION-001, C68).
+-- Migration 003 already defines vector(1536). No schema change needed.
+SELECT 1; -- no-op
+```
+
+### 010: Add Missing Foreign Keys
+
+**`010_add_missing_fk.sql` (up)**
+```sql
+-- Migration 010: Add missing foreign key constraints
+-- Prevents orphaned session references in interaction_logs and memories
+
+ALTER TABLE interaction_logs
+  ADD CONSTRAINT fk_interaction_logs_session
+  FOREIGN KEY (session_id) REFERENCES sessions(session_id) ON DELETE SET NULL;
+
+ALTER TABLE memories
+  ADD CONSTRAINT fk_memories_source_session
+  FOREIGN KEY (source_session) REFERENCES sessions(session_id) ON DELETE SET NULL;
+```
+
+**`010_add_missing_fk.down.sql`**
+```sql
+-- Rollback 010: Remove foreign key constraints
+ALTER TABLE interaction_logs DROP CONSTRAINT IF EXISTS fk_interaction_logs_session;
+ALTER TABLE memories DROP CONSTRAINT IF EXISTS fk_memories_source_session;
+```
+
+> **Note**: FK constraints use ON DELETE SET NULL to prevent cascade deletion of
+> interaction logs and memories when sessions are removed. This preserves historical
+> data while maintaining referential integrity.
+
+### 011: Consolidation Tracking
+
+**`011_consolidation_tracking.sql` (up)**
+```sql
+-- Migration 011: Add consolidation tracking to sessions
+-- Tracks which sessions have been consolidated (L2→L3 memory extraction)
+
+ALTER TABLE sessions ADD COLUMN consolidated_at TIMESTAMPTZ;
+
+CREATE INDEX idx_sessions_unconsolidated
+  ON sessions (ended_at)
+  WHERE ended_at IS NOT NULL AND consolidated_at IS NULL;
+```
+
+**`011_consolidation_tracking.down.sql`**
+```sql
+DROP INDEX IF EXISTS idx_sessions_unconsolidated;
+ALTER TABLE sessions DROP COLUMN IF EXISTS consolidated_at;
+```
+
+> **Note**: The partial index `idx_sessions_unconsolidated` efficiently identifies
+> ended sessions that have not yet been processed by the L2→L3 consolidation service
+> (MARK-CONSOLIDATION). The consolidation scheduler queries this index periodically
+> to find sessions with `minTurns >= 3` for LLM-based memory extraction.
+
 ---
 
 ## Data Migration: axnmihn → Axel
@@ -475,7 +566,10 @@ See v2.0 Plan Section 5 for full details.
 ### Execution Order
 
 ```
-1. Run schema migrations (001-008)
+1. Run schema migrations (001-008, skip 009, then 010-011)
+   NOTE: Migration 009 is DEPRECATED (see above). For fresh installs,
+   migration 003 already defines vector(1536). For existing databases,
+   009 must be replaced with a no-op before execution.
 2. Run data migration tool:
    a. SQLite sessions/messages → PostgreSQL sessions, messages
    b. ChromaDB vectors → PostgreSQL memories (re-embed with gemini-embedding-001)
