@@ -177,11 +177,17 @@ export $(grep -v '^#' .env | xargs)
 node tools/migrate/dist/cli.js up
 ```
 
+## Documentation
+
+| Document | Status | Notes |
+|----------|--------|-------|
+| `operation.md` | ✅ CREATED | User-friendly operations manual (C87) — installation, configuration, execution, debugging, operations |
+
 ## Known Issues
 
 | ID | Severity | Description | Status |
 |----|----------|-------------|--------|
-| — | — | No open issues | — |
+| cycle.sh untracked files WARNING | INFO | patches/ directory not in devops owned paths | Diagnosed (C87, DIAG-UNTRACK-001) — requires cycle.sh:93 update |
 
 ## Known Issues (Resolved)
 
