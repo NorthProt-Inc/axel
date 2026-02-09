@@ -44,6 +44,10 @@ export function createRuntimeDeps(config: AxelConfig): ContainerDeps {
 				})() as ReturnType<ContainerDeps['anthropicClient']['messages']['create']>;
 			},
 		},
+		async countTokens(params) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK bridge
+			return (anthropic as any).messages.countTokens(params) as Promise<{ input_tokens: number }>;
+		},
 	};
 
 	return {

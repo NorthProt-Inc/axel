@@ -20,3 +20,7 @@ export { defineTool, ToolRegistry, McpToolExecutor, validatePath } from './mcp/t
 export { SemanticMemoryWriter } from './memory/semantic-memory-writer.js';
 export { EntityExtractor } from './memory/entity-extractor.js';
 export { PinoLogger, type PinoLoggerConfig } from './logging/pino-logger.js';
+export {
+	AnthropicTokenCounter,
+	type AnthropicCountTokensClient,
+} from './context/anthropic-token-counter.js';

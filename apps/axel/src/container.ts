@@ -16,6 +16,7 @@ import { SessionRouter } from '@axel/core/orchestrator';
 import type { MemorySearchResult } from '@axel/core/types';
 import {
 	AnthropicLlmProvider,
+	AnthropicTokenCounter,
 	AxelPgPool,
 	EntityExtractor,
 	GeminiEmbeddingService,
@@ -91,6 +92,10 @@ export interface ContainerDeps {
 				};
 			}>;
 		};
+		countTokens(params: {
+			model: string;
+			messages: readonly { role: string; content: string }[];
+		}): Promise<{ input_tokens: number }>;
 	};
 	readonly googleClient: GoogleGenAIClient;
 	readonly embeddingClient: {
@@ -127,16 +132,6 @@ export interface Container {
 	readonly healthCheckTargets: readonly HealthCheckTarget[];
 }
 
-/** Minimal TokenCounter using heuristic estimation */
-class EstimateTokenCounter implements TokenCounter {
-	async count(text: string): Promise<number> {
-		return this.estimate(text);
-	}
-
-	estimate(text: string): number {
-		return Math.ceil(text.length / 3);
-	}
-}
 
 /**
  * Minimal ContextDataProvider that delegates to memory layers.
@@ -287,8 +282,12 @@ export function createContainer(deps: ContainerDeps, llmConfig: AxelConfig['llm'
 	const toolRegistry = new ToolRegistry();
 	const toolExecutor = new McpToolExecutor(toolRegistry);
 
-	// Context assembly (ADR-012)
-	const tokenCounter = new EstimateTokenCounter();
+	// Context assembly (ADR-012, ADR-018 2-tier)
+	const tokenCounter = new AnthropicTokenCounter(
+		deps.anthropicClient,
+		llmConfig.anthropic.model,
+		logger,
+	);
 	const contextDataProvider = new MemoryContextDataProvider(
 		workingMemory,
 		episodicMemory,

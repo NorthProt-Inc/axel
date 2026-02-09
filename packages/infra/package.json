@@ -17,6 +17,7 @@
 		"@axel/core": "workspace:*",
 		"@google/generative-ai": "^0.24.1",
 		"ioredis": "^5.9.2",
+		"lru-cache": "^11.2.5",
 		"pg": "^8.18.0",
 		"pino": "^10.3.0",
 		"zod": "^4.3.6"
