@@ -183,7 +183,7 @@ Source: plan §3.1 L2 / ADR-002 / ADR-013 / migration-strategy.md
 |---|---|---|---|---|---|
 | L2 PG Pool | `packages/infra/src/db/pg-pool.ts` | `PgPool`, `PgPoolConfig` | IN_SYNC | C46 | ADR-002. Connection pool wrapper with healthCheck(). 107 lines. |
 | L2 Episodic | `packages/infra/src/db/pg-episodic-memory.ts` | `PgEpisodicMemory` | IN_SYNC | C46 | Implements EpisodicMemory (core). createSession/endSession/addMessage/getRecentSessions/searchByTopic/searchByContent. 166 lines. 62 tests total (db module). **Note**: searchByTopic uses ILIKE (AUD-053 MEDIUM — trigram index concern). addMessage non-atomic INSERT+UPDATE (AUD-063 LOW). |
-| L2 Semantic | `packages/infra/src/db/pg-semantic-memory.ts` | `PgSemanticMemory` | IN_SYNC | C46 | Implements SemanticMemory (core). store/search/decay + HNSW pgvector index (3072d). Hybrid scoring 0.7v+0.3t. 234 lines. **Note**: decay() only does threshold DELETE, not ADR-015 8-step formula (AUD-057 MEDIUM — orchestration layer needed). |
+| L2 Semantic | `packages/infra/src/db/pg-semantic-memory.ts` | `PgSemanticMemory` | IN_SYNC | C101 | Implements SemanticMemory (core). store/search/decay + HNSW pgvector index. Hybrid scoring 0.7v+0.3t. 289 lines. **AUD-057 RESOLVED** (MARK-DECAY-BATCH): decay() now implements ADR-015 8-step formula via `decayBatch()` import from @axel/core/decay. Legacy mode (threshold-only DELETE) retained as fallback when no decayConfig. |
 | L2 Conceptual | `packages/infra/src/db/pg-conceptual-memory.ts` | `PgConceptualMemory` | IN_SYNC | C46 | Implements ConceptualMemory (core). Entity/relation CRUD + BFS traversal via recursive CTE. 167 lines. |
 | L2 Meta | `packages/infra/src/db/pg-meta-memory.ts` | `PgMetaMemory` | IN_SYNC | C46 | Implements MetaMemory (core). Access pattern tracking + hot memories materialized view. 105 lines. |
 | L2 Session | `packages/infra/src/db/pg-session-store.ts` | `PgSessionStore` | IN_SYNC | C46 | Implements SessionStore (core/orchestrator). resolve/update/end/getStats. 214 lines. **Note**: sessions table includes user_id added by dev-infra (plan-amendment PLAN-AMEND-001 pending arch). |
@@ -377,6 +377,122 @@ Source: plan L7-L9 integration
 |---|---|---|---|---|
 | sessions table | `migration-strategy.md`, `002_episodic_memory.sql` | AMENDED | C62 | channel_history JSONB→TEXT[] (PgSessionStore array_append compatibility). last_activity_at TIMESTAMPTZ added. idx_sessions_user uses last_activity_at. ERR-070 resolved. |
 
+## Phase F: Production Hardening (Mark Human Direct + Division Fixes)
+
+Mark(Human) 직접 구현 10건 커밋 (C98-C101) + Division fixes (FIX-MEMORY-001~003). Logger, FallbackLlmProvider, AnthropicTokenCounter, PgInteractionLogger, L2→L3 consolidation, batch decay, WS heartbeat/typing/session_end/tool, migrations 009-011, FilePersonaEngine.
+
+### F.1 Structured Logging (MARK-LOGGER-001)
+
+Source: plan L10 / ADR-011
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L10 Logger Interface | `packages/core/src/logging/types.ts` | `Logger`, `NoopLogger` | IN_SYNC | C101 | DI contract (ADR-006/011). 5 methods: info/warn/error/debug/child. NoopLogger for tests. 20 lines. 31-line test. |
+| L10 Logger Barrel | `packages/core/src/logging/index.ts` | (barrel export) | IN_SYNC | C101 | Re-exports Logger + NoopLogger. Subpath: `@axel/core/logging`. |
+| L10 PinoLogger | `packages/infra/src/logging/pino-logger.ts` | `PinoLogger`, `PinoLoggerConfig` | IN_SYNC | C101 | ADR-011. pino wrapper. JSON output (production), pino-pretty (dev). child() for request binding. 60 lines. 48-line test. |
+
+### F.2 FallbackLlmProvider (MARK-FALLBACK-LLM)
+
+Source: plan L5 §fallbackChain (lines 596, 1300), ADR-021
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L5 Fallback Chain | `packages/infra/src/llm/fallback-provider.ts` | `FallbackLlmProvider` | IN_SYNC | C101 | ADR-021 resilience pattern. Chain-of-Responsibility with per-provider CircuitBreaker (failureThreshold=5, cooldownMs=60s). AsyncGenerator streaming with failure recording during iteration. PermanentError on all-fail. 92 lines. 130-line test. Plan `fallbackChain: ["anthropic", "google"]` (line 596) realized as DI provider list. |
+
+### F.3 AnthropicTokenCounter (MARK-TOKEN-COUNTER)
+
+Source: plan L3 §3.3 / ADR-018 / RES-002
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L3 TokenCounter | `packages/infra/src/context/anthropic-token-counter.ts` | `AnthropicTokenCounter`, `AnthropicCountTokensClient` | IN_SYNC | C101 | ADR-018 (RES-002). 2-tier: primary=API `countTokens()`, fallback=`estimate(text.length/3)`. LRU cache (max 1000, SHA-256 keys). Implements core `TokenCounter` interface. 66 lines. 77-line test. |
+
+### F.4 InteractionLogger (MARK-INTERACTION-LOG)
+
+Source: plan L10 telemetry / interaction_logs table (plan:860-881)
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L10 InteractionLog | `packages/core/src/orchestrator/interaction-log.ts` | `InteractionLog`, `InteractionLogger` | IN_SYNC | C101 | DI contract. 10 telemetry fields: sessionId, channelId, effectiveModel, tier, routerReason, latencyMs, tokensIn/Out, toolCalls[], error. 23 lines. |
+| L10 PgInteractionLogger | `packages/infra/src/db/pg-interaction-logger.ts` | `PgInteractionLogger` | IN_SYNC | C101 | Fire-and-forget PG INSERT to interaction_logs (migration 006). Errors logged but never propagated. 48 lines. 70-line test. Plan:860-881 schema verified match. |
+
+### F.5 L2→L3 Memory Consolidation (MARK-CONSOLIDATION)
+
+Source: plan §3.1 / ADR-021 §3
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L3 Consolidation Core | `packages/core/src/memory/consolidation.ts` | `ExtractedMemory`, `ExtractedMemoryType`, `ConsolidationConfig`, `shouldConsolidate()`, `formatSessionForExtraction()`, `parseExtractedMemories()`, `EXTRACTION_PROMPT` | IN_SYNC | C101 | Pure functions + types. 3 memory types: fact/preference/insight. minTurns=3, similarityThreshold=0.92. JSON extraction from LLM response (markdown fence stripping). 86 lines. 81-line test. |
+| L3 ConsolidationService | `packages/infra/src/memory/consolidation-service.ts` | `ConsolidationService`, `ConsolidationLlm`, `ConsolidationEmbedding`, `ConsolidationResult` | IN_SYNC | C101 | Orchestrates L2→L3 extraction pipeline: findUnconsolidated → loadMessages → Gemini Flash LLM → parseExtracted → embed → deduplicate (similarity ≥0.92) → store/updateAccess → markConsolidated. Batch processing (default 50 sessions). 152 lines. 156-line test. |
+| L3 Migration 011 | `tools/migrate/migrations/011_consolidation_tracking.sql` | — | IN_SYNC | C101 | `sessions.consolidated_at TIMESTAMPTZ` + partial index `idx_sessions_unconsolidated` for efficient unconsolidated session queries. 9 lines. |
+
+### F.6 Batch Decay Scheduler (MARK-DECAY-BATCH)
+
+Source: plan §3.2 / ADR-015
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| §3.2 Decay Scheduler | `apps/axel/src/main.ts` (lines 151-171) | IN_SYNC | C101 | `setInterval` scheduler using `config.memory.consolidationIntervalHours`. Calls `semanticMemory.decay()` with ADR-015 config. Logs processed/deleted/avgImportance stats. |
+| §3.2 Adaptive Decay | `packages/infra/src/db/pg-semantic-memory.ts` (lines 93-168) | IN_SYNC | C101 | **AUD-057 RESOLVED.** decay() now has 2 modes: (1) Legacy: threshold DELETE only. (2) Adaptive: load all memories → map to DecayInput → `decayBatch()` (core/decay) ADR-015 8-step formula → batch UPDATE/DELETE. Stats: deleted, min/max/avg importance. 289 lines total. |
+
+### F.7 WS Heartbeat/Typing/Session_End/Tool Events (MARK-WS-EVENTS)
+
+Source: docs/plan/websocket-protocol.md
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| WS Heartbeat | `packages/gateway/src/ws-handler.ts` (lines 20-44) | `setupWsHeartbeat()`, `AuthenticatedWebSocket` | IN_SYNC | C101 | Per websocket-protocol.md: ping 30s, pong timeout 10s, max 3 missed pongs → close. Constants: WS_PING_INTERVAL_MS=30000, WS_PONG_TIMEOUT_MS=10000, WS_MAX_MISSED_PONGS=3. |
+| WS Typing | `packages/gateway/src/ws-handler.ts` (lines 150-153) | — | IN_SYNC | C101 | `typing_start`/`typing_stop` acknowledged as no-op (Phase 2: presence tracking). Per websocket-protocol.md typing indicator spec. |
+| WS Session End | `packages/gateway/src/ws-handler.ts` (lines 155-157, 221-257) | `handleWsSessionEnd()` | IN_SYNC | C101 | `session_end` message type → validates sessionId → calls `deps.endSession()` → returns `session_ended` event. Error handling with requestId. |
+| WS Tool Events | `packages/gateway/src/ws-handler.ts` (lines 193-219) | — | IN_SYNC | C101 | `handleWsChatMessage()` forwards ReActEvents (including tool calls) to client via `ws.send(JSON.stringify(event))` callback. |
+| WS Auth | `packages/gateway/src/ws-handler.ts` (lines 64-122) | `setupWsAuth()` | IN_SYNC | C101 | First-message auth per ADR-019. Auth timeout 5s. 64KB message size limit. Timing-safe token comparison. 257 lines total. 322-line test. |
+
+### F.8 Migrations 009-011
+
+Source: migration-strategy.md, ADR-016, ADR-021
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| Migration 009 | `tools/migrate/migrations/009_embedding_dimension_3072.sql` | DRIFT | C101 | **DRIFT**: Code restores 3072d native (reverting Matryoshka 1536d from FIX-DIMENSION-001). However, container.ts uses 1536d (MARK-EMBED-FIX). ADR-016 says 1536d Matryoshka. **migration-strategy.md에 009-011 미문서화.** Plan amendment needed to document 009-011 in migration-strategy.md. |
+| Migration 010 | `tools/migrate/migrations/010_add_missing_fk.sql` | IN_SYNC | C101 | FK constraints: interaction_logs.session_id→sessions, memories.source_session→sessions. ON DELETE SET NULL. Data integrity. 11 lines. **migration-strategy.md 미문서화.** |
+| Migration 011 | `tools/migrate/migrations/011_consolidation_tracking.sql` | IN_SYNC | C101 | sessions.consolidated_at + idx_sessions_unconsolidated. Supports L2→L3 consolidation. 9 lines. **migration-strategy.md 미문서화.** |
+
+### F.9 FilePersonaEngine (MARK-PERSONA-001)
+
+Source: plan L4 (lines 1155-1227), ADR-006, ADR-013
+
+| Plan Section | Code Location | Interfaces | Status | Last Synced | Notes |
+|---|---|---|---|---|---|
+| L4 FilePersonaEngine | `packages/infra/src/persona/file-persona-engine.ts` | `FilePersonaEngine`, `FilePersonaEngineConfig` | IN_SYNC | C101 | Implements PersonaEngine (core). JSON file I/O + Zod validation (PersonaSchema). Hot-reload via fs.watch (debounce 300ms). Atomic writes (tmp+rename). evolve() appends learned_behaviors + version++. updatePreference() updates user_preferences + version++. healthCheck() with latency. 168 lines. 384-line test (19 tests). |
+
+### F.10 Memory Persistence Wiring (FIX-MEMORY-001/002/003)
+
+Source: RES-007 (CLI 기억 상실 ROOT CAUSE)
+
+| Plan Section | Code Location | Status | Last Synced | Notes |
+|---|---|---|---|---|
+| L7 InboundHandler Memory | `packages/core/src/orchestrator/inbound-handler.ts` | IN_SYNC | C101 | FIX-MEMORY-001: WorkingMemory+EpisodicMemory DI added to InboundHandlerDeps. persistToMemory() calls pushTurn(user+assistant) + addMessage(user+assistant). Token estimate ~4 chars/token. 294 lines. 387 core tests. |
+| Shutdown Flush | `apps/axel/src/lifecycle.ts` | IN_SYNC | C101 | FIX-MEMORY-002: gracefulShutdown flush('*') → per-user flush via ActiveUserTracker.getActiveUserIds(). Per-user error isolation. |
+| M3 Semantic Write | `packages/infra/src/memory/semantic-memory-writer.ts` | IN_SYNC | C101 | FIX-MEMORY-003: SemanticMemoryWriter bridges EmbeddingProvider→SemanticMemory.store(). Importance heuristic: content length (min 100) + keyword matching ('remember','important','기억','중요'). Fire-and-forget error handling. 18 tests, 100% coverage. |
+
+### F.11 Cross-Package Interface Summary (Phase F additions)
+
+| Core Interface | Infra Implementation | Notes |
+|---|---|---|
+| `Logger` (core/logging) | `PinoLogger` (infra/logging) | DI contract. JSON (prod) / pretty (dev). ADR-011. |
+| `TokenCounter` (core/context) | `AnthropicTokenCounter` (infra/context) | LRU-cached API count + fallback estimate. ADR-018. |
+| `InteractionLogger` (core/orchestrator) | `PgInteractionLogger` (infra/db) | Fire-and-forget telemetry. Plan L10. |
+| `PersonaEngine` (core/persona) | `FilePersonaEngine` (infra/persona) | File-based + hot-reload + atomic write. ADR-013 L4. |
+| `LlmProvider` (core/orchestrator) | `FallbackLlmProvider` (infra/llm) | Chain-of-Responsibility + CircuitBreaker. ADR-021. |
+
+### F.12 Known Issues
+
+| ID | Severity | Location | Issue | Resolution |
+|---|---|---|---|---|
+| DRIFT-009 | MEDIUM | migration 009 vs ADR-016 / container.ts | 009 restores 3072d, but container.ts uses 1536d, ADR-016 says 1536d Matryoshka. Dimension inconsistency. | Plan amendment needed: clarify final dimension decision + update migration-strategy.md |
+| DRIFT-MIGDOC | MEDIUM | migration-strategy.md | Migrations 009-011 not documented in migration-strategy.md execution order or directory structure. | Plan amendment: add 009-011 documentation |
+| FIX-BUG-001 | HIGH | container.ts matchedMemoryIds | `results.map(r => r.memory.accessCount)` — accessCount(number) used as memoryId(string). In Progress (dev-core, 3cy). | Awaiting dev-core fix. |
+
 ## Drift Log
 
 | Cycle | Section | Direction | Resolution | Resolved By |
@@ -417,3 +533,14 @@ Source: plan L7-L9 integration
 | 62 | E.5 Channel Bootstrap | NOT_STARTED→IN_SYNC | INTEG-005 (apps/axel/src/bootstrap-channels.ts, 16 tests, 98.85% stmt). createChannels + wireChannels + createHandleMessage. | coord (CTO override, SYNC-007) |
 | 62 | E.6 E2E Roundtrip | NOT_STARTED→IN_SYNC | INTEG-007 (apps/axel/tests/e2e-message-roundtrip.test.ts, 8 tests). CLI→InboundHandler→mockLLM→memory→response. | coord (CTO override, SYNC-007) |
 | 62 | E.7 Schema Fix | DRIFT→AMENDED | FIX-SCHEMA-001. sessions table: channel_history JSONB→TEXT[], last_activity_at added, idx_sessions_user updated. ERR-070 resolved. | coord (CTO override, SYNC-007) |
+| 101 | F.1 Structured Logging | NOT_STARTED→IN_SYNC | MARK-LOGGER-001. core/logging: Logger interface + NoopLogger (20 lines). infra/logging: PinoLogger (60 lines). 2 tests. ADR-011. | arch (SYNC-008) |
+| 101 | F.2 FallbackLlmProvider | NOT_STARTED→IN_SYNC | MARK-FALLBACK-LLM. infra/llm/fallback-provider.ts (92 lines). Chain-of-Responsibility + per-provider CircuitBreaker. 130-line test. ADR-021. | arch (SYNC-008) |
+| 101 | F.3 AnthropicTokenCounter | NOT_STARTED→IN_SYNC | MARK-TOKEN-COUNTER. infra/context/anthropic-token-counter.ts (66 lines). LRU cache + API fallback. 77-line test. ADR-018. | arch (SYNC-008) |
+| 101 | F.4 InteractionLogger | NOT_STARTED→IN_SYNC | MARK-INTERACTION-LOG. core/orchestrator/interaction-log.ts (23 lines) + infra/db/pg-interaction-logger.ts (48 lines). Fire-and-forget PG telemetry. 70-line test. | arch (SYNC-008) |
+| 101 | F.5 L2→L3 Consolidation | NOT_STARTED→IN_SYNC | MARK-CONSOLIDATION. core/memory/consolidation.ts (86 lines) + infra/memory/consolidation-service.ts (152 lines) + migration 011 (9 lines). 237 lines test. | arch (SYNC-008) |
+| 101 | F.6 Batch Decay | NOT_STARTED→IN_SYNC | MARK-DECAY-BATCH. pg-semantic-memory.ts decay() ADR-015 8-step formula via decayBatch(). main.ts scheduler. AUD-057 RESOLVED. | arch (SYNC-008) |
+| 101 | F.7 WS Events | NOT_STARTED→IN_SYNC | MARK-WS-EVENTS. ws-handler.ts (257 lines): heartbeat (30s ping, 10s pong timeout, 3 missed → close), typing (no-op), session_end, tool event forwarding. 322-line test. Per websocket-protocol.md. | arch (SYNC-008) |
+| 101 | F.8 Migrations 009-011 | NOT_STARTED→DRIFT (009) / IN_SYNC (010-011) | Migration 009: 3072d dimension (conflicts with ADR-016 1536d + container.ts 1536d). 010: FK constraints. 011: consolidation tracking. **migration-strategy.md에 미문서화.** | arch (SYNC-008) |
+| 101 | F.9 FilePersonaEngine | NOT_STARTED→IN_SYNC | MARK-PERSONA-001. infra/persona/file-persona-engine.ts (168 lines). Hot-reload + atomic write + Zod validation. 384-line test. ADR-013 L4. | arch (SYNC-008) |
+| 101 | F.10 Memory Persistence | NOT_STARTED→IN_SYNC | FIX-MEMORY-001/002/003. InboundHandler memory DI + persistToMemory(). Shutdown per-user flush. SemanticMemoryWriter M3 write path. RES-007 ROOT CAUSE resolved. | arch (SYNC-008) |
+| 101 | C.1 Semantic decay() | AUD-057 NOTE→RESOLVED | MARK-DECAY-BATCH. pg-semantic-memory.ts decay() now imports decayBatch() from @axel/core/decay. ADR-015 8-step formula implemented. | arch (SYNC-008) |
