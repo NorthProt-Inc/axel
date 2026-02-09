@@ -325,8 +325,10 @@ describe('InMemorySemanticMemory', () => {
 			const uuid2 = await semantic.store(makeNewMemory({ content: 'Second' }));
 			const mem1 = await semantic.getByUuid(uuid1);
 			const mem2 = await semantic.getByUuid(uuid2);
+			expect(mem1).not.toBeNull();
+			expect(mem2).not.toBeNull();
 			expect(mem1?.id).not.toBe(mem2?.id);
-			expect(mem2!.id).toBeGreaterThan(mem1!.id);
+			expect(mem2?.id).toBeGreaterThan(mem1?.id ?? 0);
 		});
 
 		it('should return id in search results for use as matchedMemoryIds', async () => {
