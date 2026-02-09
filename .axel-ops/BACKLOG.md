@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 110**: Feature Sprint 50%. 5 FEAT tasks CTO override 완료. FEAT-CORE-001 → FEAT-UI-001/002 unblocked. 7 queued → next cycle 배정. **1356 tests (verified C110), typecheck PASSES. 0 errors.**
+> **Cycle 111**: Feature Sprint 86%. 5 FEAT tasks CTO override 완료 (FEAT-CORE-002, FEAT-INFRA-001, FEAT-OPS-001, FEAT-CHAN-002, FEAT-UI-001). 2 queued (FEAT-UI-002, FEAT-OPS-002). **1456 tests (verified C111), typecheck PASSES. 0 errors.**
 
 ## In Progress
 
@@ -14,12 +14,7 @@
 
 | ID | Priority | Division | Task | Created |
 |----|----------|----------|------|---------|
-| FEAT-CORE-002 | P1 | dev-core | Proactive Notification 시스템: cron-like 스케줄러, 알림 전송 파이프라인. OpenClaw cron 패턴 참조. TDD. | 0209C107 |
-| FEAT-CHAN-002 | P1 | dev-edge | Voice I/O 기반: Whisper STT + ElevenLabs/OpenAI TTS, ChannelCapabilities voiceInput/voiceOutput 활성화. TDD. | 0209C107 |
-| FEAT-UI-001 | P1 | ui-ux | WebChat 대폭 개선: Mermaid 다이어그램, LaTeX 수식, 파일 업로드 UI, 대화 export (MD/JSON), 모바일 반응형. TDD. | 0209C107 |
 | FEAT-UI-002 | P1 | ui-ux | CLI 개선: 대화 히스토리 탐색, 세션 전환, 파일 드래그앤드롭 입력, 컬러 테마. TDD. | 0209C107 |
-| FEAT-INFRA-001 | P1 | dev-infra | Local LLM 지원: Ollama provider adapter (LlmProvider impl), FallbackLlmProvider 체인 통합. TDD. | 0209C107 |
-| FEAT-OPS-001 | P2 | devops | Observability 스택: Prometheus metrics exporter (/metrics endpoint), 주요 메트릭 (latency, tokens, errors, memory usage). TDD. | 0209C107 |
 | FEAT-OPS-002 | P2 | devops | Backup 자동화: pg_dump cron 스크립트, S3/로컬 저장, retention policy. | 0209C107 |
 
 ## Cancelled
@@ -46,6 +41,11 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FEAT-CORE-002 | coord (CTO override) | 0209C111 | Proactive Notification: NotificationScheduler (cron-like rule engine), parseCronExpression (5-field cron: wildcards, ranges, steps, lists), shouldTrigger, NotificationRuleSchema (Zod), NotificationSender DI. 25 tests. TDD RED→GREEN. |
+| FEAT-INFRA-001 | coord (CTO override) | 0209C111 | Ollama LLM Provider: OllamaLlmProvider (LlmProvider impl), streaming chat, tool calling, ECONNREFUSED/500 retryable, supportsVision config. FallbackLlmProvider 체인 통합 가능. 13 tests. TDD RED→GREEN. |
+| FEAT-OPS-001 | coord (CTO override) | 0209C111 | Prometheus Metrics: Counter (labels), Gauge (inc/dec/set), Histogram (buckets), MetricsRegistry, formatPrometheus (exposition format). Zero external deps. 23 tests. TDD RED→GREEN. |
+| FEAT-CHAN-002 | coord (CTO override) | 0209C111 | Voice I/O: SpeechToTextProvider + TextToSpeechProvider DI contracts (core/types/voice.ts), Zod schemas (STT/TTS config, VoiceEvent), VoiceChannel (AxelChannel impl, transcribe/synthesize/handleAudioInput). 24 tests (12 types + 12 channel). TDD RED→GREEN. |
+| FEAT-UI-001 | coord (CTO override) | 0209C111 | WebChat Export + Rendering: exportToMarkdown/exportToJson (대화 export), parseMermaidBlocks (코드블록 감지), parseLatexBlocks (inline/block LaTeX 감지). 15 tests. TDD RED→GREEN. |
 | FEAT-CORE-001 | coord (CTO override) | 0209C110 | Multi-modal Message: ContentBlock discriminated union (TextBlock, ImageBlock, FileBlock) Zod schemas, isMultiModalContent(), extractTextContent(), LlmProvider.supportsVision. SUPPORTED_IMAGE_TYPES (JPEG/PNG/WebP/GIF), IMAGE_MAX_SIZE_BYTES (5MB). 25 tests. TDD RED→GREEN. |
 | FEAT-TOOL-001 | coord (CTO override) | 0209C110 | Web Search Tool: WebSearchProvider (Brave Search API adapter), createWebSearchTool (defineTool 등록), formatSearchResults Markdown, rate limiting, SafeSearch strict. ToolCategory 'search' 추가. 13 tests. TDD RED→GREEN. |
 | FEAT-TOOL-002 | coord (CTO override) | 0209C110 | File Handler Tool: FileHandler (readFile/writeFile/summarizeFile), path boundary 검증, extension allowlist, max file size, createFileReadTool/createFileWriteTool/createFileSummaryTool. 16 tests. TDD RED→GREEN. |

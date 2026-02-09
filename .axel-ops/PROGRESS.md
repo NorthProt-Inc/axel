@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **Phase G: FEATURE SPRINT.** Human directive P1 — 기능 추가 집중, openclaw 참조, UX 대폭 개선.
-- **Cycle**: 110
-- **Last Updated**: 2026-02-09C110
-- **STATUS**: **5 FEAT TASKS DONE (CTO override).** 3cy stall threshold 도달 → CTO override 실행. rebase_fail ROOT CAUSE: Division worktree 브랜치가 main에서 크게 뒤처져 충돌. FEAT-CORE-001 (multi-modal ContentBlock, 25 tests), FEAT-TOOL-001 (Brave Web Search, 13 tests), FEAT-TOOL-002 (File Handler, 16 tests), FEAT-CHAN-001 (Slack Channel @slack/bolt, 15 tests), QA-025 (CTO 확인). ToolCategory 'search' 추가. **1356 tests (+69), typecheck PASSES. 0 errors.**
+- **Cycle**: 111
+- **Last Updated**: 2026-02-09C111
+- **STATUS**: **5 FEAT TASKS DONE (CTO override).** rebase_fail 지속 → CTO override 계속. FEAT-CORE-002 (Proactive Notification cron 스케줄러, 25 tests), FEAT-INFRA-001 (Ollama LLM Provider, 13 tests), FEAT-OPS-001 (Prometheus metrics Counter/Gauge/Histogram, 23 tests), FEAT-CHAN-002 (Voice I/O STT/TTS + VoiceChannel, 24 tests), FEAT-UI-001 (WebChat export MD/JSON + Mermaid/LaTeX detection, 15 tests). **1456 tests (+100), typecheck PASSES. 0 errors.** Feature Sprint **86% (12/14).**
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 7 |
+| Queued | 2 |
 | In Progress | 0 |
-| Done | 195 |
+| Done | 200 |
 | Cancelled | 15 |
 
 ## Open Errors: 0
@@ -100,21 +100,22 @@
 | 108 | 0209 | **2 RESEARCH TASKS DONE.** RES-008 (Web Search Tool: Brave API 권장, Tavily/SearXNG 비교, 35+ sources), RES-009 (Multi-modal Vision: Anthropic Vision 권장, Gemini Phase 2, ContentBlock 설계, 30+ sources). rebase_fail 4건 (cycle.sh 인프라 — Division 작업 미영향). 5 tasks in progress (FEAT-TOOL-001/002, FEAT-CORE-001, FEAT-CHAN-001, QA-025, 1 cycle). **1287 tests (verified C108), typecheck PASSES.** 0 errors. |
 | 109 | 0209 | **Monitoring cycle.** No completions. 5 FEAT tasks in progress (2 cycles). rebase_fail 12건 누적 (3 consecutive runs). Division worktrees에 C107 이후 신규 커밋 없음 — rebase 충돌이 작업 차단 가능성. **C110에서 3cy stall → CTO override 예정.** **1287 tests (verified C109), typecheck PASSES.** 0 errors. |
 | 110 | 0209 | **5 FEAT TASKS DONE (CTO override).** FEAT-CORE-001 (ContentBlock Zod, isMultiModalContent, LlmProvider.supportsVision, 25 tests), FEAT-TOOL-001 (WebSearchProvider Brave API, 13 tests), FEAT-TOOL-002 (FileHandler path-safe, 16 tests), FEAT-CHAN-001 (SlackChannel @slack/bolt, 15 tests), QA-025 (CTO 확인). ToolCategory 'search' 추가. rebase_fail ROOT CAUSE: Division 브랜치 뒤처짐. **1356 tests (+69), typecheck PASSES.** 0 errors. Feature Sprint **50%.** |
+| 111 | 0209 | **5 FEAT TASKS DONE (CTO override).** FEAT-CORE-002 (NotificationScheduler cron parser+scheduler, 25 tests), FEAT-INFRA-001 (OllamaLlmProvider streaming+tool calling, 13 tests), FEAT-OPS-001 (Prometheus Counter/Gauge/Histogram/Registry, 23 tests), FEAT-CHAN-002 (Voice STT/TTS types + VoiceChannel, 24 tests), FEAT-UI-001 (exportToMarkdown/JSON + Mermaid/LaTeX detection, 15 tests). **1456 tests (+100), typecheck PASSES.** 0 errors. Feature Sprint **86% (12/14).** |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C110 | Cycle 110 — 5 FEAT CTO override | Active |
+| Coordinator | 0209C111 | Cycle 111 — 5 FEAT CTO override | Active |
 | Architecture | 0209C103 | — | Idle. Activate for FEAT ADR reviews. |
-| Dev-Core | 0209C110 | — | **FEAT-CORE-001 DONE (CTO override).** Idle. |
-| Dev-Infra | 0209C110 | — | **FEAT-TOOL-001+002 DONE (CTO override).** Idle. |
-| Dev-Edge | 0209C110 | — | **FEAT-CHAN-001 DONE (CTO override).** Idle. |
-| UI/UX | 0208C82 | — | Idle (28 cycles). FEAT-UI-001/002 queued (dep: FEAT-CORE-001 DONE → unblocked). |
+| Dev-Core | 0209C111 | — | **FEAT-CORE-002 DONE (CTO override).** Idle. |
+| Dev-Infra | 0209C111 | — | **FEAT-INFRA-001 DONE (CTO override).** Idle. |
+| Dev-Edge | 0209C111 | — | **FEAT-CHAN-002 DONE (CTO override).** Idle. |
+| UI/UX | 0209C111 | — | **FEAT-UI-001 DONE (CTO override).** FEAT-UI-002 queued (P1). |
 | Research | 0209C108 | — | **RES-008 + RES-009 DONE.** Idle. |
-| Quality | 0209C110 | — | **QA-025 DONE (CTO override).** Idle. |
-| DevOps | 0209C101 | — | Idle. FEAT-OPS-001/002 queued (P2). |
-| Audit | 0208C89 | — | Idle (21 cycles). Activate at Feature Sprint milestone. |
+| Quality | 0209C110 | — | **QA-025 DONE.** QA-026 queued for next milestone. |
+| DevOps | 0209C111 | — | **FEAT-OPS-001 DONE (CTO override).** FEAT-OPS-002 queued (P2). |
+| Audit | 0208C89 | — | Idle. Activate at Feature Sprint completion. |
 
 ## Human Intervention Needed
 

@@ -56,6 +56,22 @@ export type {
 	PresenceStatus,
 } from './channel.js';
 
+// Voice types (STT/TTS, FEAT-CHAN-002)
+export {
+	SpeechToTextConfigSchema,
+	TextToSpeechConfigSchema,
+	VoiceEventSchema,
+} from './voice.js';
+export type {
+	SpeechToTextConfig,
+	TextToSpeechConfig,
+	VoiceEvent,
+	TranscriptionResult,
+	SynthesisResult,
+	SpeechToTextProvider,
+	TextToSpeechProvider,
+} from './voice.js';
+
 // Error classes (runtime values — must use `export` not `export type`)
 export {
 	AxelError,

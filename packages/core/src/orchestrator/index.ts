@@ -41,3 +41,15 @@ export {
 
 // Interaction logging
 export type { InteractionLog, InteractionLogger } from './interaction-log.js';
+
+// Notification scheduler
+export {
+	NotificationScheduler,
+	parseCronExpression,
+	shouldTrigger,
+	NotificationRuleSchema,
+	type NotificationRule,
+	type NotificationResult,
+	type NotificationSender,
+	type ParsedCron,
+} from './notification.js';
