@@ -2,7 +2,7 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 206**: **PERF OPTIMIZATION PHASE.** 20 perf issues (C6/H6/M8). Wave 1 (10 slots, 14 issues) → Wave 2 (5 slots, 6 issues) → Wave 3 (verify).
+> **Cycle 207**: **PERF OPTIMIZATION PHASE.** P0 human directive. 20 perf issues (C6/H6/M8). Wave 1 dispatching (10 slots, 14 issues) → Wave 2 (5 slots, 6 issues) → Wave 3 (verify).
 
 ## In Progress
 
@@ -42,7 +42,7 @@
 | FEAT-INTENT-002 | STALL 3 cycles (C202-C204). 분할 → FEAT-INTENT-002a + FEAT-INTENT-002b | FEAT-INTENT-002a, FEAT-INTENT-002b |
 | FEAT-LINK-002b | Deferred for perf optimization phase | — |
 | FEAT-INTENT-002b | Deferred for perf optimization phase | — |
-| FIX-EXPORTS-001 | Deferred for perf optimization phase | — |
+| FIX-EXPORTS-001 | Completed by devops C205 (conditional exports verified, 1706 tests). Moved to Done. | — |
 
 ## Done
 

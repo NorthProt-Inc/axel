@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 205
+## Current Cycle: 207
 
 ## Division Performance (Last 10 Cycles)
 
@@ -10,13 +10,13 @@
 |----------|---------------|-----------------|--------|--------|
 | coord | — | 78 cycles | 0 | Active |
 | arch | 1 cycle | 8 | 5 (all CTO override) | Idle. |
-| dev-core | 1 cycle | 11 | 2 | Idle (FEAT-PLUGIN-001 queued). |
-| dev-infra | 1 cycle | 13 | 3 (resolved) | **ACTIVE.** FEAT-LINK-002a+FEAT-INTENT-002a 완료. 002b 착수. |
-| dev-edge | 1 cycle | 21 | 1 | Idle (pending FEAT-LINK-003, FEAT-INTENT-003). |
-| quality | 1 cycle | 10 | 1 | Idle. Next: QA-027 (post FEAT-LINK/INTENT-003). |
+| dev-core | 1 cycle | 11 | 2 | **ACTIVE.** PERF Wave 1 slots 1-3 (C1, C6, M2). |
+| dev-infra | 1 cycle | 13 | 3 (resolved) | **ACTIVE.** PERF Wave 1 slots 4-6 (C3, C5, M3M4). |
+| dev-edge | 1 cycle | 21 | 1 | **ACTIVE.** PERF Wave 1 slots 7-9 (H4H6M5M7, H5, M6). |
+| quality | 1 cycle | 10 | 1 | Idle (Wave 3 verify queued). |
 | research | 1 cycle | 8 | 0 | Idle. |
-| devops | 1 cycle | 28 | 1 | **ACTIVE** (FIX-EXPORTS-001 계속). |
-| ui-ux | 1 cycle | 7 | 0 | Idle. |
+| devops | 1 cycle | 29 | 1 | Idle (FIX-EXPORTS-001 완료 C205). |
+| ui-ux | 1 cycle | 7 | 0 | **ACTIVE.** PERF Wave 1 slot 10 (M8). |
 | audit | 1 cycle | 5 | 0 | Idle. |
 
 ## Bottleneck Indicators
@@ -58,7 +58,8 @@
 | UI/UX Sprint | **DONE** | 79 | 85 | 100% |
 | F: Production Hardening | **DONE** | 86 | 106 | 100% |
 | G: Feature Sprint | **DONE** | 107 | 112 | 100% |
-| **Phase 1: Feature Expansion** | **IN PROGRESS** | 199 | — | 39% (7/18 done [3 research + 2 core + 2 infra], 3 in progress, 10 queued). dev-infra 002b 진행, devops active. |
+| Phase 1: Feature Expansion | **PAUSED** (P0 perf) | 199 | — | 39% (7/18 done). Paused for perf optimization. |
+| **PERF Optimization** | **IN PROGRESS** | 207 | — | 0% (Wave 1 dispatching: 10 slots × 14 issues, Wave 2+3 queued). |
 
 ## Cycle History (Last 10)
 
@@ -72,3 +73,5 @@
 | 203 | devops | 0 | 0 | **dev-infra stall 2.** devops 활성화 (FIX-EXPORTS-001 P1). 1670 tests verified. |
 | 204 | dev-infra, devops | 0 | 0 | **dev-infra STALL 3 → SPLIT.** 태스크 4분할 재배정. devops 재활성화. 1670 tests (invariant). |
 | 205 | dev-infra, devops | 2 | 0 | **FEAT-LINK-002a+FEAT-INTENT-002a 완료.** 36 new tests. 1706 tests. 002b 배정. |
+| 206 | coord | 0 | 0 | **PERF PHASE SETUP.** P0 directive, perf-tasks wave 정의, 기존 태스크 보류. |
+| 207 | dev-core, dev-infra, dev-edge, ui-ux | 1 (FIX-EXPORTS-001) | 0 | **PERF WAVE 1 DISPATCH.** 10 slots 병렬. 1754 tests verified. |
