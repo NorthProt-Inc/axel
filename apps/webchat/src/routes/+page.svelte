@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PUBLIC_API_TOKEN, PUBLIC_WS_URL } from '$env/static/public';
+import { PUBLIC_API_TOKEN, PUBLIC_GATEWAY_URL } from '$env/static/public';
 import ChatSidebar from '$lib/components/ChatSidebar.svelte';
 import MessageInput from '$lib/components/MessageInput.svelte';
 import MessageList from '$lib/components/MessageList.svelte';
@@ -16,7 +16,10 @@ import { onMount } from 'svelte';
 let sidebarOpen = $state(false);
 
 onMount(async () => {
-	connectWebSocket(PUBLIC_WS_URL, PUBLIC_API_TOKEN);
+	const gatewayUrl = PUBLIC_GATEWAY_URL || `${window.location.protocol}//${window.location.hostname}:8000`;
+	const wsProtocol = gatewayUrl.startsWith('https') ? 'wss' : 'ws';
+	const wsUrl = `${wsProtocol}://${gatewayUrl.replace(/^https?:\/\//, '')}/ws`;
+	connectWebSocket(wsUrl, PUBLIC_API_TOKEN, gatewayUrl);
 	await loadSessions();
 
 	// Restore most recent session messages

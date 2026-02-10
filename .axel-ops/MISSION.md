@@ -5,7 +5,7 @@
 
 ---
 
-## North Star
+## NorthProt
 
 Axel is the open-source autonomous agent above all else.
 Carbon and Silicon in symbiosis — NorthProt's core project.
