@@ -72,6 +72,33 @@ export type {
 	TextToSpeechProvider,
 } from './voice.js';
 
+// Link Understanding types (FEAT-LINK-001)
+export {
+	LinkInfoSchema,
+	ContentSummarySchema,
+	LinkExtractResultSchema,
+	extractUrls,
+} from './link.js';
+export type {
+	LinkInfo,
+	ContentSummary,
+	LinkExtractResult,
+	LinkContentProvider,
+} from './link.js';
+
+// Intent Classifier types (FEAT-INTENT-001)
+export {
+	IntentTypeSchema,
+	ClassificationResultSchema,
+	INTENT_TYPES,
+} from './intent.js';
+export type {
+	IntentType,
+	ClassificationResult,
+	ClassificationContext,
+	IntentClassifier,
+} from './intent.js';
+
 // Error classes (runtime values — must use `export` not `export type`)
 export {
 	AxelError,
