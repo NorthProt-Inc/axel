@@ -86,8 +86,8 @@ describe('CLI History Browser — searchHistory', () => {
 	it('returns matching entries for a query', () => {
 		const result = searchHistory(entries, 'lights');
 		expect(result).toHaveLength(2);
-		expect(result[0]!.preview).toContain('lights');
-		expect(result[1]!.preview).toContain('lights');
+		expect(result[0]?.preview).toContain('lights');
+		expect(result[1]?.preview).toContain('lights');
 	});
 
 	it('returns empty array when no matches', () => {
@@ -98,7 +98,7 @@ describe('CLI History Browser — searchHistory', () => {
 	it('performs case-insensitive search', () => {
 		const result = searchHistory(entries, 'WEATHER');
 		expect(result).toHaveLength(1);
-		expect(result[0]!.preview).toContain('weather');
+		expect(result[0]?.preview).toContain('weather');
 	});
 
 	it('returns all entries when query is empty', () => {
@@ -113,7 +113,7 @@ describe('CLI History Browser — searchHistory', () => {
 		];
 		const result = searchHistory(mixed, 'unique123');
 		expect(result).toHaveLength(1);
-		expect(result[0]!.sessionId).toBe('session-unique123');
+		expect(result[0]?.sessionId).toBe('session-unique123');
 	});
 
 	it('does not mutate input array', () => {
