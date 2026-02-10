@@ -9,8 +9,8 @@
  * (GeminiEmbeddingService), SemanticMemory (PgSemanticMemory).
  */
 
-import type { ContentSummary } from '@axel/core/types';
 import type { NewMemory, SemanticMemory } from '@axel/core/memory';
+import type { ContentSummary } from '@axel/core/types';
 
 // --- DI Interfaces ---
 
@@ -107,11 +107,7 @@ class LinkContentPipeline {
 		this.onError = handler;
 	}
 
-	async processUrl(
-		url: string,
-		channelId: string,
-		sessionId: string,
-	): Promise<PipelineResult> {
+	async processUrl(url: string, channelId: string, sessionId: string): Promise<PipelineResult> {
 		// Check cache first
 		const cached = this.getCached(url);
 		if (cached !== undefined) {
