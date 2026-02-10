@@ -1,13 +1,13 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
 import * as os from 'node:os';
+import * as path from 'node:path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	FileHandler,
-	createFileReadTool,
-	createFileWriteTool,
-	createFileSummaryTool,
 	type FileHandlerConfig,
+	createFileReadTool,
+	createFileSummaryTool,
+	createFileWriteTool,
 } from '../../src/tools/file-handler.js';
 
 describe('File Handler Tool', () => {
@@ -91,9 +91,7 @@ describe('File Handler Tool', () => {
 		});
 
 		it('rejects disallowed extension on write', async () => {
-			await expect(handler.writeFile('script.py', 'bad')).rejects.toThrow(
-				'Extension not allowed',
-			);
+			await expect(handler.writeFile('script.py', 'bad')).rejects.toThrow('Extension not allowed');
 		});
 	});
 
@@ -132,7 +130,9 @@ describe('File Handler Tool', () => {
 		it('tool handler reads file successfully', async () => {
 			await fs.writeFile(path.join(tmpDir, 'readme.md'), '# Hello');
 			const tool = createFileReadTool(handler);
-			const result = await (tool as { __handler: (args: Record<string, unknown>) => Promise<unknown> }).__handler({
+			const result = await (
+				tool as { __handler: (args: Record<string, unknown>) => Promise<unknown> }
+			).__handler({
 				path: 'readme.md',
 			});
 			expect((result as { success: boolean }).success).toBe(true);
@@ -149,7 +149,9 @@ describe('File Handler Tool', () => {
 
 		it('tool handler writes file successfully', async () => {
 			const tool = createFileWriteTool(handler);
-			const result = await (tool as { __handler: (args: Record<string, unknown>) => Promise<unknown> }).__handler({
+			const result = await (
+				tool as { __handler: (args: Record<string, unknown>) => Promise<unknown> }
+			).__handler({
 				path: 'new.txt',
 				content: 'written via tool',
 			});

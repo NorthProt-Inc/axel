@@ -6,9 +6,9 @@ import type {
 	InboundMessage,
 	OutboundMessage,
 	SpeechToTextProvider,
+	SynthesisResult,
 	TextToSpeechProvider,
 	TranscriptionResult,
-	SynthesisResult,
 } from '@axel/core/types';
 
 const VOICE_CAPABILITIES: ChannelCapabilities = {

@@ -1,6 +1,6 @@
-import type { InteractionLog, InteractionLogger } from '@axel/core/orchestrator';
 import type { Logger } from '@axel/core/logging';
 import { NoopLogger } from '@axel/core/logging';
+import type { InteractionLog, InteractionLogger } from '@axel/core/orchestrator';
 import type { PgPoolDriver } from './pg-pool.js';
 
 /**

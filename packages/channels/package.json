@@ -4,10 +4,22 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		"./cli": "./src/cli/index.ts",
-		"./discord": "./src/discord/index.ts",
-		"./telegram": "./src/telegram/index.ts",
-		"./slack": "./src/slack/index.ts"
+		"./cli": {
+			"development": "./src/cli/index.ts",
+			"default": "./dist/cli/index.js"
+		},
+		"./discord": {
+			"development": "./src/discord/index.ts",
+			"default": "./dist/discord/index.js"
+		},
+		"./telegram": {
+			"development": "./src/telegram/index.ts",
+			"default": "./dist/telegram/index.js"
+		},
+		"./slack": {
+			"development": "./src/slack/index.ts",
+			"default": "./dist/slack/index.js"
+		}
 	},
 	"scripts": {
 		"build": "tsc",

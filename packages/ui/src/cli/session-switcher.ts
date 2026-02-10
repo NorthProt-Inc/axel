@@ -59,9 +59,7 @@ export function switchSession(
  * Format a list of sessions for terminal display.
  * Shows session ID (truncated), started time, message count, and status.
  */
-export function listActiveSessions(
-	sessions: readonly SessionInfo[],
-): string {
+export function listActiveSessions(sessions: readonly SessionInfo[]): string {
 	if (sessions.length === 0) {
 		return '';
 	}
@@ -74,8 +72,7 @@ export function listActiveSessions(
 		const hh = session.startedAt.getUTCHours().toString().padStart(2, '0');
 		const mm = session.startedAt.getUTCMinutes().toString().padStart(2, '0');
 		const time = `${hh}:${mm}`;
-		const statusColor =
-			session.status === 'active' ? theme.success : theme.warning;
+		const statusColor = session.status === 'active' ? theme.success : theme.warning;
 
 		lines.push(
 			`  ${theme.dim(shortId)} ${theme.muted(time)} ${theme.text(`${session.messageCount} msgs`)} ${statusColor(session.status)}`,

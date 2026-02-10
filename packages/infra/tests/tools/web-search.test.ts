@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+	type SearchResult,
+	type WebSearchConfig,
 	WebSearchProvider,
 	createWebSearchTool,
 	formatSearchResults,
-	type WebSearchConfig,
-	type SearchResult,
 } from '../../src/tools/web-search.js';
 
 describe('Web Search Tool', () => {
@@ -214,7 +214,9 @@ describe('Web Search Tool', () => {
 
 			const tool = createWebSearchTool(mockProvider);
 			// Access the internal handler via __handler
-			const result = await (tool as { __handler: (args: Record<string, unknown>) => Promise<unknown> }).__handler({
+			const result = await (
+				tool as { __handler: (args: Record<string, unknown>) => Promise<unknown> }
+			).__handler({
 				query: 'test query',
 			});
 			expect(result).toBeDefined();

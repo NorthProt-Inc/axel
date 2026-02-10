@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
-	validateFileUpload,
+	type FileUploadError,
 	fileToContentBlock,
 	formatFileSize,
 	isImageFile,
-	type FileUploadError,
+	validateFileUpload,
 } from '../src/lib/utils/file-upload.js';
 
 describe('WebChat File Upload — Validation', () => {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
-	exportToMarkdown,
-	exportToJson,
-	parseMermaidBlocks,
-	parseLatexBlocks,
 	type ExportableChatMessage,
+	exportToJson,
+	exportToMarkdown,
+	parseLatexBlocks,
+	parseMermaidBlocks,
 } from '../src/lib/utils/chat-export.js';
 
 function createMessages(): ExportableChatMessage[] {

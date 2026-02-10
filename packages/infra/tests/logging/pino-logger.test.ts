@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { Logger } from '@axel/core/logging';
+import { describe, expect, it } from 'vitest';
 import { PinoLogger } from '../../src/logging/pino-logger.js';
 
 describe('PinoLogger', () => {

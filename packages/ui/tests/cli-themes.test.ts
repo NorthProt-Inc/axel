@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	type ThemeName,
-	getThemeColors,
-	listThemes,
-	THEME_NAMES,
-} from '../src/cli/themes.js';
+import { THEME_NAMES, type ThemeName, getThemeColors, listThemes } from '../src/cli/themes.js';
 
 describe('CLI Color Themes', () => {
 	it('provides northprot theme (default)', () => {

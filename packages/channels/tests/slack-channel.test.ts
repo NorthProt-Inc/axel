@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import type { InboundMessage, OutboundMessage } from '@axel/core/types';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-	SlackChannel,
-	type SlackChannelOptions,
 	SLACK_CHANNEL_ID,
 	SLACK_MAX_MESSAGE_LENGTH,
+	SlackChannel,
+	type SlackChannelOptions,
 } from '../src/slack/slack-channel.js';
-import type { InboundMessage, OutboundMessage } from '@axel/core/types';
 
 // Mock Slack App interface matching @slack/bolt pattern
 interface MockSlackApp {

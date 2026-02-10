@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-	type HistoryEntry,
-	browseHistory,
-	searchHistory,
-} from '../src/cli/history-browser.js';
+import { type HistoryEntry, browseHistory, searchHistory } from '../src/cli/history-browser.js';
 
-const makeEntry = (
-	overrides: Partial<HistoryEntry> = {},
-): HistoryEntry => ({
+const makeEntry = (overrides: Partial<HistoryEntry> = {}): HistoryEntry => ({
 	sessionId: 'session-abc12345',
 	timestamp: new Date('2025-06-15T10:30:00Z'),
 	role: 'user',

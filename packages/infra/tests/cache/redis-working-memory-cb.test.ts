@@ -1,6 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { RedisWorkingMemory, type RedisClient, type PgPool } from '../../src/cache/redis-working-memory.js';
 import type { Turn } from '@axel/core/memory';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	type PgPool,
+	type RedisClient,
+	RedisWorkingMemory,
+} from '../../src/cache/redis-working-memory.js';
 
 /** Mock Redis client that can simulate failures */
 function createMockRedis(overrides?: Partial<RedisClient>): RedisClient {

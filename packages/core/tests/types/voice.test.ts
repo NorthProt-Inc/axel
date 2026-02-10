@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
 	SpeechToTextConfigSchema,
-	TextToSpeechConfigSchema,
-	VoiceEventSchema,
 	type SpeechToTextProvider,
+	TextToSpeechConfigSchema,
 	type TextToSpeechProvider,
 	type VoiceEvent,
+	VoiceEventSchema,
 } from '../../src/types/voice.js';
 
 describe('SpeechToTextConfigSchema', () => {

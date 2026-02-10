@@ -33,7 +33,10 @@ class Counter implements Metric {
 	readonly help: string;
 	private readonly labelNames: readonly string[];
 	private value = 0;
-	private readonly labeledValues = new Map<string, { labels: Readonly<Record<string, string>>; value: number }>();
+	private readonly labeledValues = new Map<
+		string,
+		{ labels: Readonly<Record<string, string>>; value: number }
+	>();
 
 	constructor(name: string, help: string, labelNames?: readonly string[]) {
 		this.name = name;
@@ -68,10 +71,7 @@ class Counter implements Metric {
 	}
 
 	toPrometheus(): string {
-		const lines: string[] = [
-			`# HELP ${this.name} ${this.help}`,
-			`# TYPE ${this.name} counter`,
-		];
+		const lines: string[] = [`# HELP ${this.name} ${this.help}`, `# TYPE ${this.name} counter`];
 
 		if (this.labeledValues.size > 0) {
 			for (const { labels, value } of this.labeledValues.values()) {
@@ -165,10 +165,7 @@ class Histogram implements Metric {
 	}
 
 	toPrometheus(): string {
-		const lines: string[] = [
-			`# HELP ${this.name} ${this.help}`,
-			`# TYPE ${this.name} histogram`,
-		];
+		const lines: string[] = [`# HELP ${this.name} ${this.help}`, `# TYPE ${this.name} histogram`];
 		for (const boundary of this.bucketBoundaries) {
 			lines.push(`${this.name}_bucket{le="${boundary}"} ${this.bucketCounts.get(boundary) ?? 0}`);
 		}

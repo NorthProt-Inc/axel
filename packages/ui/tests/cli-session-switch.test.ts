@@ -6,9 +6,7 @@ import {
 	switchSession,
 } from '../src/cli/session-switcher.js';
 
-const makeSession = (
-	overrides: Partial<SessionInfo> = {},
-): SessionInfo => ({
+const makeSession = (overrides: Partial<SessionInfo> = {}): SessionInfo => ({
 	id: 'session-abc12345',
 	startedAt: new Date('2025-06-15T10:00:00Z'),
 	messageCount: 5,

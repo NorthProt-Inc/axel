@@ -110,7 +110,9 @@ class OllamaLlmProvider implements LlmProvider {
 		return result;
 	}
 
-	private async *processStream(stream: AsyncIterable<OllamaChatChunk>): AsyncIterable<LlmChatChunk> {
+	private async *processStream(
+		stream: AsyncIterable<OllamaChatChunk>,
+	): AsyncIterable<LlmChatChunk> {
 		try {
 			for await (const chunk of stream) {
 				if (chunk.done) continue;

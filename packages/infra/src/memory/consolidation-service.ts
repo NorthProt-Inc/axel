@@ -95,10 +95,7 @@ export class ConsolidationService {
 				memoriesExtracted += extracted.length;
 
 				for (const memory of extracted) {
-					const embedding = await this.embeddingService.embed(
-						memory.content,
-						'RETRIEVAL_DOCUMENT',
-					);
+					const embedding = await this.embeddingService.embed(memory.content, 'RETRIEVAL_DOCUMENT');
 
 					// Deduplicate: search for similar existing memories
 					const similar = await this.semanticMemory.search({
