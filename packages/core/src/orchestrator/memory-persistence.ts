@@ -165,34 +165,44 @@ async function extractAndStoreEntities(
 ): Promise<void> {
 	const extracted = await entityExtractor.extract(userContent, assistantContent);
 
-	// Store entities (upsert: find existing or create new)
+	// PERF-C6: Parallel entity lookups (eliminates N+1 sequential findEntity calls)
 	const entityIdMap = new Map<string, string>();
-	for (const entity of extracted.entities) {
-		const existing = await conceptualMemory.findEntity(entity.name);
-		if (existing) {
-			await conceptualMemory.incrementMentions(existing.entityId);
-			entityIdMap.set(entity.name, existing.entityId);
-		} else {
+	const entityResults = await Promise.all(
+		extracted.entities.map(async (entity) => {
+			const existing = await conceptualMemory.findEntity(entity.name);
+			if (existing) {
+				await conceptualMemory.incrementMentions(existing.entityId);
+				return { name: entity.name, entityId: existing.entityId };
+			}
 			const entityId = await conceptualMemory.addEntity({
 				name: entity.name,
 				entityType: entity.type,
 				metadata: entity.properties,
 			});
-			entityIdMap.set(entity.name, entityId);
-		}
+			return { name: entity.name, entityId };
+		}),
+	);
+	for (const result of entityResults) {
+		entityIdMap.set(result.name, result.entityId);
 	}
 
-	// Store relations
-	for (const relation of extracted.relations) {
-		const sourceId = entityIdMap.get(relation.source);
-		const targetId = entityIdMap.get(relation.target);
-		if (sourceId && targetId) {
-			await conceptualMemory.addRelation({
-				sourceId,
-				targetId,
-				relationType: relation.type,
-				weight: 1.0,
-			});
-		}
-	}
+	// PERF-C6: Parallel relation additions (eliminates sequential addRelation calls)
+	await Promise.all(
+		extracted.relations
+			.filter((relation) => {
+				const sourceId = entityIdMap.get(relation.source);
+				const targetId = entityIdMap.get(relation.target);
+				return sourceId != null && targetId != null;
+			})
+			.map(async (relation) => {
+				const sourceId = entityIdMap.get(relation.source)!;
+				const targetId = entityIdMap.get(relation.target)!;
+				await conceptualMemory.addRelation({
+					sourceId,
+					targetId,
+					relationType: relation.type,
+					weight: 1.0,
+				});
+			}),
+	);
 }

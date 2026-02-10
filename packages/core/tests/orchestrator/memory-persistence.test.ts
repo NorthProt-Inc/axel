@@ -307,6 +307,58 @@ describe('persistToMemory', () => {
 
 			await expect(persistToMemory(params)).resolves.not.toThrow();
 		});
+
+		it('should process 10+ entities in parallel via Promise.all', async () => {
+			// Generate 12 entities and 6 relations
+			const entityNames = Array.from({ length: 12 }, (_, i) => `Entity${i}`);
+			const entities = entityNames.map((name, i) => ({
+				name,
+				type: i % 2 === 0 ? 'concept' : 'technology',
+				properties: {},
+			}));
+			const relations = [
+				{ source: 'Entity0', target: 'Entity1', type: 'related_to' },
+				{ source: 'Entity2', target: 'Entity3', type: 'depends_on' },
+				{ source: 'Entity4', target: 'Entity5', type: 'uses' },
+				{ source: 'Entity6', target: 'Entity7', type: 'extends' },
+				{ source: 'Entity8', target: 'Entity9', type: 'implements' },
+				{ source: 'Entity10', target: 'Entity11', type: 'contains' },
+			];
+
+			const ext: EntityExtractorLike = {
+				extract: vi.fn().mockResolvedValue({ entities, relations }),
+			};
+
+			// Track concurrency: findEntity calls should overlap (parallel execution)
+			let activeFindCalls = 0;
+			let maxConcurrentFinds = 0;
+			const cm = makeConceptualMemory();
+			(cm.findEntity as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+				activeFindCalls++;
+				maxConcurrentFinds = Math.max(maxConcurrentFinds, activeFindCalls);
+				// Simulate async delay so parallel calls can overlap
+				await new Promise((r) => setTimeout(r, 5));
+				activeFindCalls--;
+				return null; // all new entities
+			});
+
+			let entityCounter = 0;
+			(cm.addEntity as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+				return `ent-${entityCounter++}`;
+			});
+
+			const params = makeParams({ entityExtractor: ext, conceptualMemory: cm });
+			await persistToMemory(params);
+			await new Promise((r) => setTimeout(r, 50));
+
+			// All 12 entities should be processed
+			expect(cm.findEntity).toHaveBeenCalledTimes(12);
+			expect(cm.addEntity).toHaveBeenCalledTimes(12);
+			// All 6 relations should be stored
+			expect(cm.addRelation).toHaveBeenCalledTimes(6);
+			// Concurrency: more than 1 findEntity should have been in-flight at once
+			expect(maxConcurrentFinds).toBeGreaterThan(1);
+		});
 	});
 
 	describe('token count estimation', () => {
