@@ -206,6 +206,75 @@ describe('InMemoryEpisodicMemory', () => {
 			const results = await episodic.searchByTopic('nonexistent-topic', 10);
 			expect(results).toHaveLength(0);
 		});
+
+		it('should handle regex special characters in topic', async () => {
+			const sid = await episodic.createSession({
+				userId: 'user-1',
+				channelId: 'discord',
+			});
+			await episodic.addMessage(sid, {
+				role: 'user',
+				content: 'C++ is great (really!)',
+				channelId: 'discord',
+				timestamp: new Date(),
+				tokenCount: 5,
+			});
+			await episodic.endSession(sid, 'Discussed C++');
+
+			// These contain regex special chars: +, (, ), !
+			const plusResults = await episodic.searchByTopic('C++', 10);
+			expect(plusResults).toHaveLength(1);
+
+			const parenResults = await episodic.searchByTopic('(really!)', 10);
+			expect(parenResults).toHaveLength(1);
+
+			// Should not match unrelated content
+			const noMatch = await episodic.searchByTopic('C#', 10);
+			expect(noMatch).toHaveLength(0);
+		});
+
+		it('should perform well with 100+ sessions', async () => {
+			// Create 150 sessions with messages
+			for (let i = 0; i < 150; i++) {
+				const sid = await episodic.createSession({
+					userId: `user-${i % 10}`,
+					channelId: 'discord',
+				});
+				for (let j = 0; j < 5; j++) {
+					await episodic.addMessage(sid, {
+						role: 'user',
+						content: `Message ${j} about topic-${i} in session`,
+						channelId: 'discord',
+						timestamp: new Date(),
+						tokenCount: 10,
+					});
+				}
+				await episodic.endSession(sid, `Session summary ${i}`);
+			}
+
+			// Add a unique needle to find
+			const needleSid = await episodic.createSession({
+				userId: 'user-needle',
+				channelId: 'discord',
+			});
+			await episodic.addMessage(needleSid, {
+				role: 'user',
+				content: 'The unique NEEDLE content for performance test',
+				channelId: 'discord',
+				timestamp: new Date(),
+				tokenCount: 10,
+			});
+			await episodic.endSession(needleSid, 'Needle session');
+
+			const start = performance.now();
+			const results = await episodic.searchByTopic('NEEDLE', 10);
+			const elapsed = performance.now() - start;
+
+			expect(results).toHaveLength(1);
+			expect(results[0]?.summary).toBe('Needle session');
+			// Should complete well under 100ms even with 151 sessions
+			expect(elapsed).toBeLessThan(100);
+		});
 	});
 
 	describe('searchByContent', () => {

@@ -67,13 +67,13 @@ export class InMemoryEpisodicMemory implements EpisodicMemory {
 	}
 
 	async searchByTopic(topic: string, limit: number): Promise<readonly SessionSummary[]> {
-		const lowerTopic = topic.toLowerCase();
+		const pattern = new RegExp(topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 		return [...this.sessions.values()]
 			.filter(
 				(s) =>
 					s.endedAt !== null &&
-					(s.summary?.toLowerCase().includes(lowerTopic) ||
-						s.messages.some((m) => m.content.toLowerCase().includes(lowerTopic))),
+					(pattern.test(s.summary ?? '') ||
+						s.messages.some((m) => pattern.test(m.content))),
 			)
 			.slice(0, limit)
 			.map((s) => this.toSessionSummary(s));
