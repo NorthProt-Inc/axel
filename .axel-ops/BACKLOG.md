@@ -2,20 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 201**: **PHASE 1 ACTIVE.** FEAT-LINK-001 + FEAT-INTENT-001 완료 (CTO override). dev-infra 다음 배치 (FEAT-LINK-002, FEAT-INTENT-002).
+> **Cycle 202**: **PHASE 1 ACTIVE.** dev-infra 배정: FEAT-LINK-002 + FEAT-INTENT-002. QC issues 7건 → FIX-EXPORTS-001, FIX-LINT-001, FIX-DOCS-002 생성.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| (none) | — | — | — | — |
+| FEAT-LINK-002 | P1 | dev-infra | Link Understanding: HTTP fetcher + Readability parser + 임베딩 저장 | 0209C202 |
+| FEAT-INTENT-002 | P1 | dev-infra | Intent Classifier: Gemini Flash 기반 LLM intent classifier 구현 | 0209C202 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| FEAT-LINK-002 | P1 | dev-infra | Link Understanding: HTTP fetcher + Readability parser + 임베딩 저장 | ~~FEAT-LINK-001~~ ✓ | 0209C199 |
-| FEAT-INTENT-002 | P1 | dev-infra | Intent Classifier: Gemini Flash 기반 LLM intent classifier 구현 | ~~FEAT-INTENT-001~~ ✓ | 0209C199 |
+| FIX-EXPORTS-001 | P1 | devops | Gateway + 기타 패키지 exports 수정: `./src/index.ts` → conditional exports (dev: source, prod: dist) 빌드 후 정상 resolve 보장 | — | 0209C202 |
+| FIX-LINT-001 | P2 | devops | Biome lint errors 80건 + warnings 167건 정리 | — | 0209C202 |
+| FIX-DOCS-002 | P2 | devops | 문서 일관성 수정: (1) .env.example/operation.md 환경변수 표 통일, (2) env var naming 통일, (3) README buildstep 추가, (4) Migrate CLI env var 이름 통일, (5) operation.md persona ref 수정 | — | 0209C202 |
 | FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-002 | 0209C199 |
 | FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-002 | 0209C199 |
 | FEAT-PLUGIN-001 | P2 | dev-core | Plugin SDK: PluginManifest Zod schema, PluginRegistry interface, lifecycle hooks | — | 0209C199 |

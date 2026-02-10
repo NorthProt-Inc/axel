@@ -2,7 +2,7 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 201
+## Current Cycle: 202
 
 ## Division Performance (Last 10 Cycles)
 
@@ -11,7 +11,7 @@
 | coord | — | 76 cycles | 0 | Active |
 | arch | 1 cycle | 8 | 5 (all CTO override) | Idle. |
 | dev-core | 1 cycle | 11 | 2 | FEAT-LINK-001+FEAT-INTENT-001 done (CTO override C201). |
-| dev-infra | 1 cycle | 11 | 1 | Next: FEAT-LINK-002+FEAT-INTENT-002. |
+| dev-infra | 1 cycle | 11 | 1 | **ACTIVE**: FEAT-LINK-002+FEAT-INTENT-002 (assigned C202). |
 | dev-edge | 1 cycle | 21 | 1 | Idle (pending FEAT-LINK-003, FEAT-INTENT-003). |
 | quality | 1 cycle | 10 | 1 | Idle. Next: QA-027 (post FEAT-LINK/INTENT-003). |
 | research | 1 cycle | 8 | 0 | Idle (RES-010/011/012 complete). |
@@ -58,7 +58,7 @@
 | UI/UX Sprint | **DONE** | 79 | 85 | 100% |
 | F: Production Hardening | **DONE** | 86 | 106 | 100% |
 | G: Feature Sprint | **DONE** | 107 | 112 | 100% |
-| **Phase 1: Feature Expansion** | **IN PROGRESS** | 199 | — | 38% (5/13 done [3 research + 2 core], 0 in progress, 10 queued). Next: dev-infra FEAT-LINK-002+FEAT-INTENT-002. |
+| **Phase 1: Feature Expansion** | **IN PROGRESS** | 199 | — | 32% (5/16 done [3 research + 2 core], 2 in progress, 11 queued). dev-infra active. |
 
 ## Cycle History (Last 10)
 
@@ -73,4 +73,5 @@
 | 198 | (none) | 0 | 0 | **STEADY STATE.** 1534 tests, 0 errors. |
 | 199 | research | 0 | 0 | **PHASE 1 LAUNCH.** Research 3건 병렬 (RES-010/011/012). BACKLOG 15 tasks. |
 | 200 | research, dev-core | 3 | 0 | **PHASE 1 ACTIVE.** RES-010/011/012 완료. dev-core 활성화. 1636 tests. |
-| 201 | coord (CTO override) | 2 | 0 | **FEAT-LINK-001+FEAT-INTENT-001 완료.** 34 new tests. 1670 tests. Biome+typecheck PASS. |
+| 201 | coord (CTO override) | 2 | 0 | **FEAT-LINK-001+FEAT-INTENT-001 완료.** 34 new tests. 1670 tests. |
+| 202 | dev-infra | 0 | 0 | **dev-infra 활성화.** FEAT-LINK-002+FEAT-INTENT-002 배정. QC 7건→3 fix tasks. |
