@@ -28,54 +28,17 @@ mkdir -p "$OPS/logs"
 
 log() { echo "[$(date +%H:%M:%S)] $*" >> "$OPS/logs/cycle.log"; }
 
-# ── Pre-flight: Idle detection + Exponential backoff ──
 STATE_DIR="$OPS/state"
 mkdir -p "$STATE_DIR"
 
-IDLE_FILE="$STATE_DIR/idle_count"
-SKIP_FILE="$STATE_DIR/skip_count"
-HUMAN_MTIME_FILE="$STATE_DIR/last_human_md_mtime"
-LAST_SHA_FILE="$STATE_DIR/last_cycle_sha"
-
-IDLE_COUNT=$(cat "$IDLE_FILE" 2>/dev/null || echo 0)
-CURRENT_SHA=$(git -C "$MAIN_REPO" rev-parse HEAD 2>/dev/null)
-LAST_SHA=$(cat "$LAST_SHA_FILE" 2>/dev/null || echo "")
-HUMAN_MTIME=$(stat -c %Y "$OPS/comms/human.md" 2>/dev/null || echo 0)
-LAST_HUMAN_MTIME=$(cat "$HUMAN_MTIME_FILE" 2>/dev/null || echo 0)
-
-# human.md 변경 = 즉시 실행 (backoff 무시)
-if [ "$HUMAN_MTIME" != "$LAST_HUMAN_MTIME" ]; then
-    IDLE_COUNT=0
-    echo "$HUMAN_MTIME" > "$HUMAN_MTIME_FILE"
-# 새 커밋 = 즉시 실행
-elif [ "$CURRENT_SHA" != "$LAST_SHA" ] && [ -n "$LAST_SHA" ]; then
-    IDLE_COUNT=0
-# BACKLOG에 작업 존재 = 즉시 실행
-elif grep -qP '^\| [A-Z]' "$OPS/BACKLOG.md" 2>/dev/null; then
-    IDLE_COUNT=0
-else
-    # Idle — backoff 적용
-    # 0-2: 매번 실행, 3-10: 4번에 1번, 11-30: 20번에 1번, 31+: 60번에 1번
-    SKIP_THRESHOLD=0
-    if [ "$IDLE_COUNT" -ge 31 ]; then
-        SKIP_THRESHOLD=60
-    elif [ "$IDLE_COUNT" -ge 11 ]; then
-        SKIP_THRESHOLD=20
-    elif [ "$IDLE_COUNT" -ge 3 ]; then
-        SKIP_THRESHOLD=4
-    fi
-
-    if [ "$SKIP_THRESHOLD" -gt 0 ]; then
-        SKIP_COUNT=$(cat "$SKIP_FILE" 2>/dev/null || echo 0)
-        SKIP_COUNT=$((SKIP_COUNT + 1))
-        if [ "$SKIP_COUNT" -lt "$SKIP_THRESHOLD" ]; then
-            echo "$SKIP_COUNT" > "$SKIP_FILE"
-            log "BACKOFF SKIP ($SKIP_COUNT/$SKIP_THRESHOLD, idle=$IDLE_COUNT)"
-            exit 0
-        fi
-        echo 0 > "$SKIP_FILE"
-    fi
-fi
+# CLI flags
+SKIP_QC=0
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --skip-qc) SKIP_QC=1; shift ;;
+        *) shift ;;
+    esac
+done
 
 # Division → worktree mapping
 get_worktree() {
@@ -297,16 +260,6 @@ timeout 900 $CLAUDE -p \
         fi
     }
 
-# ── Idle counter update (based on activation result) ──
-LATEST_ACTIVATION=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1 || true)
-if echo "$LATEST_ACTIVATION" | grep -q '"active":\[\]'; then
-    IDLE_COUNT=$((IDLE_COUNT + 1))
-else
-    IDLE_COUNT=0
-fi
-echo "$IDLE_COUNT" > "$IDLE_FILE"
-echo "$CURRENT_SHA" > "$LAST_SHA_FILE"
-
 # ── Phase 1.5: Escalation notification ──
 LATEST_ESC=$(grep '"type":"escalate"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1 || true)
 if [ -n "$LATEST_ESC" ]; then
@@ -455,10 +408,10 @@ fi
 # ── Phase 5: QC (Quality Control) ──
 # Runs 3 workers (parallel, haiku) → supervisor (sonnet) to test build/runtime/docs
 # Workers are read-only observers that execute commands as a real user would.
-# Set AXEL_SKIP_QC=1 to skip QC phase (e.g., when running cycle without QC).
+# Use --skip-qc flag or AXEL_SKIP_QC=1 env var to skip QC phase.
 QC_SCRIPT="$OPS/launchers/qc-cycle.sh"
-if [ "${AXEL_SKIP_QC:-0}" = "1" ]; then
-    log "QC PHASE SKIP — AXEL_SKIP_QC=1"
+if [ "$SKIP_QC" = "1" ] || [ "${AXEL_SKIP_QC:-0}" = "1" ]; then
+    log "QC PHASE SKIP — --skip-qc or AXEL_SKIP_QC=1"
 elif [ -x "$QC_SCRIPT" ]; then
     log "QC PHASE START"
     AXEL_QC_FROM_CYCLE=1 bash "$QC_SCRIPT" 2>>"$OPS/logs/cycle.log" || log "QC PHASE FAILED (exit $?)"

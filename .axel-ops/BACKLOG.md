@@ -2,24 +2,26 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 202**: **PHASE 1 ACTIVE.** dev-infra 배정: FEAT-LINK-002 + FEAT-INTENT-002. QC issues 7건 → FIX-EXPORTS-001, FIX-LINT-001, FIX-DOCS-002 생성.
+> **Cycle 204**: **PHASE 1 ACTIVE.** dev-infra STALL 3 → 태스크 분할 (FEAT-LINK-002a/b, FEAT-INTENT-002a/b). devops 재활성화 (FIX-EXPORTS-001 P1).
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FEAT-LINK-002 | P1 | dev-infra | Link Understanding: HTTP fetcher + Readability parser + 임베딩 저장 | 0209C202 |
-| FEAT-INTENT-002 | P1 | dev-infra | Intent Classifier: Gemini Flash 기반 LLM intent classifier 구현 | 0209C202 |
+| FEAT-LINK-002a | P1 | dev-infra | Link Understanding: HTTP fetcher (fetch+timeout+redirect) + @mozilla/readability + linkedom content extraction. LinkContentProvider 구현. | 0209C204 |
+| FEAT-INTENT-002a | P1 | dev-infra | Intent Classifier: Gemini Flash JSON mode classifier 구현. IntentClassifier interface 구현. 6 IntentType 분류, confidence 0-1. | 0209C204 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
 | FIX-EXPORTS-001 | P1 | devops | Gateway + 기타 패키지 exports 수정: `./src/index.ts` → conditional exports (dev: source, prod: dist) 빌드 후 정상 resolve 보장 | — | 0209C202 |
+| FEAT-LINK-002b | P1 | dev-infra | Link Understanding: EmbeddingProvider→SemanticMemory 저장 파이프라인, 캐시 (TTL 60min), SSRF guard | FEAT-LINK-002a | 0209C204 |
+| FEAT-INTENT-002b | P1 | dev-infra | Intent Classifier: keyword fallback classifier, integration tests | FEAT-INTENT-002a | 0209C204 |
 | FIX-LINT-001 | P2 | devops | Biome lint errors 80건 + warnings 167건 정리 | — | 0209C202 |
 | FIX-DOCS-002 | P2 | devops | 문서 일관성 수정: (1) .env.example/operation.md 환경변수 표 통일, (2) env var naming 통일, (3) README buildstep 추가, (4) Migrate CLI env var 이름 통일, (5) operation.md persona ref 수정 | — | 0209C202 |
-| FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-002 | 0209C199 |
-| FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-002 | 0209C199 |
+| FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-002b | 0209C199 |
+| FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-002b | 0209C199 |
 | FEAT-PLUGIN-001 | P2 | dev-core | Plugin SDK: PluginManifest Zod schema, PluginRegistry interface, lifecycle hooks | — | 0209C199 |
 | FEAT-PLUGIN-002 | P2 | dev-infra | Plugin SDK: FilePluginLoader, hot-reload (fs.watch), ToolRegistry integration | FEAT-PLUGIN-001 | 0209C199 |
 | FEAT-CANVAS-001 | P2 | ui-ux | Interactive Canvas: agent-driven UI components (buttons, forms), WS 이벤트 프로토콜 | — | 0209C199 |
@@ -46,6 +48,8 @@
 | ADR-021 | Absorbed into WP-6 | WP-6 |
 | QA-012 | 5 cycles stalled (C34→C39). CORE-001 types already verified by SYNC-002. Scope absorbed into QA-013. | QA-013 |
 | MARK-PERSONA-001 | Mark(Human) 직접 구현 완료 (9fb41b5). BACKLOG 추적 불필요. | — |
+| FEAT-LINK-002 | STALL 3 cycles (C202-C204). 분할 → FEAT-LINK-002a + FEAT-LINK-002b | FEAT-LINK-002a, FEAT-LINK-002b |
+| FEAT-INTENT-002 | STALL 3 cycles (C202-C204). 분할 → FEAT-INTENT-002a + FEAT-INTENT-002b | FEAT-INTENT-002a, FEAT-INTENT-002b |
 
 ## Done
 
