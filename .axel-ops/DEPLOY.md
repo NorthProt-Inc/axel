@@ -20,13 +20,14 @@
 |------|--------|-------|
 | `pnpm-workspace.yaml` | ✅ CREATED | Workspace definition |
 | `tsconfig.base.json` | ✅ CREATED | TypeScript 5.7 strict config |
-| `biome.json` | ✅ CREATED | Linter + formatter config |
+| `biome.json` | ✅ UPDATED | Linter + formatter config (C203: schema 2.3.14) |
 | `package.json` (root) | ✅ CREATED | Workspace scripts |
 | `vitest.config.ts` (root) | ✅ CREATED | Test config |
-| `packages/core/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, @vitest/coverage-v8, **subpath exports** (C44) |
-| `packages/infra/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
-| `packages/channels/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **subpath exports** (C48) |
-| `packages/gateway/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **subpath exports** (C48) |
+| `packages/core/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, @vitest/coverage-v8, **conditional exports** (C203: dev:src, prod:dist) |
+| `packages/infra/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **conditional exports** (C203) |
+| `packages/channels/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **conditional exports** (C203) |
+| `packages/gateway/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **conditional exports** (C203) |
+| `packages/ui/package.json` | ✅ UPDATED | + tsconfig.json, vitest.config.ts, **conditional exports** (C203) |
 | `apps/axel/package.json` | ✅ CREATED | + tsconfig.json, vitest.config.ts |
 
 ## Docker Compose (Dev)
@@ -244,14 +245,15 @@ node tools/migrate/dist/cli.js up
 
 | ID | Severity | Description | Status |
 |----|----------|-------------|--------|
-| ERR-091 | MEDIUM | tools/data-quality @google/genai dependency missing — typecheck fails | FIX-TYPECHECK-002 (devops P1) in progress |
-| Gateway exports | P1 | compiled dist/main.js imports .ts source files (ERR_UNKNOWN_FILE_EXTENSION) | QC-report C99, unresolved |
-| cycle.sh untracked files WARNING | INFO | patches/ directory not in devops owned paths | **RESOLVED** (C92, Mark 커밋 0966063) |
+| ERR-091 | MEDIUM | tools/data-quality @google/genai dependency missing — typecheck fails | FIX-TYPECHECK-002 (devops P1) queued |
+| Biome lint | P2 | 50 errors + 191 warnings (noUnusedTemplateLiteral, noExplicitAny, noDelete) | FIX-LINT-001 (devops P2) in progress |
 
 ## Known Issues (Resolved)
 
 | Issue | Cycle | Resolution |
 |-------|-------|-----------|
+| Gateway exports P1: compiled dist/main.js imports .ts source files (ERR_UNKNOWN_FILE_EXTENSION) | C203 | **RESOLVED (C203, FIX-EXPORTS-001)**: Conditional exports (development:src, default:dist) applied to 5 packages (core, infra, channels, gateway, ui). Production build now resolves `dist/*.js` correctly. 1670 tests pass. Commit: `564344c`. |
+| cycle.sh untracked files WARNING | C92 | **RESOLVED (C92)**: Mark(Human) 커밋 `0966063`에서 cycle.sh:93 devops 소유 경로에 `patches/` 추가 완료. |
 | ERR-069 CRITICAL: pgvector 2000d dimension limit | C68 | **RESOLVED (C68, FIX-DIMENSION-001)**: Mark(Human) approved 1536d Matryoshka truncation. 16 files updated (source, tests, ADRs, plan docs, SQL migration). HNSW index activated. 835 tests pass. Commits: `6120a90` + `228a146`. |
 | ERR-086 HIGH: punycode DEP0040 + telegram test failures | C84 | **RESOLVED (C84, FIX-PUNYCODE-001+002)**: FIX-PUNYCODE-001의 packageExtensions + postinstall script가 정상 작동. whatwg-url@5.0.0 require('../punycode') 해결됨. **Result: 975 tests pass (0 FAIL), telegram 25 tests pass.** FIX-PUNYCODE-002는 재검증 결과 불필요 판정. |
 | ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
