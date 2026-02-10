@@ -6,7 +6,7 @@ import type {
 } from '@axel/core/types';
 import { Events } from 'discord.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DiscordChannel } from '../../src/discord/discord-channel.js';
+import { DiscordChannel, MAX_CHANNEL_CACHE_SIZE } from '../../src/discord/discord-channel.js';
 import type { DiscordChannelOptions } from '../../src/discord/discord-channel.js';
 
 /** Minimal mock for discord.js Client */
@@ -420,6 +420,77 @@ describe('DiscordChannel', () => {
 		it('is available as a function', async () => {
 			await startChannel();
 			expect(channel.addReaction).toBeTypeOf('function');
+		});
+	});
+
+	describe('channel cache eviction', () => {
+		it('evicts oldest entry when cache exceeds MAX_CHANNEL_CACHE_SIZE', async () => {
+			await startChannel();
+
+			// Fill cache to MAX + 1 entries
+			for (let i = 0; i < MAX_CHANNEL_CACHE_SIZE + 1; i++) {
+				const { msg } = createMockDiscordMessage({ channelId: `ch-${i}` });
+				mockClient.emit(Events.MessageCreate, msg);
+			}
+			await new Promise((r) => setTimeout(r, 10));
+
+			// The first channel (ch-0) should have been evicted
+			await expect(channel.send('ch-0', { content: 'ping' })).rejects.toThrow(
+				'Unknown Discord channel: ch-0',
+			);
+
+			// The last channel should still be cached
+			const { msg: lastMsg } = createMockDiscordMessage({
+				channelId: `ch-${MAX_CHANNEL_CACHE_SIZE}`,
+			});
+			// Verify it doesn't throw (channel is in cache from inbound above)
+			await channel.send(`ch-${MAX_CHANNEL_CACHE_SIZE}`, { content: 'ping' });
+			expect(lastMsg.channel.send).not.toHaveBeenCalled(); // lastMsg is a fresh mock, not the cached one
+		});
+
+		it('does not evict when at exactly MAX_CHANNEL_CACHE_SIZE', async () => {
+			await startChannel();
+
+			// Fill cache to exactly MAX entries
+			for (let i = 0; i < MAX_CHANNEL_CACHE_SIZE; i++) {
+				const { msg } = createMockDiscordMessage({ channelId: `ch-${i}` });
+				mockClient.emit(Events.MessageCreate, msg);
+			}
+			await new Promise((r) => setTimeout(r, 10));
+
+			// First channel should still be present
+			await expect(
+				channel.send('ch-0', { content: 'ping' }),
+			).resolves.toBeUndefined();
+		});
+
+		it('promotes re-accessed channels (LRU behavior)', async () => {
+			await startChannel();
+
+			// Fill cache to MAX entries
+			for (let i = 0; i < MAX_CHANNEL_CACHE_SIZE; i++) {
+				const { msg } = createMockDiscordMessage({ channelId: `ch-${i}` });
+				mockClient.emit(Events.MessageCreate, msg);
+			}
+			await new Promise((r) => setTimeout(r, 10));
+
+			// Re-access ch-0 (promotes it to most recent)
+			const { msg: refreshMsg } = createMockDiscordMessage({ channelId: 'ch-0' });
+			mockClient.emit(Events.MessageCreate, refreshMsg);
+			await new Promise((r) => setTimeout(r, 10));
+
+			// Now ch-1 is the oldest; add one more to trigger eviction
+			const { msg: newMsg } = createMockDiscordMessage({ channelId: 'ch-new' });
+			mockClient.emit(Events.MessageCreate, newMsg);
+			await new Promise((r) => setTimeout(r, 10));
+
+			// ch-0 should survive (was promoted), ch-1 should be evicted
+			await expect(
+				channel.send('ch-0', { content: 'ping' }),
+			).resolves.toBeUndefined();
+			await expect(channel.send('ch-1', { content: 'ping' })).rejects.toThrow(
+				'Unknown Discord channel: ch-1',
+			);
 		});
 	});
 

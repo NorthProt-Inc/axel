@@ -21,6 +21,9 @@ const DISCORD_CHANNEL_ID = 'discord';
 const DISCORD_MAX_MESSAGE_LENGTH = 2000;
 const STREAMING_EDIT_INTERVAL_MS = 1000;
 
+/** Maximum cached channels before oldest entries are evicted (FIFO). */
+export const MAX_CHANNEL_CACHE_SIZE = 500;
+
 const DISCORD_CAPABILITIES: ChannelCapabilities = {
 	streaming: true,
 	richMedia: true,
@@ -254,6 +257,20 @@ export class DiscordChannel implements AxelChannel {
 		});
 	}
 
+	/** Insert or promote a channel in the cache, evicting the oldest entry when full. */
+	private cacheChannel(id: string, ch: SendableChannel): void {
+		// Delete first so re-insertion moves the key to the end (LRU promotion)
+		this.channelCache.delete(id);
+		this.channelCache.set(id, ch);
+		if (this.channelCache.size > MAX_CHANNEL_CACHE_SIZE) {
+			// Map iteration order = insertion order; first key is the oldest
+			const oldest = this.channelCache.keys().next().value;
+			if (oldest !== undefined) {
+				this.channelCache.delete(oldest);
+			}
+		}
+	}
+
 	private handleInboundMessage(message: Message): void {
 		if (message.author.bot) {
 			return;
@@ -264,8 +281,8 @@ export class DiscordChannel implements AxelChannel {
 			return;
 		}
 
-		// Cache the channel for outbound messages
-		this.channelCache.set(message.channelId, message.channel as SendableChannel);
+		// Cache the channel for outbound messages (LRU-evicting)
+		this.cacheChannel(message.channelId, message.channel as SendableChannel);
 
 		const isThread = message.channel.isThread?.();
 		const inbound: InboundMessage = {
