@@ -2,30 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 205**: **PHASE 1 ACTIVE.** dev-infra FEAT-LINK-002a+FEAT-INTENT-002a 완료 (36 new tests, 1706 total). FEAT-LINK-002b+FEAT-INTENT-002b 배정. devops FIX-EXPORTS-001 계속.
+> **Cycle 206**: **PERF OPTIMIZATION PHASE.** 20 perf issues (C6/H6/M8). Wave 1 (10 slots, 14 issues) → Wave 2 (5 slots, 6 issues) → Wave 3 (verify).
 
 ## In Progress
 
-| ID | Priority | Division | Task | Started |
-|----|----------|----------|------|---------|
-| FEAT-LINK-002b | P1 | dev-infra | Link Understanding: EmbeddingProvider→SemanticMemory 저장 파이프라인, 캐시 (TTL 60min), SSRF guard | 0209C205 |
-| FEAT-INTENT-002b | P1 | dev-infra | Intent Classifier: keyword fallback classifier, integration tests | 0209C205 |
-| FIX-EXPORTS-001 | P1 | devops | Gateway + 기타 패키지 exports 수정: `./src/index.ts` → conditional exports (dev: source, prod: dist) 빌드 후 정상 resolve 보장 | 0209C203 |
+| ID | Division | Task | Ref |
+|----|----------|------|-----|
+| PERF-WAVE-1 | multi (10 slots) | Wave 1: 14 issues parallel | `.axel-ops/perf-tasks/wave-1/` |
 
 ## Queued
 
-| ID | Priority | Division | Task | Depends | Created |
-|----|----------|----------|------|---------|---------|
-| FIX-LINT-001 | P2 | devops | Biome lint errors 80건 + warnings 167건 정리 | — | 0209C202 |
-| FIX-DOCS-002 | P2 | devops | 문서 일관성 수정: (1) .env.example/operation.md 환경변수 표 통일, (2) env var naming 통일, (3) README buildstep 추가, (4) Migrate CLI env var 이름 통일, (5) operation.md persona ref 수정, (6) README 테스트 수치 업데이트, (7) migrate CLI --help env 검증 개선 | — | 0209C202 |
-| FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-002b | 0209C199 |
-| FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-002b | 0209C199 |
-| FEAT-PLUGIN-001 | P2 | dev-core | Plugin SDK: PluginManifest Zod schema, PluginRegistry interface, lifecycle hooks | — | 0209C199 |
-| FEAT-PLUGIN-002 | P2 | dev-infra | Plugin SDK: FilePluginLoader, hot-reload (fs.watch), ToolRegistry integration | FEAT-PLUGIN-001 | 0209C199 |
-| FEAT-CANVAS-001 | P2 | ui-ux | Interactive Canvas: agent-driven UI components (buttons, forms), WS 이벤트 프로토콜 | — | 0209C199 |
-| FEAT-ONBOARD-001 | P2 | dev-edge | Onboarding Wizard: CLI interactive setup (채널 설정, API 키 검증, DB 마이그레이션) | — | 0209C199 |
-| FEAT-BROWSER-001 | P2 | dev-infra | Browser Tool: Playwright 기반 웹 자동화 (navigate, screenshot, extract), ToolRegistry 등록 | — | 0209C199 |
-| QA-027 | P1 | quality | Phase 1 batch 1 코드 리뷰 (FEAT-LINK + FEAT-INTENT 완료 후) | FEAT-LINK-003, FEAT-INTENT-003 | 0209C199 |
+| ID | Division | Task | Blocked By |
+|----|----------|------|------------|
+| PERF-WAVE-2 | multi (5 slots) | Wave 2: 6 issues | PERF-WAVE-1 |
+| PERF-WAVE-3 | quality | Integration verify | PERF-WAVE-2 |
+
+
 
 ## Cancelled
 
@@ -48,6 +40,9 @@
 | MARK-PERSONA-001 | Mark(Human) 직접 구현 완료 (9fb41b5). BACKLOG 추적 불필요. | — |
 | FEAT-LINK-002 | STALL 3 cycles (C202-C204). 분할 → FEAT-LINK-002a + FEAT-LINK-002b | FEAT-LINK-002a, FEAT-LINK-002b |
 | FEAT-INTENT-002 | STALL 3 cycles (C202-C204). 분할 → FEAT-INTENT-002a + FEAT-INTENT-002b | FEAT-INTENT-002a, FEAT-INTENT-002b |
+| FEAT-LINK-002b | Deferred for perf optimization phase | — |
+| FEAT-INTENT-002b | Deferred for perf optimization phase | — |
+| FIX-EXPORTS-001 | Deferred for perf optimization phase | — |
 
 ## Done
 
