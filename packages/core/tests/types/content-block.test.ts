@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
-	TextBlockSchema,
-	ImageBlockSchema,
-	FileBlockSchema,
-	ContentBlockSchema,
-	type TextBlock,
-	type ImageBlock,
-	type FileBlock,
 	type ContentBlock,
-	isMultiModalContent,
-	extractTextContent,
+	ContentBlockSchema,
+	type FileBlock,
+	FileBlockSchema,
 	IMAGE_MAX_SIZE_BYTES,
+	type ImageBlock,
+	ImageBlockSchema,
 	SUPPORTED_IMAGE_TYPES,
+	type TextBlock,
+	TextBlockSchema,
+	extractTextContent,
+	isMultiModalContent,
 } from '../../src/types/content-block.js';
 
 describe('ContentBlock types', () => {

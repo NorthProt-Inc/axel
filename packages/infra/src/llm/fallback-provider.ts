@@ -20,10 +20,7 @@ export class FallbackLlmProvider implements LlmProvider {
 	private readonly providers: readonly NamedProvider[];
 	private readonly logger: Logger;
 
-	constructor(
-		providers: readonly { name: string; provider: LlmProvider }[],
-		logger?: Logger,
-	) {
+	constructor(providers: readonly { name: string; provider: LlmProvider }[], logger?: Logger) {
 		this.logger = logger ?? new NoopLogger();
 		this.providers = providers.map((p) => ({
 			name: p.name,

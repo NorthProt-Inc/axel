@@ -65,9 +65,7 @@ export class FileHandler {
 
 		const stat = await fs.stat(fullPath);
 		if (stat.size > this.config.maxFileSizeBytes) {
-			throw new Error(
-				`File size ${stat.size} exceeds maximum ${this.config.maxFileSizeBytes}`,
-			);
+			throw new Error(`File size ${stat.size} exceeds maximum ${this.config.maxFileSizeBytes}`);
 		}
 
 		const content = await fs.readFile(fullPath, 'utf-8');
@@ -101,7 +99,11 @@ export class FileHandler {
 		} else {
 			const head = lines.slice(0, PREVIEW_HEAD_LINES);
 			const tail = lines.slice(-PREVIEW_TAIL_LINES);
-			preview = [...head, `... (${lines.length - PREVIEW_HEAD_LINES - PREVIEW_TAIL_LINES} lines omitted) ...`, ...tail].join('\n');
+			preview = [
+				...head,
+				`... (${lines.length - PREVIEW_HEAD_LINES - PREVIEW_TAIL_LINES} lines omitted) ...`,
+				...tail,
+			].join('\n');
 		}
 
 		return {
@@ -131,7 +133,8 @@ const FileSummaryInputSchema = z.object({
 export function createFileReadTool(handler: FileHandler) {
 	return defineTool({
 		name: 'file_read',
-		description: 'Read a file and return its contents. Path must be relative to the base directory.',
+		description:
+			'Read a file and return its contents. Path must be relative to the base directory.',
 		category: 'file',
 		schema: FileReadInputSchema,
 		handler: async (args): Promise<ToolResult> => {

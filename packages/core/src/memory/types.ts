@@ -103,7 +103,9 @@ export interface EpisodicMemory {
 	listSessions(userId: string, limit?: number): Promise<readonly SessionListInfo[]>;
 	searchByTopic(topic: string, limit: number): Promise<readonly SessionSummary[]>;
 	searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]>;
-	findUnconsolidated(limit: number): Promise<readonly { sessionId: string; userId: string; channelId: string }[]>;
+	findUnconsolidated(
+		limit: number,
+	): Promise<readonly { sessionId: string; userId: string; channelId: string }[]>;
 	markConsolidated(sessionId: string): Promise<void>;
 	healthCheck(): Promise<ComponentHealth>;
 }

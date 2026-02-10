@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+	DEFAULT_CONSOLIDATION_CONFIG,
 	formatSessionForExtraction,
 	parseExtractedMemories,
 	shouldConsolidate,
-	DEFAULT_CONSOLIDATION_CONFIG,
 } from '../../src/memory/consolidation.js';
 
 describe('consolidation pure functions', () => {
@@ -22,8 +22,20 @@ describe('consolidation pure functions', () => {
 	describe('formatSessionForExtraction', () => {
 		it('formats messages as role: content pairs', () => {
 			const messages = [
-				{ role: 'user' as const, content: 'Hello', channelId: 'cli', timestamp: new Date(), tokenCount: 5 },
-				{ role: 'assistant' as const, content: 'Hi there!', channelId: 'cli', timestamp: new Date(), tokenCount: 10 },
+				{
+					role: 'user' as const,
+					content: 'Hello',
+					channelId: 'cli',
+					timestamp: new Date(),
+					tokenCount: 5,
+				},
+				{
+					role: 'assistant' as const,
+					content: 'Hi there!',
+					channelId: 'cli',
+					timestamp: new Date(),
+					tokenCount: 10,
+				},
 			];
 			const result = formatSessionForExtraction(messages);
 			expect(result).toBe('user: Hello\nassistant: Hi there!');
@@ -36,7 +48,8 @@ describe('consolidation pure functions', () => {
 
 	describe('parseExtractedMemories', () => {
 		it('parses valid JSON response', () => {
-			const response = '{"memories":[{"content":"User likes coffee","type":"preference","importance":0.6}]}';
+			const response =
+				'{"memories":[{"content":"User likes coffee","type":"preference","importance":0.6}]}';
 			const result = parseExtractedMemories(response, 'sess-1', 'cli');
 
 			expect(result).toHaveLength(1);
@@ -50,7 +63,8 @@ describe('consolidation pure functions', () => {
 		});
 
 		it('handles markdown-fenced JSON', () => {
-			const response = '```json\n{"memories":[{"content":"Fact","type":"fact","importance":0.8}]}\n```';
+			const response =
+				'```json\n{"memories":[{"content":"Fact","type":"fact","importance":0.8}]}\n```';
 			const result = parseExtractedMemories(response, 'sess-1', 'cli');
 			expect(result).toHaveLength(1);
 		});

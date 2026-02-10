@@ -232,7 +232,9 @@ function handleWsSessionEnd(
 	}
 
 	if (!deps.endSession) {
-		ws.send(JSON.stringify({ type: 'error', error: 'Session management not configured', requestId }));
+		ws.send(
+			JSON.stringify({ type: 'error', error: 'Session management not configured', requestId }),
+		);
 		return;
 	}
 

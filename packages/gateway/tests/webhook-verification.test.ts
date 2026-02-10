@@ -93,11 +93,7 @@ function generateTestKeyPair(): {
 }
 
 /** Sign a Discord request body with Ed25519 private key */
-function signDiscordRequest(
-	privateKey: crypto.KeyObject,
-	timestamp: string,
-	body: string,
-): string {
+function signDiscordRequest(privateKey: crypto.KeyObject, timestamp: string, body: string): string {
 	const message = Buffer.from(timestamp + body);
 	const sig = crypto.sign(null, message, privateKey);
 	return sig.toString('hex');

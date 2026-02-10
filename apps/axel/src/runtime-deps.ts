@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PinoLogger } from '@axel/infra';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Redis } from 'ioredis';
 import pg from 'pg';
 

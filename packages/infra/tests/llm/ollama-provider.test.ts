@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
-import { OllamaLlmProvider } from '../../src/llm/ollama-provider.js';
 import type { LlmChatParams } from '@axel/core/orchestrator';
 import { ProviderError } from '@axel/core/types';
+import { describe, expect, it, vi } from 'vitest';
+import { OllamaLlmProvider } from '../../src/llm/ollama-provider.js';
 
 /** Helper: create mock Ollama client */
 function createMockClient(responses: AsyncIterable<OllamaChatChunk>): OllamaClient {
@@ -72,7 +72,10 @@ describe('OllamaLlmProvider', () => {
 				{ done: true },
 			]),
 		);
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const chunks = await collectChunks(provider.chat(makeParams()));
 
@@ -90,7 +93,10 @@ describe('OllamaLlmProvider', () => {
 				{ done: true },
 			]),
 		);
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const chunks = await collectChunks(provider.chat(makeParams()));
 
@@ -118,7 +124,10 @@ describe('OllamaLlmProvider', () => {
 				{ done: true },
 			]),
 		);
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const chunks = await collectChunks(provider.chat(makeParams()));
 
@@ -134,7 +143,10 @@ describe('OllamaLlmProvider', () => {
 
 	it('builds correct request params with system message', async () => {
 		const client = createMockClient(streamFrom([{ done: true }]));
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const params = makeParams({
 			messages: [
@@ -177,7 +189,10 @@ describe('OllamaLlmProvider', () => {
 
 	it('passes tools to Ollama in correct format', async () => {
 		const client = createMockClient(streamFrom([{ done: true }]));
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const params = makeParams({
 			tools: [
@@ -216,7 +231,10 @@ describe('OllamaLlmProvider', () => {
 		const client: OllamaClient = {
 			chat: vi.fn().mockReturnValue(failStream()),
 		};
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		await expect(collectChunks(provider.chat(makeParams()))).rejects.toThrow(ProviderError);
 	});
@@ -229,7 +247,10 @@ describe('OllamaLlmProvider', () => {
 		const client: OllamaClient = {
 			chat: vi.fn().mockReturnValue(failStream()),
 		};
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		try {
 			await collectChunks(provider.chat(makeParams()));
@@ -247,7 +268,10 @@ describe('OllamaLlmProvider', () => {
 		const client: OllamaClient = {
 			chat: vi.fn().mockReturnValue(failStream()),
 		};
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		try {
 			await collectChunks(provider.chat(makeParams()));
@@ -259,7 +283,10 @@ describe('OllamaLlmProvider', () => {
 
 	it('supportsVision defaults to false', () => {
 		const client = createMockClient(streamFrom([]));
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		expect(provider.supportsVision).toBe(false);
 	});
@@ -292,7 +319,10 @@ describe('OllamaLlmProvider', () => {
 				{ done: true },
 			]),
 		);
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const chunks = await collectChunks(provider.chat(makeParams()));
 
@@ -316,7 +346,10 @@ describe('OllamaLlmProvider', () => {
 				{ done: true },
 			]),
 		);
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const chunks = await collectChunks(provider.chat(makeParams()));
 
@@ -342,7 +375,10 @@ describe('OllamaLlmProvider', () => {
 				{ done: true },
 			]),
 		);
-		const provider = new OllamaLlmProvider(client, { model: 'llama3.2', baseUrl: 'http://localhost:11434' });
+		const provider = new OllamaLlmProvider(client, {
+			model: 'llama3.2',
+			baseUrl: 'http://localhost:11434',
+		});
 
 		const chunks = (await collectChunks(provider.chat(makeParams()))) as Array<{
 			content: { callId: string };

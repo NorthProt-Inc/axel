@@ -148,10 +148,9 @@ class PgEpisodicMemory implements EpisodicMemory {
 	}
 
 	async markConsolidated(sessionId: string): Promise<void> {
-		await this.pool.query(
-			`UPDATE sessions SET consolidated_at = NOW() WHERE session_id = $1`,
-			[sessionId],
-		);
+		await this.pool.query(`UPDATE sessions SET consolidated_at = NOW() WHERE session_id = $1`, [
+			sessionId,
+		]);
 	}
 
 	async searchByContent(query: string, limit: number): Promise<readonly MessageRecord[]> {

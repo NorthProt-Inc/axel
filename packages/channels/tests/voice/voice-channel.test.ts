@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { VoiceChannel } from '../../src/voice/voice-channel.js';
 import type { SpeechToTextProvider, TextToSpeechProvider } from '@axel/core/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { VoiceChannel } from '../../src/voice/voice-channel.js';
 
 function createMockStt(): SpeechToTextProvider {
 	return {

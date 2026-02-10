@@ -19,7 +19,10 @@ export interface SearchResult {
 }
 
 /** Fetch function type (injectable for testing) */
-type FetchFn = (url: string, init: RequestInit) => Promise<{ ok: boolean; status?: number; statusText?: string; json: () => Promise<unknown> }>;
+type FetchFn = (
+	url: string,
+	init: RequestInit,
+) => Promise<{ ok: boolean; status?: number; statusText?: string; json: () => Promise<unknown> }>;
 
 /**
  * Web Search Provider — Brave Search API adapter (RES-008).
@@ -63,7 +66,7 @@ export class WebSearchProvider {
 		const response = await this.fetchFn(url, {
 			method: 'GET',
 			headers: {
-				'Accept': 'application/json',
+				Accept: 'application/json',
 				'Accept-Encoding': 'gzip',
 				'X-Subscription-Token': this.config.apiKey,
 			},
@@ -73,7 +76,9 @@ export class WebSearchProvider {
 			throw new Error(`Search API error: ${response.status ?? 'unknown'}`);
 		}
 
-		const data = await response.json() as { web?: { results?: readonly { title: string; url: string; description: string }[] } };
+		const data = (await response.json()) as {
+			web?: { results?: readonly { title: string; url: string; description: string }[] };
+		};
 		const results = data.web?.results ?? [];
 
 		return results.slice(0, maxResults).map((r) => ({
@@ -91,10 +96,7 @@ export function formatSearchResults(results: readonly SearchResult[]): string {
 	}
 
 	return results
-		.map(
-			(r, i) =>
-				`${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`,
-		)
+		.map((r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`)
 		.join('\n\n');
 }
 
@@ -111,9 +113,7 @@ const WebSearchInputSchema = z.object({
  * Uses Brave Search API (RES-008 recommendation).
  * Returns formatted Markdown results.
  */
-export function createWebSearchTool(
-	provider: WebSearchProvider,
-) {
+export function createWebSearchTool(provider: WebSearchProvider) {
 	return defineTool({
 		name: 'web_search',
 		description:

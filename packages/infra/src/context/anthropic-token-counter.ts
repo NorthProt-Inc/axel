@@ -1,7 +1,7 @@
+import { createHash } from 'node:crypto';
 import type { TokenCounter } from '@axel/core/context';
 import type { Logger } from '@axel/core/logging';
 import { NoopLogger } from '@axel/core/logging';
-import { createHash } from 'node:crypto';
 import { LRUCache } from 'lru-cache';
 
 /** Subset of Anthropic SDK for countTokens */
@@ -24,11 +24,7 @@ export class AnthropicTokenCounter implements TokenCounter {
 	private readonly logger: Logger;
 	private readonly cache: LRUCache<string, number>;
 
-	constructor(
-		client: AnthropicCountTokensClient,
-		model: string,
-		logger?: Logger,
-	) {
+	constructor(client: AnthropicCountTokensClient, model: string, logger?: Logger) {
 		this.client = client;
 		this.model = model;
 		this.logger = logger ?? new NoopLogger();

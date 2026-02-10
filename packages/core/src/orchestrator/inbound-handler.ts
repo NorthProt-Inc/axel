@@ -8,10 +8,10 @@ import type { ReActEvent } from '../types/react.js';
 import type { ToolDefinition } from '../types/tool.js';
 import type { InteractionLogger } from './interaction-log.js';
 import {
-	persistToMemory,
 	type ConceptualMemoryLike,
 	type EntityExtractorLike,
 	type SemanticMemoryWriterLike,
+	persistToMemory,
 } from './memory-persistence.js';
 import { reactLoop } from './react-loop.js';
 import type { SessionRouter } from './session-router.js';

@@ -50,16 +50,17 @@ export type FileBlock = z.infer<typeof FileBlockSchema>;
 /** Discriminated union of all content block types */
 export const ContentBlockSchema = z.discriminatedUnion('type', [
 	TextBlockSchema,
-	z.object({
-		type: z.literal('image'),
-		source: z.enum(['base64', 'url']),
-		mediaType: z.enum(SUPPORTED_IMAGE_TYPES),
-		data: z.string().optional(),
-		url: z.string().url().optional(),
-	}).refine(
-		(val) => (val.source === 'base64' ? !!val.data : !!val.url),
-		{ message: 'base64 requires data, url requires url field' },
-	),
+	z
+		.object({
+			type: z.literal('image'),
+			source: z.enum(['base64', 'url']),
+			mediaType: z.enum(SUPPORTED_IMAGE_TYPES),
+			data: z.string().optional(),
+			url: z.string().url().optional(),
+		})
+		.refine((val) => (val.source === 'base64' ? !!val.data : !!val.url), {
+			message: 'base64 requires data, url requires url field',
+		}),
 	FileBlockSchema,
 ]);
 export type ContentBlock = TextBlock | ImageBlock | FileBlock;

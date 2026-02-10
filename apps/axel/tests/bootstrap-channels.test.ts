@@ -10,7 +10,13 @@ function createMockContainer(): Container {
 		chat: vi.fn(),
 	};
 	return {
-		logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: vi.fn().mockReturnThis() } as unknown as Container['logger'],
+		logger: {
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			debug: vi.fn(),
+			child: vi.fn().mockReturnThis(),
+		} as unknown as Container['logger'],
 		pgPool: { healthCheck: vi.fn() } as unknown as Container['pgPool'],
 		streamBuffer: { healthCheck: vi.fn() } as unknown as Container['streamBuffer'],
 		workingMemory: { healthCheck: vi.fn() } as unknown as Container['workingMemory'],
@@ -50,7 +56,12 @@ function createMockContainer(): Container {
 			log: vi.fn().mockResolvedValue(undefined),
 		} as unknown as Container['interactionLogger'],
 		consolidationService: {
-			consolidate: vi.fn().mockResolvedValue({ sessionsProcessed: 0, memoriesExtracted: 0, memoriesStored: 0, memoriesUpdated: 0 }),
+			consolidate: vi.fn().mockResolvedValue({
+				sessionsProcessed: 0,
+				memoriesExtracted: 0,
+				memoriesStored: 0,
+				memoriesUpdated: 0,
+			}),
 		} as unknown as Container['consolidationService'],
 		healthCheckTargets: [],
 	};
@@ -321,14 +332,12 @@ describe('bootstrap-channels', () => {
 					isNew: true,
 					previousSession: null,
 				});
-			(container.llmProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi
-				.fn()
-				.mockReturnValue(
-					(async function* () {
-						yield { type: 'message_delta' as const, content: 'Hi' };
-						yield { type: 'message_complete' as const, content: '' };
-					})(),
-				);
+			(container.llmProvider as { chat: ReturnType<typeof vi.fn> }).chat = vi.fn().mockReturnValue(
+				(async function* () {
+					yield { type: 'message_delta' as const, content: 'Hi' };
+					yield { type: 'message_complete' as const, content: '' };
+				})(),
+			);
 
 			// Mock memory methods to track calls
 			const pushTurn = vi.fn().mockResolvedValue(undefined);

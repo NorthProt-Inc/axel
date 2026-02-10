@@ -1,9 +1,9 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
-	MetricsRegistry,
 	Counter,
-	Histogram,
 	Gauge,
+	Histogram,
+	MetricsRegistry,
 	formatPrometheus,
 } from '../../src/metrics/prometheus-metrics.js';
 

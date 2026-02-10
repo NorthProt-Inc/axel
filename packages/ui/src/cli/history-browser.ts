@@ -32,14 +32,9 @@ export function browseHistory(entries: readonly HistoryEntry[]): string {
 		const mm = entry.timestamp.getUTCMinutes().toString().padStart(2, '0');
 		const time = `${hh}:${mm}`;
 		const preview = truncatePreview(entry.preview);
-		const roleLabel =
-			entry.role === 'user'
-				? theme.accent(entry.role)
-				: theme.success(entry.role);
+		const roleLabel = entry.role === 'user' ? theme.accent(entry.role) : theme.success(entry.role);
 
-		lines.push(
-			`  ${theme.dim(time)} ${theme.muted(shortId)} ${roleLabel} ${theme.text(preview)}`,
-		);
+		lines.push(`  ${theme.dim(time)} ${theme.muted(shortId)} ${roleLabel} ${theme.text(preview)}`);
 	}
 
 	lines.push('');

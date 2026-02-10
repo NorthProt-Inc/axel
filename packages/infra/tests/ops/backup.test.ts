@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+	type BackupConfig,
 	BackupConfigSchema,
-	generatePgDumpCommand,
+	type BackupFile,
 	applyRetentionPolicy,
 	calculateStorageUsage,
 	generateCronEntry,
-	type BackupConfig,
-	type BackupFile,
+	generatePgDumpCommand,
 } from '../../src/ops/backup.js';
 
 describe('BackupConfigSchema', () => {
@@ -145,9 +145,7 @@ describe('generatePgDumpCommand', () => {
 	it('generates a timestamped filename in outputPath', () => {
 		const result = generatePgDumpCommand(baseConfig);
 		// Expect pattern like: /var/backups/axel/axel_backup_YYYYMMDD_HHmmss.dump
-		expect(result.outputPath).toMatch(
-			/\/var\/backups\/axel\/axel_backup_\d{8}_\d{6}\.dump$/,
-		);
+		expect(result.outputPath).toMatch(/\/var\/backups\/axel\/axel_backup_\d{8}_\d{6}\.dump$/);
 	});
 
 	it('uses --file flag pointing to outputPath', () => {

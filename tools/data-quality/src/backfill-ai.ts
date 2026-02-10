@@ -65,8 +65,7 @@ function parseSummaryResponse(text: string): SummaryResponse {
 	const parsed = JSON.parse(cleaned) as Record<string, unknown>;
 
 	const summary = typeof parsed['summary'] === 'string' ? parsed['summary'] : '';
-	const tone =
-		typeof parsed['emotional_tone'] === 'string' ? parsed['emotional_tone'] : 'neutral';
+	const tone = typeof parsed['emotional_tone'] === 'string' ? parsed['emotional_tone'] : 'neutral';
 	const validTones = ['positive', 'negative', 'neutral', 'mixed'];
 
 	return {
@@ -128,15 +127,8 @@ async function summarizeLargeSession(
 	const chunkSummaries: string[] = [];
 	for (let i = 0; i < chunks.length; i++) {
 		const chunk = chunks[i]!;
-		console.error(
-			`  Summarizing chunk ${i + 1}/${chunks.length} (${chunk.length} messages)...`,
-		);
-		const result = await generateSummary(
-			gemini,
-			modelName,
-			SUMMARY_PROMPT,
-			formatMessages(chunk),
-		);
+		console.error(`  Summarizing chunk ${i + 1}/${chunks.length} (${chunk.length} messages)...`);
+		const result = await generateSummary(gemini, modelName, SUMMARY_PROMPT, formatMessages(chunk));
 		chunkSummaries.push(`[구간 ${i + 1}] ${result.summary}`);
 	}
 
@@ -212,9 +204,7 @@ export async function backfillAi(client: Client): Promise<AiBackfillResult> {
 		 GROUP BY session_id`,
 		[sessions.rows.map((s) => s.session_id)],
 	);
-	const countMap = new Map(
-		msgCounts.rows.map((r) => [r.session_id, Number.parseInt(r.cnt, 10)]),
-	);
+	const countMap = new Map(msgCounts.rows.map((r) => [r.session_id, Number.parseInt(r.cnt, 10)]));
 
 	let summarized = 0;
 	let inserted = 0;

@@ -264,7 +264,6 @@ class RedisWorkingMemory implements WorkingMemory {
 			};
 		}
 	}
-
 }
 
 export { RedisWorkingMemory, type RedisClient, type PgPool };

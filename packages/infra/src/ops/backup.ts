@@ -186,8 +186,8 @@ export function calculateStorageUsage(files: readonly BackupFile[]): StorageUsag
 	}
 
 	let totalBytes = 0;
-	let oldestTime = Infinity;
-	let newestTime = -Infinity;
+	let oldestTime = Number.POSITIVE_INFINITY;
+	let newestTime = Number.NEGATIVE_INFINITY;
 
 	for (const file of files) {
 		totalBytes += file.sizeBytes;

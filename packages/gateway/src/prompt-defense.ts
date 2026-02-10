@@ -19,10 +19,7 @@ export function sanitizeInput(input: string): string {
 		'[FILTERED: instruction override attempt]',
 	);
 	// Neutralize "you are now" role hijacking
-	sanitized = sanitized.replace(
-		/you\s+are\s+now\s+/gi,
-		'[FILTERED: role hijack attempt] ',
-	);
+	sanitized = sanitized.replace(/you\s+are\s+now\s+/gi, '[FILTERED: role hijack attempt] ');
 	return sanitized;
 }
 

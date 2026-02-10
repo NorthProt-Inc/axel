@@ -1,6 +1,6 @@
+import type { LlmChatChunk, LlmChatParams, LlmProvider } from '@axel/core/orchestrator';
 import { PermanentError } from '@axel/core/types';
 import { describe, expect, it, vi } from 'vitest';
-import type { LlmChatChunk, LlmChatParams, LlmProvider } from '@axel/core/orchestrator';
 import { FallbackLlmProvider } from '../../src/llm/fallback-provider.js';
 
 const DUMMY_PARAMS: LlmChatParams = {

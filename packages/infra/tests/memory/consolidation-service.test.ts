@@ -9,17 +9,41 @@ function mockEpisodicMemory() {
 		addMessage: vi.fn(),
 		getRecentSessions: vi.fn(),
 		getSessionMessages: vi.fn().mockResolvedValue([
-			{ role: 'user', content: 'I love TypeScript', channelId: 'cli', timestamp: new Date(), tokenCount: 10 },
-			{ role: 'assistant', content: 'Nice!', channelId: 'cli', timestamp: new Date(), tokenCount: 5 },
-			{ role: 'user', content: 'I prefer functional programming', channelId: 'cli', timestamp: new Date(), tokenCount: 15 },
-			{ role: 'assistant', content: 'Great choice!', channelId: 'cli', timestamp: new Date(), tokenCount: 8 },
+			{
+				role: 'user',
+				content: 'I love TypeScript',
+				channelId: 'cli',
+				timestamp: new Date(),
+				tokenCount: 10,
+			},
+			{
+				role: 'assistant',
+				content: 'Nice!',
+				channelId: 'cli',
+				timestamp: new Date(),
+				tokenCount: 5,
+			},
+			{
+				role: 'user',
+				content: 'I prefer functional programming',
+				channelId: 'cli',
+				timestamp: new Date(),
+				tokenCount: 15,
+			},
+			{
+				role: 'assistant',
+				content: 'Great choice!',
+				channelId: 'cli',
+				timestamp: new Date(),
+				tokenCount: 8,
+			},
 		]),
 		listSessions: vi.fn(),
 		searchByTopic: vi.fn(),
 		searchByContent: vi.fn(),
-		findUnconsolidated: vi.fn().mockResolvedValue([
-			{ sessionId: 'sess-1', userId: 'user-1', channelId: 'cli' },
-		]),
+		findUnconsolidated: vi
+			.fn()
+			.mockResolvedValue([{ sessionId: 'sess-1', userId: 'user-1', channelId: 'cli' }]),
 		markConsolidated: vi.fn().mockResolvedValue(undefined),
 		healthCheck: vi.fn(),
 	};
@@ -44,7 +68,9 @@ function mockEmbedding() {
 	};
 }
 
-function mockLlm(response = '{"memories":[{"content":"User likes TypeScript","type":"preference","importance":0.6}]}') {
+function mockLlm(
+	response = '{"memories":[{"content":"User likes TypeScript","type":"preference","importance":0.6}]}',
+) {
 	return {
 		getGenerativeModel: vi.fn().mockReturnValue({
 			generateContent: vi.fn().mockResolvedValue({
@@ -82,12 +108,14 @@ describe('ConsolidationService', () => {
 	it('deduplicates with updateAccess when similarity >= threshold', async () => {
 		const em = mockEpisodicMemory();
 		const sm = mockSemanticMemory();
-		sm.search.mockResolvedValue([{
-			memory: { uuid: 'existing-uuid' },
-			vectorScore: 0.95,
-			textScore: 0.90,
-			finalScore: 0.94,
-		}]);
+		sm.search.mockResolvedValue([
+			{
+				memory: { uuid: 'existing-uuid' },
+				vectorScore: 0.95,
+				textScore: 0.9,
+				finalScore: 0.94,
+			},
+		]);
 		const embed = mockEmbedding();
 		const llm = mockLlm();
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-	formatSessionList,
-	formatSessionEntry,
 	type SessionListEntry,
+	formatSessionEntry,
+	formatSessionList,
 } from '../src/cli/session-list.js';
 
 const sampleSessions: readonly SessionListEntry[] = [

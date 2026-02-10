@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
 import type { InteractionLog } from '@axel/core/orchestrator';
+import { describe, expect, it, vi } from 'vitest';
 import { PgInteractionLogger } from '../../src/db/pg-interaction-logger.js';
 
 function mockPool() {
