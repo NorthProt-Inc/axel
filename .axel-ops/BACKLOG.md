@@ -2,24 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 204**: **PHASE 1 ACTIVE.** dev-infra STALL 3 → 태스크 분할 (FEAT-LINK-002a/b, FEAT-INTENT-002a/b). devops 재활성화 (FIX-EXPORTS-001 P1).
+> **Cycle 205**: **PHASE 1 ACTIVE.** dev-infra FEAT-LINK-002a+FEAT-INTENT-002a 완료 (36 new tests, 1706 total). FEAT-LINK-002b+FEAT-INTENT-002b 배정. devops FIX-EXPORTS-001 계속.
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FEAT-LINK-002a | P1 | dev-infra | Link Understanding: HTTP fetcher (fetch+timeout+redirect) + @mozilla/readability + linkedom content extraction. LinkContentProvider 구현. | 0209C204 |
-| FEAT-INTENT-002a | P1 | dev-infra | Intent Classifier: Gemini Flash JSON mode classifier 구현. IntentClassifier interface 구현. 6 IntentType 분류, confidence 0-1. | 0209C204 |
+| FEAT-LINK-002b | P1 | dev-infra | Link Understanding: EmbeddingProvider→SemanticMemory 저장 파이프라인, 캐시 (TTL 60min), SSRF guard | 0209C205 |
+| FEAT-INTENT-002b | P1 | dev-infra | Intent Classifier: keyword fallback classifier, integration tests | 0209C205 |
+| FIX-EXPORTS-001 | P1 | devops | Gateway + 기타 패키지 exports 수정: `./src/index.ts` → conditional exports (dev: source, prod: dist) 빌드 후 정상 resolve 보장 | 0209C203 |
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| FIX-EXPORTS-001 | P1 | devops | Gateway + 기타 패키지 exports 수정: `./src/index.ts` → conditional exports (dev: source, prod: dist) 빌드 후 정상 resolve 보장 | — | 0209C202 |
-| FEAT-LINK-002b | P1 | dev-infra | Link Understanding: EmbeddingProvider→SemanticMemory 저장 파이프라인, 캐시 (TTL 60min), SSRF guard | FEAT-LINK-002a | 0209C204 |
-| FEAT-INTENT-002b | P1 | dev-infra | Intent Classifier: keyword fallback classifier, integration tests | FEAT-INTENT-002a | 0209C204 |
 | FIX-LINT-001 | P2 | devops | Biome lint errors 80건 + warnings 167건 정리 | — | 0209C202 |
-| FIX-DOCS-002 | P2 | devops | 문서 일관성 수정: (1) .env.example/operation.md 환경변수 표 통일, (2) env var naming 통일, (3) README buildstep 추가, (4) Migrate CLI env var 이름 통일, (5) operation.md persona ref 수정 | — | 0209C202 |
+| FIX-DOCS-002 | P2 | devops | 문서 일관성 수정: (1) .env.example/operation.md 환경변수 표 통일, (2) env var naming 통일, (3) README buildstep 추가, (4) Migrate CLI env var 이름 통일, (5) operation.md persona ref 수정, (6) README 테스트 수치 업데이트, (7) migrate CLI --help env 검증 개선 | — | 0209C202 |
 | FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-002b | 0209C199 |
 | FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-002b | 0209C199 |
 | FEAT-PLUGIN-001 | P2 | dev-core | Plugin SDK: PluginManifest Zod schema, PluginRegistry interface, lifecycle hooks | — | 0209C199 |
@@ -55,6 +53,8 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FEAT-LINK-002a | dev-infra | 0209C205 | ReadabilityContentProvider — DI HTTP fetcher + HTML parser (Readability+linkedom). SSRF prevention (private IP blocking), URL validation, content truncation (50K). 18 tests, 100% stmt. TDD RED→GREEN→REFACTOR. |
+| FEAT-INTENT-002a | dev-infra | 0209C205 | GeminiIntentClassifier — DI LLM client (Gemini Flash JSON mode). CircuitBreaker integration. Slash command priority, keyword fallback chain. 18 tests, 97.97% stmt. TDD RED→GREEN→REFACTOR. |
 | FEAT-LINK-001 | coord (CTO override) | 0209C201 | Link Understanding core types: LinkInfo/ContentSummary/LinkExtractResult Zod schemas, extractUrls() pure function (regex URL+email extraction, position tracking), LinkContentProvider DI interface. 22 tests. TDD RED→GREEN. |
 | FEAT-INTENT-001 | coord (CTO override) | 0209C201 | Intent Classifier core types: IntentType enum (6 types: chat/search/tool_use/memory_query/command/creative), ClassificationResult Zod schema (confidence 0-1, optional secondary), IntentClassifier DI interface with ClassificationContext. 12 tests. TDD RED→GREEN. |
 | RES-010 | research | 0209C200 | Link Understanding 리서치 완료. 권장: Readability + linkedom (OpenClaw 검증 패턴). URL 추출: linkifyjs. DOM: linkedom (경량). Fallback: regex strip. Phase 1: Readability, Phase 2: Defuddle. 709 lines, 30+ sources. docs/research/RES-010-link-understanding.md. |
