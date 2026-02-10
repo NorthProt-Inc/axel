@@ -28,6 +28,17 @@ export {
 	type AnthropicCountTokensClient,
 } from './context/anthropic-token-counter.js';
 export {
+	ReadabilityContentProvider,
+	type HttpFetcher,
+	type HtmlParser,
+	type LinkProviderConfig,
+} from './link/index.js';
+export {
+	GeminiIntentClassifier,
+	type IntentLlmClient,
+	type IntentClassifierConfig,
+} from './intent/index.js';
+export {
 	BackupConfigSchema,
 	type BackupConfig,
 	type BackupFile,
