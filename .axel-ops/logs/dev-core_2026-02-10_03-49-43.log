@@ -1,0 +1,29 @@
+# Dev-Core Division — Wave 1 완료 보고
+
+> **참고**: dev-core 에이전트가 600s 타임아웃으로 종료되었으나, 3개 태스크는 타임아웃 전 커밋 완료 + main merge 완료 상태.
+> 본 보고서는 Mark의 수동 검증 후 작성됨.
+
+## 결과 요약
+
+| Task | Severity | 상태 | Commit | 핵심 변경 |
+|------|----------|------|--------|-----------|
+| **PERF-C1** | CRITICAL | **완료** | `6d5078c` | `truncateToFit`: binary search → ratio-based estimate (count() 최대 3회) |
+| **PERF-C6** | CRITICAL | **완료** | `de042b5` | `extractAndStoreEntities`: sequential → `Promise.all` 병렬화 |
+| **PERF-M2** | MEDIUM | **완료** | `0cb090f` | `searchByTopic`: `toLowerCase` → `RegExp('i')` + 특수문자 이스케이프 |
+
+## 검증 결과
+
+- **625 core tests PASS**, 0 fail (40 test files)
+- **Duration**: ~1s
+- 주요 검증 항목:
+  - `assembler.test.ts`: PERF-C1 truncation 성능 테스트 — count() ≤ 4회 (truncateToFit 3 + addSection 1)
+  - `memory-persistence.test.ts`: PERF-C6 병렬 처리 테스트 — maxConcurrentFinds > 1
+  - `episodic-memory.test.ts`: PERF-M2 regex 특수문자 테스트 — `C++`, `(`, `)`, `!` 안전 처리
+
+## 타임라인
+
+- `03:49:43` dev-core 에이전트 시작 (worktree: axel-wt-dev-core)
+- `03:59:43` 600s 타임아웃으로 종료 (커밋은 완료, 보고서 미작성)
+- `ac6801d` mid-cycle merge: `div/dev-core` → `main` 성공
+- Lint 수정 커밋: `1ae3988` (Biome lint issues)
+- 완료 보고 커밋: `6ae9f47` (done reports — 빈 로그)
