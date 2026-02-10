@@ -14,7 +14,8 @@ HD="$OPS/comms/human.md"
 
 say() {
 	local line="- [ ] **[$1]** $2"
-	echo "$line" >> "$HD"
+	sed -i '/^(없음)$/d' "$HD"
+	sed -i '/<!-- ax:insert -->/a\'"$line" "$HD"
 	echo "  $line"
 }
 
@@ -33,9 +34,10 @@ case "$1" in
 	s|status)   [ -f "$OPS/PROGRESS.md" ] && cat "$OPS/PROGRESS.md" || echo "없음" ;;
 	b|backlog)  [ -f "$OPS/BACKLOG.md" ] && cat "$OPS/BACKLOG.md" || echo "없음" ;;
 	e|errors)   [ -f "$OPS/ERRORS.md" ] && cat "$OPS/ERRORS.md" || echo "없음" ;;
+	m|metrics)  [ -f "$OPS/METRICS.md" ] && cat "$OPS/METRICS.md" || echo "없음" ;;
 	log)        [ -f "$OPS/logs/cycle.log" ] && tail -20 "$OPS/logs/cycle.log" || echo "없음" ;;
 	pending)    grep -n '^\- \[ \]' "$HD" 2>/dev/null || echo "대기 중인 지시 없음" ;;
-	clear)      sed -i '/^\- \[x\]/d' "$HD" && echo "처리 완료된 항목 삭제" ;;
+	clear)      sed -i '/^## Directives/,/^## Archive/{/^\- \[x\]/d;}' "$HD" && echo "처리 완료된 항목 삭제" ;;
 	help|-h)
 		cat <<'HELP'
 ax — Axel 지시 CLI
@@ -51,9 +53,10 @@ ax — Axel 지시 CLI
   ax s                     상태 (PROGRESS)
   ax b                     백로그 (BACKLOG)
   ax e                     에러 (ERRORS)
+  ax m                     메트릭스 (METRICS)
   ax log                   최근 사이클 로그
   ax pending               미처리 지시 목록
-  ax clear                 처리완료([x]) 항목 삭제
+  ax clear                 Directives 섹션 처리완료([x]) 항목 삭제
 HELP
 		;;
 	*)   say "P1 directive" "$*" ;;
