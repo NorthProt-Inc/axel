@@ -260,6 +260,21 @@ node tools/migrate/dist/cli.js up
 | ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
 | AUD-083 HIGH: Hardcoded DB credentials in migrate CLI (AUDIT-005) | C61 | **RESOLVED (C61, FIX-AUDIT-E-003)**: Removed hardcoded fallback credentials ('axel_dev_password') from tools/migrate/src/cli.ts. Added validateEnvironment() to enforce explicit env vars (DATABASE_URL or PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD). Updated DEPLOY.md with secure usage examples. **Result: 5 new tests, 806 tests pass.** Security compliance verified. |
 
+## Cycle 205 Status (2026-02-09)
+
+**Summary**: FIX-EXPORTS-001 confirmed complete (C203). dev-infra completed FEAT-LINK-002a+FEAT-INTENT-002a (36 new tests). 1706 tests pass.
+
+- ✅ Conditional exports verified (5 packages, C203 commit `564344c`)
+- ✅ **1706 tests pass** (+36 from C204), typecheck PASSES
+- ✅ dev-infra: ReadabilityContentProvider + GeminiIntentClassifier implemented (TDD RED→GREEN→REFACTOR)
+- ✅ FIX-EXPORTS-001 done message sent to Coordinator (BACKLOG status correction)
+
+**Commits** (Cycle 205):
+- `daf9d08`: chore(ops): CTO cycle 205 — FEAT-LINK-002a + FEAT-INTENT-002a done, 1706 tests
+- `99502d9`: fix: commit residual division changes blocking devops merge
+- `85fedb1`: chore(ops): dev-infra done report — FEAT-LINK-002a + FEAT-INTENT-002a complete
+- `f22ac57`: refactor(infra): fix Biome format + reduce cognitive complexity in link/intent tests
+
 ## Cycle 204 Status (2026-02-09)
 
 **Summary**: FIX-EXPORTS-001 already complete (C203). Minor formatting cleanup committed.
