@@ -459,9 +459,7 @@ describe('DiscordChannel', () => {
 			await new Promise((r) => setTimeout(r, 10));
 
 			// First channel should still be present
-			await expect(
-				channel.send('ch-0', { content: 'ping' }),
-			).resolves.toBeUndefined();
+			await expect(channel.send('ch-0', { content: 'ping' })).resolves.toBeUndefined();
 		});
 
 		it('promotes re-accessed channels (LRU behavior)', async () => {
@@ -485,9 +483,7 @@ describe('DiscordChannel', () => {
 			await new Promise((r) => setTimeout(r, 10));
 
 			// ch-0 should survive (was promoted), ch-1 should be evicted
-			await expect(
-				channel.send('ch-0', { content: 'ping' }),
-			).resolves.toBeUndefined();
+			await expect(channel.send('ch-0', { content: 'ping' })).resolves.toBeUndefined();
 			await expect(channel.send('ch-1', { content: 'ping' })).rejects.toThrow(
 				'Unknown Discord channel: ch-1',
 			);
