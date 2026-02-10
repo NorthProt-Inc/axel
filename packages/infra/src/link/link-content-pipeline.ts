@@ -156,7 +156,7 @@ class LinkContentPipeline {
 
 			const newMemory: NewMemory = {
 				content: embeddingText,
-				memoryType: 'reference',
+				memoryType: 'fact',
 				importance,
 				embedding,
 				sourceChannel: channelId,

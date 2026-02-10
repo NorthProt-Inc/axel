@@ -93,7 +93,7 @@ describe('LinkContentPipeline', () => {
 			expect(semanticMemory.store).toHaveBeenCalledOnce();
 		});
 
-		it('should store with memoryType "reference" and link metadata', async () => {
+		it('should store with memoryType "fact" and link metadata', async () => {
 			const pipeline = new LinkContentPipeline(fetcher, embedder, semanticMemory);
 			await pipeline.processUrl(
 				'https://example.com/article',
@@ -102,7 +102,7 @@ describe('LinkContentPipeline', () => {
 			);
 
 			const storedMemory = semanticMemory.store.mock.calls[0]?.[0] as NewMemory;
-			expect(storedMemory.memoryType).toBe('reference');
+			expect(storedMemory.memoryType).toBe('fact');
 			expect(storedMemory.sourceChannel).toBe('channel-1');
 			expect(storedMemory.sourceSession).toBe('session-1');
 			expect(storedMemory.embedding).toBeInstanceOf(Float32Array);
