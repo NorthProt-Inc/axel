@@ -1,5 +1,5 @@
 import { renderMarkdown } from './renderer.js';
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * CLI output rendering functions for CliChannel integration.
@@ -13,13 +13,13 @@ export function renderAssistantMessage(content: string): string {
 	if (content.length === 0) {
 		return '';
 	}
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const rendered = renderMarkdown(content);
 	return `${theme.accent('Axel')}${theme.dim(':')} ${rendered}`;
 }
 
 export function renderStreamStart(): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	return `${theme.accent('Axel')}${theme.dim(':')} `;
 }
 
@@ -32,7 +32,7 @@ export function renderStreamEnd(): string {
 }
 
 export function renderToolCall(toolName: string, input: Record<string, unknown>): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const inputSummary = Object.entries(input)
 		.map(([k, v]) => `${k}=${JSON.stringify(v)}`)
 		.join(', ');
@@ -40,7 +40,7 @@ export function renderToolCall(toolName: string, input: Record<string, unknown>)
 }
 
 export function renderToolResult(toolName: string, success: boolean, output: string): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const indicator = success ? theme.success('✓') : theme.error('✗');
 	const truncated =
 		output.length > MAX_TOOL_OUTPUT_LENGTH
@@ -50,6 +50,6 @@ export function renderToolResult(toolName: string, success: boolean, output: str
 }
 
 export function renderThinking(content: string): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	return theme.muted(`  💭 ${content}`);
 }

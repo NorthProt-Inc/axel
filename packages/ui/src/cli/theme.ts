@@ -41,3 +41,22 @@ export function createCliTheme(): CliTheme {
 		header: chalk.hex('#06B6D4').bold,
 	};
 }
+
+/**
+ * Lazy singleton for the CLI theme.
+ * Created on first access, frozen for immutability.
+ * Use `resetCliTheme()` in tests to clear the cached instance.
+ */
+let cachedTheme: CliTheme | null = null;
+
+export function getCliTheme(): CliTheme {
+	if (!cachedTheme) {
+		cachedTheme = Object.freeze(createCliTheme());
+	}
+	return cachedTheme;
+}
+
+/** Reset the cached theme singleton (for test isolation). */
+export function resetCliTheme(): void {
+	cachedTheme = null;
+}
