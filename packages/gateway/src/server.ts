@@ -20,11 +20,15 @@ import {
 
 const MAX_BODY_BYTES = 32_768; // 32KB
 const RATE_LIMIT_WINDOW_MS = 60_000;
+const MAX_BUCKET_COUNT = 10_000; // H4: cap to prevent unbounded growth
+const EVICTION_INTERVAL_MS = 30_000; // H6: periodic eviction instead of per-request
+const MAX_WS_CONNECTIONS = 1_000; // M5: cap concurrent WebSocket connections
 
 export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	let httpServer: http.Server | null = null;
 	let wss: WebSocketServer | null = null;
 	let startedAt = 0;
+	let evictionTimer: ReturnType<typeof setInterval> | null = null; // H6
 	const connections = new Set<AuthenticatedWebSocket>();
 	const rateLimitBuckets = new Map<string, number[]>();
 
@@ -97,14 +101,24 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 
 		wss.on('connection', (ws: AuthenticatedWebSocket) => {
+			// M5: reject if at max connections
+			if (connections.size >= MAX_WS_CONNECTIONS) {
+				ws.close(1013, 'Too many connections');
+				return;
+			}
 			connections.add(ws);
-			ws.on('close', () => {
+			const cleanup = () => {
 				cleanupWsTimers(ws);
 				connections.delete(ws);
-			});
+			};
+			ws.on('close', cleanup);
+			ws.on('error', cleanup); // M5: handle error event to prevent leaks
 			setupWsAuth(ws, config, deps);
 			setupWsHeartbeat(ws);
 		});
+
+		// H6: start periodic eviction instead of per-request O(n) scan
+		evictionTimer = setInterval(() => evictStaleBuckets(Date.now()), EVICTION_INTERVAL_MS);
 
 		return new Promise<http.Server>((resolve) => {
 			httpServer?.listen(config.port, config.host, () => {
@@ -115,6 +129,12 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 	}
 
 	async function stop(): Promise<void> {
+		// H6: clear eviction interval
+		if (evictionTimer) {
+			clearInterval(evictionTimer);
+			evictionTimer = null;
+		}
+
 		for (const ws of connections) {
 			cleanupWsTimers(ws);
 			ws.close(1001, 'Server shutting down');
@@ -138,7 +158,8 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		const requestId = generateRequestId();
 		if (handleCors(req, res)) return;
 
-		let body = '';
+		// M7: collect Buffer chunks in array, single toString at end
+		const chunks: Buffer[] = [];
 		let bodyBytes = 0;
 		let aborted = false;
 
@@ -151,11 +172,14 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 				req.destroy();
 				return;
 			}
-			body += chunk.toString();
+			chunks.push(chunk);
 		});
 
 		req.on('end', () => {
-			if (!aborted) processRequest(req, res, body, requestId);
+			if (!aborted) {
+				const body = Buffer.concat(chunks).toString();
+				processRequest(req, res, body, requestId);
+			}
 		});
 	}
 
@@ -193,13 +217,25 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		});
 	}
 
-	function evictStaleBuckets(now: number, excludeIp: string): void {
+	// H6: periodic eviction (called by interval, not per-request)
+	// H4: also enforces MAX_BUCKET_COUNT by deleting oldest entries
+	function evictStaleBuckets(now: number): void {
 		const staleThreshold = now - RATE_LIMIT_WINDOW_MS * 2;
 		for (const [ip, ts] of rateLimitBuckets) {
-			if (ip === excludeIp) continue;
 			const latest = ts[ts.length - 1];
 			if (latest === undefined || latest < staleThreshold) {
 				rateLimitBuckets.delete(ip);
+			}
+		}
+
+		// H4: if still over cap, evict oldest entries (Map iterates in insertion order)
+		if (rateLimitBuckets.size > MAX_BUCKET_COUNT) {
+			const excess = rateLimitBuckets.size - MAX_BUCKET_COUNT;
+			let deleted = 0;
+			for (const key of rateLimitBuckets.keys()) {
+				if (deleted >= excess) break;
+				rateLimitBuckets.delete(key);
+				deleted++;
 			}
 		}
 	}
@@ -225,7 +261,7 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		const now = Date.now();
 		const windowStart = now - RATE_LIMIT_WINDOW_MS;
 
-		evictStaleBuckets(now, clientIp);
+		// H6: eviction now runs on interval, not per-request
 
 		let timestamps = rateLimitBuckets.get(clientIp);
 		if (!timestamps) {
@@ -393,5 +429,5 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		res.end();
 	}
 
-	return { start, stop, getRateLimitBucketCount };
+	return { start, stop, getRateLimitBucketCount, getConnectionCount: () => connections.size, evictStaleBuckets };
 }
