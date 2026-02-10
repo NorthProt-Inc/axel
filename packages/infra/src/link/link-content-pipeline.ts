@@ -40,6 +40,8 @@ const DEFAULT_CONFIG: ContentPipelineConfig = {
 	maxCacheSize: 500,
 };
 
+const MAX_CONCURRENT_URLS = 3;
+
 const IMPORTANCE_KEYWORDS = ['important', 'remember', '중요', '기억'] as const;
 const BASE_IMPORTANCE = 0.4;
 const KEYWORD_BOOST = 0.15;
@@ -81,6 +83,32 @@ function calculateImportance(content: string): number {
 	}
 
 	return Math.min(importance, 1.0);
+}
+
+// --- Concurrency Limiter ---
+
+async function withConcurrency<T, R>(
+	items: readonly T[],
+	limit: number,
+	fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+	const results: R[] = new Array(items.length);
+	const executing = new Set<Promise<void>>();
+
+	for (let i = 0; i < items.length; i++) {
+		const index = i;
+		const p = fn(items[index]!).then((r) => {
+			results[index] = r;
+			executing.delete(p);
+		});
+		executing.add(p);
+		if (executing.size >= limit) {
+			await Promise.race(executing);
+		}
+	}
+
+	await Promise.all(executing);
+	return results;
 }
 
 class LinkContentPipeline {
@@ -149,22 +177,59 @@ class LinkContentPipeline {
 		channelId: string,
 		sessionId: string,
 	): Promise<readonly PipelineResult[]> {
+		const results: (PipelineResult | null)[] = new Array(urls.length).fill(null);
 		const seen = new Map<string, PipelineResult>();
-		const results: PipelineResult[] = [];
 
-		for (const url of urls) {
-			const existing = seen.get(url);
-			if (existing !== undefined) {
-				results.push(existing);
+		// Pass 1: resolve duplicates and cache hits synchronously
+		const cacheMissIndices: number[] = [];
+		const uniqueCacheMissUrls: string[] = [];
+		// Maps a URL (cache miss, first occurrence) to the index in uniqueCacheMissUrls
+		const urlToMissSlot = new Map<string, number>();
+
+		for (let i = 0; i < urls.length; i++) {
+			const url = urls[i]!;
+
+			// Duplicate within this batch — will be filled after processing
+			if (seen.has(url) || urlToMissSlot.has(url)) {
+				cacheMissIndices.push(i);
 				continue;
 			}
 
-			const result = await this.processUrl(url, channelId, sessionId);
-			seen.set(url, result);
-			results.push(result);
+			// Cache hit from the persistent cache
+			const cached = this.getCached(url);
+			if (cached !== undefined) {
+				const result: PipelineResult = { stored: true, uuid: cached.uuid, url };
+				results[i] = result;
+				seen.set(url, result);
+				continue;
+			}
+
+			// Cache miss — first occurrence
+			urlToMissSlot.set(url, uniqueCacheMissUrls.length);
+			uniqueCacheMissUrls.push(url);
+			cacheMissIndices.push(i);
 		}
 
-		return results;
+		// Pass 2: process unique cache misses in parallel with concurrency limit
+		const missResults = await withConcurrency(
+			uniqueCacheMissUrls,
+			MAX_CONCURRENT_URLS,
+			(url) => this.processUrl(url, channelId, sessionId),
+		);
+
+		// Index miss results by URL
+		for (let j = 0; j < uniqueCacheMissUrls.length; j++) {
+			const url = uniqueCacheMissUrls[j]!;
+			seen.set(url, missResults[j]!);
+		}
+
+		// Pass 3: fill in all remaining slots from seen map
+		for (const idx of cacheMissIndices) {
+			const url = urls[idx]!;
+			results[idx] = seen.get(url)!;
+		}
+
+		return results as PipelineResult[];
 	}
 
 	private getCached(url: string): CacheEntry | undefined {
@@ -213,4 +278,4 @@ class LinkContentPipeline {
 	}
 }
 
-export { LinkContentPipeline, DEFAULT_CONFIG };
+export { LinkContentPipeline, DEFAULT_CONFIG, MAX_CONCURRENT_URLS };

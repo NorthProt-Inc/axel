@@ -3,6 +3,7 @@ import type { ContentSummary } from '@axel/core/types';
 import type { NewMemory, SemanticMemory } from '@axel/core/memory';
 import {
 	LinkContentPipeline,
+	MAX_CONCURRENT_URLS,
 	type ContentFetcher,
 	type ContentEmbedder,
 	type ContentPipelineConfig,
@@ -275,6 +276,105 @@ describe('LinkContentPipeline', () => {
 
 			expect(results).toHaveLength(2);
 			expect(fetcher.fetchContent).toHaveBeenCalledTimes(1);
+		});
+
+		it('should process 5 URLs in parallel faster than serial', async () => {
+			const DELAY_MS = 50;
+			const URL_COUNT = 5;
+
+			// Create a fetcher with artificial delay to simulate network latency
+			const delayedFetcher: ContentFetcher = {
+				fetchContent: vi.fn().mockImplementation(
+					() =>
+						new Promise<ContentSummary>((resolve) => {
+							setTimeout(() => resolve(DEFAULT_SUMMARY), DELAY_MS);
+						}),
+				),
+			};
+
+			const pipeline = new LinkContentPipeline(delayedFetcher, embedder, semanticMemory);
+
+			const urls = Array.from({ length: URL_COUNT }, (_, i) => `https://example.com/page-${i}`);
+
+			const start = performance.now();
+			const results = await pipeline.processUrls(urls, 'ch-1', 's-1');
+			const elapsed = performance.now() - start;
+
+			// All results should be present and in order
+			expect(results).toHaveLength(URL_COUNT);
+			for (let i = 0; i < URL_COUNT; i++) {
+				expect(results[i]!.url).toBe(urls[i]);
+				expect(results[i]!.stored).toBe(true);
+			}
+
+			// Serial would take ~URL_COUNT * DELAY_MS = ~250ms
+			// Parallel with concurrency 3 should take ~ceil(5/3)*DELAY_MS = ~100ms
+			// We check it's significantly less than serial time (allow generous margin)
+			const serialEstimate = URL_COUNT * DELAY_MS;
+			expect(elapsed).toBeLessThan(serialEstimate * 0.8);
+		});
+
+		it('should isolate individual URL failures in parallel batch', async () => {
+			let callCount = 0;
+			const mixedFetcher: ContentFetcher = {
+				fetchContent: vi.fn().mockImplementation((url: string) => {
+					callCount++;
+					if (url.includes('fail')) {
+						return Promise.resolve(undefined);
+					}
+					return Promise.resolve(DEFAULT_SUMMARY);
+				}),
+			};
+
+			const pipeline = new LinkContentPipeline(mixedFetcher, embedder, semanticMemory);
+
+			const results = await pipeline.processUrls(
+				[
+					'https://example.com/ok-1',
+					'https://example.com/fail-2',
+					'https://example.com/ok-3',
+					'https://example.com/fail-4',
+					'https://example.com/ok-5',
+				],
+				'ch-1',
+				's-1',
+			);
+
+			expect(results).toHaveLength(5);
+			expect(results[0]!.stored).toBe(true);
+			expect(results[1]!.stored).toBe(false);
+			expect(results[2]!.stored).toBe(true);
+			expect(results[3]!.stored).toBe(false);
+			expect(results[4]!.stored).toBe(true);
+		});
+
+		it('should preserve result order matching input URL order', async () => {
+			// Each URL returns a unique uuid to verify ordering
+			let storeCallIdx = 0;
+			const orderMemory = createMockSemanticMemory();
+			orderMemory.store.mockImplementation(() => {
+				storeCallIdx++;
+				return Promise.resolve(`uuid-${storeCallIdx}`);
+			});
+
+			const pipeline = new LinkContentPipeline(fetcher, embedder, orderMemory);
+
+			const urls = [
+				'https://example.com/first',
+				'https://example.com/second',
+				'https://example.com/third',
+			];
+
+			const results = await pipeline.processUrls(urls, 'ch-1', 's-1');
+
+			expect(results).toHaveLength(3);
+			expect(results[0]!.url).toBe('https://example.com/first');
+			expect(results[1]!.url).toBe('https://example.com/second');
+			expect(results[2]!.url).toBe('https://example.com/third');
+		});
+
+		it('should export MAX_CONCURRENT_URLS constant', () => {
+			expect(MAX_CONCURRENT_URLS).toBeGreaterThanOrEqual(2);
 		});
 	});
 
