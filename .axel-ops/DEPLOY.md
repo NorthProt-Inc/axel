@@ -6,13 +6,13 @@
 
 | Component | Status | Version | Notes |
 |-----------|--------|---------|-------|
-| Node.js | ✅ READY | 22.13.1 | Runtime — ready for Phase E |
+| Node.js | ✅ READY | 22.13.1 | Runtime — ready for Phase 1 |
 | pnpm | ✅ READY | 9.15.4 (via npx) | Package manager — functional |
 | PostgreSQL | ✅ READY | 17 + pgvector 0.8.1 | Docker Compose running, schema migrated (10 migrations applied) |
 | Redis | ✅ READY | 7 Alpine | Docker Compose running |
 | Docker Compose | ✅ READY | — | Dev environment operational |
-| GitHub Actions | ✅ READY | — | CI workflow active |
-| Migration Tool | ✅ READY | @axel/migrate 0.1.0 | DB migration runner (tools/migrate/), 10 tests pass |
+| GitHub Actions | ✅ READY | — | CI workflow active (dormant — no push) |
+| Migration Tool | ✅ READY | @axel/migrate 0.1.0 | DB migration runner (tools/migrate/), 15 tests pass |
 
 ## Monorepo Scaffolding
 
@@ -245,8 +245,9 @@ node tools/migrate/dist/cli.js up
 
 | ID | Severity | Description | Status |
 |----|----------|-------------|--------|
-| ERR-091 | MEDIUM | tools/data-quality @google/genai dependency missing — typecheck fails | FIX-TYPECHECK-002 (devops P1) queued |
-| Biome lint | P2 | 50 errors + 191 warnings (noUnusedTemplateLiteral, noExplicitAny, noDelete) | FIX-LINT-001 (devops P2) in progress |
+| ERR-091 | MEDIUM | tools/data-quality @google/genai dependency missing — typecheck fails | FIX-TYPECHECK-002 (devops P1) queued (not blocking — dev workflow uses tsx) |
+| Biome lint | P2 | 50 errors + 191 warnings (noUnusedTemplateLiteral, noExplicitAny, noDelete) | FIX-LINT-001 (devops P2) queued (C203 partial: 31 files formatted, 24 imports organized) |
+| BACKLOG.md stale | LOW | FIX-EXPORTS-001 completed C203 but BACKLOG still shows Queued | Coordinator update needed |
 
 ## Known Issues (Resolved)
 
@@ -258,6 +259,18 @@ node tools/migrate/dist/cli.js up
 | ERR-086 HIGH: punycode DEP0040 + telegram test failures | C84 | **RESOLVED (C84, FIX-PUNYCODE-001+002)**: FIX-PUNYCODE-001의 packageExtensions + postinstall script가 정상 작동. whatwg-url@5.0.0 require('../punycode') 해결됨. **Result: 975 tests pass (0 FAIL), telegram 25 tests pass.** FIX-PUNYCODE-002는 재검증 결과 불필요 판정. |
 | ERR-065 MEDIUM: zod resolve failure — 16 MCP tests skipped (QA-016 HIGH) | C46 | **RESOLVED (C47, FIX-INFRA-001)**: Root cause: zod symlink missing in packages/infra/node_modules. Fix: (1) pnpm install regenerated zod symlink, (2) Added @testcontainers/postgresql@^11.11.0 devDep (PostgreSqlContainer moved to separate package in testcontainers v11+), (3) Updated tests/setup.ts import. **Result: 475 tests, 41 files, 0 skips.** CONSTITUTION §10 compliance restored. |
 | AUD-083 HIGH: Hardcoded DB credentials in migrate CLI (AUDIT-005) | C61 | **RESOLVED (C61, FIX-AUDIT-E-003)**: Removed hardcoded fallback credentials ('axel_dev_password') from tools/migrate/src/cli.ts. Added validateEnvironment() to enforce explicit env vars (DATABASE_URL or PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD). Updated DEPLOY.md with secure usage examples. **Result: 5 new tests, 806 tests pass.** Security compliance verified. |
+
+## Cycle 204 Status (2026-02-09)
+
+**Summary**: FIX-EXPORTS-001 already complete (C203). Minor formatting cleanup committed.
+
+- ✅ Conditional exports verified (5 packages)
+- ✅ 1670 tests pass, typecheck PASSES
+- ✅ Trivial formatting commit (webhook-verification.test.ts)
+- ⚠️ BACKLOG.md status stale (FIX-EXPORTS-001 Queued→should be Done)
+
+**Commits**:
+- `4aac4c6`: chore(gateway): format webhook-verification test function signature
 
 ## Release History
 
