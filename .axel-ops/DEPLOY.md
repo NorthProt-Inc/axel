@@ -87,7 +87,7 @@ File: `docker/docker-compose.dev.yml`
 
 | Workflow | Trigger | Steps | Status |
 |----------|---------|-------|--------|
-| CI | push to main, PRs | lint → typecheck → test | ✅ CREATED |
+| CI | push to main, PRs (inactive — no push) | lint → typecheck → test | ✅ CREATED (dormant) |
 
 File: `.github/workflows/ci.yml`
 - Node.js 22, pnpm 9

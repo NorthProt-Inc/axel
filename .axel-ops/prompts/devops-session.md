@@ -57,7 +57,7 @@ Based on the task type:
 - Health checks
 
 **GitHub Actions CI**:
-- Trigger: push to main, PRs
+- Trigger: push to main, PRs (currently inactive — all development is local, no push)
 - Steps: install → lint → typecheck → test
 - Cache: pnpm store
 

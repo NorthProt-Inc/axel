@@ -1,7 +1,7 @@
 #!/bin/bash
 # .axel-ops/launchers/cycle.sh
-# Master cycle launcher: CTO → Active Divisions (parallel) → Merge + Smoke Test → Push
-# Only CTO commits and pushes to origin. Divisions commit locally only.
+# Master cycle launcher: CTO → Active Divisions (parallel) → Merge + Smoke Test
+# All commits are local only. No git push — development is entirely local.
 set -euo pipefail
 
 MAIN_REPO="/home/northprot/projects/axel"
@@ -199,14 +199,19 @@ run_division() {
     set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
     unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
-    $CLAUDE -p \
+    timeout 600 $CLAUDE -p \
         --model "$model" \
         --dangerously-skip-permissions \
         --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash,WebSearch,WebFetch" \
         --no-session-persistence \
         "$(cat "$prompt_file")" \
         >> "$logfile" 2>&1 || {
-            log "$div FAILED (exit $?)"
+            local ec=$?
+            if [ $ec -eq 124 ]; then
+                log "$div TIMEOUT (600s)"
+            else
+                log "$div FAILED (exit $ec)"
+            fi
         }
 
     # Commit Division output (local only — no push)
@@ -277,13 +282,20 @@ cd "$MAIN_REPO"
 set -a; source "$MAIN_REPO/.env" 2>/dev/null || true; set +a
 unset ANTHROPIC_API_KEY  # Use subscription auth, not API key
 
-$CLAUDE -p \
+timeout 900 $CLAUDE -p \
     --model opus \
     --dangerously-skip-permissions \
     --allowed-tools "Read,Glob,Grep,Write,Edit,Task,Bash" \
     --no-session-persistence \
     "$(cat "$OPS/prompts/coordinator-session.md")" \
-    >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || log "coordinator FAILED"
+    >> "$OPS/logs/coordinator_$(date +%Y-%m-%d_%H-%M-%S).log" 2>&1 || {
+        ec=$?
+        if [ $ec -eq 124 ]; then
+            log "coordinator TIMEOUT (900s)"
+        else
+            log "coordinator FAILED (exit $ec)"
+        fi
+    }
 
 # ── Idle counter update (based on activation result) ──
 LATEST_ACTIVATION=$(grep '"type":"activation"' "$OPS/comms/broadcast.jsonl" 2>/dev/null | tail -1 || true)
@@ -309,7 +321,7 @@ fi
 
 # Commit CTO output (CONSTITUTION §1 — only CTO-owned files)
 cd "$MAIN_REPO"
-CTO_OWNED=".axel-ops/PROGRESS.md .axel-ops/BACKLOG.md .axel-ops/ERRORS.md .axel-ops/METRICS.md .axel-ops/comms/broadcast.jsonl .axel-ops/launchers/ .axel-ops/qc/known-issues.jsonl"
+CTO_OWNED=".axel-ops/PROGRESS.md .axel-ops/BACKLOG.md .axel-ops/ERRORS.md .axel-ops/METRICS.md .axel-ops/comms/broadcast.jsonl .axel-ops/comms/human.md .axel-ops/launchers/ .axel-ops/qc/known-issues.jsonl"
 git add --ignore-errors -- $CTO_OWNED 2>/dev/null || true
 if ! git diff --cached --quiet 2>/dev/null; then
     git commit -m "$(cat <<EOF
@@ -437,13 +449,8 @@ if [ ${#MERGED_BRANCHES[@]} -gt 0 ] && [ -f "$MAIN_REPO/package.json" ]; then
     fi
 fi
 
-# ── Phase 4: Conditional Push (CTO only) ──
-# Controlled by state file: echo 1 > .axel-ops/state/push_enabled
-if [ "$(cat "$STATE_DIR/push_enabled" 2>/dev/null)" = "1" ]; then
-    git push origin main --quiet 2>>"$OPS/logs/cycle.log" || log "PUSH FAILED"
-else
-    log "PUSH SKIP (push_enabled!=1)"
-fi
+# ── Phase 4: Push removed ──
+# All development is local. Push permanently disabled per Mark directive.
 
 # ── Phase 5: QC (Quality Control) ──
 # Runs 3 workers (parallel, haiku) → supervisor (sonnet) to test build/runtime/docs
