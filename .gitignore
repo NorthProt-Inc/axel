@@ -39,3 +39,10 @@ coverage/
 # Claude Code
 .claude/
 packages/core/coverage/
+
+# SvelteKit build artifacts
+apps/webchat/.svelte-kit/
+apps/webchat/build/
+
+# Ops state (local conflict markers)
+.axel-ops/state/conflict_*
