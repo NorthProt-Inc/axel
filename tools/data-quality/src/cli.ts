@@ -160,9 +160,7 @@ async function runBackfill(
 	try {
 		if (phases.includes('sessions')) {
 			console.error('Phase 1: Timestamp-based session mapping...');
-			const result = dryRun
-				? await backfillSessionsDryRun(client)
-				: await backfillSessions(client);
+			const result = dryRun ? await backfillSessionsDryRun(client) : await backfillSessions(client);
 			console.error(`  S1 ended_at extended: ${result.s1EndExtended}`);
 			console.error(`  NULL session_id fixed: ${result.nullSessionsFixed}`);
 			console.error(`  S2 → S1 reassigned: ${result.s2ToS1Reassigned}`);
