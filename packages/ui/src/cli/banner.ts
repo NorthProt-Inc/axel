@@ -1,4 +1,4 @@
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * NorthProt 4-point star ASCII art banner.
@@ -20,7 +20,7 @@ export interface BannerOptions {
 }
 
 export function renderBanner(options?: BannerOptions): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const lines: string[] = [];
 
 	lines.push('');

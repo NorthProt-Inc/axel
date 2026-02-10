@@ -1,6 +1,6 @@
 import { Marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * Render Markdown content to styled terminal output.
@@ -13,7 +13,7 @@ function getMarked(): Marked {
 	if (cachedMarked) {
 		return cachedMarked;
 	}
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const instance = new Marked();
 	instance.use(
 		markedTerminal({
@@ -40,16 +40,16 @@ export function renderMarkdown(content: string): string {
 }
 
 export function renderUserPrompt(content: string): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	return `${theme.accent('❯')} ${theme.text(content)}`;
 }
 
 export function renderSystemMessage(content: string): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	return theme.muted(`[system] ${content}`);
 }
 
 export function renderError(content: string): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	return theme.error(`✗ ${content}`);
 }

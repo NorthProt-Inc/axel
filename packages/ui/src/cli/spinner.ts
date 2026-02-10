@@ -1,5 +1,5 @@
 import ora, { type Ora } from 'ora';
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * Streaming wait indicator for CLI.
@@ -7,7 +7,7 @@ import { createCliTheme } from './theme.js';
  */
 
 export function createSpinner(text?: string): Ora {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	return ora({
 		text: text ?? theme.dim('thinking...'),
 		color: 'cyan',

@@ -1,4 +1,4 @@
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * Session switching and listing for CLI.
@@ -64,7 +64,7 @@ export function listActiveSessions(sessions: readonly SessionInfo[]): string {
 		return '';
 	}
 
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const lines: string[] = [theme.header('Sessions'), ''];
 
 	for (const session of sessions) {

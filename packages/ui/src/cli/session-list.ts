@@ -1,4 +1,4 @@
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * CLI session list formatting.
@@ -14,7 +14,7 @@ export interface SessionListEntry {
 }
 
 export function formatSessionEntry(session: SessionListEntry): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const indicator = session.active ? theme.accent('▶ ') : '  ';
 	const shortId = session.id.slice(0, 8);
 	const title = session.active ? theme.bold(session.title) : session.title;
@@ -24,11 +24,11 @@ export function formatSessionEntry(session: SessionListEntry): string {
 
 export function formatSessionList(sessions: readonly SessionListEntry[]): string {
 	if (sessions.length === 0) {
-		const theme = createCliTheme();
+		const theme = getCliTheme();
 		return theme.muted('  No sessions found.');
 	}
 
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const lines: string[] = [theme.header('  Sessions'), ''];
 
 	for (const session of sessions) {
