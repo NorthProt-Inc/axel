@@ -5,17 +5,17 @@
 ## Status
 
 - **Phase**: **Phase 1: Channels + Cross-Channel + Feature Expansion** (openclaw 참조)
-- **Cycle**: 204
-- **Last Updated**: 2026-02-09C204
-- **STATUS**: **PHASE 1 ACTIVE.** dev-infra STALL 3 → 태스크 분할 (FEAT-LINK-002→002a/b, FEAT-INTENT-002→002a/b). devops 재활성화 (FIX-EXPORTS-001 P1, C203 branch_reset 복구). 1670 tests (invariant, HEAD=bdfe009). 0 errors.
+- **Cycle**: 205
+- **Last Updated**: 2026-02-09C205
+- **STATUS**: **PHASE 1 ACTIVE.** dev-infra FEAT-LINK-002a+FEAT-INTENT-002a **완료** (stall 해소, 36 new tests). FEAT-LINK-002b+FEAT-INTENT-002b 배정. devops FIX-EXPORTS-001 계속. **1706 tests** (HEAD=99502d9). 0 errors.
 
 ## Task Counts
 
 | Status | Count |
 |--------|-------|
-| Queued | 13 |
-| In Progress | 2 |
-| Done | 211 |
+| Queued | 10 |
+| In Progress | 3 |
+| Done | 213 |
 | Cancelled | 17 |
 
 ## Open Errors: 0
@@ -33,20 +33,21 @@
 | 202 | 0209 | **dev-infra 활성화.** FEAT-LINK-002+FEAT-INTENT-002 배정. QC 7건 처리 → 3 fix tasks 생성. 1670 tests (invariant). 0 errors. |
 | 203 | 0209 | **dev-infra stall 2.** devops 활성화 (FIX-EXPORTS-001 P1 + lint fixes 커밋). 1670 tests (verified). 0 errors. |
 | 204 | 0209 | **dev-infra STALL 3 → 태스크 분할.** FEAT-LINK-002/FEAT-INTENT-002 cancelled, 4 subtasks 생성 (002a/b). devops 재활성화. 1670 tests (invariant). 0 errors. |
+| 205 | 0209 | **FEAT-LINK-002a+FEAT-INTENT-002a 완료.** dev-infra stall 해소. 36 new tests (1706 total). FEAT-LINK-002b+FEAT-INTENT-002b 배정. devops FIX-EXPORTS-001 계속. 0 errors. |
 
 ## Division Status
 
 | Division | Last Active | Current Task | Status |
 |----------|-------------|-------------|--------|
-| Coordinator | 0209C204 | Cycle 204 | Active |
+| Coordinator | 0209C205 | Cycle 205 | Active |
 | Architecture | 0209C103 | — | Idle. |
 | Dev-Core | 0209C201 | — | Idle (FEAT-PLUGIN-001 queued). |
-| Dev-Infra | 0209C204 | FEAT-LINK-002a, FEAT-INTENT-002a | **STALL 3 → SPLIT.** 분할 태스크 재배정. |
+| Dev-Infra | 0209C205 | FEAT-LINK-002b, FEAT-INTENT-002b | **ACTIVE.** 002a 완료, 002b 착수. |
 | Dev-Edge | 0209C111 | — | Idle (pending FEAT-LINK-003, FEAT-INTENT-003). |
 | UI/UX | 0209C112 | — | Idle (FEAT-CANVAS-001 queued). |
 | Research | 0209C200 | — | Idle. |
 | Quality | 0209C112 | — | Idle (QA-027 queued). |
-| DevOps | 0209C204 | FIX-EXPORTS-001 | **ACTIVE** (재활성화, C203 branch_reset 복구). |
+| DevOps | 0209C205 | FIX-EXPORTS-001 | **ACTIVE** (계속). |
 | Audit | 0208C89 | — | Idle. |
 
 ## Human Intervention Needed
