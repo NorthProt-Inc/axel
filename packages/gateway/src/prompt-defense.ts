@@ -7,20 +7,21 @@
  * Layer 4: Context boundary — wrap user input with markers
  */
 
+/**
+ * Combined pattern for all Layer 1 sanitization rules (PERF-H5).
+ * Single scan instead of 4 sequential passes: O(4n) → O(n).
+ */
+const SANITIZE_PATTERN =
+	/\0|```system|ignore\s+(all\s+)?previous\s+instructions|you\s+are\s+now\s+/gi;
+
 /** Layer 1: Sanitize user input to neutralize common injection patterns */
 export function sanitizeInput(input: string): string {
-	// Strip null bytes
-	let sanitized = input.replace(/\0/g, '');
-	// Neutralize markdown-based injection (triple backtick system prompt extraction)
-	sanitized = sanitized.replace(/```system/gi, '\\`\\`\\`system');
-	// Neutralize "ignore previous instructions" patterns
-	sanitized = sanitized.replace(
-		/ignore\s+(all\s+)?previous\s+instructions/gi,
-		'[FILTERED: instruction override attempt]',
-	);
-	// Neutralize "you are now" role hijacking
-	sanitized = sanitized.replace(/you\s+are\s+now\s+/gi, '[FILTERED: role hijack attempt] ');
-	return sanitized;
+	return input.replace(SANITIZE_PATTERN, (match) => {
+		if (match === '\0') return '';
+		if (match.toLowerCase().startsWith('```system')) return '\\`\\`\\`system';
+		if (match.toLowerCase().startsWith('ignore')) return '[FILTERED: instruction override attempt]';
+		return '[FILTERED: role hijack attempt] ';
+	});
 }
 
 /** Layer 2: Wrap system prompt with isolation markers */
