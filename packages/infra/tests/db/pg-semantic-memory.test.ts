@@ -289,7 +289,7 @@ describe('PgSemanticMemory', () => {
 					],
 					rowCount: 2,
 				})
-				// Subsequent UPDATE/DELETE calls
+				// Batch DELETE + batch UPDATE
 				.mockResolvedValue({ rows: [], rowCount: 1 });
 
 			const { PgSemanticMemory } = await import('../../src/db/index.js');
@@ -304,6 +304,17 @@ describe('PgSemanticMemory', () => {
 			expect(result.processed).toBe(2);
 			// mem-2 with importance 0.02 will decay further and get deleted
 			expect(result.deleted).toBeGreaterThanOrEqual(1);
+
+			// Verify batch pattern: 1 SELECT + at most 1 DELETE + 1 UPDATE = max 3 queries
+			const totalQueries = mockPool.query.mock.calls.length;
+			expect(totalQueries).toBeLessThanOrEqual(3);
+
+			// Verify batch SQL patterns (no individual WHERE uuid = $1)
+			const sqls = mockPool.query.mock.calls.map((c: unknown[]) => c[0] as string);
+			const hasAnyDelete = sqls.some((s: string) => s.includes('ANY($1::uuid[])'));
+			const hasUnnestUpdate = sqls.some((s: string) => s.includes('unnest'));
+			// At least one of them should be present (delete or update happened)
+			expect(hasAnyDelete || hasUnnestUpdate).toBe(true);
 		});
 
 		it('with decayConfig: returns zeros for empty table', async () => {
@@ -320,6 +331,69 @@ describe('PgSemanticMemory', () => {
 
 			expect(result.processed).toBe(0);
 			expect(result.deleted).toBe(0);
+		});
+
+		it('PERF-C3: 100+ rows decay uses at most 3 queries (SELECT + batch DELETE + batch UPDATE)', async () => {
+			const now = new Date();
+			const twoHoursAgo = new Date(now.getTime() - 7_200_000);
+			const rowCount = 120;
+
+			// Generate 120 rows: half with high importance (survive), half with very low (deleted)
+			const rows = Array.from({ length: rowCount }, (_, i) => ({
+				uuid: `mem-${i}`,
+				importance: i < 60 ? 0.01 : 0.9, // first 60 will be deleted, last 60 updated
+				memory_type: 'fact',
+				created_at: twoHoursAgo,
+				last_accessed: i < 60 ? twoHoursAgo : now,
+				access_count: i < 60 ? 1 : 5,
+				channel_mentions: null,
+			}));
+
+			mockPool.query
+				.mockResolvedValueOnce({ rows, rowCount }) // SELECT load
+				.mockResolvedValue({ rows: [], rowCount: 0 }); // batch DELETE + batch UPDATE
+
+			const { PgSemanticMemory } = await import('../../src/db/index.js');
+			const mem: SemanticMemory = new PgSemanticMemory(mockPool as any);
+
+			const { DEFAULT_DECAY_CONFIG } = await import('@axel/core/decay');
+			const result: DecayResult = await mem.decay({
+				threshold: DEFAULT_DECAY_CONFIG.deleteThreshold,
+				decayConfig: DEFAULT_DECAY_CONFIG,
+			});
+
+			// ── Query count assertion ──
+			const totalQueries = mockPool.query.mock.calls.length;
+			expect(totalQueries).toBeLessThanOrEqual(3); // 1 SELECT + 1 DELETE + 1 UPDATE
+
+			// ── Stats correctness ──
+			expect(result.processed).toBe(rowCount);
+			expect(result.deleted).toBeGreaterThanOrEqual(1);
+			const surviving = result.processed - result.deleted;
+			expect(surviving).toBeGreaterThanOrEqual(1);
+			expect(result.minImportance).toBeGreaterThan(0);
+			expect(result.maxImportance).toBeGreaterThanOrEqual(result.minImportance);
+			expect(result.avgImportance).toBeGreaterThan(0);
+			// Allow floating-point tolerance (avg may differ from min/max by rounding)
+			expect(result.avgImportance).toBeLessThanOrEqual(result.maxImportance + 1e-10);
+			expect(result.avgImportance).toBeGreaterThanOrEqual(result.minImportance - 1e-10);
+
+			// ── Batch SQL verification ──
+			const sqls = mockPool.query.mock.calls.map((c: unknown[]) => c[0] as string);
+			const deleteQuery = sqls.find((s: string) => s.includes('DELETE') && s.includes('ANY'));
+			const updateQuery = sqls.find((s: string) => s.includes('unnest'));
+			expect(deleteQuery).toContain('ANY($1::uuid[])');
+			expect(updateQuery).toContain('unnest($1::uuid[])');
+			expect(updateQuery).toContain('unnest($2::float8[])');
+
+			// ── No individual per-row queries ──
+			const perRowQueries = sqls.filter(
+				(s: string) =>
+					(s.includes('DELETE') || s.includes('UPDATE')) &&
+					s.includes('WHERE uuid = $1') &&
+					!s.includes('ANY'),
+			);
+			expect(perRowQueries).toHaveLength(0);
 		});
 	});
 

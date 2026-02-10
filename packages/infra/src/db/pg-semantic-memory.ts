@@ -138,8 +138,10 @@ class PgSemanticMemory implements SemanticMemory {
 
 		const decayed = decayBatch(inputs, config.decayConfig);
 
-		// Batch UPDATE + collect stats
-		let deleted = 0;
+		// Collect batch targets + stats in JS (no extra DB queries)
+		const deleteUuids: string[] = [];
+		const updateUuids: string[] = [];
+		const updateImportances: number[] = [];
 		let min = Number.POSITIVE_INFINITY;
 		let max = Number.NEGATIVE_INFINITY;
 		let total = 0;
@@ -149,19 +151,33 @@ class PgSemanticMemory implements SemanticMemory {
 			const row = rows[i]!;
 
 			if (newImportance < config.threshold) {
-				await this.pool.query('DELETE FROM memories WHERE uuid = $1', [row.uuid]);
-				deleted++;
+				deleteUuids.push(row.uuid);
 			} else {
-				await this.pool.query(
-					`UPDATE memories SET importance = $1, decayed_importance = $1, last_decayed_at = NOW()
-					 WHERE uuid = $2`,
-					[newImportance, row.uuid],
-				);
+				updateUuids.push(row.uuid);
+				updateImportances.push(newImportance);
 				if (newImportance < min) min = newImportance;
 				if (newImportance > max) max = newImportance;
 				total += newImportance;
 			}
 		}
+
+		// Batch DELETE: single query with ANY
+		if (deleteUuids.length > 0) {
+			await this.pool.query('DELETE FROM memories WHERE uuid = ANY($1::uuid[])', [deleteUuids]);
+		}
+
+		// Batch UPDATE: single query with unnest
+		if (updateUuids.length > 0) {
+			await this.pool.query(
+				`UPDATE memories AS m
+				 SET importance = v.imp, decayed_importance = v.imp, last_decayed_at = NOW()
+				 FROM (SELECT unnest($1::uuid[]) AS uuid, unnest($2::float8[]) AS imp) AS v
+				 WHERE m.uuid = v.uuid`,
+				[updateUuids, updateImportances],
+			);
+		}
+
+		const deleted = deleteUuids.length;
 
 		const surviving = rows.length - deleted;
 		return {
