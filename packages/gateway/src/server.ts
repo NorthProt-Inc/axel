@@ -429,5 +429,11 @@ export function createGatewayServer(config: GatewayConfig, deps: GatewayDeps) {
 		res.end();
 	}
 
-	return { start, stop, getRateLimitBucketCount, getConnectionCount: () => connections.size, evictStaleBuckets };
+	return {
+		start,
+		stop,
+		getRateLimitBucketCount,
+		getConnectionCount: () => connections.size,
+		evictStaleBuckets,
+	};
 }
