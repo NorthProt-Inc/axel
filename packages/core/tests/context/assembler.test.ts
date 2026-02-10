@@ -756,6 +756,116 @@ describe('ContextAssembler', () => {
 		});
 	});
 
+	describe('truncateToFit performance (PERF-C1)', () => {
+		it('uses at most 3 counter.count() calls for large text truncation', async () => {
+			const provider = makeEmptyProvider();
+			// Generate a large text (10K+ characters)
+			const largeText = 'x'.repeat(15_000);
+			(provider.getWorkingMemory as ReturnType<typeof vi.fn>).mockResolvedValue([
+				makeTurn(largeText, 1),
+			]);
+
+			const countSpy = vi.fn().mockImplementation(async (text: string) =>
+				Math.ceil(text.length / 3),
+			);
+			const counter: TokenCounter = {
+				count: countSpy,
+				estimate: (text) => Math.ceil(text.length / 3),
+			};
+
+			// Budget of 100 tokens means we need to truncate hard (100 * 3 = ~300 chars)
+			const tinyBudget = {
+				...DEFAULT_CONTEXT_BUDGET,
+				workingMemory: 100,
+			};
+			const assembler = new ContextAssembler(provider, counter, tinyBudget);
+
+			// Reset count before the operation we care about
+			countSpy.mockClear();
+
+			const result = await assembler.assemble({
+				systemPrompt: '',
+				userId: 'u1',
+				query: 'test',
+			});
+
+			const wmSection = result.sections.find((s) => s.source === 'M1:working');
+			expect(wmSection).toBeDefined();
+			expect(wmSection?.tokens).toBeLessThanOrEqual(100);
+
+			// PERF-C1: truncateToFit is called once (for workingMemory section).
+			// addSection also calls count() once more after truncation to set section tokens.
+			// So total = truncateToFit calls + 1 addSection verification call.
+			// truncateToFit should use at most 3 count() calls.
+			// Plus 1 from addSection = at most 4 total.
+			// We verify truncateToFit's calls by checking total <= 4.
+			// truncateToFit max 3 + addSection 1 = 4
+			expect(countSpy.mock.calls.length).toBeLessThanOrEqual(4);
+		});
+
+		it('uses only 1 count() call when text already fits within budget', async () => {
+			const provider = makeEmptyProvider();
+			const shortText = 'Hello world';
+			(provider.getWorkingMemory as ReturnType<typeof vi.fn>).mockResolvedValue([
+				makeTurn(shortText, 1),
+			]);
+
+			const countSpy = vi.fn().mockImplementation(async (text: string) =>
+				Math.ceil(text.length / 3),
+			);
+			const counter: TokenCounter = {
+				count: countSpy,
+				estimate: (text) => Math.ceil(text.length / 3),
+			};
+
+			const assembler = new ContextAssembler(provider, counter);
+			countSpy.mockClear();
+
+			await assembler.assemble({
+				systemPrompt: '',
+				userId: 'u1',
+				query: 'test',
+			});
+
+			// estimate says it fits -> 1 count() to verify -> fits -> return
+			// Then addSection calls count() once more = 2 total
+			const totalCalls = countSpy.mock.calls.length;
+			expect(totalCalls).toBeLessThanOrEqual(2);
+		});
+
+		it('maintains truncation accuracy with estimate-based approach', async () => {
+			const provider = makeEmptyProvider();
+			const largeText = 'ABCDEFGHIJ'.repeat(2000); // 20K chars
+			(provider.getWorkingMemory as ReturnType<typeof vi.fn>).mockResolvedValue([
+				makeTurn(largeText, 1),
+			]);
+
+			// Use a non-trivial token ratio (1 token per 4 chars)
+			const counter: TokenCounter = {
+				count: async (text) => Math.ceil(text.length / 4),
+				estimate: (text) => Math.ceil(text.length / 4),
+			};
+
+			const budget = {
+				...DEFAULT_CONTEXT_BUDGET,
+				workingMemory: 500,
+			};
+			const assembler = new ContextAssembler(provider, counter, budget);
+
+			const result = await assembler.assemble({
+				systemPrompt: '',
+				userId: 'u1',
+				query: 'test',
+			});
+
+			const wmSection = result.sections.find((s) => s.source === 'M1:working');
+			expect(wmSection).toBeDefined();
+			expect(wmSection!.tokens).toBeLessThanOrEqual(500);
+			// Should use most of the budget (at least 80%)
+			expect(wmSection!.tokens).toBeGreaterThanOrEqual(400);
+		});
+	});
+
 	describe('multiple items in a section', () => {
 		it('combines multiple turns in working memory', async () => {
 			const provider = makeEmptyProvider();

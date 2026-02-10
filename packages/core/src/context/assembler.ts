@@ -182,37 +182,85 @@ export class ContextAssembler {
 		sections.push({ name, content: truncated, tokens, source });
 	}
 
+	/**
+	 * Truncate text to fit within maxTokens budget.
+	 *
+	 * PERF-C1: Uses estimate-based single pass + verification instead of
+	 * binary search. Maximum 3 count() calls instead of O(log n).
+	 *
+	 * Algorithm:
+	 * 1. Fast estimate pre-check; if fits, verify with 1 count() call.
+	 * 2. If text exceeds budget: count() full text to derive chars-per-token ratio.
+	 * 3. Calculate cut point from ratio (with 5% safety margin), verify with count().
+	 * 4. If still over, shrink proportionally once more (max 3 count() calls total).
+	 */
 	private async truncateToFit(text: string, maxTokens: number): Promise<string> {
 		if (text.length === 0) {
 			return '';
 		}
 
+		// Fast path: estimate says it fits → verify with 1 count() call
 		const estimated = this.counter.estimate(text);
 		if (estimated <= maxTokens) {
-			const actual = await this.counter.count(text);
+			const actual = await this.counter.count(text); // call 1
 			if (actual <= maxTokens) {
 				return text;
 			}
+			// Estimate was wrong (under-estimated). Use actual count to derive ratio.
+			return this.truncateByRatio(text, maxTokens, actual);
 		}
 
-		let low = 0;
-		let high = text.length;
-		let result = '';
-
-		while (low <= high) {
-			const mid = Math.floor((low + high) / 2);
-			const candidate = text.slice(0, mid);
-			const tokens = await this.counter.count(candidate);
-
-			if (tokens <= maxTokens) {
-				result = candidate;
-				low = mid + 1;
-			} else {
-				high = mid - 1;
-			}
+		// Estimate says it won't fit. Count full text to get accurate ratio.
+		const fullCount = await this.counter.count(text); // call 1
+		if (fullCount <= maxTokens) {
+			return text;
 		}
 
-		return result;
+		return this.truncateByRatio(text, maxTokens, fullCount);
+	}
+
+	/**
+	 * Ratio-based truncation: given the full text's actual token count,
+	 * estimate the right cut point and verify. Uses at most 2 more count() calls.
+	 */
+	private async truncateByRatio(
+		text: string,
+		maxTokens: number,
+		fullTokens: number,
+	): Promise<string> {
+		const charsPerToken = text.length / fullTokens;
+
+		// Cut with 5% safety margin to avoid overshooting
+		const cutChars = Math.floor(maxTokens * charsPerToken * 0.95);
+		const candidate1 = text.slice(0, Math.max(0, Math.min(cutChars, text.length)));
+
+		if (candidate1.length === 0) {
+			return '';
+		}
+
+		const tokens1 = await this.counter.count(candidate1); // call 2
+		if (tokens1 <= maxTokens) {
+			return candidate1;
+		}
+
+		// Still over budget — shrink proportionally based on actual overshoot
+		const shrinkRatio = maxTokens / tokens1;
+		const cutChars2 = Math.floor(candidate1.length * shrinkRatio * 0.95);
+		const candidate2 = text.slice(0, Math.max(0, cutChars2));
+
+		if (candidate2.length === 0) {
+			return '';
+		}
+
+		const tokens2 = await this.counter.count(candidate2); // call 3
+		if (tokens2 <= maxTokens) {
+			return candidate2;
+		}
+
+		// Final safety: if still over after 3 calls, do a conservative hard cut
+		// based on character-level estimation (no additional count() call)
+		const hardCut = Math.floor(candidate2.length * (maxTokens / tokens2) * 0.9);
+		return text.slice(0, Math.max(0, hardCut));
 	}
 }
 
