@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -9,16 +9,15 @@
 	"files": {
 		"ignoreUnknown": false,
 		"ignore": [
-			"node_modules",
-			"dist",
-			"build",
-			".turbo",
-			"coverage",
-			"*.log",
-			".env",
-			".env.*",
-			"!.env.example",
-			"apps/webchat/.svelte-kit/**"
+			"**/node_modules",
+			"**/dist",
+			"**/build",
+			"**/.turbo",
+			"**/coverage",
+			"**/*.log",
+			"**/.env",
+			"**/.env.*",
+			"**/apps/webchat/.svelte-kit/**"
 		]
 	},
 	"formatter": {
@@ -28,9 +27,7 @@
 		"lineWidth": 100,
 		"lineEnding": "lf"
 	},
-	"organizeImports": {
-		"enabled": true
-	},
+	"organizeImports": { "enabled": true },
 	"linter": {
 		"enabled": true,
 		"rules": {

@@ -4,13 +4,34 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		"./types": "./src/types/index.ts",
-		"./memory": "./src/memory/index.ts",
-		"./decay": "./src/decay/index.ts",
-		"./context": "./src/context/index.ts",
-		"./persona": "./src/persona/index.ts",
-		"./orchestrator": "./src/orchestrator/index.ts",
-		"./logging": "./src/logging/index.ts"
+		"./types": {
+			"development": "./src/types/index.ts",
+			"default": "./dist/types/index.js"
+		},
+		"./memory": {
+			"development": "./src/memory/index.ts",
+			"default": "./dist/memory/index.js"
+		},
+		"./decay": {
+			"development": "./src/decay/index.ts",
+			"default": "./dist/decay/index.js"
+		},
+		"./context": {
+			"development": "./src/context/index.ts",
+			"default": "./dist/context/index.js"
+		},
+		"./persona": {
+			"development": "./src/persona/index.ts",
+			"default": "./dist/persona/index.js"
+		},
+		"./orchestrator": {
+			"development": "./src/orchestrator/index.ts",
+			"default": "./dist/orchestrator/index.js"
+		},
+		"./logging": {
+			"development": "./src/logging/index.ts",
+			"default": "./dist/logging/index.js"
+		}
 	},
 	"scripts": {
 		"build": "tsc",
