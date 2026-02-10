@@ -1,4 +1,4 @@
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * Conversation history browsing and search for CLI.
@@ -23,7 +23,7 @@ export function browseHistory(entries: readonly HistoryEntry[]): string {
 		return '';
 	}
 
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const lines: string[] = [theme.header('History'), ''];
 
 	for (const entry of entries) {

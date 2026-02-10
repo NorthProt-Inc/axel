@@ -1,4 +1,4 @@
-import { createCliTheme } from './theme.js';
+import { getCliTheme } from './theme.js';
 
 /**
  * CLI conversation history formatting.
@@ -15,7 +15,7 @@ export interface HistoryEntry {
 }
 
 export function formatHistoryEntry(entry: HistoryEntry): string {
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const time = formatTime(entry.timestamp);
 	const prefix = entry.role === 'user' ? theme.accent('You') : theme.text('Axel');
 	const content = truncateContent(entry.content, MAX_CONTENT_LENGTH);
@@ -27,11 +27,11 @@ export function formatHistoryList(
 	maxEntries: number = DEFAULT_MAX_ENTRIES,
 ): string {
 	if (entries.length === 0) {
-		const theme = createCliTheme();
+		const theme = getCliTheme();
 		return theme.muted('  No history in this session.');
 	}
 
-	const theme = createCliTheme();
+	const theme = getCliTheme();
 	const lines: string[] = [theme.header('  Conversation History'), ''];
 
 	const visible = entries.slice(-maxEntries);

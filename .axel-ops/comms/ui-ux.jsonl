@@ -12,3 +12,5 @@
 {"ts":"0208T1545","from":"ui-ux","type":"test-result","pkg":"ui","tests":62,"pass":62,"fail":0,"coverage":"95.77% stmt (cli), 100% (tokens), 100% (streaming)"}
 {"ts":"0208T1545","from":"ui-ux","type":"test-result","pkg":"webchat","tests":68,"pass":68,"fail":0,"coverage":"N/A (pure logic tests only)"}
 {"ts":"0208T1545","from":"ui-ux","type":"test-result","pkg":"all","tests":975,"pass":975,"fail":0,"coverage":"smoke test PASS, 84 files, 36 skipped (testcontainers)"}
+{"ts":"0210C207","from":"ui-ux","type":"done","task":"PERF-M8","out":"packages/ui/src/cli/{format,renderer,history,session-list,spinner,banner,session-switcher,history-browser}.ts, packages/ui/tests/cli-theme-singleton.test.ts","note":"CLI theme singleton: migrated 8 files (18 call sites) from createCliTheme() to getCliTheme() frozen singleton. Theme object now created once per runtime. 19 new tests enforce no direct createCliTheme() in consumers. TDD RED→GREEN→REFACTOR."}
+{"ts":"0210C207","from":"ui-ux","type":"test-result","pkg":"ui","tests":136,"pass":136,"fail":0,"coverage":"91.68% stmt, 95.74% branch, 97.29% func"}
