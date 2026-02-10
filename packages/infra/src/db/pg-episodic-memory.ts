@@ -1,4 +1,10 @@
-import type { CreateSessionParams, EpisodicMemory, MessageRecord } from '@axel/core/memory';
+import type {
+	CreateSessionParams,
+	Entity,
+	EpisodicMemory,
+	MessageRecord,
+	NewEntity,
+} from '@axel/core/memory';
 import type { ComponentHealth, SessionSummary } from '@axel/core/types';
 import type { PgPoolDriver } from './pg-pool.js';
 
@@ -56,6 +62,54 @@ class PgEpisodicMemory implements EpisodicMemory {
 		await this.pool.query('UPDATE sessions SET turn_count = turn_count + 1 WHERE session_id = $1', [
 			sessionId,
 		]);
+	}
+
+	/**
+	 * PERF-M3: Batch INSERT for multiple messages in a single query.
+	 *
+	 * Reduces N individual INSERTs + N session updates to 1 multi-row INSERT + 1 session update.
+	 * Falls back to single-message addMessage when given a single message.
+	 */
+	async addMessages(sessionId: string, messages: readonly MessageRecord[]): Promise<void> {
+		if (messages.length === 0) return;
+
+		// Single message: delegate to existing method (no overhead)
+		if (messages.length === 1) {
+			await this.addMessage(sessionId, messages[0]!);
+			return;
+		}
+
+		// Fetch current max turn_id once
+		const maxResult = await this.pool.query(
+			'SELECT COALESCE(MAX(turn_id), 0) AS max_turn FROM messages WHERE session_id = $1',
+			[sessionId],
+		);
+		let nextTurn = ((maxResult.rows[0] as { max_turn: number })?.max_turn ?? 0) + 1;
+
+		// Build multi-row VALUES clause
+		const valueClauses: string[] = [];
+		const params: unknown[] = [];
+		let paramIdx = 1;
+
+		for (const msg of messages) {
+			valueClauses.push(
+				`($${paramIdx}, $${paramIdx + 1}, $${paramIdx + 2}, $${paramIdx + 3}, $${paramIdx + 4}, $${paramIdx + 5}, $${paramIdx + 6})`,
+			);
+			params.push(sessionId, nextTurn++, msg.role, msg.content, msg.channelId, msg.timestamp, msg.tokenCount);
+			paramIdx += 7;
+		}
+
+		await this.pool.query(
+			`INSERT INTO messages (session_id, turn_id, role, content, channel_id, timestamp, token_count)
+			 VALUES ${valueClauses.join(', ')}`,
+			params,
+		);
+
+		// Single turn_count update for all messages
+		await this.pool.query(
+			'UPDATE sessions SET turn_count = turn_count + $2 WHERE session_id = $1',
+			[sessionId, messages.length],
+		);
 	}
 
 	async getRecentSessions(userId: string, limit: number): Promise<readonly SessionSummary[]> {
@@ -165,6 +219,112 @@ class PgEpisodicMemory implements EpisodicMemory {
 		return (result.rows as MessageRow[]).map(toMessageRecord);
 	}
 
+	/**
+	 * PERF-M4: Batch entity processing — find or create multiple entities in 1-2 queries.
+	 *
+	 * 1. Batch lookup: SELECT WHERE name = ANY($1)
+	 * 2. Batch insert: multi-row INSERT for entities not found
+	 * 3. Batch increment: UPDATE mentions for existing entities
+	 *
+	 * Returns entity IDs for all entities (existing + newly created).
+	 */
+	async processEntities(entities: readonly NewEntity[]): Promise<readonly Entity[]> {
+		if (entities.length === 0) return [];
+
+		const names = entities.map((e) => e.name);
+
+		// 1. Batch lookup — single query for all names
+		const existing = await this.pool.query(
+			`SELECT entity_id, name, entity_type, mentions AS mention_count,
+			        created_at, last_accessed AS updated_at, properties AS metadata
+			 FROM entities
+			 WHERE name = ANY($1)`,
+			[names],
+		);
+
+		const existingMap = new Map<string, EntityRow>();
+		for (const row of existing.rows as EntityRow[]) {
+			existingMap.set(row.name, row);
+		}
+
+		// Separate into existing (need mention increment) and new (need insert)
+		const toInsert: NewEntity[] = [];
+		const toIncrement: string[] = [];
+		for (const entity of entities) {
+			const found = existingMap.get(entity.name);
+			if (found) {
+				toIncrement.push(found.entity_id);
+			} else {
+				toInsert.push(entity);
+			}
+		}
+
+		// 2. Batch increment mentions for existing entities — single query
+		if (toIncrement.length > 0) {
+			await this.pool.query(
+				`UPDATE entities
+				 SET mentions = mentions + 1, last_accessed = NOW()
+				 WHERE entity_id = ANY($1)`,
+				[toIncrement],
+			);
+		}
+
+		// 3. Batch INSERT for new entities — single multi-row query
+		const newEntityRows: EntityRow[] = [];
+		if (toInsert.length > 0) {
+			const valueClauses: string[] = [];
+			const params: unknown[] = [];
+			let paramIdx = 1;
+
+			for (const entity of toInsert) {
+				const entityId = crypto.randomUUID();
+				valueClauses.push(
+					`($${paramIdx}, $${paramIdx + 1}, $${paramIdx + 2}, $${paramIdx + 3})`,
+				);
+				params.push(entityId, entity.name, entity.entityType, JSON.stringify(entity.metadata ?? {}));
+				paramIdx += 4;
+			}
+
+			const insertResult = await this.pool.query(
+				`INSERT INTO entities (entity_id, name, entity_type, properties)
+				 VALUES ${valueClauses.join(', ')}
+				 RETURNING entity_id, name, entity_type, 1 AS mention_count,
+				           created_at, last_accessed AS updated_at, properties AS metadata`,
+				params,
+			);
+
+			for (const row of insertResult.rows as EntityRow[]) {
+				newEntityRows.push(row);
+			}
+		}
+
+		// Build result: existing (with incremented mentions) + newly created
+		const results: Entity[] = [];
+		for (const row of existingMap.values()) {
+			results.push(toEntity({ ...row, mention_count: row.mention_count + 1 }));
+		}
+		for (const row of newEntityRows) {
+			results.push(toEntity(row));
+		}
+
+		return results;
+	}
+
+	/**
+	 * PERF-M4: Batch entity lookup by names — single query.
+	 */
+	async findEntities(names: readonly string[]): Promise<readonly Entity[]> {
+		if (names.length === 0) return [];
+		const result = await this.pool.query(
+			`SELECT entity_id, name, entity_type, mentions AS mention_count,
+			        created_at, last_accessed AS updated_at, properties AS metadata
+			 FROM entities
+			 WHERE name = ANY($1)`,
+			[names],
+		);
+		return (result.rows as EntityRow[]).map(toEntity);
+	}
+
 	async healthCheck(): Promise<ComponentHealth> {
 		const start = Date.now();
 		try {
@@ -225,6 +385,28 @@ function toMessageRecord(row: MessageRow): MessageRecord {
 		channelId: row.channel_id,
 		timestamp: row.timestamp,
 		tokenCount: row.token_count,
+	};
+}
+
+interface EntityRow {
+	entity_id: string;
+	name: string;
+	entity_type: string;
+	mention_count: number;
+	created_at: Date;
+	updated_at: Date;
+	metadata: Record<string, unknown>;
+}
+
+function toEntity(row: EntityRow): Entity {
+	return {
+		entityId: row.entity_id,
+		name: row.name,
+		entityType: row.entity_type,
+		mentionCount: row.mention_count,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at,
+		metadata: row.metadata ?? {},
 	};
 }
 
