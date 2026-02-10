@@ -2,23 +2,22 @@
 
 > Managed by Coordinator only. Other Divisions request changes via comms.
 >
-> **Cycle 200**: **PHASE 1 ACTIVE.** Research 3건 완료 → dev-core 활성화 (FEAT-LINK-001, FEAT-INTENT-001 병렬).
+> **Cycle 201**: **PHASE 1 ACTIVE.** FEAT-LINK-001 + FEAT-INTENT-001 완료 (CTO override). dev-infra 다음 배치 (FEAT-LINK-002, FEAT-INTENT-002).
 
 ## In Progress
 
 | ID | Priority | Division | Task | Started |
 |----|----------|----------|------|---------|
-| FEAT-LINK-001 | P1 | dev-core | Link Understanding: URL 추출기 + 콘텐츠 요약기 (core/types + pure functions) | 0209C200 |
-| FEAT-INTENT-001 | P1 | dev-core | Intent Classifier: IntentType enum, ClassificationResult, IntentClassifier DI interface | 0209C200 |
+| (none) | — | — | — | — |
 
 ## Queued
 
 | ID | Priority | Division | Task | Depends | Created |
 |----|----------|----------|------|---------|---------|
-| FEAT-LINK-002 | P1 | dev-infra | Link Understanding: HTTP fetcher + Readability parser + 임베딩 저장 | FEAT-LINK-001 | 0209C199 |
-| FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-001, FEAT-LINK-002 | 0209C199 |
-| FEAT-INTENT-002 | P1 | dev-infra | Intent Classifier: Gemini Flash 기반 LLM intent classifier 구현 | FEAT-INTENT-001 | 0209C199 |
-| FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-001, FEAT-INTENT-002 | 0209C199 |
+| FEAT-LINK-002 | P1 | dev-infra | Link Understanding: HTTP fetcher + Readability parser + 임베딩 저장 | ~~FEAT-LINK-001~~ ✓ | 0209C199 |
+| FEAT-INTENT-002 | P1 | dev-infra | Intent Classifier: Gemini Flash 기반 LLM intent classifier 구현 | ~~FEAT-INTENT-001~~ ✓ | 0209C199 |
+| FEAT-LINK-003 | P1 | dev-edge | Link Understanding: InboundHandler URL 감지→자동 처리 파이프라인 통합 | FEAT-LINK-002 | 0209C199 |
+| FEAT-INTENT-003 | P1 | dev-edge | Intent Classifier: InboundHandler 라우팅 통합 (chat/search/tool/memory_query) | FEAT-INTENT-002 | 0209C199 |
 | FEAT-PLUGIN-001 | P2 | dev-core | Plugin SDK: PluginManifest Zod schema, PluginRegistry interface, lifecycle hooks | — | 0209C199 |
 | FEAT-PLUGIN-002 | P2 | dev-infra | Plugin SDK: FilePluginLoader, hot-reload (fs.watch), ToolRegistry integration | FEAT-PLUGIN-001 | 0209C199 |
 | FEAT-CANVAS-001 | P2 | ui-ux | Interactive Canvas: agent-driven UI components (buttons, forms), WS 이벤트 프로토콜 | — | 0209C199 |
@@ -50,6 +49,8 @@
 
 | ID | Division | Completed | Output |
 |----|----------|-----------|--------|
+| FEAT-LINK-001 | coord (CTO override) | 0209C201 | Link Understanding core types: LinkInfo/ContentSummary/LinkExtractResult Zod schemas, extractUrls() pure function (regex URL+email extraction, position tracking), LinkContentProvider DI interface. 22 tests. TDD RED→GREEN. |
+| FEAT-INTENT-001 | coord (CTO override) | 0209C201 | Intent Classifier core types: IntentType enum (6 types: chat/search/tool_use/memory_query/command/creative), ClassificationResult Zod schema (confidence 0-1, optional secondary), IntentClassifier DI interface with ClassificationContext. 12 tests. TDD RED→GREEN. |
 | RES-010 | research | 0209C200 | Link Understanding 리서치 완료. 권장: Readability + linkedom (OpenClaw 검증 패턴). URL 추출: linkifyjs. DOM: linkedom (경량). Fallback: regex strip. Phase 1: Readability, Phase 2: Defuddle. 709 lines, 30+ sources. docs/research/RES-010-link-understanding.md. |
 | RES-011 | research | 0209C200 | Intent Classifier 리서치 완료. 권장: Gemini 2.5 Flash LLM 기반 (JSON mode). 6 IntentType: chat/search/tool_use/memory_query/command/creative. Confidence threshold 0.7. Phase 1: Gemini Flash, Phase 2: Embedding Router 하이브리드. 674 lines, 30+ sources. docs/research/RES-011-intent-classifier.md. |
 | RES-012 | research | 0209C200 | Plugin SDK 리서치 완료. 권장: Manifest-Based + PluginRegistry 분리 (Obsidian 단순성 + OpenClaw TS-first). Zod manifest, ESM dynamic import, fs.watch hot-reload. Phase 1: PluginRegistry, Phase 2: isolated-vm sandboxing. 723 lines, 30+ sources. docs/research/RES-012-plugin-sdk.md. |

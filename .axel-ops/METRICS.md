@@ -2,29 +2,29 @@
 
 > Updated by Coordinator at the end of each cycle. Rolling 10-cycle window.
 
-## Current Cycle: 200
+## Current Cycle: 201
 
 ## Division Performance (Last 10 Cycles)
 
 | Division | Avg Cycle Time | Tasks Completed | Stalls | Status |
 |----------|---------------|-----------------|--------|--------|
-| coord | — | 74 cycles | 0 | Active |
+| coord | — | 76 cycles | 0 | Active |
 | arch | 1 cycle | 8 | 5 (all CTO override) | Idle. |
-| dev-core | 1 cycle | 9 | 2 (FIX-BUG-001 4cy CTO, FIX-FILESIZE+GAP-SESSION 4cy CTO) | Idle. CTO override C106 resolved stall. |
-| dev-infra | 1 cycle | 11 | 1 (GAP-REDIS-CB+GAP-CMD 4cy CTO) | Idle. CTO override C106 resolved stall. |
-| dev-edge | 1 cycle | 21 | 1 (GAP-PROMPT+GAP-WEBHOOK 4cy CTO) | Idle. CTO override C106 resolved stall. |
-| quality | 1 cycle | 10 | 1 (QA-024 4cy → CTO resolved) | Idle. Next: QA-025 review 6 CTO overrides. |
-| research | 1 cycle | 5 | 0 | **RES-008+009 DONE C108.** |
+| dev-core | 1 cycle | 11 | 2 | FEAT-LINK-001+FEAT-INTENT-001 done (CTO override C201). |
+| dev-infra | 1 cycle | 11 | 1 | Next: FEAT-LINK-002+FEAT-INTENT-002. |
+| dev-edge | 1 cycle | 21 | 1 | Idle (pending FEAT-LINK-003, FEAT-INTENT-003). |
+| quality | 1 cycle | 10 | 1 | Idle. Next: QA-027 (post FEAT-LINK/INTENT-003). |
+| research | 1 cycle | 8 | 0 | Idle (RES-010/011/012 complete). |
 | devops | 1 cycle | 28 | 0 | Idle. |
-| ui-ux | 1 cycle | 7 | 0 | Idle (24 cycles). |
-| audit | 1 cycle | 5 | 0 | Idle (17 cycles). |
+| ui-ux | 1 cycle | 7 | 0 | Idle. |
+| audit | 1 cycle | 5 | 0 | Idle. |
 
 ## Bottleneck Indicators
 
 | Indicator | Current | Threshold | Status |
 |-----------|---------|-----------|--------|
 | Open Errors | 0 | 5 | OK |
-| Stalled Tasks (3+ cycles) | 0 | 0 | OK (resolved C106 CTO override) |
+| Stalled Tasks (3+ cycles) | 0 | 0 | OK |
 | Merge Conflicts (last 10) | 0 | 3 | OK |
 | Merge Reverts (last 10) | 0 | 0 | OK |
 | Test Failures | 0 | 0 | OK |
@@ -38,41 +38,32 @@
 | `packages/core/` | 90% | 95.2% (branches), 99.69% (stmts), 100% (funcs/lines) | +5% over target |
 | `packages/infra/` | 80% | cache 94.6%, common 100%, db 95.5%, embedding 99.2%, llm 97.32%, mcp 91.42% | +15% over target |
 | `packages/channels/` | 75% | CLI 95.95%, Discord 90.27%, Telegram 93.18% | +15% over target |
-| `packages/gateway/` | 80% | 95.65% stmt, 88.07% branch (post HARDEN-006/007) | +15% over target |
+| `packages/gateway/` | 80% | 95.65% stmt, 88.07% branch | +15% over target |
 | `apps/axel/` | — | bootstrap-channels 98.85%, config 100%, lifecycle 98.63%, container 85.48% | — |
-| `packages/ui/` | 80% | 95.77% stmt (cli), 100% (tokens), 100% (streaming). 62 tests, 9 test files. | +15% over target |
-| `apps/webchat/` | — | 68 tests (markdown 8 + enhanced-markdown 17 + chat-logic 14 + ws-auth 9 + session-api 13 + tokens-integration 7). Pure logic tests. | — |
-| `tools/migrate/` | — | 15 tests (10 migrator + 5 cli) | — |
-| `tools/migrate-axnmihn/` | — | TBD (MIGRATE-IMPL-001, newly merged) | — |
-| `packages/infra/src/memory/` | 80% | SemanticMemoryWriter 100% (18 tests), EntityExtractor tested, ConsolidationService (156 tests, Mark b15044c) | OK |
-| `packages/infra/src/persona/` | 80% | FilePersonaEngine (19 tests, committed 9fb41b5) | OK (Mark) |
-| `packages/infra/src/context/` | 80% | AnthropicTokenCounter (77 tests, Mark 9063a63) | NEW (Mark) |
-| `packages/infra/src/llm/` (new) | 80% | FallbackLlmProvider (130 tests, Mark d0b42bf) | NEW (Mark) |
-| `packages/infra/src/db/` (new) | 80% | PgInteractionLogger (70 tests, Mark a3005ab), PgSemanticMemory batch decay (77 tests, Mark c83d5cb) | NEW (Mark) |
-| `packages/core/src/memory/` (new) | 90% | consolidation.ts (81 tests, Mark b15044c) | NEW (Mark) |
-| `tools/data-quality/` | — | 0 tests (utility tool, 10 src files) | Committed (Mark 9fb41b5) |
+| `packages/ui/` | 80% | 95.77% stmt (cli), 100% (tokens), 100% (streaming) | +15% over target |
+| `apps/webchat/` | — | 68 tests (pure logic tests) | — |
+| `tools/migrate/` | — | 15 tests | — |
 
 ## Sprint Progress
 
 | Phase | Status | Start Cycle | End Cycle | Completion |
 |-------|--------|-------------|-----------|------------|
 | Plan Closure | **DONE** | 17 | 21 | 100% |
-| A: Foundation | **DONE** | 28 | 31 | 100% (milestone verified: install+typecheck+test+lint pass) |
-| B: Core Sprint | **DONE** | 32 | 41 | 100% (56 tasks, 330 tests, 99.69% stmt, ALL gates PASS) |
-| C: Infra Sprint | **DONE** | 42 | 46 | 100% (9/9 coding, QA-016 PASS, AUDIT-003 PASS, SYNC-004 done. 475 tests) |
-| D: Edge Sprint | **DONE** | 47 | 55 | 100% (18/18 done. 646 tests, 50 files. 0 errors. ALL coverage targets exceeded.) |
-| E: Integration | **DONE** | 56 | 66 | 100% (20/20 executable tasks). 834 tests (798 pass, 36 skip), 66 files. QA-020 PASS. ALL coverage targets exceeded. 1 error (human-blocked ERR-069). |
-| Post-Release Hardening | **DONE** | 67 | 70 | 100% (5/5 tasks: HARDEN-003/004/005/006/007). Gateway 95.65% stmt. |
-| UI/UX Sprint | **DONE** | 79 | 85 | 100% (8/8 UI tasks + QA-022 PASS + FIX-PUNYCODE-002 resolved). 975 tests, 85 files. 0 errors. |
-| F: Production Hardening | **DONE** | 86 | 106 | 100% (Mark 10 커밋 + memory fixes + security hardening 6건). 1287 tests, 104 files. 0 errors. |
-| G: Feature Sprint | **DONE** | 107 | 112 | 100% (14/14 done, 0 queued). 1534 tests, 117 files. QA-026 PASS. |
-| **Phase 1: Feature Expansion** | **IN PROGRESS** | 199 | — | 25% (3/12 done [research], 2 in progress, 10 queued). dev-core 착수. |
+| A: Foundation | **DONE** | 28 | 31 | 100% |
+| B: Core Sprint | **DONE** | 32 | 41 | 100% |
+| C: Infra Sprint | **DONE** | 42 | 46 | 100% |
+| D: Edge Sprint | **DONE** | 47 | 55 | 100% |
+| E: Integration | **DONE** | 56 | 66 | 100% |
+| Post-Release Hardening | **DONE** | 67 | 70 | 100% |
+| UI/UX Sprint | **DONE** | 79 | 85 | 100% |
+| F: Production Hardening | **DONE** | 86 | 106 | 100% |
+| G: Feature Sprint | **DONE** | 107 | 112 | 100% |
+| **Phase 1: Feature Expansion** | **IN PROGRESS** | 199 | — | 38% (5/13 done [3 research + 2 core], 0 in progress, 10 queued). Next: dev-infra FEAT-LINK-002+FEAT-INTENT-002. |
 
 ## Cycle History (Last 10)
 
 | Cycle | Active Divisions | Tasks Done | Issues | Notes |
 |-------|-----------------|------------|--------|-------|
-| 191 | (none) | 0 | 0 | **STEADY STATE.** 1534 tests, 0 errors. Roadmap exhausted. |
 | 192 | (none) | 0 | 0 | **STEADY STATE.** 1534 tests, 0 errors. |
 | 193 | (none) | 0 | 0 | **STEADY STATE.** 1534 tests, 0 errors. |
 | 194 | (none) | 0 | 0 | **STEADY STATE.** 1534 tests, 0 errors. |
@@ -82,3 +73,4 @@
 | 198 | (none) | 0 | 0 | **STEADY STATE.** 1534 tests, 0 errors. |
 | 199 | research | 0 | 0 | **PHASE 1 LAUNCH.** Research 3건 병렬 (RES-010/011/012). BACKLOG 15 tasks. |
 | 200 | research, dev-core | 3 | 0 | **PHASE 1 ACTIVE.** RES-010/011/012 완료. dev-core 활성화. 1636 tests. |
+| 201 | coord (CTO override) | 2 | 0 | **FEAT-LINK-001+FEAT-INTENT-001 완료.** 34 new tests. 1670 tests. Biome+typecheck PASS. |
