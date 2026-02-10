@@ -1,19 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import type { ClassificationResult, IntentClassifier } from '@axel/core/types';
+import type { IntentClassifier } from '@axel/core/types';
+import { KeywordIntentClassifier } from '../../src/intent/keyword-intent-classifier.js';
 
 /**
- * FEAT-INTENT-002b: KeywordIntentClassifier tests (RED phase)
+ * FEAT-INTENT-002b: KeywordIntentClassifier tests
  *
  * Standalone keyword-based fallback classifier.
  * Used when LLM (GeminiIntentClassifier) is unavailable or circuit-broken.
  * Implements IntentClassifier interface for drop-in replacement.
  */
 
-// Will be imported once implementation exists
-// import { KeywordIntentClassifier } from '../../src/intent/keyword-intent-classifier.js';
-
 function createClassifier(): IntentClassifier {
-	throw new Error('KeywordIntentClassifier not implemented');
+	return new KeywordIntentClassifier();
 }
 
 // =====================================================

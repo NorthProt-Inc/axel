@@ -1,40 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ClassificationResult, IntentClassifier } from '@axel/core/types';
+import type { IntentClassifier } from '@axel/core/types';
+import { GeminiIntentClassifier, type IntentLlmClient } from '../../src/intent/index.js';
+import { KeywordIntentClassifier } from '../../src/intent/keyword-intent-classifier.js';
+import { createFallbackClassifier } from '../../src/intent/fallback-chain.js';
 
 /**
- * FEAT-INTENT-002b: Intent classification integration tests (RED phase)
+ * FEAT-INTENT-002b: Intent classification integration tests
  *
  * Tests GeminiIntentClassifier → KeywordIntentClassifier fallback chain.
  * Verifies the two classifiers can be composed as primary+fallback.
  */
-
-// Will be imported once implementation exists
-// import { GeminiIntentClassifier, type IntentLlmClient } from '../../src/intent/index.js';
-// import { KeywordIntentClassifier } from '../../src/intent/keyword-intent-classifier.js';
-// import { createFallbackClassifier } from '../../src/intent/fallback-chain.js';
-
-interface IntentLlmClient {
-	readonly generateStructured: (prompt: string, systemPrompt: string) => Promise<{
-		readonly intent: string;
-		readonly confidence: number;
-		readonly reasoning?: string;
-	}>;
-}
-
-function createFallbackClassifier(
-	_primary: IntentClassifier,
-	_fallback: IntentClassifier,
-): IntentClassifier {
-	throw new Error('createFallbackClassifier not implemented');
-}
-
-function createGeminiClassifier(_client: IntentLlmClient): IntentClassifier {
-	throw new Error('GeminiIntentClassifier not imported');
-}
-
-function createKeywordClassifier(): IntentClassifier {
-	throw new Error('KeywordIntentClassifier not imported');
-}
 
 // =====================================================
 // TESTS
@@ -50,8 +25,8 @@ describe('Intent Classification Fallback Chain', () => {
 					reasoning: 'User wants to find info',
 				}),
 			};
-			const primary = createGeminiClassifier(mockLlm);
-			const fallback = createKeywordClassifier();
+			const primary = new GeminiIntentClassifier(mockLlm);
+			const fallback = new KeywordIntentClassifier();
 			const classifier = createFallbackClassifier(primary, fallback);
 
 			const result = await classifier.classify('오늘 날씨 알려줘');
@@ -65,8 +40,8 @@ describe('Intent Classification Fallback Chain', () => {
 			const mockLlm: IntentLlmClient = {
 				generateStructured: vi.fn().mockRejectedValue(new Error('API rate limited')),
 			};
-			const primary = createGeminiClassifier(mockLlm);
-			const fallback = createKeywordClassifier();
+			const primary = new GeminiIntentClassifier(mockLlm);
+			const fallback = new KeywordIntentClassifier();
 			const classifier = createFallbackClassifier(primary, fallback);
 
 			const result = await classifier.classify('파일 읽어줘');
@@ -78,8 +53,8 @@ describe('Intent Classification Fallback Chain', () => {
 			const mockLlm: IntentLlmClient = {
 				generateStructured: vi.fn().mockRejectedValue(new Error('timeout')),
 			};
-			const primary = createGeminiClassifier(mockLlm);
-			const fallback = createKeywordClassifier();
+			const primary = new GeminiIntentClassifier(mockLlm);
+			const fallback = new KeywordIntentClassifier();
 			const classifier = createFallbackClassifier(primary, fallback);
 
 			const result = await classifier.classify('검색해줘 맛집');
@@ -95,8 +70,8 @@ describe('Intent Classification Fallback Chain', () => {
 					confidence: 0.99,
 				}),
 			};
-			const primary = createGeminiClassifier(mockLlm);
-			const fallback = createKeywordClassifier();
+			const primary = new GeminiIntentClassifier(mockLlm);
+			const fallback = new KeywordIntentClassifier();
 
 			const primaryResult = await primary.classify('/help');
 			const fallbackResult = await fallback.classify('/help');

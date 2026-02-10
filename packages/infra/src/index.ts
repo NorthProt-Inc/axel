@@ -38,6 +38,18 @@ export {
 	type IntentLlmClient,
 	type IntentClassifierConfig,
 } from './intent/index.js';
+export { KeywordIntentClassifier } from './intent/keyword-intent-classifier.js';
+export {
+	FallbackIntentClassifier,
+	createFallbackClassifier,
+} from './intent/fallback-chain.js';
+export {
+	LinkContentPipeline,
+	type ContentFetcher,
+	type ContentEmbedder,
+	type ContentPipelineConfig,
+	type PipelineResult,
+} from './link/link-content-pipeline.js';
 export {
 	BackupConfigSchema,
 	type BackupConfig,
