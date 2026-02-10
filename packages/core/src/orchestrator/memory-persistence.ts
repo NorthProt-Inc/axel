@@ -195,14 +195,16 @@ async function extractAndStoreEntities(
 				return sourceId != null && targetId != null;
 			})
 			.map(async (relation) => {
-				const sourceId = entityIdMap.get(relation.source)!;
-				const targetId = entityIdMap.get(relation.target)!;
-				await conceptualMemory.addRelation({
-					sourceId,
-					targetId,
-					relationType: relation.type,
-					weight: 1.0,
-				});
+				const sourceId = entityIdMap.get(relation.source);
+				const targetId = entityIdMap.get(relation.target);
+				if (sourceId && targetId) {
+					await conceptualMemory.addRelation({
+						sourceId,
+						targetId,
+						relationType: relation.type,
+						weight: 1.0,
+					});
+				}
 			}),
 	);
 }

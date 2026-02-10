@@ -765,9 +765,9 @@ describe('ContextAssembler', () => {
 				makeTurn(largeText, 1),
 			]);
 
-			const countSpy = vi.fn().mockImplementation(async (text: string) =>
-				Math.ceil(text.length / 3),
-			);
+			const countSpy = vi
+				.fn()
+				.mockImplementation(async (text: string) => Math.ceil(text.length / 3));
 			const counter: TokenCounter = {
 				count: countSpy,
 				estimate: (text) => Math.ceil(text.length / 3),
@@ -810,9 +810,9 @@ describe('ContextAssembler', () => {
 				makeTurn(shortText, 1),
 			]);
 
-			const countSpy = vi.fn().mockImplementation(async (text: string) =>
-				Math.ceil(text.length / 3),
-			);
+			const countSpy = vi
+				.fn()
+				.mockImplementation(async (text: string) => Math.ceil(text.length / 3));
 			const counter: TokenCounter = {
 				count: countSpy,
 				estimate: (text) => Math.ceil(text.length / 3),
@@ -860,9 +860,9 @@ describe('ContextAssembler', () => {
 
 			const wmSection = result.sections.find((s) => s.source === 'M1:working');
 			expect(wmSection).toBeDefined();
-			expect(wmSection!.tokens).toBeLessThanOrEqual(500);
+			expect(wmSection?.tokens).toBeLessThanOrEqual(500);
 			// Should use most of the budget (at least 80%)
-			expect(wmSection!.tokens).toBeGreaterThanOrEqual(400);
+			expect(wmSection?.tokens).toBeGreaterThanOrEqual(400);
 		});
 	});
 
