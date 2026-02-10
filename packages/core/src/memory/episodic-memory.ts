@@ -72,8 +72,7 @@ export class InMemoryEpisodicMemory implements EpisodicMemory {
 			.filter(
 				(s) =>
 					s.endedAt !== null &&
-					(pattern.test(s.summary ?? '') ||
-						s.messages.some((m) => pattern.test(m.content))),
+					(pattern.test(s.summary ?? '') || s.messages.some((m) => pattern.test(m.content))),
 			)
 			.slice(0, limit)
 			.map((s) => this.toSessionSummary(s));
